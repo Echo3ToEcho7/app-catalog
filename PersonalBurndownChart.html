@@ -1,0 +1,462 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>Personal Burndown</title>
+<meta name="Name" content="App: Personal Burndown"/>
+<meta name="Version" content="1.0"/>
+<meta name="Vendor" content="Tony Huang"/>
+<link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="/slm/css/sprites.css" charset="utf-8"/>
+<script type="text/javascript" src="/slm/js/slm.js"></script>
+<script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
+<script type="text/javascript" src="/slm/js-lib/ejsc/2.1/EJSChart.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.19/js/utilities.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.19/js/dropdown.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.19/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+
+google.load("visualization", "1", {packages:["table"]});
+dojo.addOnLoad(initPage);
+
+var WORK_WEEKENDS = false;
+
+var iterationDropdown;
+var batchToolkit;
+var widgetMode;
+var burndownChart;
+var ONE_DAY = 1000 * 60 * 60 * 24;
+var DEBUG = false;
+
+function draw(results) {
+    var startDate = RALLY.Mashup.Utilities.convertIsoDateOnly(iterationDropdown.getSelectedStart());
+    startDate.setHours(23);
+    startDate.setMinutes(59);
+    startDate.setSeconds(59);
+    var endDate = RALLY.Mashup.Utilities.convertIsoDateOnly(iterationDropdown.getSelectedEnd());
+    endDate.setHours(23);
+    endDate.setMinutes(59);
+    endDate.setSeconds(59);
+    document.getElementById("dates_div").innerHTML = formatDate(startDate) + " - " + formatDate(endDate);
+
+    if (!widgetMode) {
+        drawTable(results);
+    }
+    drawChart(startDate, endDate, results);
+}
+
+function drawTable(results) {
+    if (results.tasks.length == 0) {
+        return;
+    }
+
+    var css = {
+        "headerRow": "headerRow",
+        "tableRow": "tableRow",
+        "oddTableRow": "tableRow",
+        "selectedTableRow": "tableRow",
+        "hoverTableRow": "tableRow",
+        "headerCell": "headerCell",
+        "tableCell": "tableCell",
+        "rowNumberCell": "tableCell"};
+
+    var options = {allowHtml: true, alternatingRowStyle: false, cssClassNames: css, sortColumn: 0};
+
+    var baseUrl = "";
+    if (!RALLY.Mashup.Utilities.isMashupRunningInsideRally()) {
+        baseUrl = "https://" + batchToolkit.getServer();
+    }
+
+    var data = new google.visualization.DataTable();
+    data.addColumn("number", "Rank");
+    data.addColumn("string", "ID");
+    data.addColumn("string", "Task");
+    data.addColumn("string", "Story");
+    data.addColumn("string", "State");
+    data.addColumn("number", "Estimate");
+    data.addColumn("number", "To-Do");
+    data.addColumn("number", "Actuals");
+    data.addColumn("string", "");
+
+    var row = 0;
+    var totalEstimate = 0;
+    var totalToDo = 0;
+    var totalActuals = 0;
+    for (var i = 0; i < results.tasks.length; i++) {
+        var task = results.tasks[i];
+
+        totalEstimate += task.Estimate;
+        totalToDo += task.ToDo;
+        totalActuals += task.Actuals;
+
+        data.addRows(1);
+        var column = 0;
+        data.setCell(row, column++, row + 1);
+        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/detail/tk/" + task.ObjectID + "\" target=\"_parent\" " +
+                "onclick=\"parent.rallyPorthole.showDetail('/tk/view.sp','" + task.ObjectID + "','pj/b');return false;\">" + task.FormattedID + "</a>");
+        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/detail/tk/" + task.ObjectID + "\" target=\"_parent\" " +
+                "onclick=\"parent.rallyPorthole.showDetail('/tk/view.sp','" + task.ObjectID + "','pj/b');return false;\">" + task.Name + "</a>");
+        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/detail/ar/" + task.WorkProduct.ObjectID + "\" target=\"_parent\" " +
+                "onclick=\"parent.rallyPorthole.showDetail('/ar/view.sp','" + task.WorkProduct.ObjectID + "','pj/b');return false;\">" +
+                task.WorkProduct.FormattedID + ": " + task.WorkProduct.Name + "</a>");
+        if (task.Blocked == true) {
+            data.setCell(row, column, "Blocked", null, {"style": "color: red;"});
+        } else {
+            data.setCell(row, column, task.State, null, {"style": "color: green;"});
+        }
+        column++;
+        data.setCell(row, column++, task.Estimate);
+        data.setCell(row, column++, task.ToDo);
+        data.setCell(row, column++, task.Actuals);
+        var text = "<a href='#' class=\"sprite-edit\" title=\"Edit Task " + task.FormattedID + "\"" +
+                "onclick=\"parent.popup('" + baseUrl + "/slm/tk/edit.sp?oid=" + task.ObjectID + "', " +
+                "800, 600, 'littleN');return false;\">&nbsp;&nbsp;&nbsp;&nbsp;</a>";
+        data.setCell(row, column++, text, null, {"style": "text-align: center;"});
+
+        row++;
+    }
+    data.setColumnLabel(column - 4, "Estimate<br>&nbsp;&nbsp;&nbsp;&nbsp;" + totalEstimate);
+    data.setColumnLabel(column - 3, "To-Do<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + totalToDo);
+    data.setColumnLabel(column - 2, "Actuals<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + totalActuals);
+
+    var table = new google.visualization.Table(document.getElementById("table_div"));
+    table.draw(data, options);
+}
+
+function by(property) {
+    return function(o, p) {
+        var a, b;
+        if (typeof o === "object" && typeof p === "object" && o && p) {
+            a = o[property];
+            b = p[property];
+            if (a === b) {
+                return 0;
+            }
+            if (typeof a === typeof b) {
+                return a < b ? -1 : 1;
+            }
+            return typeof a < typeof b ? -1 : 1;
+        }
+    };
+}
+
+function drawChart(startDate, endDate, results) {
+    if (typeof burndownChart !== "undefined") {
+        burndownChart.remove();
+    }
+
+    if (results.tasks.length == 0) {
+        hideWait();
+        document.getElementById("table_div").innerHTML = "";
+        document.getElementById("chart_div").innerHTML = "You do not have any tasks in this iteration";
+        return;
+    }
+
+    var minDate = new Date(startDate.getTime());
+    minDate.setDate(minDate.getDate() - 1);
+    var maxDate = new Date(endDate.getTime());
+    maxDate.setDate(maxDate.getDate() + 3);
+    burndownChart = new EJSC.Chart("chart_div", {
+        show_legend: false,
+        show_titlebar: false,
+        allow_zoom: false,
+        axis_bottom: {
+            caption: "Date",
+            grid: {show: false},
+            extremes_ticks: true,
+            max_extreme: maxDate.getTime(),
+            formatter: new EJSC.DateFormatter({
+                format_string: "MM/DD",
+                useUTC: false
+            })
+        },
+        axis_left: {caption: "Hours"}
+    });
+
+    var totalEstimate = 0;
+    var history = []
+    for (var i = 0; i < results.tasks.length; i++) {
+        var task = results.tasks[i];
+
+        totalEstimate += task.Estimate;
+
+        var initialToDo = -1;
+        var initialRevision = -1;
+        var matches;
+        var revisions = task.RevisionHistory.Revisions;
+        for (var j = revisions.length - 1; j >= 0; j--) {
+            var creationDate = convertIsoDate(revisions[j].CreationDate);
+            if (DEBUG) {
+                console.log(task.FormattedID + " " + task.WorkProduct.FormattedID + " " + creationDate + " " + revisions[j].Description);
+            }
+
+            var delta = 0;
+            var matched = false;
+            if (revisions[j].Description.indexOf("Original revision") == 0) {
+                delta = task.Estimate;
+                matched = true;
+                initialRevision = history.length;
+            } else {
+                if (revisions[j].Description.indexOf("TO DO added") >= 0) {
+                    matches = /.*?TO DO added.*?(\d+\.\d+).*?/.exec(revisions[j].Description);
+                    if (initialToDo == -1) {
+                        initialToDo = parseFloat(matches[1]);
+                    } else {
+                        delta = parseFloat(matches[1]);
+                        matched = true;
+                    }
+                }
+
+                if (revisions[j].Description.indexOf("TO DO changed from") >= 0) {
+                    matches = /.*?TO DO changed from.*?(\d+\.\d+).*?(\d+\.\d+).*?/.exec(revisions[j].Description);
+                    if (initialToDo == -1) {
+                        initialToDo = parseFloat(matches[1]);
+                    }
+                    delta = matches[2] - matches[1];
+                    matched = true;
+                }
+
+                if (revisions[j].Description.indexOf("TO DO removed") >= 0) {
+                    matches = /.*?TO DO removed.*?(\d+\.\d+).*?/.exec(revisions[j].Description);
+                    if (initialToDo == -1) {
+                        initialToDo = parseFloat(matches[1]);
+                    }
+                    delta = -1 * matches[1];
+                    matched = true;
+                }
+            }
+
+            if (matched) {
+                if (DEBUG) {
+                    console.log(task.FormattedID + " delta: " + delta);
+                }
+                history.push({
+                    "FormattedID": task.FormattedID,
+                    "CreationDate": creationDate,
+                    "Delta": delta
+                });
+            }
+        }
+
+        if (initialToDo == -1 && task.ToDo == 0) {
+            initialToDo = 0;
+        }
+
+        if (initialRevision != -1 && initialRevision < history.length && initialToDo >= 0) {
+            if (DEBUG) {
+                console.log(task.FormattedID + " Overriding Initial To Do: " + initialToDo);
+            }
+            history[initialRevision].Delta = initialToDo;
+        }
+    }
+
+    history.sort(by("CreationDate"));
+
+    if (DEBUG) {
+        console.log("History:");
+        for (var i = 0; i < history.length; i++) {
+            console.log(history[i].FormattedID + " " + history[i].CreationDate + " Delta: " + history[i].Delta);
+        }
+    }
+
+    var date = new Date(startDate.getTime());
+
+    var today = new Date();
+    today.setHours(23);
+    today.setMinutes(59);
+    today.setSeconds(59);
+
+    var cutoff = new Date(endDate.getTime());
+    if (today < cutoff) {
+        cutoff = today;
+    }
+
+    var todo = 0;
+    var todoArray = [];
+    var i = 0;
+    var j = 0;
+    while (date <= cutoff || j < history.length) {
+        var roundedDate = new Date(date.getTime());
+        roundedDate.setHours(15);
+
+        if (j < history.length && history[j].CreationDate <= date) {
+            todo += history[j].Delta;
+            todoArray[i] = [roundedDate.getTime(), todo];
+            j++;
+        } else {
+            todoArray[i] = [roundedDate.getTime(), todo];
+            date.setDate(date.getDate() + 1);
+            i++;
+        }
+    }
+
+    burndownChart.addSeries(new EJSC.BarSeries(
+            new EJSC.ArrayDataHandler(todoArray),
+            {title: "To Do"}
+    ));
+
+    var totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / ONE_DAY);
+    var workingDays = 0;
+    for (var d = new Date(startDate.getTime()); d <= endDate; d.setDate(d.getDate() + 1)) {
+        if (WORK_WEEKENDS || (d.getDay() != 0 && d.getDay() != 6)) {
+            workingDays++;
+        }
+    }
+
+    var incrementY = totalEstimate / (workingDays);
+    var idealArray = [];
+    var idealY = totalEstimate;
+    var j = 1;
+    for (var d = new Date(minDate.getTime()); d <= endDate; d.setDate(d.getDate() + 1)) {
+        d.setHours(15);
+        idealArray.push([d.getTime(), idealY]);
+        if (WORK_WEEKENDS || d.getDay() < 5) {
+            idealY = totalEstimate - (j * incrementY);
+            j++;
+        }
+    }
+
+    burndownChart.addSeries(new EJSC.LineSeries(
+            new EJSC.ArrayDataHandler(idealArray),
+            {
+                title: "Ideal Burndown",
+                lineWidth: 2,
+                color: "rgb(7,102,146)",
+                y_axis_formatter: new EJSC.NumberFormatter({
+                    variable_decimals: 2
+                })
+            }
+    ));
+
+    hideWait();
+}
+
+function convertIsoDate(isoDate) {
+    var jsDate = RALLY.Mashup.Utilities.convertIsoToJSDate(isoDate);
+    jsDate.setMinutes(jsDate.getMinutes() - jsDate.getTimezoneOffset());
+    return jsDate;
+}
+
+function formatDate(date) {
+    var day = date.getDate();
+    if (day < 10) {
+        day = "0" + day;
+    }
+    var month = date.getMonth() + 1;
+    if (month < 10) {
+        month = "0" + month;
+    }
+    var year = date.getFullYear();
+
+    return month + "/" + day + "/" + year;
+}
+
+function runMainQuery() {
+    showWait("<em>Loading chart...</em>");
+
+    var taskQuery = {
+        key: "tasks",
+        type: "Task",
+        fetch: "FormattedID,Name,ObjectID,Rank,State,Blocked,Estimate,ToDo,Actuals,WorkProduct,RevisionHistory,Revisions",
+        order: "Rank",
+        query: "((Iteration.Name = \"" + iterationDropdown.getSelectedName() + "\") AND (Owner = \"__USER_NAME__\"))"
+    };
+
+    batchToolkit.findAll(taskQuery, draw);
+}
+
+function initPage() {
+    RALLY.Mashup.Utilities.showPrintButton();
+
+    widgetMode = RALLY.Mashup.Utilities.getDisplayMode("__MODE__") === "widget" || RALLY.Mashup.Utilities.getDisplayMode("__MODE__") === "panel";
+
+    var chartWidth = Math.floor(getAvailableWidth() * 0.90) - 5;
+
+    batchToolkit = new RALLY.Mashup.BatchToolkit("__WORKSPACE_OID__", "__PROJECT_OID__",
+            "__PROJECT_SCOPING_UP__", "__PROJECT_SCOPING_DOWN__");
+
+    iterationDropdown = new RALLY.Mashup.Dropdown(batchToolkit, RALLY.Mashup.ITERATION,
+            "timeboxList", "timeboxLabel", "mu_personal_burndown");
+    iterationDropdown.invoke(runMainQuery);
+
+    if (widgetMode) {
+        document.getElementById("chart_div").style.width = chartWidth + "px";
+    } else {
+        document.getElementById("title_div").style.display = "block";
+        document.getElementById("print_div").style.display = "block";
+    }
+}
+
+function showWait(message) {
+    RALLY.Mashup.Utilities.showWait("spinner_div", ["chart_div", "table_div"]);
+    var spinner = document.getElementById("spinner_div").innerHTML;
+    document.getElementById("spinner_div").innerHTML = spinner + " " + message;
+
+}
+
+function hideWait() {
+    RALLY.Mashup.Utilities.hideWait("spinner_div", ["chart_div", "table_div"]);
+}
+
+function getAvailableWidth() {
+    var browserWidth = document.body.clientWidth || window.innerWidth;
+    if ("__width__" !== "__w" + "idth__") {
+        return "__width__";
+    } else {
+        return browserWidth;
+    }
+}
+</script>
+
+
+</head>
+<body>
+<div class="titlebar" style="float: left; display: none;" id="title_div">Personal Burndown Chart</div>
+<div id="print_div" style="display: none;">
+    <table>
+        <tr>
+            <td style="text-align: left; width: 99%;">
+            <td style="text-align: right; width: 1%;">
+                <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();"
+                     onmouseout="hidecbMenu('buttons',event);" style="vertical-align: middle;"
+                     src="/slm/images/menu_actions.gif"/>
+
+                <div style="position:relative;top:5px" align="left">
+                    <div id="buttons" class="do-menu" style="left:0px;"
+                         onmouseover="document.body.style.cursor='pointer';"
+                         onmouseout="document.body.style.cursor='default';hidecbMenu('buttons',event);">
+                        <a id="print" onclick="RALLY.Mashup.Utilities.printPage()">Print...</a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<div style="clear: both;"></div>
+<table width="100%">
+    <tr>
+        <td style="vertical-align: top;">
+            <table>
+                <tr>
+                    <td id="timeboxLabel" class="lbl">Iteration</td>
+                    <td><select id="timeboxList"></select></td>
+                    <td nowrap>
+                        <div id="dates_div" style="margin-left: 10px"></div>
+                    </td>
+                </tr>
+            </table>
+            <br/>
+
+            <div id="spinner_div" style="clear: both;"></div>
+            <div id="chart_div" class="chart" style="width: 400px; height: 200px;"></div>
+        </td>
+        <td style="vertical-align: top; width: 100%">
+            <br/>
+
+            <div id="table_div" style="margin-left: 20px;"></div>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

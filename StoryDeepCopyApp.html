@@ -1,0 +1,299 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html dir="ltr">
+<head>
+<title>Deep Copy Story</title>
+<meta name="Name" content="App: Deep Copy Story"/>
+<meta name="Version" content="1.0"/>
+<meta name="Vendor" content="Rally Software"/>
+<script type="text/javascript" src="/apps/1.22/sdk.js?debug=true"></script>
+
+<script type="text/javascript">
+    rally.DeepCopyStory = function (rallyDataSource, config) {
+        var storyBuffer = [];
+        var firstStoryOid = null;
+        var finishedCallback;
+        var that = this;
+
+        function getTypeFromRef(ref) {
+            if (rally.sdk.util.Ref.isRef(ref)) {
+                var list = ref.split("/");
+                list.pop();
+                return list.pop();
+            }
+            else {
+                throw "Function getTypeFromRef expected a Rally Reference.";
+            }
+        }
+
+        //dojo.connect(obj, event, context, method, dontFix);
+        this._fireEvent = function(eventName, eventArgs) {
+
+            if (config && config.eventListeners[eventName] && dojo.isFunction(config.eventListeners[eventName])) {
+                config.eventListeners[eventName](that, eventArgs);
+            }
+        };
+
+        // removes private and read only fields to keep from pushing them up.
+        this.filterObject = function (object) {
+            delete object.Discussion;
+            delete object.Rank;
+            delete object.LastUpdateDate;
+            delete object.Attachments;
+            delete object.AcceptedDate;
+            delete object.Blocker;
+            delete object.Defects;
+            delete object.TaskActualTotal;
+            delete object.TaskEstimateTotal;
+            delete object.TaskRemainingTotal;
+            delete object.TaskEstimateTotal;
+            delete object.RevisionHistory;
+            delete object.Subscription;
+            delete object.FormattedID;
+            delete object.CreationDate;
+            delete object.Changesets;
+            delete object.ObjectID;
+            for (var j in object) {
+                if (j.substring(0, 1) == '_') {
+                    delete object[j];
+                }
+            }
+            return object;
+        };
+
+        this._addObject = function(object, typeName, callback) {
+            var item = dojo.clone(object);
+            item = this.filterObject(item);
+            function errorFunctionWrapper(error) {
+                if (dojo.isArray(error.Errors)) {
+                    var errorMessage = error.Errors.pop();
+                    if (errorMessage.indexOf("Not authorized to create:") >= 0) {
+                        errorMessage = "Unable to create an object. This can happen due to a child or task being in a project you do not have write permissions to.";
+                    }
+                    rally.sdk.ui.AppHeader.showMessage("error", errorMessage, 10000);
+                }
+                else if (dojo.isObject(error) && error.message) {
+                    rally.sdk.ui.AppHeader.showMessage("error", error.message, 10000);
+                    error = [error.message];
+                }
+                if (dojo.isFunction(config.onError)) {
+                    config.onError(error);
+                }
+            }
+
+            rallyDataSource.create(typeName, item, callback, errorFunctionWrapper);
+        };
+
+        this._copyAllFromBuffer = function() {
+            if (storyBuffer.length > 0) {
+                var story = storyBuffer.pop();
+                that._copyStory(story.ref, story.parent, that._copyAllFromBuffer);
+            }
+            else {
+                if (finishedCallback) {
+                    finishedCallback(firstStoryOid);
+                }
+            }
+        };
+
+        this._addStoriesToBuffer = function(storyArray, parentRef) {
+            dojo.forEach(storyArray, function (story) {
+                storyBuffer.push({
+                    ref: story._ref,
+                    parent: parentRef
+                });
+            });
+        };
+
+        this._copyStory = function(ref, parentRef, callback) {
+            that._getObjectByRef(ref, function (foundObject) {
+                var type = getTypeFromRef(ref);
+                that._fireEvent("storyPreAdd", {story:foundObject});
+                if (parentRef) {
+                    foundObject.Parent = parentRef;
+                }
+                else {
+                    foundObject.Name = "(Copy of) " + foundObject.Name;
+                }
+                that._addObject(foundObject, type, function (storyRef) {
+                    if (!firstStoryOid) {
+                        firstStoryOid = rally.sdk.util.Ref.getOidFromRef(storyRef);
+                    }
+                    that._fireEvent("storyPostAdd", {});
+                    that._addStoriesToBuffer(foundObject.Children, storyRef);
+                    that._copyTasksToStory(foundObject.Tasks, storyRef, callback);
+                }, null);
+            });
+        };
+
+        this._copyTasksToStory = function(tasks, storyRef, callback) {
+            //Copy the array
+            var localTasks = tasks.slice(0);
+            if (localTasks.length > 0) {
+                var task = localTasks.pop();
+                that._copyTask(task._ref, storyRef, function () {
+                    that._copyTasksToStory(localTasks, storyRef, callback);
+                });
+            }
+            else {
+                callback();
+            }
+        };
+
+        this._copyTask = function(ref, storyRef, callback) {
+            that._getObjectByRef(ref, function (foundObject) {
+                var type = getTypeFromRef(ref);
+                foundObject.WorkProduct = storyRef;
+                that._fireEvent("taskPreAdd", {task:foundObject});
+                that._addObject(foundObject, type, function (ref, warnings) {
+                    if (callback) {
+                        that._fireEvent("taskPostAdd", [ref]);
+                        callback();
+                    }
+                }, null);
+            });
+        };
+
+        //TODO: This will not return objects in a different scope
+        this._getObjectByRef = function(ref, callback) {
+            var queryObject = {
+                key: "objects",
+                type: getTypeFromRef(ref),
+                fetch: true,
+                project:null,
+                query: "( ObjectId = " + rally.sdk.util.Ref.getOidFromRef(ref) + " )"
+            };
+            rallyDataSource.find(queryObject, function (results) {
+                callback(results.objects.pop());
+            });
+        };
+
+
+        this.copyStory = function (ref, callback) {
+            that._copyStory(ref, undefined, that._copyAllFromBuffer);
+            finishedCallback = callback;
+        };
+    };
+
+</script>
+
+<script type="text/javascript">
+    rally.addOnLoad(function() {
+        dojo.require("dijit.form.Button");
+        var selectedValue = null;
+        var tasksAdded = 0;
+        var storiesAdded = 0;
+        var waiter;
+        var searchStories;
+        var dataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__', '__PROJECT_OID__',
+                '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
+
+        function taskPostAdd(object, args) {
+            tasksAdded = tasksAdded + 1;
+            displayTasksAdded(tasksAdded);
+        }
+
+        function taskPreAdd(object, args) {
+            dojo.byId("currentInfo").innerHTML = "Adding Task " + args.task.FormattedID + " - " + args.task.Name;
+        }
+
+        function storyPreAdd(object, args) {
+            dojo.byId("currentInfo").innerHTML = "Adding User Story " + args.story.FormattedID + " - " + args.story.Name;
+        }
+
+        function storyPostAdd(object, args) {
+            storiesAdded = storiesAdded + 1;
+            displayStoriesAdded(storiesAdded);
+        }
+
+        function displayStoriesAdded(count) {
+            dojo.byId("storyResult").innerHTML = "Stories added " + count;
+        }
+
+        function displayTasksAdded(count) {
+            dojo.byId("taskResult").innerHTML = "Tasks added " + tasksAdded;
+        }
+
+
+        function storyCopied(storyOid) {
+            dojo.byId("currentInfo").innerHTML = "";
+            dojo.byId("storyLinkContainer").innerHTML = "";
+            var link = document.createElement('a');
+            link.href = "/slm/detail/ar/" + storyOid;
+            link.target = "_top";
+            dijit.byId('goButton').attr('disabled', false);
+            link.innerHTML = "Click here to go to your new story";
+            dojo.byId("storyLinkContainer").appendChild(link);
+        }
+
+        function buttonPressed(value) {
+            dojo.byId("storyLinkContainer").innerHTML = "";
+            if (selectedValue) {
+                var config = {
+                    eventListeners:{
+                        storyPreAdd:storyPreAdd,
+                        storyPostAdd:storyPostAdd ,
+                        taskPreAdd:taskPreAdd,
+                        taskPostAdd: taskPostAdd
+                    }
+                };
+                tasksAdded = 0;
+                displayTasksAdded(tasksAdded);
+                storiesAdded = 0;
+                displayStoriesAdded(storiesAdded);
+                var copy = new rally.DeepCopyStory(dataSource, config);
+                dijit.byId('goButton').attr('disabled', true);
+                copy.copyStory(selectedValue, storyCopied);
+            }
+
+        }
+
+        function onDropdownComplete(component, eventArgs) {
+            dojo.byId("storyLinkContainer").innerHTML = "";
+            if (waiter.getSpinner())
+                waiter.hide();
+
+            selectedValue = eventArgs.value;
+        }
+
+        rally.addOnLoad(function () {
+            waiter = new rally.sdk.ui.Wait({hideTarget:true});
+            var button = new dijit.form.Button({
+                        label: "Copy story",
+                        onClick: buttonPressed
+                    },
+                    "goButton");
+            waiter.display("container");
+            var storyConfig = {
+                type: "story",
+                attribute: "Name",
+                order:"Name,ObjectID",
+                label:null
+            };
+            searchStories = new rally.sdk.ui.ObjectDropdown(storyConfig, dataSource);
+            searchStories.display("storyBox", onDropdownComplete);
+
+            rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Story+Deep+Copy");
+        });
+    });
+
+</script>
+</head>
+<body>
+<div id="container">
+    <div id="storyBox"></div>
+    <div id="goButton" type="button">
+    </div>
+    <div id="storyResult">
+
+    </div>
+    <div id="taskResult">
+
+    </div>
+    <div id="currentInfo">
+
+    </div>
+    <div id="storyLinkContainer">
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!-- Copyright (c) 2002-2010  Rally Software Development Corp. All rights reserved. -->
+
+<html>
+<head>
+<meta name="Name" content="App: Source Code Check-in"/>
+<meta name="Version" content="2010.12.11"/>
+<meta name="Vendor" content="Rally Software"/>
+<script type="text/javascript" src="/apps/1.22/sdk.js"></script>
+
+<script type="text/javascript">
+/*
+ Copyright (c) 2002-2010  Rally Software Development Corp. All rights reserved.
+ SourceCodeCheckin.js
+ */
+function SourceCodeCheckin() {
+    var containerDiv, results;
+    var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__', '__PROJECT_OID__',
+            '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
+
+    // need to reference __MODE__ so this mashup shows
+    // up as an available panel on the dashboard
+    var mode = '__MODE__';
+
+    var pagesize = 20;
+    var order = 'CreationDate desc';
+    var wait = rally.sdk.ui.Wait();
+
+    // private method to build query string for conversation posts
+    //"((((Text contains "Subversion Checkin") OR (Text contains "Perforce Checkin")) OR (Text contains "Git Checkin")) OR (Text contains "Changeset Number:"))"
+    function buildOrQueryString() {
+        // Changeset Number: is for TFS, we should change TFS to have a header "TFS Checkin"
+        var checkinHeaders = ["Subversion Checkin","Perforce Checkin","Git Checkin", "Changeset Number:"];
+        var checkinQuery = [];
+
+        for (var i = 0; i < checkinHeaders.length; i++) {
+            checkinQuery.push("Text contains \"" + checkinHeaders[i] + "\"");
+        }
+
+        return new rally.sdk.util.Query.or(checkinQuery);
+    }
+
+    //private method to display error message when no discussion or changeset data
+    function checkForNoData() {
+        var helpTopic = "https://wiki.rallydev.com/display/rlyintgrs/Source+Code";
+
+        if (results.scmdiscussion.length === 0 && results.scmrepository.length === 0) {
+            containerDiv.innerHTML = '<div class="no-data">No source code check-ins.<br>' +
+                    'There are either no check-in discussion post/changeset data or no Rally source ' +
+                    'code management connector has been installed. ' +
+                    'To get started, see the <a href=' + helpTopic + ' target="_blank">' +
+                    'available</a> Rally source code management connectors.';
+        }
+    }
+
+    //private method to create inner scm div for each check-in instance
+    function createInnerScmDiv() {
+        var div = document.createElement("div");
+        div.setAttribute('class', 'list-elements') || div.setAttribute('className', 'list-elements');
+        containerDiv.appendChild(div);
+        return div;
+    }
+
+    //private method to re-format changeset message so the Rally artifact links to its detail page
+    function formatMessage(message, artifact) {
+        var formattedMsg = message;
+        var rallyId = artifact.FormattedID.toLowerCase();
+
+        var matchStr = message.toLowerCase().match(rallyId);
+
+        if (matchStr !== null) {
+            formattedMsg = message.slice(0, matchStr.index);
+            formattedMsg += '<a href=' + rally.sdk.util.Ref.createRallyDetailUrl(artifact) + ' target="_blank">' + message.slice(matchStr.index, matchStr.index + rallyId.length) + '</a>';
+            formattedMsg += message.slice(matchStr.index + rallyId.length);
+        }
+        return formattedMsg;
+    }
+
+    // private method for pretty format of changeset and change data
+    function formatChangesetData(changeset) {
+        var text = changeset.SCMRepository.Name + " " + changeset.SCMRepository.SCMType + ' Check-in <div style=padding-left:7px;>';
+        text += changeset.Author !== null ? 'Author: ' + changeset.Author._refObjectName + '<br>' : '';
+        text += changeset.Revision !== null ? 'Revision: ' + changeset.Revision + '<br>' : '';
+        text += changeset.Revision !== null ? 'Message: ' + formatMessage(changeset.Message, changeset.Artifacts[0]) +
+                '<br><br>' : 'Message: ' + changeset.Message + '<br><br>';
+
+        if (changeset.Changes.length > 0) {
+            text += 'Files Affected By Revision ' + changeset.Revision + '<br>';
+
+            for (cnt = 0; cnt < changeset.Changes.length; cnt++) {
+                text += changeset.Changes[cnt].Action + ' <a href=' + changeset.Changes[cnt].Uri + ' target="_blank">' +
+                        changeset.Changes[cnt].PathAndFilename + '</a><br>';
+            }
+        } else {
+            text += 'No affected files';
+        }
+
+        return text;
+    }
+
+    //private method to query for the 20 most recent changesets
+    function queryChangesets(objectIds) {
+        var scmDomElement;
+
+        var changesetCallback = function(queryResults) {
+            for (var cnt = 0; cnt < queryResults.changeset.length; cnt++) {
+                scmDomElement = createInnerScmDiv();
+                scmDomElement.innerHTML = formatChangesetData(queryResults.changeset[cnt]);
+            }
+        };
+
+        var query = new rally.sdk.util.Query.or(objectIds);
+        var changesetQueryObj = {
+            key: 'changeset',
+            type: 'changeset',
+            query: query,
+            fetch:  'Changes,SCMRepository,Revision,SCMType,Message,Action,Uri,PathAndFilename,Author,Name,Artifacts,FormattedID',
+            pagesize: pagesize,
+            order: order
+        };
+
+        rallyDataSource.find(changesetQueryObj, changesetCallback);
+    }
+
+    // private display method
+    // If no conversation posts or changesets found, show no data warning message
+    // If changesets and conversation posts found, show changesets
+    // If only conversation posts found, show conversation posts
+    function display() {
+        var scmElement;
+        checkForNoData();
+
+        if (results.scmrepository.length > 0) {
+            var scmrepoObjectIds = [];
+            for (var i = 0; i < results.scmrepository.length; i++) {
+                result = results.scmrepository[i];
+                scmrepoObjectIds.push("SCMRepository.ObjectID = " + result.ObjectID);
+            }
+            // query for changesets based on scmrepositories in scope and then display
+            queryChangesets(scmrepoObjectIds);
+        } else if (results.scmdiscussion.length > 0) {
+            for (var cnt = 0; cnt < results.scmdiscussion.length; cnt++) {
+                scmElement = createInnerScmDiv();
+                scmElement.innerHTML = results.scmdiscussion[cnt].Text;
+            }
+        }
+        wait.hide();
+    }
+
+    // private method to build project query if running inside Rally
+    function buildProjectQuery() {
+        var projectObjectIds;
+        var projectQuery = [];
+
+
+        if (rally.sdk.util.Context.isInsideRally()) {
+            // create an array of project oids in scope
+            projectObjectIds = '__PROJECT_OIDS_IN_SCOPE__'.split(',');
+
+            if (projectObjectIds.length > 0) {
+                if (projectObjectIds.length > 800) {
+                    throw "Too many projects in scope. Select a different project.";
+                }
+                for (var i = 0; i < projectObjectIds.length; i++) {
+                    projectQuery.push('Projects contains /project/' + projectObjectIds[i]);
+                }
+                return new rally.sdk.util.Query.or(projectQuery);
+            } else {
+                return '';
+            }
+        } else {
+            return '';
+        }
+    }
+
+    // searches for most recent 20 conversation posts and queries for scmrepositories in scope
+    function performQuery() {
+        try {
+
+            var query = buildProjectQuery();
+            var queryArray = [];
+
+            var callback = function(queryResults) {
+                results = queryResults;
+                display();
+            };
+
+
+            // query on conversation posts (discussions) and search text for instances of SCM check-ins
+            queryArray[0] = {
+                key: 'scmdiscussion',
+                type: 'conversationpost',
+                query: buildOrQueryString(),
+                fetch: 'Text',
+                pagesize: pagesize,
+                order: order
+            };
+
+            // query for scmrepositories in scope
+            queryArray[1] = {
+                key: 'scmrepository',
+                type: 'scmrepository',
+                fetch: 'ObjectID',
+                pagesize: 200,
+                query: query,
+                order: order
+            };
+
+            rallyDataSource.find(queryArray, callback);
+        } catch(err) {
+            wait.hide();
+            rally.sdk.ui.AppHeader.showMessage("error", err);
+            rally.Logger.warn(err);
+        }
+    }
+
+    // only public method
+    this.display = function(div) {
+        rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Source+Code+Check-In+App");
+        wait.display("mainDiv");
+        containerDiv = document.getElementById(div);
+        performQuery();
+    };
+
+}
+
+</script>
+<script type="text/javascript">
+    rally.addOnLoad(function() {
+        var sourceCodeCheckin = new SourceCodeCheckin();
+        sourceCodeCheckin.display("mainDiv");
+    });
+</script>
+
+
+</head>
+<body>
+<div id="mainDiv"></div>
+</body>
+</html>

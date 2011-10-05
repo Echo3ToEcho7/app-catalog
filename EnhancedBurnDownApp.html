@@ -1,0 +1,947 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<!-- Copyright (c) 2002-2009  Rally Software Development Corp. All rights reserved. -->
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+<meta name="Name" content="Mashup: Release Enhanced Burn Down"/>
+<meta name="Version" content="2009.5"/>
+<meta name="Vendor" content="Rally Software"/>
+
+<link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
+<script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
+<script type="text/javascript" src="/slm/js/help.js"></script>
+<script type="text/javascript" src="/slm/js/slm.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.13/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.13/js/utilities.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.13/js/dropdown.js"></script>
+<script type="text/javascript" src="/slm/js-lib/ejsc/2.0.1/EJSChart.js"></script>
+<script type="text/javascript" description="EnhancedBurnDown_calc.js">
+/*
+ Copyright (c) 2002-2008  Rally Software Development Corp. All rights reserved.
+ EnhancedBurnDown_calc.js
+ */
+
+
+// Performs linear least-squares fit on the data in xypairs,
+// which is assumed to be an array of 2-element x-y pair arrays.
+// Returns slope and y-intercept of the best fit line.
+// Returns NaN for both if there is only one point.
+// Inspired by http://mathworld.wolfram.com/LeastSquaresFitting.html
+function calcLeastSquares(xypairs) {
+    var n = xypairs.length;
+    var sumx = 0.0, sumx2 = 0.0, sumy = 0.0, sumy2 = 0.0, sumxy = 0.0;
+    var sxx, syy, sxy, xmean, ymean, slope, yintercept;
+
+    //Compute sums of x, x^2, y, y^2, and xy
+    for (var i = 0; i < n; i++) {
+        sumx = sumx + xypairs[i][0];
+        sumx2 = sumx2 + xypairs[i][0] * xypairs[i][0];
+        sumy = sumy + xypairs[i][1];
+        sumy2 = sumy2 + xypairs[i][1] * xypairs[i][1];
+        sumxy = sumxy + xypairs[i][0] * xypairs[i][1];
+    }
+    slope = (n * sumxy - sumx * sumy) / (n * sumx2 - sumx * sumx);
+    yintercept = (sumy * sumx2 - sumx * sumxy) / (n * sumx2 - sumx * sumx);
+    return [slope, yintercept];
+}
+
+function calcIntersection(coeffs1, coeffs2) {
+    if (isNaN(coeffs1[0]) || isNaN(coeffs2[0]) || coeffs1[0] === coeffs2[0]) {
+        return [NaN, NaN];
+    } else {
+        var xIntersect = (coeffs2[1] - coeffs1[1]) / (coeffs1[0] - coeffs2[0]);
+        var yIntersect = coeffs1[0] * xIntersect + coeffs1[1];
+        return [xIntersect, yIntersect];
+    }
+}
+
+function addDaysToDate(date, days) {
+    return (date.getTime() + RALLY.Mashup.Utilities.convertDaysToMilliseconds(days));
+}
+
+//Calculate number of workdays in the period including start and end
+function calcNumberOfWorkDays(startDate, endDate) {
+    var workDays = 0;
+    var aDate;
+    if (startDate.getTime() === endDate.getTime()) {
+        return 1;
+    } else if (startDate < endDate) {
+        aDate = new Date(startDate.getTime());
+        while (aDate <= endDate) {
+            if (RALLY.Mashup.Utilities.isWorkDay(aDate)) {
+                workDays = workDays + 1;
+            }
+            aDate.setDate(aDate.getDate() + 1);
+        }
+        return workDays;
+    } else {
+        aDate = new Date(endDate.getTime());
+        while (aDate <= startDate) {
+            if (RALLY.Mashup.Utilities.isWorkDay(aDate)) {
+                workDays = workDays - 1;
+            }
+            aDate.setDate(aDate.getDate() + 1);
+        }
+        return workDays;
+    }
+}
+
+function findDateForDay(startDate, nthWorkDay) {
+    //Finds the date corresponding to the nth work day
+    //starting at some beginning date
+    var aDate, workDaysFound, startDate, nthDay;
+
+    nthDay = Math.round(nthWorkDay);
+    if (nthDay <= 0) {
+        return startDate;
+    }
+    aDate = new Date(startDate.getTime());
+    workDaysFound = 0;
+    while (workDaysFound < nthDay) {
+        if (RALLY.Mashup.Utilities.isWorkDay(aDate)) {
+            workDaysFound = workDaysFound + 1;
+            if (workDaysFound === nthDay) {
+                return aDate;
+            }
+        }
+        aDate.setTime(addDaysToDate(aDate, 1));
+    }
+    return null;
+}
+
+function isValidChartDate(theDate, start, end) {
+    return (RALLY.Mashup.Utilities.isWorkDay(theDate) &&
+            theDate >= start && theDate <= end) ? true : false;
+}
+
+function aggregateNotAcceptedPerDay(notAcceptedResults, releaseStart, releaseEnd) {
+
+    var utils = RALLY.Mashup.Utilities;
+    var totalPerDay = [];
+    var dates = [];
+    var releaseStart = RALLY.Mashup.Utilities.convertIsoDateOnly(releaseStart);
+    var releaseEnd = RALLY.Mashup.Utilities.convertIsoDateOnly(releaseEnd);
+    var effectiveStart = calcEffectiveStart(releaseStart);
+    var dayNumber = 0;
+    var currentDate, dataDate, firstDataDate, lastDataDate;
+    var i, firstDataDay, lastDataDay, notAcceptedData, notAcceptedLength;
+
+    firstDataDate = utils.convertIsoDateOnly(notAcceptedResults[0].CreationDate);
+    lastDataDate = utils.convertIsoDateOnly(notAcceptedResults[notAcceptedResults.length - 1].CreationDate);
+
+    if (effectiveStart > lastDataDate) {
+        document.getElementById('info_msg').innerHTML =
+                "<p>Days to ignore is equal to or greater than the number of days of data available.";
+        document.getElementById('info_msg').style.visibility = "visible";
+        return null;
+    }
+
+    //Fill in dates from effective start to date of first cum flow data
+    currentDate = new Date(effectiveStart.getTime());
+    dayNumber = 0;
+    while (currentDate < firstDataDate) {
+        if (utils.isWorkDay(currentDate)) {
+            dates[dayNumber] = new Date(currentDate.getTime());
+            dayNumber = dayNumber + 1;
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+    firstDataDay = dayNumber;
+
+    //Fill in total not-accepted per day values
+    currentDate = new Date(firstDataDate.getTime());
+    dayNumber = dayNumber - 1;
+    currentDate.setDate(currentDate.getDate() - 1);
+    for (i = 0; i < notAcceptedResults.length; i++) {
+        dataDate = utils.convertIsoDateOnly(notAcceptedResults[i].CreationDate);
+        if (dataDate > currentDate) {
+            currentDate = dataDate;
+
+            if (isValidChartDate(dataDate, effectiveStart, releaseEnd)) {
+                dayNumber = dayNumber + 1;
+                lastDataDay = dayNumber;
+                dates[dayNumber] = currentDate;
+                totalPerDay[dayNumber] = 0;
+            }
+        }
+
+        if (isValidChartDate(currentDate, effectiveStart, releaseEnd)) {
+            dates[dayNumber] = currentDate;
+            totalPerDay[dayNumber] += notAcceptedResults[i].CardEstimateTotal;
+        }
+    }
+
+    //Fill in remaining dates from date of last cum flow data to end of release
+    lastDataDate = dates[lastDataDay];
+    currentDate = new Date(lastDataDate.getTime());
+    currentDate.setDate(currentDate.getDate() + 1);
+    dayNumber = lastDataDay + 1;
+    while (currentDate <= releaseEnd) {
+        if (utils.isWorkDay(currentDate)) {
+            dates[dayNumber] = new Date(currentDate.getTime());
+            dayNumber = dayNumber + 1;
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    notAcceptedData = {
+        "firstDataDay" : firstDataDay,
+        "lastDataDay" : lastDataDay,
+        "dates": dates,
+        "totalPerDay": totalPerDay
+    };
+
+    return notAcceptedData;
+}
+
+function arrayContainsDate(a, obj) {
+    var i = a.length;
+    while (i--) {
+        if (a[i].getDate() === obj.getDate() &&
+                a[i].getMonth() === obj.getMonth() &&
+                a[i].getFullYear() === obj.getFullYear()) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// dates is an array of dates in the release, excluding non-work days
+// planEstimates is used to look up the plan estimate for a formatted id
+// workProductsAdded comes from rev history - formatted id and date it was added
+function getPlanEst(totalPerDay, dates, planEstimates, workProductsAdded) {
+    var totalPoints = 0;
+    var index;
+
+    for (index in workProductsAdded) {
+        var dataDate =
+                RALLY.Mashup.Utilities.convertIsoDateOnly(workProductsAdded[index].CreationDate);
+        dayNumber = arrayContainsDate(dates, dataDate);
+
+        if (dayNumber >= 0) {
+            if (typeof planEstimates[workProductsAdded[index].PrefixID] !== 'undefined') {
+                totalPoints = (planEstimates[workProductsAdded[index].PrefixID]) * -1;
+                totalPerDay[dayNumber] += totalPoints;
+            }
+        }
+    }
+}
+
+function aggregateWorkAdded(workProductsAdded, dates, storiesPlanEst, defectsPlanEst, defectSuitesPlanEst) {
+    var totalPerDay = initTotals(dates);
+
+    getPlanEst(totalPerDay, dates, storiesPlanEst, workProductsAdded.storyIds);
+    getPlanEst(totalPerDay, dates, defectsPlanEst, workProductsAdded.defectIds);
+    getPlanEst(totalPerDay, dates, defectSuitesPlanEst, workProductsAdded.defectSuiteIds);
+
+    accumulateTotals(totalPerDay);
+
+    return totalPerDay;
+}
+
+function by(property) {
+    return function(o, p) {
+        var a, b;
+        if (typeof o === 'object' && typeof p === 'object' && o && p) {
+            a = o[property];
+            b = p[property];
+            if (a === b) {
+                return 0;
+            }
+            if (typeof a === typeof b) {
+                return a < b ? -1 : 1;
+            }
+            return typeof a < typeof b ? -1 : 1;
+        }
+    };
+}
+
+function calcEffectiveStart(releaseStart) {
+    var effectiveStart = new Date(releaseStart.getTime());
+
+    if (document.getElementById('ignore') !== null) {
+        var ignoreDays = document.getElementById('ignore').selectedIndex;
+    } else {
+        var ignoreDays = 0;
+    }
+    effectiveStart.setDate(effectiveStart.getDate() + ignoreDays);
+
+    if (effectiveStart.getDay() === 0) { //Sunday
+        effectiveStart.setDate(effectiveStart.getDate() + 1);
+    } else if (effectiveStart.getDay() === 6) { //Saturday
+        effectiveStart.setDate(effectiveStart.getDate() + 2);
+    }
+    return effectiveStart;
+}
+
+function computePlanEst(results) {
+    var planEst = 0;
+    for (i = 0; i < results.length; i++) {
+        planEst += results[i].PlanEstimate;
+    }
+    return planEst;
+}
+
+function accumulateTotals(totalPerDay) {
+    var points = 0;
+
+    for (var i = 0; i < totalPerDay.length; i++) {
+        points = points + totalPerDay[i];
+        totalPerDay[i] = points;
+    }
+}
+
+function initTotals(dates) {
+    var totalPerDay = [];
+    for (var i = 0; i < dates.length; i++) {
+        totalPerDay[i] = 0;
+    }
+    return totalPerDay;
+}
+
+function getScheduledItems(text) {
+    return text.match(/Scheduled (User Story|Defect|Defect Suite) \[[A-Za-z]+\d+:/g);
+}
+
+function getFormattedId(scheduledItem) {
+    return scheduledItem.split("[")[1].split(":")[0];
+}
+
+function parseRevisions(revisions, releaseStart, releaseEnd, storyPrefix, defectPrefix, defectSuitePrefix) {
+    var storyIds = [];
+    var defectIds = [];
+    var defectSuiteIds = [];
+    var scheduledItems, formattedIdWithPrefix, formattedIdOnly;
+
+    for (var i = 0; i < revisions.length; i++) {
+        var dataDate = RALLY.Mashup.Utilities.convertIsoToJSDate(revisions[i].CreationDate);
+
+        if (revisions[i].Description.indexOf("Scheduled") >= 0 &&
+                dataDate >= RALLY.Mashup.Utilities.convertIsoDateOnly(releaseStart) &&
+                dataDate <= RALLY.Mashup.Utilities.convertIsoDateOnly(releaseEnd)) {
+
+            scheduledItems = getScheduledItems(revisions[i].Description);
+
+            if (scheduledItems !== null) {
+                for (j = 0; j < scheduledItems.length; j++) {
+                    formattedIdWithPrefix = getFormattedId(scheduledItems[j]);
+                    formattedIdOnly = formattedIdWithPrefix.replace(/[^0-9]/g, "");
+
+                    if (formattedIdWithPrefix.indexOf(defectSuitePrefix) >= 0) {
+                        defectSuiteIds[formattedIdOnly] = {
+                            "FormattedID": formattedIdOnly,
+                            "PrefixID": formattedIdWithPrefix,
+                            "CreationDate": revisions[i].CreationDate
+                        };
+                    } else if (formattedIdWithPrefix.indexOf(defectPrefix) >= 0) {
+                        defectIds[formattedIdOnly] = {
+                            "FormattedID": formattedIdOnly,
+                            "PrefixID": formattedIdWithPrefix,
+                            "CreationDate": revisions[i].CreationDate
+                        };
+                    } else if (formattedIdWithPrefix.indexOf(storyPrefix) >= 0) {
+                        storyIds[formattedIdOnly] = {
+                            "FormattedID": formattedIdOnly,
+                            "PrefixID": formattedIdWithPrefix,
+                            "CreationDate": revisions[i].CreationDate
+                        };
+                    }
+                }
+            }
+        }
+    }
+
+    storyIds.sort(by('FormattedID'));
+    defectIds.sort(by('FormattedID'));
+    defectSuiteIds.sort(by('FormattedID'));
+
+    var allWorkProductIds = {
+        "storyIds": storyIds,
+        "defectIds": defectIds,
+        "defectSuiteIds": defectSuiteIds
+    };
+
+    return allWorkProductIds;
+}
+</script>
+<script type="text/javascript" description="EnhancedBurnDown.js">
+/*
+ Copyright (c) 2002-2008  Rally Software Development Corp. All rights reserved.
+ */
+
+dojo.require('dojo.io.script');
+dojo.addOnLoad(initPage);
+
+var releaseDropdown;
+var theChart;
+var blueBarSeries;
+var redBarSeries2;
+var blueLineSeries;
+var redLineSeries;
+var MAX_IGNORE_DAYS = 6;
+
+var batchToolkit;
+
+var workProductsAdded;
+
+// TODO put this in an array of prefixes
+var storyPrefix;
+var defectPrefix;
+var defectSuitePrefix;
+
+// TODO put this in an array of plan estimates
+var storiesPlanEst;
+var defectsPlanEst;
+var defectSuitesPlanEst;
+
+function buildAdjustedChartArray(blueData, redData) {
+    var blueRegressionData = [];
+    for (var i = 0; i < blueData.length; i++) {
+        redData[i][2] = Math.min(0, blueData[i][2] + redData[i][1]);
+        if (blueData[i][2] + redData[i][1] > 0) {
+            blueRegressionData.push([i, blueData[i][2] + redData[i][1]]); //top of blue bars
+        } else {
+            blueRegressionData.push([i, redData[i][2]]); //top of red bars
+        }
+
+        blueData[i][2] =
+                Math.max(blueData[i][2] + redData[i][1], 0); //redData is negative
+    }
+    return blueRegressionData;
+}
+
+function buildChartArray(dates, totals, dataStart, dataEnd) {
+    var chartArr = [];
+    for (var i = dataStart; i <= dataEnd; i++) {
+        if (totals[i] >= 0) {
+            chartArr.push([i, 0, totals[i]]);
+        } else {
+            chartArr.push([i, totals[i], 0]);
+        }
+    }
+    return chartArr;
+}
+
+function formatDateForChart(jsDate) {
+    return (jsDate.getMonth() + 1) + "/" + jsDate.getDate();
+}
+
+function buildBarChart(notAcceptedData, workAddedData) {
+    RALLY.Mashup.Utilities.hideWait('info_msg', ['chart_div1', 'release_date']);
+
+    var predictedRelease, intersectXY;
+    var blueData = buildChartArray(notAcceptedData.dates, notAcceptedData.totalPerDay,
+            notAcceptedData.firstDataDay, notAcceptedData.lastDataDay);
+    var redData = buildChartArray(notAcceptedData.dates, workAddedData,
+            notAcceptedData.firstDataDay, notAcceptedData.lastDataDay);
+    var blueRegressionData = buildAdjustedChartArray(blueData, redData);
+    var redRegressionData = getXY(redData, 1);
+    var axis_bottom_end = notAcceptedData.dates.length - 1;
+
+    // Custom formatter translates x values of 0..n to dates
+    var CustomDateFormatter = function() {
+        EJSC.Formatter.__extendTo(this);
+        this.format = function(value) {
+            if (Math.round(value) !== value) {
+                return "";
+            }
+            if (value >= 0 && value < notAcceptedData.dates.length) {
+                return formatDateForChart(notAcceptedData.dates[value]);
+            } else {
+                return formatDateForChart(findDateForDay(notAcceptedData.dates[0], value));
+            }
+        };
+    };
+
+    if (typeof theChart !== 'undefined') {
+        theChart.remove();
+    }
+
+    theChart = new EJSC.Chart("chart_div1", {
+        show_legend: true,
+        show_titlebar: false,
+        allow_zoom: false,
+        axis_bottom: {
+            caption: "Date",
+            min_extreme: -1,
+            max_extreme: axis_bottom_end + 1,
+            stagger_ticks: false
+        },
+        axis_left: {caption: "Story Points"}
+    });
+
+    theChart.axis_bottom.formatter = new CustomDateFormatter();
+
+    theChart.onShowHint = function(point, series, chart, hint, hoverOrSelect) {
+        barLength = Math.abs(point.min - point.max);
+        barLength = Math.round(barLength * 10) / 10;
+        if (series.title.indexOf("Trendline") >= 0) {
+            return '[series_title]<br/>Date: [x]';
+        } else {
+            return '[series_title]<br/>Date: [x]<br/>Story Points: ' + barLength;
+        }
+    };
+
+    blueBarSeries = new EJSC.FloatingBarSeries(
+            new EJSC.ArrayDataHandler(blueData),
+            {
+                groupedBars: false
+            }
+    );
+
+    blueBarSeries.title = "Original Scope";
+    blueBarSeries.color = 'rgb(0,0,255)';
+    blueBarSeries.lineWidth = 1;
+    blueBarSeries.opacity = 70;
+    theChart.addSeries(blueBarSeries);
+
+    redBarSeries = new EJSC.FloatingBarSeries(
+            new EJSC.ArrayDataHandler(redData),
+            {
+                groupedBars: false
+            }
+    );
+
+    redBarSeries.title = "Added Scope";
+    redBarSeries.color = 'rgb(255,0,0)';
+    redBarSeries.lineWidth = 1;
+    redBarSeries.opacity = 70;
+    theChart.addSeries(redBarSeries);
+
+    intersectXY = buildTrendLines(blueRegressionData, redRegressionData);
+    if (intersectXY[0] > theChart.axis_bottom.getExtremes().max) {
+        theChart.axis_bottom.setExtremes(theChart.axis_bottom.getExtremes().min,
+                intersectXY[0] + 1);
+    }
+
+    if (!isNaN(intersectXY[0]) && Math.round(intersectXY[0]) > 0) {
+        predictedRelease = findDateForDay(notAcceptedData.dates[0], intersectXY[0]);
+        document.getElementById('release_date').innerHTML =
+                'Release Date: ' + RALLY.Mashup.Utilities.formatDate(releaseDropdown.getSelectedEnd()) +
+                        '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+                        'Projected Release Date: ' + RALLY.Mashup.Utilities.formatDateObject(predictedRelease);
+    } else {
+        document.getElementById('release_date').innerHTML =
+                'Release Date: ' + RALLY.Mashup.Utilities.formatDate(releaseDropdown.getSelectedEnd()) +
+                        '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+                        'Projected Release Date: <span style="font-style:italic;">Warning!</span> You are adding scope faster than you are accepting';
+    }
+    document.getElementById('release_date').style.visibility = "visible";
+}
+
+function buildTrendLines(blueRegressionData, redRegressionData) {
+    var blueLastX, redLastX;
+    var blueEndPoints = [];
+    var redEndPoints = [];
+
+    var blueCoefficients = calcLeastSquares(blueRegressionData);
+    var redCoefficients = calcLeastSquares(redRegressionData);
+
+    var intersectXY = calcIntersection(blueCoefficients, redCoefficients);
+
+    if (!isNaN(intersectXY[0]) && Math.round(intersectXY[0]) > 0) {
+        blueLastX = Math.round(intersectXY[0]);
+        redLastX = blueLastX;
+    } else {
+        blueLastX = Math.max(blueRegressionData[blueRegressionData.length - 1][0],
+                redRegressionData[redRegressionData.length - 1][0]);
+        redLastX = blueLastX;
+    }
+
+    if (!isNaN(blueCoefficients[0]) && !isNaN(blueCoefficients[1])) {
+        blueEndPoints = [
+            [blueRegressionData[0][0], blueCoefficients[1]],
+            [blueLastX, blueCoefficients[0] * blueLastX + blueCoefficients[1]]
+        ];
+        blueLineSeries = new EJSC.LineSeries(new EJSC.ArrayDataHandler(blueEndPoints));
+        blueLineSeries.title = "Original Scope Trendline";
+        blueLineSeries.color = 'rgb(0,0,255)';
+        blueLineSeries.lineWidth = 5;
+        theChart.addSeries(blueLineSeries);
+    }
+
+    if (!isNaN(redCoefficients[0]) && !isNaN(redCoefficients[1])) {
+        redEndPoints = [
+            [redRegressionData[0][0], redCoefficients[1]],
+            [redLastX, redCoefficients[0] * redLastX + redCoefficients[1]]
+        ];
+        redLineSeries = new EJSC.LineSeries(new EJSC.ArrayDataHandler(redEndPoints));
+        redLineSeries.title = "Added Scope Trendline";
+        redLineSeries.color = 'rgb(255,0,0)';
+        redLineSeries.lineWidth = 5;
+        theChart.addSeries(redLineSeries);
+    }
+
+    return intersectXY;
+}
+
+// Query to retrieve plan estimate for scheduled work of a given artifact type not accepted
+function buildArtifactQuery(objectType, attributeName, attributeValues) {
+    var q = '(((( Release.ReleaseStartDate = ' +
+            releaseDropdown.getSelectedStart() + ') AND (Release.ReleaseDate = ' +
+            releaseDropdown.getSelectedEnd() + ')) AND (Release.Name = "' +
+            releaseDropdown.getSelectedName() + '")) AND ( ' +
+            attributeName + ' != ' + attributeValues[0] + '))';
+
+    var artifactQuery = {
+        key: objectType,
+        type: objectType,
+        fetch: 'PlanEstimate',
+        query: q
+    };
+    return artifactQuery;
+}
+
+function buildBurnDownQuery(query) {
+    var burnDownQuery = {
+        key: 'NotAccepted',
+        type: 'ReleaseCumulativeFlowData',
+        fetch: 'true',
+        order: 'CreationDate',
+        query: '(' + query + 'AND ( CardState != Accepted))'
+
+    };
+    return burnDownQuery;
+}
+
+function buildChart() {
+    var optList = document.getElementById('releaseList');
+    var selectedIndex = optList.selectedIndex;
+    releaseInfo = optList.options[selectedIndex].value.split(/\s?~\s?/);
+    RALLY.Mashup.Utilities.showWait('info_msg', ['chart_div1', 'release_date']);
+    runQuery();
+}
+
+function buildDateArray(definedResults) {
+    dateArray = [];
+    for (var i = 0; i < definedResults.length; i++) {
+        dateArray.push(definedResults[i].CreationDate);
+    }
+    return dateArray;
+}
+
+function buildIdLookupQuery(objectType, theQuery) {
+    var queryObject = null;
+    if (theQuery !== null && theQuery.length > 0) {
+        queryObject = {
+            key: objectType,
+            type: objectType,
+            fetch: 'PlanEstimate,FormattedID',
+            query: theQuery,
+            order: 'FormattedID'
+        };
+    }
+    return queryObject;
+}
+
+function buildIgnoreSelection() {
+    ignoreList = document.getElementById('ignore');
+    for (var i = 0; i < MAX_IGNORE_DAYS; i++) {
+        ignoreList.options[i] = new Option(i, i);
+    }
+    ignoreList.selectedIndex = 1;
+
+    if (document.addEventListener) { // For most browsers
+        ignoreList.addEventListener('change', onIgnoreChange, false);
+    } else if (document.attachEvent) { // For IE
+        ignoreList.attachEvent('onchange', onIgnoreChange);
+    }
+}
+
+function buildSingleQueryEscaped(field, value) {
+    return "(" + field + " = \"" + value + "\")";
+}
+
+function calculateToday(notAcceptedData, workAddedData) {
+    var dayNumber = 0;
+    var today = new Date();
+    var planEstForToday = 0;
+
+    var defectPlanEstCallback = function(results) {
+        planEstForToday += computePlanEst(results.Defect);
+        notAcceptedData.totalPerDay[dayNumber] = planEstForToday;
+
+        var defectSuiteQuery = buildArtifactQuery('DefectSuite', 'ScheduleState', ['Accepted']);
+        batchToolkit.findAll(defectSuiteQuery, defectSuitePlanEstCallback);
+    };
+
+    var defectSuitePlanEstCallback = function(results) {
+        planEstForToday += computePlanEst(results.DefectSuite);
+        notAcceptedData.totalPerDay[dayNumber] = planEstForToday;
+
+        buildBarChart(notAcceptedData, workAddedData);
+    };
+
+    var storyPlanEstCallback = function(results) {
+        planEstForToday += computePlanEst(results.HierarchicalRequirement);
+        notAcceptedData.totalPerDay[dayNumber] = planEstForToday;
+
+        var defectQuery = buildArtifactQuery('Defect', 'ScheduleState', ['Accepted']);
+        batchToolkit.findAll(defectQuery, defectPlanEstCallback);
+    };
+
+    dayNumber = arrayContainsDate(notAcceptedData.dates, today);
+    notAcceptedData.lastDataDay = dayNumber;
+
+    // Query for scheduled work to determine total plan estimate (blue bars)
+    var storyQuery = buildArtifactQuery('HierarchicalRequirement', 'ScheduleState', ['Accepted']);
+    batchToolkit.findAll(storyQuery, storyPlanEstCallback);
+}
+
+function createObjectResults(results, key) {
+    var newObject = {};
+    if (typeof results[key] !== 'undefined') {
+        for (var i = 0; i < results[key].length; i++) {
+            if (results[key][i].PlanEstimate === null) {
+                newObject[results[key][i].FormattedID] = 0;
+            } else {
+                newObject[results[key][i].FormattedID] = results[key][i].PlanEstimate;
+            }
+        }
+    }
+    return newObject;
+}
+
+function getWorkProductPrefixes() {
+    queryArray = [];
+    queryArray[0] = {
+        key: 'StoryPrefix',
+        type: 'hierarchicalrequirement',
+        fetch: 'FormattedID',
+        order: 'CreationDate desc',
+        pagesize: 1
+    };
+    queryArray[1] = {
+        key: 'DefectPrefix',
+        type: 'defect',
+        fetch: 'FormattedID',
+        order: 'CreationDate desc',
+        pagesize: 1
+    };
+    queryArray[2] = {
+        key: 'DefectSuitePrefix',
+        type: 'defectSuite',
+        fetch: 'FormattedID',
+        order: 'CreationDate desc',
+        pagesize: 1
+    };
+    batchToolkit.find(queryArray, processWorkProductPrefixes);
+}
+
+function getXY(chartArray, yIndex) {
+    var newArray = [];
+    for (var i = 0; i < chartArray.length; i++) {
+        newArray.push([chartArray[i][0], chartArray[i][yIndex]]);
+    }
+    return newArray;
+}
+
+function initPage() {
+    RALLY.Mashup.Utilities.showHelpIcon(161);
+    RALLY.Mashup.Utilities.showPrintButton();
+
+    batchToolkit = new RALLY.Mashup.BatchToolkit('__WORKSPACE_OID__', '__PROJECT_OID__',
+            '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
+
+    buildIgnoreSelection();
+    getWorkProductPrefixes();
+}
+
+function onIgnoreChange() {
+    buildChart();
+}
+
+function processWorkProductPrefixes(results) {
+
+    if (results['StoryPrefix'].length > 0) {
+        storyPrefix = results['StoryPrefix'][0].FormattedID.replace(/[0-9]/g, "");
+    } else {
+        storyPrefix = "S";
+    }
+    if (results['DefectPrefix'].length > 0) {
+        defectPrefix = results['DefectPrefix'][0].FormattedID.replace(/[0-9]/g, "");
+    } else {
+        defectPrefix = "DE";
+    }
+    if (results['DefectSuitePrefix'].length > 0) {
+        defectSuitePrefix = results['DefectSuitePrefix'][0].FormattedID.replace(/[0-9]/g, "");
+    } else {
+        defectSuitePrefix = "DS";
+    }
+
+    releaseDropdown = new RALLY.Mashup.Dropdown(batchToolkit, RALLY.Mashup.RELEASE, 'releaseList', 'releaseLabel',
+            'mu_enhanced_burndown');
+
+    releaseDropdown.invoke(buildChart);
+}
+
+function releaseBurnDown(releases) {
+
+    workProductsAdded = parseRevisions(releases.releaseRevisions, releaseDropdown.getSelectedStart(),
+            releaseDropdown.getSelectedEnd(), storyPrefix, defectPrefix, defectSuitePrefix);
+
+    var findStoryByIdQuery = buildIdLookupQuery('hierarchicalrequirement',
+            RALLY.Mashup.Utilities.buildOrQueryString(workProductsAdded.storyIds, 'FormattedID', 'FormattedID'));
+    var findDefectByIdQuery = buildIdLookupQuery('defect',
+            RALLY.Mashup.Utilities.buildOrQueryString(workProductsAdded.defectIds, 'FormattedID', 'FormattedID'));
+    var findDSByIdQuery = buildIdLookupQuery('defectsuite',
+            RALLY.Mashup.Utilities.buildOrQueryString(workProductsAdded.defectSuiteIds, 'FormattedID', 'FormattedID'));
+
+    var releaseBurnDownQuery = buildBurnDownQuery(RALLY.Mashup.Utilities.buildOrQueryString(releases.releaseOids,
+            'ReleaseObjectID', 'ObjectID'));
+
+    // Find stories, defects and defect suites that were added after start of the release
+    // Chained queries because we need all data before we can draw the chart
+    // Find stories first, then find defects and finally find defect suites
+
+    if (workProductsAdded.storyIds.length === 0) {
+        results = [];
+        findStoryCallback(results);
+    } else {
+        batchToolkit.findAll(findStoryByIdQuery, findStoryCallback);
+    }
+
+    function findStoryCallback(results) {
+        storiesPlanEst = createObjectResults(results, 'hierarchicalrequirement');
+
+        if (workProductsAdded.defectIds.length === 0) {
+            results = [];
+            findDefectCallback(results);
+        } else {
+            batchToolkit.findAll(findDefectByIdQuery, findDefectCallback);
+        }
+    }
+
+    function findDefectCallback(results) {
+        defectsPlanEst = createObjectResults(results, 'defect');
+
+        if (workProductsAdded.defectSuiteIds.length === 0) {
+            results = [];
+            findDSCallback(results);
+        } else {
+            batchToolkit.findAll(findDSByIdQuery, findDSCallback);
+        }
+    }
+
+    function findDSCallback(results) {
+        defectSuitesPlanEst = createObjectResults(results, 'defectsuite');
+
+        //Find total work not accepted per day of the release
+        batchToolkit.findAll(releaseBurnDownQuery, releaseBurnDownCallback);
+    }
+}
+
+function releaseBurnDownCallback(results) {
+    var releaseEnd = RALLY.Mashup.Utilities.convertIsoDateOnly(releaseDropdown.getSelectedEnd());
+    var today = new Date();
+    var notAcceptedData, workAddedData;
+
+    if (results['NotAccepted'].length === 0) {
+        document.getElementById('chart_div1').style.visibility = "hidden";
+        document.getElementById('info_msg').style.visibility = "visible";
+        document.getElementById('info_msg').innerHTML = "<p>No release cumulative flow data found for this release.</p>";
+    } else {
+        notAcceptedData = aggregateNotAcceptedPerDay(results['NotAccepted'],
+                releaseDropdown.getSelectedStart(), releaseDropdown.getSelectedEnd());
+
+        //Aggregate work added for stories, defects and defect suites
+        workAddedData = aggregateWorkAdded(workProductsAdded, notAcceptedData.dates,
+                storiesPlanEst, defectsPlanEst, defectSuitesPlanEst);
+
+        if (notAcceptedData !== null) {
+            // Determine if need to calculate data for today or just return release data object
+            if (RALLY.Mashup.Utilities.isWorkDay(today) && today.getTime() <= releaseEnd.getTime()) {
+                calculateToday(notAcceptedData, workAddedData);
+            } else {
+                buildBarChart(notAcceptedData, workAddedData);
+            }
+        }
+    }
+}
+
+function buildReleaseQuery() {
+    return '((( ReleaseStartDate = ' +
+            releaseDropdown.getSelectedStart() + ') AND (ReleaseDate = ' +
+            releaseDropdown.getSelectedEnd() + ')) AND (Name = ' + '\"' +
+            releaseDropdown.getSelectedName() + '\"))';
+}
+
+function runQuery() {
+    queryArray = [];
+    query1 = buildReleaseQuery();
+    query2 = '${releaseOids/revisionhistory/revisions?' +
+            'fetch=creationDate,description&order=CreationDate}';
+
+    queryArray[0] = {
+        key: 'releaseOids',
+        type: 'release',
+        query: query1,
+        fetch: 'objectid,Name,ReleaseStartDate,ReleaseDate,project',
+        order:'ReleaseDate'
+    };
+
+    queryArray[1] = {
+        key: 'releaseRevisions',
+        placeholder: query2
+    };
+
+    batchToolkit.findAll(queryArray, releaseBurnDown);
+}
+</script>
+
+
+</head>
+<body>
+<div style="float:right" id="help"></div>
+<div class="titlebar" style="float:left" id="title">Release Enhanced Burn Down</div>
+<table>
+    <tr>
+        <td style="text-align: left; width: 99%;">
+        <td style="text-align: right; width: 1%;">
+            <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();"
+                 onmouseout="hidecbMenu('buttons',event);" style="vertical-align: middle;"
+                 src="/slm/images/menu_actions.gif"/>
+
+            <div style="position:relative;top:5px" align="left">
+                <div id="buttons" class="do-menu" style="left:0px;"
+                     onmouseover="document.body.style.cursor='pointer';"
+                     onmouseout="document.body.style.cursor='default';hidecbMenu('buttons',event);">
+                    <a id="print" onclick="RALLY.Mashup.Utilities.printPage()">Print...</a>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div style="clear:both"></div>
+<table>
+    <tr>
+        <td id="releaseLabel" class="lbl">Release Name</td>
+        <td><select id="releaseList"></select></td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td class="lbl">Ignore first</td>
+        <td><select id="ignore"></select></td>
+        <td class="lbl">days</td>
+    </tr>
+</table>
+<table border=0>
+    <tr>
+        <td class="lbl">
+            <div id="info_msg"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="chart_div1" style="width:600px; height:400px;"></div>
+        </td>
+    </tr>
+    <tr>
+        <td class="lbl">
+            <div id="release_date"></div>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta name="Name" content="Mashup: Active Defect Charts"/>
+    <meta name="Version" content="2009.4"/>
+    <meta name="Vendor" content="Rally Software"/>
+    <link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
+    <link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
+
+    <script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
+    <script type="text/javascript" src="/slm/js/slm.js"></script>
+    <script type="text/javascript" src="/slm/mashup/1.13/js/batch-toolkit.js"></script>
+    <script type="text/javascript" src="/slm/mashup/1.13/js/utilities.js"></script>
+    <script type="text/javascript" description="Defect Mashup specific code.">
+        /*
+         Copyright (c) 2002-2009  Rally Software Development Corp. All rights reserved.
+         */
+
+        dojo.require('dojo.io.script')
+        dojo.addOnLoad(runAllowedValuesQuery);
+
+        var batchToolkit;
+
+        function runAllowedValuesQuery() {
+            batchToolkit = new RALLY.Mashup.BatchToolkit('__WORKSPACE_OID__', '__PROJECT_OID__', '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
+
+            RALLY.Mashup.Utilities.showPrintButton();
+
+            var queryArray = [];
+            queryArray[0] = {
+                key: 'priorities',
+                type: 'Defect',
+                attribute: 'Priority'
+            };
+            queryArray[1] = {
+                key: 'severities',
+                type: 'Defect',
+                attribute: 'Severity'
+            };
+
+            batchToolkit.find(queryArray, runDefectQuery);
+        }
+
+        function runDefectQuery(allowedValuesResult) {
+            var priorities = removeEmptyValues(allowedValuesResult.priorities);
+            var severities = removeEmptyValues(allowedValuesResult.severities);
+
+            var defectQuery = buildDefectQuery(priorities, severities);
+            var callback = function(results) {
+                showResults(priorities, severities, results);
+            };
+
+            batchToolkit.find(defectQuery, callback);
+        }
+        function removeEmptyValues(arr) {
+            var nonEmpty = [];
+            for (var i = 0; i < arr.length; i++) {
+                if (arr[i]) {
+                    nonEmpty.push(arr[i]);
+                }
+            }
+            return nonEmpty;
+        }
+
+        function buildDefectQuery(priorities, severities) {
+
+            var defectQueryArray = [];
+            var count = 0;
+            for (var i = 0; i < priorities.length; i++) {
+                var keyName = "pri" + i;
+                defectQueryArray[count++] = {
+                    key: "#" + keyName,
+                    type: 'defect',
+                    fetch: false,
+                    query: "((State != Closed) and (Priority = \"" + priorities[i] + "\"))"
+                }
+                defectQueryArray[count++] = {
+                    key: keyName,
+                    placeholder: "${#pri" + i + "/size}"
+                }
+            }
+
+            for (var i = 0; i < severities.length; i++) {
+                var keyName = "sev" + i;
+                defectQueryArray[count++] = {
+                    key: "#" + keyName,
+                    type: 'defect',
+                    fetch: false,
+                    query: "((State != Closed) and (Severity = \"" + severities[i] + "\"))"
+                }
+                defectQueryArray[count++] = {
+                    key: keyName,
+                    placeholder: "${#sev" + i + "/size}"
+                }
+            }
+
+            return defectQueryArray;
+        }
+
+        function collectValuesByPrefix(results, prefix, numKeys) {
+            var values = [];
+            for (var i = 0; i < numKeys; i++) {
+                values[i] = results[prefix + i];
+            }
+            return values;
+        }
+
+        function showResults(priorities, severities, results) {
+            var priorityValues = collectValuesByPrefix(results, 'pri', priorities.length);
+            showGoogleChart('priorityChart', priorities, priorityValues);
+
+            var severityValues = collectValuesByPrefix(results, 'sev', severities.length)
+            showGoogleChart('severityChart', severities, severityValues);
+        }
+
+        function showGoogleChart(chartId, labels, values) {
+            var gChartUrl = "http://chart.apis.google.com/chart?cht=p3&chs=450x150&chd=t:";
+
+            gChartUrl += values.join();
+            gChartUrl += "&chl=";
+            var sectionLabels = [];
+            for (var i = 0; i < values.length; i++) {
+                var label = labels[i];
+                if (label.length > 15) {
+                    label = label.substring(0, 12) + '...';
+                }
+                sectionLabels.push(label + "(" + values[i] + ")");
+            }
+            gChartUrl += sectionLabels.join('|');
+
+            document.getElementById(chartId).title = sectionLabels.join(',');
+            document.getElementById(chartId).src = gChartUrl;
+        }
+    </script>
+</head>
+
+<body>
+<table>
+    <tr>
+        <td style="text-align: left; width: 99%;">
+        <td style="text-align: right; width: 1%;">
+            <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();" onmouseout="hidecbMenu('buttons',event);"
+                 style="vertical-align: middle;" src="/slm/images/menu_actions.gif"/>
+
+            <div style="position:relative;top:5px" align="left">
+                <div id="buttons" class="do-menu" style="left:0px;"
+                     onmouseover="document.body.style.cursor='pointer';"
+                     onmouseout="hidecbMenu('buttons',event);">
+                    <a id="print" onclick="RALLY.Mashup.Utilities.printPage()">
+                        Print...
+                    </a>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div style="clear:both">
+</div>
+<div id="chartContainer">
+    <div class="chart">
+        <h3>
+            Active Defects by Priority
+        </h3>
+        <img id="priorityChart" src="http://chart.apis.google.com/chart?cht=p3&chs=450x150&chd=t:100"
+                />
+    </div>
+    <div class="chart">
+        <h3>
+            Active Defects by Severity
+        </h3>
+        <img id="severityChart" src="http://chart.apis.google.com/chart?cht=p3&chs=450x150&chd=t:100"
+                />
+    </div>
+    <br style="clear:both"/>
+</div>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<html>
+<head>
+    <meta name="Name" content="Mashup: Defect Package Report"/>
+    <meta name="Version" content="2.0"/>
+    <meta name="Vendor" content="Rally Software"/>
+
+
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/dojo/1.2.0/dojo/dojo.xd.js"></script>
+    <script src="/slm/mashup/1.11/js/batch-toolkit.js"></script>
+    <script src="/slm/mashup/1.11/js/utilities.js"></script>
+    <script type="text/javascript">
+        google.load("visualization", "1", {packages:["table"]});
+    </script>
+    <script type="text/javascript" charset="utf-8">
+
+        //Setup my Script level variables
+        var batchToolkit = new RALLY.Mashup.BatchToolkit('__WORKSPACE_OID__', '__PROJECT_OID__', '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
+        dojo.addOnLoad(getDefectsPackages);
+        var g_data = {};
+        var g_tables = {};
+        var g_pkgList = [];
+        var g_rallyDEfields = [ "FormattedID", "Name", "Severity", "Priority", "State", "SubmittedBy", "Owner", "ObjectID" ];
+        var g_debug = 0;
+
+        //Get the list of packages to put in the dropdown
+        function getDefectsPackages() {
+            var pkgquery = { key:'dePackage', type:'Defect', attribute:'Package' };
+            batchToolkit.find(pkgquery, buildPackageSections);
+            add2log("Logging Info:");
+        }
+
+        function buildPackageSections(results) {
+            var myresults = "";
+            var count = results.dePackage.length;
+            for (var j = 0; j < count; j++) {
+                var value = results.dePackage[j];
+                if (value == "") {
+                    value = "No Package";
+                }
+                myresults += "<table><tr><td width=200 class='heading'>" + value + "</td>";
+                myresults += "<td><fieldset>Show Defects<input type='radio'";
+                myresults += " name='" + value + "_Group'";
+                myresults += " id='" + value + "_show'";
+                myresults += " onclick='showDEs(\"" + value + "\")'>";
+                myresults += "Hide Defects<input type='radio'";
+                myresults += " name='" + value + "_Group'";
+                myresults += " id='" + value + "_hide'";
+                myresults += " onclick='hideDEs(\"" + value + "\")' checked='checked'>";
+                myresults += "</fieldset></td></tr></table>";
+                var mykey = "defects_" + value;
+                myresults += "<div id='" + mykey + "_div'></div><br/><br/>";
+                g_data[mykey] = 0;
+                g_tables[mykey] = 0;
+                g_pkgList.push(value);
+            }
+            document.getElementById("table_div").innerHTML = myresults;
+            showAllPackages();
+        }
+
+        //Runs when you click the hide defect radio button
+        function hideDEs(thepackage) {
+            document.getElementById("defects_" + thepackage + "_div").innerHTML = "";
+        }
+
+        //Runs when you click the show defect radio button
+        function showDEs(thepackage) {
+            document.getElementById("defects_" + thepackage + "_div").innerHTML = "Getting Defects...";
+            runPackageReport(thepackage);
+        }
+
+        function showAllPackages() {
+            for (var i = 0; i < g_pkgList.length; i++) {
+                var mypkg = g_pkgList[i];
+                if (mypkg == "No Package") {
+                    continue;
+                }
+                var myradio = mypkg + "_hide";
+                document.getElementById(myradio).checked = "";
+                myradio = mypkg + "_show";
+                document.getElementById(myradio).checked = "checked";
+                showDEs(mypkg);
+            }
+        }
+
+        function hideAllPackages() {
+            for (var i = 0; i < g_pkgList.length; i++) {
+                var mypkg = g_pkgList[i];
+                var myradio = mypkg + "_hide";
+                document.getElementById(myradio).checked = "checked";
+                myradio = mypkg + "_show";
+                document.getElementById(myradio).checked = "";
+                hideDEs(mypkg);
+            }
+        }
+
+        //Query to the api to get the defects for a certain package
+        function runPackageReport(thepackage) {
+            var mykey = "defects_" + thepackage;
+            var querystring = '( Package = "' + thepackage + '")';   //default to no package
+            if (thepackage == "No Package") {
+                querystring = '( Package = "")'
+            }
+            var myfields = "";
+            //set defect fields to fetch
+            for (var i = 0; i < g_rallyDEfields.length; i++) {
+                myfields += g_rallyDEfields[i];
+                if (i < (g_rallyDEfields.length - 1)) {
+                    myfields += ",";
+                }
+            }
+            var defectquery = { key:mykey, type:'Defect', query:querystring, fetch:myfields };
+            batchToolkit.find(defectquery, displayResults);
+        }
+
+        //callback for a specific package query - takes query result, finds the package from the query key and populate the table
+        function displayResults(queryResult) {
+            var mykey = "";
+            //Get the key from the query so we know what package was queried
+            for (property in queryResult) {
+                if (property.indexOf("defects_") == 0) {
+                    mykey = property;
+                }
+            }
+            if (queryResult[mykey].length == 0) {
+                g_data[mykey] = 1;
+                document.getElementById(mykey + "_div").innerHTML = "No Defects";
+            }
+            if (g_data[mykey] == 0) {
+                g_data[mykey] = new google.visualization.DataTable();
+                var temp = queryResult[mykey][0];
+                var length = queryResult[mykey].length;
+                addTableColumns(mykey);
+                var count = 0;
+                for (var j = 0; j < length; j++) {
+                    var art = queryResult[mykey][j];
+                    addTableRow(mykey, count++, art);
+                }
+                var mydiv = mykey + "_div";
+                g_tables[mykey] = new google.visualization.Table(document.getElementById(mydiv));
+            }
+            add2log("drawing table");
+            if (g_data[mykey] != 1) {
+                g_tables[mykey].draw(g_data[mykey], {allowHtml: true});
+            }
+        }
+
+        function addTableColumns(mykey) {
+            for (var i = 0; i < g_rallyDEfields.length; i++) {
+                var thefield = g_rallyDEfields[i];
+                if (thefield == "ObjectID") {
+                    continue;
+                }
+                g_data[mykey].addColumn('string', thefield);
+            }
+        }
+
+        function addTableRow(mykey, rownumber, artifactObject) {
+            g_data[mykey].addRows(1);
+            artifactObject["Type"] = "Defect";
+            for (var i = 0; i < g_rallyDEfields.length; i++) {
+                var thefield = g_rallyDEfields[i];
+                if (thefield == "ObjectID") {
+                    continue;
+                }
+                var rallyvalue = artifactObject[thefield];
+                if (i == 0) {
+                    var mylink = buildArtifactLink("__SERVER_URL__", artifactObject);
+                    rallyvalue = mylink + rallyvalue + "</a>";
+                }
+                g_data[mykey].setCell(rownumber, i, rallyvalue);
+            }
+        }
+
+        function buildArtifactLink(serverURL, workProduct) {
+            var link = '';
+            var prefix = '';
+            if (workProduct.Type === 'Defect') {
+                prefix = 'df';
+            }
+            else if (workProduct.Type === "HierarchicalRequirement") {
+                prefix = 'ar';
+            }
+            else if (workProduct.Type === "DefectSuite") {
+                prefix = 'ds';
+            }
+            if (workProduct.ObjectID !== 0) {
+                link = "<a href=\"" + serverURL + "/detail/" + prefix + "/";
+                link += workProduct.ObjectID + "\" target='_blank'>";
+            }
+            return link;
+        }
+
+
+        function add2log(message) {
+            if (g_debug == 1) {
+                document.getElementById("log_div").innerHTML += message + "<br/>";
+            }
+        }
+
+    </script>
+</head>
+
+<body>
+<strong>Defects by Package Report</strong> ---
+<a href="javascript:showAllPackages();">Show All Defects</a> ---
+<a href="javascript:hideAllPackages();">Hide All Defects</a> ---
+<a href="javascript:print();">Print This Page</a>
+
+
+<div id="table_div">Loading Defects</div>
+<br/>
+
+<div id="log_div"></div>
+<br/>
+</body>
+</html>
