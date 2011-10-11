@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!-- Copyright (c) 2002-2010  Rally Software Development Corp. All rights reserved. -->
+<html>
+<head>
+<title>Utilization Chart</title>
+<meta name="Name" content="App: Utilization Chart"/>
+<meta name="Version" content="1.0"/>
+<meta name="Vendor" content="Chris Jensen"/>
+
+<script src="/apps/1.22/sdk.js"></script>
+
+<script type="text/javascript">
+function UtilizationChart() {
+    var MAX_ITERATIONS = 15;
+    var ESTIMATION_UNIT = "Hours";
+    var KEY_PATTERN = /[^a-zA-Z0-9]+/g;
+    var rallyDataSource;
+    var chart;
+    var iterationMap = [];
+    var productivitySeries = [];
+
+    if (!Number.toFixed) {
+        Number.prototype.toFixed = function(x) {
+            var temp = this;
+            temp = Math.round(temp * Math.pow(10, x)) / Math.pow(10, x);
+            return temp;
+        };
+    }
+
+    // converts ISO format date to JS date only (ignores hours, min, seconds)
+    function convertIsoDateOnly(dateStr) {
+        var month = dateStr.slice(5, 7) - 1;
+        return new Date(dateStr.slice(0, 4), month, dateStr.slice(8, 10));
+    }
+
+    function formatDate(date) {
+        var day = date.getDate();
+        if (day < 10) {
+            day = "0" + day;
+        }
+        var month = date.getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var year = date.getFullYear();
+
+        return month + "/" + day + "/" + year;
+    }
+
+    function drawChart(resultsMap) {
+        var i, story, productivity, sum = 0, count = 0;
+
+        if (typeof chart !== "undefined") {
+            chart.remove();
+        }
+
+        for (var key in resultsMap) {
+            if (key != "errors" && key != "warnings") {
+                var stories = resultsMap[key];
+                var estimate = 0;
+                for (i = 0; i < stories.length; i++) {
+                    story = stories[i];
+                    estimate += story.TaskEstimateTotal;
+                }
+                iterationMap[key].estimate = estimate;
+
+                productivity = 100 * (iterationMap[key].estimate / iterationMap[key].capacity);
+                for (i = 0; i < productivitySeries.length; i++) {
+                    if (productivitySeries[i][0] == iterationMap[key].name) {
+                        productivitySeries[i][1] = productivity;
+                        break;
+                    }
+                }
+                sum += productivity;
+                count++;
+            }
+        }
+
+        chart = new EJSC.Chart("chart_div", {
+            show_legend: false,
+            show_titlebar: false,
+            allow_zoom: false,
+            axis_bottom: {
+                caption: "Iterations",
+                stagger_ticks: true,
+                grid: {show: false},
+                size: 40
+            },
+            axis_left: {
+                min_extreme: 0.0,
+                caption: "Utilization"
+            }
+        });
+
+        var average = sum / count;
+        average = average.toFixed(3);
+        document.getElementById("average_div").innerHTML = "<strong>Average Utilization Rate for last " +
+                count + " non-zero iterations:</strong>&nbsp;&nbsp;&nbsp;" + average + "%";
+        document.getElementById("scoping_msg").innerHTML = "<em>Data is shown for the current project " +
+                " only.  Sub-projects are not included.</em>";
+
+        var SERIES_TITLE = "Series";
+        var TREND_LINE_TITLE = "Trend Line";
+
+        var barSeries = new EJSC.BarSeries(
+                new EJSC.ArrayDataHandler(productivitySeries),
+                {
+                    title: SERIES_TITLE,
+                    color: "rgb(7,102,146)",
+                    y_axis_formatter: new EJSC.NumberFormatter({
+                        variable_decimals: 3
+                    })
+                }
+        );
+
+        chart.addSeries(barSeries);
+
+        if (count > 1) {
+            var trendSeries = new EJSC.TrendSeries(
+                    barSeries,
+                    "linear",
+                    {
+                        title: TREND_LINE_TITLE,
+                        lineWidth: 1,
+                        color: "rgb(7,102,146)",
+                        opacity: 100,
+                        y_axis_formatter: new EJSC.NumberFormatter({
+                            variable_decimals: 3
+                        })
+                    }
+            );
+
+            chart.addSeries(trendSeries);
+        }
+
+        chart.onShowHint = function(point, series, chart, hint, hoverOrSelect) {
+            if (series.title == TREND_LINE_TITLE) {
+                return "<strong>Utilization Rate Trend:</strong> " + point.y.toFixed(3) + "%";
+            } else if (series.title == SERIES_TITLE) {
+                var key = point.x.replace(KEY_PATTERN, "_");
+                var startDate = convertIsoDateOnly(iterationMap[key].startDate);
+                var endDate = convertIsoDateOnly(iterationMap[key].endDate);
+                return "<strong>[x]</strong><br/><strong>Dates:</strong> " + formatDate(startDate) + " - " +
+                        formatDate(endDate) + "<br/>" +
+                        "<strong>Tasks:</strong> " + iterationMap[key].estimate + " " + ESTIMATION_UNIT + "<br/>" +
+                        "<strong>Capacity:</strong> " + iterationMap[key].capacity + " Hours<br/>" +
+                        "<strong>Utilization Rate:</strong> " + point.y.toFixed(3) + "%";
+            } else {
+                throw "Unrecognized series: " + series.title;
+            }
+
+        };
+    }
+
+    function loadCapacities(results) {
+        if (results.iterations.length === 0) {
+            document.getElementById("chart_div").innerHTML = "No Iterations for this project.";
+            document.getElementById("scoping_msg").innerHTML = "";
+            return;
+        }
+
+        var queries = [];
+        var count = 0;
+        for (var i = 0; i < results.iterations.length && count < MAX_ITERATIONS; i++) {
+            var iteration = results.iterations[i];
+            var userCapacities = iteration.UserIterationCapacities;
+            var capacity = 0;
+            var users = 0;
+            for (j = 0; j < userCapacities.length; j++) {
+                capacity += userCapacities[j].Capacity;
+                if (userCapacities[j].Capacity > 0) {
+                    users++;
+                }
+            }
+            if (capacity > 0) {
+                var key = iteration.Name.replace(KEY_PATTERN, "_");
+
+                iterationMap[key] = {
+                    name: iteration.Name,
+                    startDate: iteration.StartDate,
+                    endDate: iteration.EndDate,
+                    estimate: 0,
+                    users: users,
+                    capacity: capacity
+                };
+
+                var queryObject = {
+                    key: key,
+                    type: "HierarchicalRequirement",
+                    fetch: "TaskEstimateTotal",
+                    query: "(Iteration.ObjectID = \"" + iteration.ObjectID + "\")"
+                };
+
+                queries.unshift(queryObject);
+                productivitySeries.unshift([iteration.Name, 0]);
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            rallyDataSource.findAll(queries, drawChart);
+        } else {
+            document.getElementById("chart_div").innerHTML = "User Iteration Capacities have " +
+                    "not been defined (set these values on the Team Status page).";
+            document.getElementById("scoping_msg").innerHTML = "";
+        }
+    }
+
+    function runMainQuery() {
+        var today = dojo.date.stamp.toISOString(new Date(), {milliseconds: true, zulu: true});
+
+        var queryObject = {
+            key: "iterations",
+            type: "Iteration",
+            fetch: "Name,ObjectID,StartDate,EndDate,UserIterationCapacities,Capacity",
+            order: "EndDate desc",
+            query: "((Project.ObjectID = \"__PROJECT_OID__\") AND (StartDate <= " + today + "))"
+        };
+
+        rallyDataSource.findAll(queryObject, loadCapacities);
+    }
+
+    function initPage() {
+        rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Utilization+Chart+App");
+        rally.sdk.ui.AppHeader.showPageTools(true);
+        rallyDataSource = new rally.sdk.data.RallyDataSource("__WORKSPACE_OID__", "__PROJECT_OID__",
+                "__PROJECT_SCOPING_UP__", "__PROJECT_SCOPING_DOWN__");
+        runMainQuery();
+    }
+
+    this.display = function() {
+        initPage();
+    };
+}
+
+
+</script>
+<script type="text/javascript">
+    rally.addOnLoad(function() {
+        var utilizationChart = new UtilizationChart();
+        utilizationChart.display();
+    });
+</script>
+</head>
+<body>
+<div style="clear: both;"></div>
+<div style="padding: 5px; margin: 0px auto; background-color: #fff; width: 95%;">
+    <div id="average_div" style="margin-bottom: 20px;"></div>
+    <div id="chart_div" style="width:100%; height: 300px;">
+        <div>
+            <img alt="Progress" src="/slm/images/icon_spinner.gif"/>
+            <em>loading chart...</em>
+        </div>
+    </div>
+    <div id="scoping_msg" style="margin-top: 10px; margin-bottom: 10px;"></div>
+</div>
+</body>
+</html>

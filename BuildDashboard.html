@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Build Dashboard</title>
+
+</head>
+
+<link type="text/css" rel="stylesheet"
+      href="http://yui.yahooapis.com/2.5.2/build/reset-fonts-grids/reset-fonts-grids.css"/>
+<script type="text/javascript" charset="utf-8" src="/slm/js/xmlhttp.js"></script>
+<script type="text/javascript" charset="utf-8" src="/slm/js-lib/json.js"></script>
+<script type="text/javascript" charset="utf-8" src="/slm/js/jsonapi/jsonapi.js"></script>
+<script type="text/javascript" charset="utf-8">
+
+var api = new RALLY.JsonApi("__SERVER_URL__", '1.07', __WORKSPACE_OID__, __PROJECT_OID__, "__PROJECT_SCOPING_UP__", "__PROJECT_SCOPING_DOWN__", new RALLY.IntegrationInfo("Mashup: Build Dashboard", "1.1", "Rally Software"));
+var project = api.read("Project", __PROJECT_OID__);
+
+var releases = api.query(new RALLY.Query('Release', "((Project = " + project.getRef() + ") and (State != \"Planning\"))", "ReleaseStartDate desc", true));
+var defaultBuildDef = getDefaultBuild();
+var x = 0;
+var pass_percent = new Array();
+
+function initPage() {
+    getReleases();
+}
+
+function getReleases() {
+
+    if (releases.length() != 0) {
+        for (i = 0; i < releases.length(); i++) {
+            var release = releases.get(i);
+            addOption(release.getName(), i + 1);
+        }
+        allReleases();
+    }
+    else {
+        document.getElementById("buildDiv-add").innerHTML = "<h3>No releases found in an Active or Accepted state.</h3>";
+    }
+
+}
+
+function addOption(release, count) {
+
+    document.forms['testform'].testselect.options[count] = new Option(release, release);
+
+}
+
+function onChange() {
+    document.getElementById("buildDiv-add").innerHTML = "";
+    document.getElementById("buildDiv-daily").innerHTML = "";
+    document.getElementById("buildAllDiv-add").innerHTML = "";
+
+    x = 0;
+
+    user_input = document.forms['testform'].testselect.value;
+    index = document.forms['testform'].testselect.selectedIndex;
+
+    if (index == 0) {
+        allReleases();
+    }
+    else {
+        readRelease(index);
+    }
+
+}
+
+function allReleases() {
+
+    for (d = 0; d < releases.length(); d++) {
+        var activeRelease = releases.get(d);
+        getBuilds(activeRelease);
+        x = x + 1;
+    }
+    drawBarChart();
+}
+
+function readRelease(index) {
+
+    activeRelease = releases.get(index - 1);
+    getBuilds(activeRelease);
+
+}
+
+function getBuilds(activeRelease) {
+    total_passes = new Array();
+    total_fails = new Array();
+    passes = 0;
+    fails = 0;
+    startDate = activeRelease.getReleaseStartDate();
+    endDate = activeRelease.getReleaseDate();
+    cnt = 0;
+
+    buildResults = api.query(new RALLY.Query('Build', "(((BuildDefinition = " + defaultBuildDef + ") and (CreationDate >= " + trimDate(startDate) + ")) and (CreationDate <= " + trimDate(endDate) + "))", "CreationDate", true));
+
+
+    if (buildResults.length() != 0) {
+        tmpdate = new Date();
+        dates = [displayDate(buildResults.get(0).getCreationDate())];
+
+        for (i = 0; i < buildResults.length(); i++) {
+            status = buildResults.get(i).getStatus().toString();
+            date = buildResults.get(i).getCreationDate();
+
+            if (trimDate(date) != trimDate(tmpdate)) {
+                cnt = cnt + 1;
+                passes = 0;
+                fails = 0;
+                dates[cnt] = displayDate(date);
+                tmpdate = date;
+                total_passes[cnt] = 0;
+                total_fails[cnt] = 0;
+                if (status === "true" || status === true) {
+                    total_passes[cnt] = passes + 1;
+                }
+                else {
+                    total_fails[cnt] = fails + 1;
+                }
+            }
+            else {
+
+
+                if (status === "true" || status === true) {
+                    passes = passes + 1;
+                    total_passes[cnt] = passes;
+                }
+                else {
+                    fails = fails + 1;
+                    total_fails[cnt] = fails;
+                }
+            }
+        }
+
+        createGoogleChart(activeRelease, dates, total_passes, total_fails);
+
+    }
+    else {
+        output = "<tr><td><div class=\"d-build\" id=\"" + x + "\">";
+        output2 = "<div class=\"d-build\" id=\"" + x + "\">";
+        document.getElementById("buildDiv-add").innerHTML += output + "" + activeRelease.getName() + ":<br>No build results found.</td>";
+        document.getElementById("buildDiv-daily").innerHTML += output2 + "</td>";
+        pass_percent[x] = 0;
+
+    }
+
+}
+
+function createGoogleChart(release, dates, total_passes, total_fails) {
+    all_passes = 0;
+    all_fails = 0;
+
+    output = "<tr><td><div class=\"d-build\" id=\"" + x + "\">";
+    gChartUrl = "<img src='http://chart.apis.google.com/chart?cht=p3&chtt=" + release.getName() + "&chd=t:";
+
+    output2 = "<div class=\"d-build\" id=\"" + x + "\">";
+    gChartUrl2 = "<img src='http://chart.apis.google.com/chart?cht=bvs&chd=t:";
+
+    for (p in total_passes) {
+        all_passes = all_passes + total_passes[p];
+
+        gChartUrl2 += total_passes[p];
+        if (p != total_passes.length - 1) {
+            gChartUrl2 += ',';
+        }
+    }
+
+    gChartUrl2 += '|';
+
+    for (f in total_fails) {
+        all_fails = all_fails + total_fails[f];
+
+        gChartUrl2 += total_fails[f];
+        if (f != total_fails.length - 1) {
+            gChartUrl2 += ',';
+        }
+    }
+
+    sum = all_passes + all_fails;
+    pass_percent[x] = Math.round((all_passes / sum) * 100);
+
+    gChartUrl += all_passes + "," + all_fails + ""
+    gChartUrl += "&chco=00ff00,ff0000&chs=440x150&chl=Pass " + Math.round((all_passes / sum) * 100) + "% | Fail " + Math.round((all_fails / sum) * 100) + "%";
+    gChartUrl += "'>";
+
+    gChartUrl2 += "&chds=0,50&chtt=" + release.getName() + " Daily Build &chxt=y&chco=00ff00,ff0000&chs=280x150&chl=";
+
+    for (v in total_passes) {
+        gChartUrl2 += (dates[v] + "");
+        if (v != total_passes.length - 1) {
+            gChartUrl2 += '|';
+        }
+    }
+
+    gChartUrl2 += "'>";
+
+    document.getElementById("buildDiv-add").innerHTML += output + gChartUrl + "</td>";
+    document.getElementById("buildDiv-daily").innerHTML += output2 + gChartUrl2 + "</td></tr>";
+    return;
+
+}
+
+function drawBarChart() {
+    var total_pass_percent = 0;
+    var chl = "";
+
+    var gChartUrl = "<img src='http://chart.apis.google.com/chart?cht=lc&chd=t:";
+    for (n in pass_percent) {
+        total_pass_percent = total_pass_percent + "," + pass_percent[n] + "";
+        chl = chl + "|" + releases.get(n).getName();
+    }
+
+
+    gChartUrl += total_pass_percent + "&chl=" + chl + "&chtt=Build Success (%)&chxt=y&chm=s,000000,0,-1,5,1&chs=400x150";
+    gChartUrl += "'>";
+
+
+    document.getElementById("buildAllDiv-add").innerHTML += gChartUrl;
+    return;
+}
+
+function getDefaultBuild() {
+
+    buildQueryResult = api.query(new RALLY.Query('BuildDefinition', "(Project = " + project.getRef() + ")", null, false));
+
+    for (j = 0; j < buildQueryResult.length(); j++) {
+        var defaultBuildDef = buildQueryResult.get(j).getRef();
+    }
+
+    return defaultBuildDef.replace(/.js/, "");
+}
+
+function trimDate(rawDate) {
+    rawDate = rawDate.getFullYear() + "-" + (rawDate.getMonth() + 1) + "-" + rawDate.getDate();
+    return rawDate;
+}
+
+function displayDate(rawDate) {
+    rawDate = (rawDate.getMonth() + 1) + "/" + rawDate.getDate();
+    return rawDate;
+}
+
+
+</script>
+
+<body onLoad="initPage(); return false;">
+
+<div id="wrapper">
+    <div id="header">
+        <div id="title"><h3>Build Dashboard</h3></div>
+        <div id="info"></div>
+        <div class="clear"></div>
+    </div>
+    <div id="filter">
+            <span id="testselect">   
+            <form name="testform">
+                <select name="testselect" size="1" onChange="onChange()">
+                    <option>All Releases</option>
+                </select>
+            </form>
+            </span>
+    </div>
+    <table border=1>
+        <tr>
+            <td valign="top">
+                <div class="d-build" id="buildAllDiv-add"></div>
+            </td>
+            <td>
+                <div class="d-build" id="buildDiv-add"></div>
+            </td>
+            <td>
+                <div id="buildDiv-daily"></div>
+        </tr>
+    </table>
+</body>
+</html>

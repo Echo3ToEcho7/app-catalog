@@ -1,0 +1,267 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!-- Copyright (c) 2002-2009  Rally Software Development Corp. All rights reserved. -->
+<html>
+<head>
+<meta name="Name" content="Mashup: Cross Workspace Release Status"/>
+<meta name="Version" content="2009.4"/>
+<meta name="Vendor" content="Rally Software"/>
+
+<link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
+<script type="text/javascript" src="/slm/js/help.js"></script>
+<script type="text/javascript" src="/slm/js/slm.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.13/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.13/js/utilities.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.13/js/dropdown.js"></script>
+<script type="text/javascript" description="CrossWsReleaseStatus.js">
+/*
+ Copyright (c) 2002-2008  Rally Software Development Corp. All rights reserved.
+ */
+
+dojo.require("dojo.io.script");
+dojo.addOnLoad(initPage);
+google.load("visualization", "1", {
+    packages: ["table"]
+});
+
+var workspaceQueryResults = {};
+var queryResults = [];
+var workspaceIndex = 0;
+var artifacts = ['hierarchicalrequirement', 'defect', 'defectsuite'];
+var wsTitle;
+var releaseDropdown;
+var batchToolkit;
+
+function formatCenter(str) {
+    var num = parseFloat(str);
+    if (isNaN(num)) {
+        return "<center>" + str + "</center>";
+    } else {
+        var num2 = num.toFixed(1);
+        return "<center>" + num2 + "</center>";
+    }
+}
+
+function formatState(str, blocked) {
+    //For blocked, could return "<img src='icon_blocked.gif'>"
+    var bgcolor = blocked ? '#FF0000' : '#006600';
+    if (str.indexOf('Progress') > 0) {
+        return '<center><span style="background-color: ' + bgcolor +
+                '; color: #FFFFFF;">' + 'P' + '</span></center>';
+    } else {
+        return '<center><span style="background-color: ' + bgcolor +
+                '; color: #FFFFFF;">' + str.charAt(0) + '</span></center>';
+    }
+}
+
+function buildRollupHeaders(workProducts) {
+    var totalPlanEst = 0;
+    var totalTaskEst = 0;
+    var totalToDo = 0;
+    var totalAccepted = 0;
+    for (var i = 0; i < workProducts.length; i++) {
+        totalPlanEst += workProducts[i].PlanEstimate;
+        totalTaskEst += workProducts[i].TaskEstimateTotal;
+        totalToDo += workProducts[i].TaskRemainingTotal;
+        if (workProducts[i].ScheduleState.indexOf('Accepted') >= 0) {
+            totalAccepted += 1;
+        }
+    }
+    return ['State<br/>(' + totalAccepted + ' of ' + workProducts.length + ') ' +
+            (totalAccepted * 100 / workProducts.length).toFixed(0) + '%',
+        'Plan Est<br/>(' + totalPlanEst.toFixed(1) + ')',
+        'Task Est<br/>(' + totalTaskEst.toFixed(1) + ')',
+        'To Do<br/>(' + totalToDo.toFixed(1) + ')'];
+}
+
+function drawTable(workProducts) {
+    var data = new google.visualization.DataTable();
+    var headers = buildRollupHeaders(workProducts);
+
+    if (workProducts.length === 0) {
+        document.getElementById('table_div').innerHTML =
+                'No results found';
+        return;
+    }
+
+    data.addColumn('number', 'Rank');
+    data.addColumn('string', 'ID');
+    data.addColumn('string', 'Workspace');
+    data.addColumn('string', 'Project');
+    data.addColumn('string', 'Name');
+    data.addColumn('string', headers[0]);
+    data.addColumn('number', headers[1]);
+    data.addColumn('number', headers[2]);
+    data.addColumn('number', headers[3]);
+    data.addRows(workProducts.length);
+
+    for (var i = 0; i < workProducts.length; i++) {
+        data.setCell(i, 0, workProducts[i].Rank);
+        data.setCell(i, 1, workProducts[i].FormattedID);
+        data.setCell(i, 2, workProducts[i].Workspace._refObjectName);
+        data.setCell(i, 3, workProducts[i].Project._refObjectName);
+        data.setCell(i, 4, workProducts[i].Name);
+        data.setCell(i, 5, formatState(workProducts[i].ScheduleState, workProducts[i].Blocked));
+        if (workProducts[i].PlanEstimate !== null) {
+            data.setCell(i, 6, workProducts[i].PlanEstimate);
+        }
+        data.setCell(i, 7, workProducts[i].TaskEstimateTotal);
+        data.setCell(i, 8, workProducts[i].TaskRemainingTotal);
+    }
+
+    data.sort([
+        {column: 0}
+    ]);
+
+    for (i = 0; i < workProducts.length; i++) {
+        data.setCell(i, 0, i);
+    }
+
+    var table = new google.visualization.Table(document.getElementById('table_div'));
+    table.draw(data, {
+        allowHtml: true,
+        showRowNumber: false,
+        sortColumn: 0
+    });
+}
+
+function buildArtifactQuery(workspaceOID, releaseName, releaseStart, releaseEnd) {
+    var queryArray = [];
+    for (var i = 0; i < artifacts.length; i++) {
+        queryArray[i] = {
+            key: artifacts[i],
+            type: artifacts[i],
+            workspace: '/workspace/' + workspaceOID,
+            fetch: 'true',
+            query: '( ((Release.Name = "' +
+                    releaseName + '") AND (Release.ReleaseStartDate = ' +
+                    releaseStart + ')) AND (Release.ReleaseDate = ' +
+                    releaseEnd + '))',
+            order: 'Rank',
+            pagesize: 99,
+            project: null
+        };
+    }
+    return queryArray;
+}
+
+function processArtifactQuery(query_result) {
+    if (query_result !== null) {
+        for (var i = 0; i < artifacts.length; i++) {
+            if (typeof query_result[artifacts[i]] !== 'undefined' &&
+                    query_result[artifacts[i]].length > 0) {
+                queryResults = queryResults.concat(query_result[artifacts[i]]);
+            }
+        }
+    }
+
+    workspaceIndex = workspaceIndex + 1;
+    if (workspaceIndex < workspaceQueryResults.length) {
+        runArtifactQuery();
+    } else {
+        drawTable(queryResults);
+    }
+}
+
+function runArtifactQuery() {
+    var workspaceOID, state, style, query;
+
+    workspaceOID = workspaceQueryResults[workspaceIndex].ObjectID;
+    state = workspaceQueryResults[workspaceIndex].State;
+    style = workspaceQueryResults[workspaceIndex].Style;
+
+    if (state !== 'Open' || style !== 'UserStory') {
+        processArtifactQuery(null);
+    } else {
+        query = buildArtifactQuery(workspaceOID,
+                releaseDropdown.getSelectedName(), releaseDropdown.getSelectedStart(),
+                releaseDropdown.getSelectedEnd());
+        try {
+            batchToolkit.findAll(query, processArtifactQuery);
+        } catch(ex) {
+            alert('Query Exception: ' + ex.message);
+        }
+    }
+}
+
+function buildChart() {
+    var optList = document.getElementById('releaseList');
+    var selectedIndex = optList.selectedIndex;
+    queryResults.length = 0;
+    RALLY.Mashup.Utilities.showWait('table_div');
+    workspaceIndex = 0;
+    runArtifactQuery();
+}
+
+function processWorkspaceQuery(query_result) {
+    workspaceQueryResults = query_result.workspaceStuff;
+    wsTitle = "Cross-Workspace Release Status";
+    document.getElementById('pagetitle').innerHTML = wsTitle;
+    document.getElementById('pagetitle').style.font = "bold 11pt tahoma,sans-serif";
+    buildChart();
+}
+
+function runWorkspaceQuery() {
+    queryArray = [];
+    queryArray[0] = {key:'user', type:'user', fetch:'loginname'};
+    queryArray[1] = {key:'workspaceStuff', placeholder:'${user.subscription.workspaces?fetch=ObjectID,Name,State,Style}'};
+    batchToolkit.findAll(queryArray, processWorkspaceQuery);
+}
+
+function gotReleases() {
+    if (document.getElementById('releaseList').length > 0) {
+        runWorkspaceQuery();
+    }
+}
+
+function initPage() {
+    RALLY.Mashup.Utilities.showHelpIcon(162);
+    RALLY.Mashup.Utilities.showPrintButton();
+
+    batchToolkit = new RALLY.Mashup.BatchToolkit('__WORKSPACE_OID__', '__PROJECT_OID__',
+            '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
+
+    releaseDropdown = new RALLY.Mashup.Dropdown(batchToolkit,
+            RALLY.Mashup.RELEASE, 'releaseList', 'releaseLabel', 'mu_cross_workspace');
+    releaseDropdown.invoke(gotReleases);
+}
+</script>
+
+
+<title>Cross Workspace Release Status</title>
+</head>
+<body>
+<div style="float:right" id="help"></div>
+<div class="titlebar" style="float:left" id="pagetitle"></div>
+<table>
+    <tr>
+        <td style="text-align: left; width: 99%;">
+        <td style="text-align: right; width: 1%;">
+            <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();" onmouseout="hidecbMenu('buttons',event);"
+                 style="vertical-align: middle;" src="/slm/images/menu_actions.gif"/>
+
+            <div style="position:relative;top:5px" align="left">
+                <div id="buttons" class="do-menu" style="left:0px;"
+                     onmouseover="document.body.style.cursor='pointer';"
+                     onmouseout="document.body.style.cursor='default';hidecbMenu('buttons',event);">
+                    <a id="print" onclick="RALLY.Mashup.Utilities.printPage()">Print...</a>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div style="clear:both"></div>
+<br>
+<table>
+    <tr>
+        <td id="releaseLabel" class="lbl">Release Name</td>
+        <td><select id="releaseList"></select></td>
+    </tr>
+</table>
+<br/>
+
+<div id="table_div"></div>
+</body>
+</html>

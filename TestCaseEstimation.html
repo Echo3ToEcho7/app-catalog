@@ -1,0 +1,318 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<!-- Copyright (c) 2002-2010 Rally Software Development Corp.  All rights reserved. -->
+<html>
+<head>
+<title>Test Case Estimation</title>
+<meta name="Name" content="Mashup: Test Case Estimation"/>
+<meta name="Version" content="2.0"/>
+<meta name="Vendor" content="Rally Software"/>
+
+<link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
+
+
+<script src="/slm/js-lib/dojo/rally-1.3.1/dojo/dojo.js"></script>
+<script src="/slm/js/slm.js"></script>
+<script src="/slm/mashup/1.18/js/batch-toolkit.js"></script>
+<script src="/slm/mashup/1.18/js/utilities.js"></script>
+<script src="/slm/js-lib/ejsc/2.0.1/EJSChart.js"></script>
+
+
+<script type="text/javascript">
+function dontProceedNotification(targetDiv) {
+    var noJoy = "<strong>You do not have the necessary custom fields defined for this mashup.<br>" +
+            "<p>TestCaseEstimate, TestCaseToDo and TestCaseActual must be defined " +
+            "as custom fields for the 'Test Case' artifact</strong></p>";
+    targetDiv.innerHTML = noJoy;
+}
+
+function hasNecessaryCustomFields(attributes, requiredCustomFields) {
+    var status = false;
+    var customFieldsDetected = 0;
+
+    customFields = [];
+    for (var ix = 0; ix < attributes.length; ix++) {
+        attribute = attributes[ix];
+        if (attribute.Custom === true) {
+            customFields.push(attribute);
+        }
+    }
+    //console.log("Your custom fields:");
+    //console.log(customFields);
+    var attr = null;
+    for (var j = 0; j < requiredCustomFields.length; j++) {
+        ncfName = requiredCustomFields[j];
+        //console.log("Looking to see if _" + ncfName + "_ exists as a custom field ...");
+        for (var k = 0; k < customFields.length; k++) {
+            attr = customFields[k];
+            //console.log("_____ " + attr.ElementName + " " + attr.AttributeType);
+            if (attr.ElementName === ncfName && attr.AttributeType === 'DECIMAL') {
+                //console.log("  bingo!!");
+                customFieldsDetected++;
+            }
+        }
+    }
+
+    //console.log("found " + customFieldsDetected + " of the " + requiredCustomFields.length + " required custom fields");
+    if (customFieldsDetected === requiredCustomFields.length) {
+        status = true;
+    }
+    return status;
+}
+
+
+function shortUrl(type) {
+    if (type == "User Story") {
+        return "ar";
+    }
+    else if (type == "Defect") {
+        return "df";
+    }
+    else if (type == "Task") {
+        return "tk";
+    }
+    else if (type == "Test Case") {
+        return "tc";
+    }
+    else if (type == "Test Case Result") {
+        return "tcr";
+    }
+
+    return "error";
+}
+
+
+function createUrl(type, ident) {
+    var url = "__SERVER_URL__" + "/detail/" + shortUrl(type) + "/" + ident;
+    return url;
+}
+
+
+function drawBox(verdict) {
+    if (verdict === 'Pass') {
+        verdict_class = 'pass-legend';
+    }
+    else if (verdict === 'Fail') {
+        verdict_class = 'pass-legend-fail';
+    }
+    else {
+        verdict_class = 'none-legend';
+    }
+    return '<div class="' + verdict_class + '">' + verdict + '</div>';
+}
+
+
+function makeChart(est, todo, act) {
+    var chart_options = { show_legend: false,
+        axis_left  : {caption: "", size: 15},
+        axis_bottom: {caption: "", size: 10},
+        axis_right : {size: 20}
+    };
+    var chart = new EJSC.Chart("TCE_Chart", chart_options);
+    chart.setTitle("");
+    var dataSeries = [
+        ["Est", est],
+        ["ToDo", todo],
+        ["Actual", act]
+    ];
+    var adh = new EJSC.ArrayDataHandler(dataSeries);
+    chart.addSeries(new EJSC.BarSeries(adh, {intervalOffset: 0.5}));
+}
+
+
+var TABLE_START = '<table width="60%" style="margin-top: 15px; margin-left: 5px;">';
+var TABLE_END = "</table>";
+
+var HEADER_ROW = '<tr><th class="tchl">Test Case</th> <th>&nbsp;</th> <th class="tchr">Estimate</th> <th>&nbsp;</th> ' +
+        '<th class="tchr">To Do</th> <th>&nbsp;</th> <th class="tchr">Actual</th> ' +
+        '<th>&nbsp;</th> <th class="tchc">Verdict</th></tr>';
+
+var TC_ROW = '<tr><td class="tccl">_TC_INFO_</td><td>&nbsp;</td> <td class="tccr">_TC_ESTIMATE_</td> <td>&nbsp;</td> ' +
+        '<td class="tccr">_TC_TODO_</td> <td>&nbsp;</td> <td class="tccr">_TC_ACTUAL_</td> ' +
+        '<td>&nbsp;</td> <td class="tccc">_VERDICT_</td> </tr>';
+
+var TC_LINK = "<div class=\"heading\"><a href=\"_TARGET_URL_\" target=\"_top\">_ID_ _NAME_</a></div>";
+
+var TOTALS_TABLE = '<table>' +
+        '  <tr>' +
+        '     <th>Test Case <br>Estimate Total</th> ' +
+        '     <th>&nbsp;</th> ' +
+        '     <th>Test Case <br>Estimate To Do</th> ' +
+        '     <th>&nbsp;</th> ' +
+        '     <th>Test Case <br>Actual</th>' +
+        '  </tr>\n' +
+        '  <tr>' +
+        '     <td align="center">_TOT_EST_</td> ' +
+        '     <td>&nbsp;</td> ' +
+        '     <td align="center">_TOT_TODO_</td> ' +
+        '     <td>&nbsp;</td> ' +
+        '     <td align="center">_TOT_ACT_</td>' +
+        '  </tr>' +
+        '</table>';
+
+
+function showTestCaseEstimateInfo(testcaseResults) {
+    //console.log(" ... in showTestCaseEstimateInfo ...");
+    var totalTestCaseEstimates = 0;
+    var totalTestCaseToDo = 0;
+    var totalTestCaseActual = 0;
+    var blurb = "";
+    var tableRows = [];
+    var row = "";
+    var testCase = "";
+    var verdictBox = "";
+
+    for (var ix = 0; ix < testcaseResults.length; ix++) {
+        testCase = testcaseResults[ix];
+        targetUrl = createUrl('Test Case', testCase.ObjectID);
+        tcLink = TC_LINK.replace('_ID_', testCase.FormattedID).replace('_NAME_', testCase.Name);
+        tcInfo = tcLink.replace('_TARGET_URL_', targetUrl);
+        row = TC_ROW.replace('_TC_INFO_', tcInfo);
+        //
+        //blurb += "_IDENT_&nbsp;&nbsp;_NAME_<br>\n".replace('_IDENT_', testCase.FormattedID).replace('_NAME_', testCase.Name);
+        //console.log(testCase.FormattedID + " " + testCase.Name + " Estimate: " + testCase.TestCaseEstimate);
+        //
+        est = testCase.TestCaseEstimate !== 'undefined' && testCase.TestCaseEstimate !== null ? testCase.TestCaseEstimate : "";
+        todo = testCase.TestCaseToDo !== 'undefined' && testCase.TestCaseToDo !== null ? testCase.TestCaseToDo : "";
+        act = testCase.TestCaseActual !== 'undefined' && testCase.TestCaseActual !== null ? testCase.TestCaseActual : "";
+        row = row.replace('_TC_ESTIMATE_', est).replace('_TC_TODO_', todo).replace('_TC_ACTUAL_', act);
+        // get the verdict of the last run test result for this testCase
+        // (which will be the first one since we ordered our query results in Date descending order)
+        if (testCase.Results === 'undefined' || testCase.Results === null || testCase.Results.length < 1) {
+            tcr = {Verdict: 'None'};
+        }
+        else {
+            tcr = testCase.Results[0];
+        }
+        verdictBox = drawBox(tcr.Verdict);
+        row = row.replace('_VERDICT_', verdictBox);
+        tableRows.push(row);
+
+        estNum = est !== "" ? est : 0;
+        todoNum = todo !== "" ? todo : 0;
+        actNum = act !== "" ? act : 0;
+        totalTestCaseEstimates += estNum;
+        totalTestCaseToDo += todoNum;
+        totalTestCaseActual += actNum;
+
+    }
+    //console.log("There are " + tableRows.length + " rows in tableRows");
+    tcTable = TABLE_START + HEADER_ROW + tableRows.join("\n") + TABLE_END;
+    totalsTable = TOTALS_TABLE.replace('_TOT_EST_', parseInt(totalTestCaseEstimates, 10));
+    totalsTable = totalsTable.replace('_TOT_TODO_', parseInt(totalTestCaseToDo, 10));
+    totalsTable = totalsTable.replace('_TOT_ACT_', parseInt(totalTestCaseActual, 10));
+
+    makeChart(totalTestCaseEstimates, totalTestCaseToDo, totalTestCaseActual);
+    tce_table_div.innerHTML = "<br>" + tcTable;
+    tce_totals_div.innerHTML = totalsTable;
+}
+
+
+function showResults(queryResults) {
+    RALLY.Mashup.Utilities.hideWait("spinner", "TCE_Totals");
+
+    if (queryResults.errors.length > 0) {
+        console.log("Errors detected for queries...");
+        console.log(queryResults.errors);
+        return;
+    }
+
+    attributes = queryResults.tca[0].Attributes;
+    //console.log("attribute results: ");
+    //for (var ix=0; ix < attributes.length; ix++)
+    //{
+    //    attribute = attributes[ix];
+    //    console.log("----> " + attribute.Name + " ElementName: " + attribute.ElementName +
+    //                       " Type: " + attribute.AttributeType + " Custom: " + attribute.Custom);
+    //}
+    if (!hasNecessaryCustomFields(attributes, requiredCustomFields)) {
+        dontProceedNotification(tce_totals_div);
+        return;
+    }
+
+    testcaseResults = queryResults.testcase;
+    showTestCaseEstimateInfo(testcaseResults);
+    return;
+}
+
+
+function runMashupQueries() {
+    RALLY.Mashup.Utilities.showWait("spinner", "TCE_Totals");
+
+    querySpec = [];
+    querySpec[0] = {
+        key  : 'tca',
+        type : 'TypeDefinition',
+        fetch: 'Attributes,AttributeDefinition,Name,Custom,AttributeType',
+        query: '(Name = "Test Case")'
+    };
+    querySpec[1] = {
+        key   : "testcase",
+        type  : "testcase",
+        fetch : 'FormattedID,Name,TestCaseEstimate,TestCaseToDo,TestCaseActual,Results,ObjectID,Date,Verdict',
+        order : 'FormattedID,Date desc'
+    };
+
+    batchToolkit.findAll(querySpec, showResults);
+}
+
+
+</script>
+<script type="text/javascript" charset="utf-8">
+    function testCaseEstimationMashup() {
+        batchToolkit = new RALLY.Mashup.BatchToolkit('__WORKSPACE_OID__',
+                '__PROJECT_OID__',
+                '__PROJECT_SCOPING_UP__',
+                '__PROJECT_SCOPING_DOWN__');
+        targetArtifact = "TestCase";
+        requiredCustomFields = ['TestCaseEstimate', 'TestCaseToDo', 'TestCaseActual'];
+        tce_chart_div = document.getElementById("TCE_Chart");
+        tce_table_div = document.getElementById("TCE_Table");
+        tce_totals_div = document.getElementById("TCE_Totals");
+        runMashupQueries();
+    }
+    dojo.addOnLoad(testCaseEstimationMashup);
+</script>
+</head>
+
+<body>
+<div>
+    <table width="80%" style="padding-right:10px;">
+        <tr>
+            <td align="left" style="padding-bottom: 5px;">
+                <H2>Test Case Estimation</H2>
+            </td>
+            <!-- float the Activity->Print Page button set on the right side of the page-->
+            <td align="left" style="margin-top: 5px;">
+                <div style="width: 80px;">
+                    <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();"
+                         onmouseout="hidecbMenu('buttons',event);"
+                         style="vertical-align: middle;"
+                         src="https://preview.rallydev.com/slm/images/menu_actions.gif"/>
+
+                    <div style="position:relative; top:5px" align="left">
+                        <div id="buttons" class="do-menu" style="left: 0px;"
+                             onmouseover="document.body.style.cursor='pointer';"
+                             onmouseout="document.body.style.cursor='default';hidecbMenu('buttons',event);">
+                            <a id="print" onclick="RALLY.Mashup.Utilities.printPage();">Print...</a>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<!-- The spinner shows while the query is being executed, it is hidden after the query completes -->
+<div id="spinner"></div>
+<!-- The bar chart with Estimate, ToDo, Actual counts gets placed in here ... -->
+<div id="TCE_Chart" style="margin-left: 30px; width: 200px; height: 220px;
+                                  border: 1px solid #B5D8EB; background-color: white;"></div>
+<!-- The generated table with TC ident,name, counts and verdict rows -->
+<div id="TCE_Table"></div>
+<p>
+<hr align="left" width="60%">
+</p>
+<div id="TCE_Totals" style="margin-left: 80px;"></div>
+</body>
+</html>
