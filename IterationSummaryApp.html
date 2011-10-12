@@ -69,7 +69,7 @@
                     '__PROJECT_SCOPING_DOWN__');
 
             var panelContext = rally.sdk.util.Context.getPanelContext();
-            if (panelContext.followGlobalProject === true && panelContext.timeboxFilter && panelContext.timeboxFilter.iteration !== undefined) {
+            if (panelContext.timeboxFilter && panelContext.timeboxFilter.iteration !== undefined) {
                 displayTimeboxOverviewFromIteration(panelContext.timeboxFilter.iteration);
             } else {
                 iterationDropdown = new rally.sdk.ui.IterationDropdown({label: "Iteration: ", fetch: "State"}, rallyDataSource);
