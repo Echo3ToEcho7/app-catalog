@@ -164,7 +164,9 @@
             cardMarkup = dojo.byId("printSection").innerHTML;
 
             doc.write('<html><head><title>' + iterationDropdown.getSelectedName() + ' ' + title + '</title>');
-            doc.write('');
+            doc.write('<style>');
+            doc.write(getStyleSheet());
+            doc.write('</style>');
             doc.write('</head><body class="landscape">');
             doc.write(cardMarkup);
             doc.write('</body></html>');
@@ -188,7 +190,114 @@
     }
 
 </script>
+<style type="text/css" title="printCards">
+        /* PLEASE LEAVE THIS STYLESHEET INLINE SINCE TITLE IS NECESSARY */
+    @media print {
+        #interface {
+            display: none;
+        }
 
+        .pb {
+            page-break-before: always;
+            clear: both;
+        }
+    }
+
+    #buttonDiv,
+    #iterationDropdown {
+        display: inline;
+    }
+
+    #interface, #printSection {
+        margin: 20px;
+    }
+
+    html {
+        background-color: #fff;
+        color: #000;
+        font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background-color: #fff;
+        margin: 0;
+        padding: 0;
+    }
+
+    .cb {
+        clear: both;
+    }
+
+    .artifact {
+        background-color: #fff;
+        border: 2px solid #000;
+        float: left;
+        height: 3.2in;
+        margin: 0.1in 0.1in 0.1in 0.1in;
+        position: relative;
+        overflow: hidden;
+        width: 4.3in;
+    }
+
+    .header {
+        border: 1px;
+        border-bottom-style: solid;
+        display: table-cell;
+        font-size: 18px;
+        height: 40px;
+        vertical-align: middle;
+        width: 4.3in;
+    }
+
+    .card-title {
+        font: bold 28px Genova, sans-serif;
+        padding-top: 0.5em;
+        text-align: center;
+    }
+
+    .description {
+        float: left;
+        font: 12pt Georgia, sans-serif;
+        margin: 0.25em auto 0 auto;
+        padding-left: 1.0em;
+        padding-right: 1.0em;
+        overflow: hidden;
+    }
+
+    .owner {
+        float: right;
+        height: 40px;
+    }
+
+    .ownerText {
+        float: right;
+        font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+        margin-right: 0.3em;
+        margin-top: 0.3em;
+    }
+
+    .storyID {
+        float: left;
+        font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+        margin-left: 0.25em;
+        margin-top: 0.3em;
+    }
+
+    .estimate {
+        bottom: 0.5em;
+        position: absolute;
+        right: 0.5em;
+    }
+
+    .content {
+        height: 2.3in;
+        overflow: hidden;
+        width: 4.3in;
+    }
+
+</style>
 <script type="text/javascript">
 
     function onLoad() {

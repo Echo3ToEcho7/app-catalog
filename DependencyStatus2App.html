@@ -411,6 +411,144 @@ function EnhancedDependencyDataPresenter(displayElementName) {
     });
 </script>
 
+<style type="text/css">
+
+    body {
+        font-family: tahoma, geneva, helvetica, arial, sans-serif;
+        font-size: 11px;
+        background: EBEBD8;
+    }
+
+    .d-iteration {
+        padding: 5px;
+        margin: 5px;
+        background: white;
+        border: solid 1px #cccccc;
+        border-top: solid 2px #cccccc;
+        font-family: tahoma, geneva, helvetica, arial, sans-serif;
+        font-size: 11px;
+        width: 275px;
+        height: 400px;
+        overflow-y: auto;
+        float: left;
+    }
+
+    .heading {
+        border: 0px;
+        border-bottom: solid 1px #cccccc;
+        padding-bottom: 5px;
+    }
+
+    .heading .label {
+        font-weight: bold;
+    }
+
+    #d_titlebar {
+        font-family: tahoma, geneva, helvetica, arial, sans-serif;
+        font-weight: bold;
+        padding-left: 10px;
+        font-size: 14px;
+    }
+
+    #subtitle {
+        font-family: tahoma, geneva, helvetica, arial, sans-serif;
+        padding-left: 10px;
+        font-size: 11px;
+        display: block;
+    }
+
+    .dependency {
+        padding-top: 5px;
+        padding-bottom: 3px;
+        padding-left: 3px;
+        float: left;
+    }
+
+    .dependency .predecessor {
+        padding: 5px;
+        padding-left: 22px;
+    }
+
+    .predecessor-container {
+        padding-left: 20px;
+    }
+
+    .predecessor-status {
+        float: left;
+        padding-top: 5px;
+    }
+
+    .statusDescription {
+        color: #999999;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    a:link {
+        color: #366AB7;
+    }
+
+    a:visited {
+        color: #366AB7;
+    }
+
+    a img {
+        cursor: pointer;
+    }
+
+        /* State Squares */
+
+    .state-legend {
+        background: #006600 none repeat scroll 0%;
+        border: 1px solid #DDDDDD;
+        color: #FFFFFF;
+        cursor: default;
+        float: left;
+        height: 14px;
+        line-height: 14px;
+        margin-right: 1px;
+        text-align: center;
+        width: 14px;
+    }
+
+    .state-legend-blocked {
+        background: transparent url(/slm/images/icon_blocked.gif) no-repeat scroll 0%;
+        color: #FFFFFF;
+        cursor: default;
+        display: inline;
+        float: left;
+        height: 16px;
+        line-height: 16px;
+        margin-right: 1px;
+        text-align: center;
+        width: 16px;
+    }
+
+    .queryError {
+        padding-left: 10px;
+        padding-top: 10px;
+        color: red
+    }
+
+        /*
+        Put override styles here
+        */
+    .defect-container {
+        padding-left: 18px;
+    }
+
+    .predecessor-defect-container {
+        padding-left: 38px;
+    }
+
+    .userStoryIcon {
+        float: left;
+        padding-right: 5px;
+    }
+
+</style>
 
 </head>
 <body>

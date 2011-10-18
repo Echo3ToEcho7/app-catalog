@@ -1,214 +1,242 @@
 <html>
 <head>
-    <title>Release Traceability</title>
-    <meta name="Name" content="Mashup: Release Traceability"/>
-    <meta name="Version" content="2.0"/>
-    <meta name="Vendor" content="Rally Software"/>
-    <link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
-    <link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
-    <link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
+<title>Release Traceability</title>
+<meta name="Name" content="Mashup: Release Traceability"/>
+<meta name="Version" content="2.0"/>
+<meta name="Vendor" content="Rally Software"/>
+<link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
 
+<style type="text/css">
+    .heading {
+        font-weight: bold;
+        font-size: 14px;
+        border: 0px;
+        padding-bottom: 5px;
+    }
 
-    <script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
-    <script type="text/javascript" src="/slm/js/slm.js"></script>
-    <script type="text/javascript" src="/slm/mashup/1.15/js/batch-toolkit.js"></script>
-    <script type="text/javascript" src="/slm/mashup/1.15/js/utilities.js"></script>
-    <script type="text/javascript" src="/slm/mashup/1.15/js/dropdown.js"></script>
+    td {
+        background: #ffffff;
+        font-family: tahoma, geneva, helvetica, arial, sans-serif;
+        font-size: 11px;
+    }
 
-    <script>
+    th {
+        background: #e4ecee;
+        font-family: tahoma, geneva, helvetica, arial, sans-serif;
+        font-size: 11px;
+    }
 
-        dojo.addOnLoad(initPage);
-        var batchToolkit, timeboxDropdown;
+    .not-blocked {
+    }
 
-        batchToolkit = new RALLY.Mashup.BatchToolkit('__WORKSPACE_OID__', '__PROJECT_OID__', '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
+    .blocked {
+        background: transparent url(/slm/js/rally/resources/images/blocked.png) no-repeat scroll center right;
+    }
 
-        function add2log(msg) {
-            document.getElementById("logdiv").innerHTML += "<br/>" + msg;
+</style>
+
+<script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
+<script type="text/javascript" src="/slm/js/slm.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.15/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.15/js/utilities.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.15/js/dropdown.js"></script>
+
+<script>
+
+    dojo.addOnLoad(initPage);
+    var batchToolkit, timeboxDropdown;
+
+    batchToolkit = new RALLY.Mashup.BatchToolkit('__WORKSPACE_OID__', '__PROJECT_OID__', '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
+
+    function add2log(msg) {
+        document.getElementById("logdiv").innerHTML += "<br/>" + msg;
+    }
+
+    // builds a URL ink to the detail page of a defect, user story or defect suite
+    // expects a workProduct object that includes a Type and ObjectID attributes
+    function buildArtifactLink(serverURL, workProduct, linktext) {
+        var link = '';
+        var prefix = '';
+        switch (workProduct._type) {
+            case 'Defect':
+                prefix = 'df';
+                break;
+            case 'HierarchicalRequirement':
+                prefix = 'ar';
+                break;
+            case 'Task':
+                prefix = 'tk';
+                break;
+            case 'TestCase':
+                prefix = 'tc';
+                break;
+        }
+        if (workProduct.ObjectID !== 0) {
+            link = "<a href=" + serverURL + "\/detail/" + prefix + "/" +
+                    workProduct.ObjectID + "\ target=\'_blank\'>";
+        }
+        link += linktext + "<\/a>";
+        return link;
+    }
+
+    function startTable() {
+        var tblhtml = "<table width=100%  border=1 frame='above'><tr>";
+        tblhtml += "<th width=34% class='taskh'>Task ID - Name<\/th><th width=50 class='taskh'>State<\/th><th width=50> <\/th>";
+        tblhtml += "<th width=33% class='defecth'>Defect ID - Name<\/th><th width=50 class='defecth'>State<\/th><th width=50> <\/th>";
+        tblhtml += "<th width=33% class='testh'>Test ID - Name<\/th><th width=50 class='testh'>State<\/th>";
+        tblhtml += "<\/tr>";
+        return tblhtml;
+    }
+
+    function drawTable(tblhtml, tablediv) {
+        tblhtml += "<\/table><br/>";
+        document.getElementById(tablediv).innerHTML = tblhtml;
+    }
+
+    function addRow(story, rowcount) {
+        var tlink, color;
+        var idname = " ";
+        var state = " ";
+        var tblhtml = "<tr>";
+        var emptyrow = "<td><\/td><td><\/td><td><\/td>";
+        var emptytd = "<td><\/td>";
+        var txtred = "#ef3f35";
+        var txtgreen = "#3a874f";
+        var txtblack = "#000000";
+
+        if (story.Tasks[rowcount] !== undefined) {
+            idname = story.Tasks[rowcount].FormattedID + " - " + story.Tasks[rowcount].Name;
+            tlink = buildArtifactLink("__SERVER_URL__", story.Tasks[rowcount], idname);
+            var dclass = "not-blocked";
+            if (story.Tasks[rowcount].Blocked === true) {
+                dclass = "blocked";
+            }
+            tblhtml += "<td class='" + dclass + "' border=1>" + tlink + "<\/td>";
+            state = story.Tasks[rowcount].State;
+            tblhtml += "<td border=1><font bold>" + state + "<\/font><\/td>";
+            tblhtml += emptytd;
+        }
+        else {
+            tblhtml += emptyrow;
         }
 
-        // builds a URL ink to the detail page of a defect, user story or defect suite
-        // expects a workProduct object that includes a Type and ObjectID attributes
-        function buildArtifactLink(serverURL, workProduct, linktext) {
-            var link = '';
-            var prefix = '';
-            switch (workProduct._type) {
-                case 'Defect':
-                    prefix = 'df';
-                    break;
-                case 'HierarchicalRequirement':
-                    prefix = 'ar';
-                    break;
-                case 'Task':
-                    prefix = 'tk';
-                    break;
-                case 'TestCase':
-                    prefix = 'tc';
-                    break;
+        if (story.Defects[rowcount] !== undefined) {
+            idname = story.Defects[rowcount].FormattedID + " - " + story.Defects[rowcount].Name;
+            tlink = buildArtifactLink("__SERVER_URL__", story.Defects[rowcount], idname);
+            var dclass = "not-blocked";
+            if (story.Defects[rowcount].Blocked === true) {
+                dclass = "blocked";
             }
-            if (workProduct.ObjectID !== 0) {
-                link = "<a href=" + serverURL + "\/detail/" + prefix + "/" +
-                        workProduct.ObjectID + "\ target=\'_blank\'>";
+            tblhtml += "<td class='" + dclass + "' >" + tlink + "<\/td>";
+            state = story.Defects[rowcount].State;
+            color = txtblack;
+            if (state === "Open") {
+                color = txtred;
             }
-            link += linktext + "<\/a>";
-            return link;
+            if (state === "Closed") {
+                color = txtgreen;
+            }
+            tblhtml += "<td><font color='" + color + "' >" + state + "<\/font><\/td>";
+            tblhtml += emptytd;
+        }
+        else {
+            tblhtml += emptyrow;
         }
 
-        function startTable() {
-            var tblhtml = "<table width=100%  border=1 frame='above'><tr>";
-            tblhtml += "<th width=34% class='taskh'>Task ID - Name<\/th><th width=50 class='taskh'>State<\/th><th width=50> <\/th>";
-            tblhtml += "<th width=33% class='defecth'>Defect ID - Name<\/th><th width=50 class='defecth'>State<\/th><th width=50> <\/th>";
-            tblhtml += "<th width=33% class='testh'>Test ID - Name<\/th><th width=50 class='testh'>State<\/th>";
-            tblhtml += "<\/tr>";
-            return tblhtml;
+        if (story.TestCases[rowcount] !== undefined) {
+            idname = story.TestCases[rowcount].FormattedID + " - " + story.TestCases[rowcount].Name;
+            tlink = buildArtifactLink("__SERVER_URL__", story.TestCases[rowcount], idname);
+            tblhtml += "<td>" + tlink + "<\/td>";
+            state = story.TestCases[rowcount].LastVerdict || " ";
+            color = txtblack;
+            if (story.TestCases[rowcount].LastVerdict === "Pass") {
+                color = txtgreen;
+            }
+            if (story.TestCases[rowcount].LastVerdict === "Fail") {
+                color = txtred;
+            }
+            tblhtml += "<td><font color='" + color + "' >" + state + "<\/font><\/td>";
+        }
+        else {
+            tblhtml += emptytd + emptytd;
+        }
+        tblhtml += "<\/tr>";
+        return tblhtml;
+    }
+
+    function parseResults(results) {
+        RALLY.Mashup.Utilities.hideWait("spinner", "lastMod");
+        var storyID, linkname, i;
+        var temphtml = "";
+
+        for (i = 0; i < results.stories.length; i++) {
+            storyID = results.stories[i].FormattedID;
+            temphtml += "<div class='heading'>";
+            linkname = storyID + " " + results.stories[i].Name;
+            temphtml += buildArtifactLink("__SERVER_URL__", results.stories[i], linkname);
+            var planest = results.stories[i].PlanEstimate || " ";
+            temphtml += " - ( Plan Estimate:" + planest + " )";
+            temphtml += "  -  " + results.stories[i].ScheduleState;
+            temphtml += "<br/><\/div>";
+            temphtml += '<div id="' + storyID + '_div"><\/div><br/>';
+        }
+        document.getElementById("lastMod").innerHTML = temphtml;
+        for (i = 0; i < results.stories.length; i++) {
+            storyID = results.stories[i].FormattedID;
+            var templength = 0;
+            if (results.stories[i].Tasks !== undefined) {
+                templength = results.stories[i].Tasks.length;
+            }
+            if (results.stories[i].Defects !== undefined) {
+                if (templength < results.stories[i].Defects.length) {
+                    templength = results.stories[i].Defects.length;
+                }
+            }
+            if (results.stories[i].TestCases !== undefined) {
+                if (templength < results.stories[i].TestCases.length) {
+                    templength = results.stories[i].TestCases.length;
+                }
+            }
+            if (templength < 1) {
+                var nochildren = "No Children Artifacts";
+                document.getElementById(storyID + '_div').innerHTML = nochildren;
+                continue;
+            }
+            var tblhtml = startTable();
+            var rowcount = 0;
+            for (var j = 0; j < templength; j++) {
+                tblhtml += addRow(results.stories[i], rowcount);
+                rowcount = rowcount + 1;
+            }
+            drawTable(tblhtml, storyID + '_div');
+        }
+    }
+
+    function runMainQuery() {
+        document.getElementById("lastMod").innerHTML = "";
+
+        if (timeboxDropdown.getSelectedName() !== null) {
+            RALLY.Mashup.Utilities.showWait("spinner", "lastMod");
         }
 
-        function drawTable(tblhtml, tablediv) {
-            tblhtml += "<\/table><br/>";
-            document.getElementById(tablediv).innerHTML = tblhtml;
-        }
+        var storyquery = {
+            key:"stories",
+            type: "hierarchicalrequirement",
+            fetch: "Type,FormattedID,Name,ObjectID,ScheduleState,PlanEstimate,Tasks,State,Defects,TestCases,LastVerdict,Blocked",
+            order: "Rank",
+            query: "(Release.Name = " + "\"" + timeboxDropdown.getSelectedName() + "\")"
+        };
+        batchToolkit.findAll(storyquery, parseResults);
+    }
 
-        function addRow(story, rowcount) {
-            var tlink, color;
-            var idname = " ";
-            var state = " ";
-            var tblhtml = "<tr>";
-            var emptyrow = "<td><\/td><td><\/td><td><\/td>";
-            var emptytd = "<td><\/td>";
-            var txtred = "#ef3f35";
-            var txtgreen = "#3a874f";
-            var txtblack = "#000000";
+    function initPage() {
+        timeboxDropdown = new RALLY.Mashup.Dropdown(batchToolkit, RALLY.Mashup.RELEASE, 'timeboxList', 'timeboxLabel', 'mu_release_trace');
+        timeboxDropdown.invoke(runMainQuery);
+    }
 
-            if (story.Tasks[rowcount] !== undefined) {
-                idname = story.Tasks[rowcount].FormattedID + " - " + story.Tasks[rowcount].Name;
-                tlink = buildArtifactLink("__SERVER_URL__", story.Tasks[rowcount], idname);
-                var dclass = "not-blocked";
-                if (story.Tasks[rowcount].Blocked === true) {
-                    dclass = "blocked";
-                }
-                tblhtml += "<td class='" + dclass + "' border=1>" + tlink + "<\/td>";
-                state = story.Tasks[rowcount].State;
-                tblhtml += "<td border=1><font bold>" + state + "<\/font><\/td>";
-                tblhtml += emptytd;
-            }
-            else {
-                tblhtml += emptyrow;
-            }
-
-            if (story.Defects[rowcount] !== undefined) {
-                idname = story.Defects[rowcount].FormattedID + " - " + story.Defects[rowcount].Name;
-                tlink = buildArtifactLink("__SERVER_URL__", story.Defects[rowcount], idname);
-                var dclass = "not-blocked";
-                if (story.Defects[rowcount].Blocked === true) {
-                    dclass = "blocked";
-                }
-                tblhtml += "<td class='" + dclass + "' >" + tlink + "<\/td>";
-                state = story.Defects[rowcount].State;
-                color = txtblack;
-                if (state === "Open") {
-                    color = txtred;
-                }
-                if (state === "Closed") {
-                    color = txtgreen;
-                }
-                tblhtml += "<td><font color='" + color + "' >" + state + "<\/font><\/td>";
-                tblhtml += emptytd;
-            }
-            else {
-                tblhtml += emptyrow;
-            }
-
-            if (story.TestCases[rowcount] !== undefined) {
-                idname = story.TestCases[rowcount].FormattedID + " - " + story.TestCases[rowcount].Name;
-                tlink = buildArtifactLink("__SERVER_URL__", story.TestCases[rowcount], idname);
-                tblhtml += "<td>" + tlink + "<\/td>";
-                state = story.TestCases[rowcount].LastVerdict || " ";
-                color = txtblack;
-                if (story.TestCases[rowcount].LastVerdict === "Pass") {
-                    color = txtgreen;
-                }
-                if (story.TestCases[rowcount].LastVerdict === "Fail") {
-                    color = txtred;
-                }
-                tblhtml += "<td><font color='" + color + "' >" + state + "<\/font><\/td>";
-            }
-            else {
-                tblhtml += emptytd + emptytd;
-            }
-            tblhtml += "<\/tr>";
-            return tblhtml;
-        }
-
-        function parseResults(results) {
-            RALLY.Mashup.Utilities.hideWait("spinner", "lastMod");
-            var storyID, linkname, i;
-            var temphtml = "";
-
-            for (i = 0; i < results.stories.length; i++) {
-                storyID = results.stories[i].FormattedID;
-                temphtml += "<div class='heading'>";
-                linkname = storyID + " " + results.stories[i].Name;
-                temphtml += buildArtifactLink("__SERVER_URL__", results.stories[i], linkname);
-                var planest = results.stories[i].PlanEstimate || " ";
-                temphtml += " - ( Plan Estimate:" + planest + " )";
-                temphtml += "  -  " + results.stories[i].ScheduleState;
-                temphtml += "<br/><\/div>";
-                temphtml += '<div id="' + storyID + '_div"><\/div><br/>';
-            }
-            document.getElementById("lastMod").innerHTML = temphtml;
-            for (i = 0; i < results.stories.length; i++) {
-                storyID = results.stories[i].FormattedID;
-                var templength = 0;
-                if (results.stories[i].Tasks !== undefined) {
-                    templength = results.stories[i].Tasks.length;
-                }
-                if (results.stories[i].Defects !== undefined) {
-                    if (templength < results.stories[i].Defects.length) {
-                        templength = results.stories[i].Defects.length;
-                    }
-                }
-                if (results.stories[i].TestCases !== undefined) {
-                    if (templength < results.stories[i].TestCases.length) {
-                        templength = results.stories[i].TestCases.length;
-                    }
-                }
-                if (templength < 1) {
-                    var nochildren = "No Children Artifacts";
-                    document.getElementById(storyID + '_div').innerHTML = nochildren;
-                    continue;
-                }
-                var tblhtml = startTable();
-                var rowcount = 0;
-                for (var j = 0; j < templength; j++) {
-                    tblhtml += addRow(results.stories[i], rowcount);
-                    rowcount = rowcount + 1;
-                }
-                drawTable(tblhtml, storyID + '_div');
-            }
-        }
-
-        function runMainQuery() {
-            document.getElementById("lastMod").innerHTML = "";
-
-            if (timeboxDropdown.getSelectedName() !== null) {
-                RALLY.Mashup.Utilities.showWait("spinner", "lastMod");
-            }
-
-            var storyquery = {
-                key:"stories",
-                type: "hierarchicalrequirement",
-                fetch: "Type,FormattedID,Name,ObjectID,ScheduleState,PlanEstimate,Tasks,State,Defects,TestCases,LastVerdict,Blocked",
-                order: "Rank",
-                query: "(Release.Name = " + "\"" + timeboxDropdown.getSelectedName() + "\")"
-            };
-            batchToolkit.findAll(storyquery, parseResults);
-        }
-
-        function initPage() {
-            timeboxDropdown = new RALLY.Mashup.Dropdown(batchToolkit, RALLY.Mashup.RELEASE, 'timeboxList', 'timeboxLabel', 'mu_release_trace');
-            timeboxDropdown.invoke(runMainQuery);
-        }
-
-    </script>
+</script>
 </head>
 
 <body>

@@ -1,285 +1,331 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-
-<!-- Copyright (c) 2002-2011  Rally Software Development Corp.  All rights reserved. -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- Copyright (c) 2011  Rally Software Development Corp.  All rights reserved -->
 <html>
 <head>
-<title>Test Case Pass/Fail History</title>
-<meta name="Name" content="App: Test Case Pass/Fail History"/>
-<meta name="Version" content="2.2"/>
+<title>Traceability Matrix</title>
+<meta name="Name" content="App: Traceability Matrix"/>
+<meta name="Version" content="2011.09.19"/>
 <meta name="Vendor" content="Rally Software"/>
-<script type="text/javascript" src="/apps/1.22/sdk.js"></script>
-
+<script type="text/javascript" src="/apps/1.26/sdk.js"></script>
 
 <script type="text/javascript">
-function shortUrl(type) {
-    if (type == "User Story") {
-        return "ar";
-    }
-    if (type == "Defect") {
-        return "df";
-    }
-    else if (type == "Test Case") {
-        return "tc";
-    }
-    else if (type == "Test Case Result") {
-        return "tcr";
-    }
+function TraceabilityMatrix() {
+    var dataSource, chooser, chooseButton, epicTable, childTable;
 
-    return "error";
-}
+    this.display = function() {
+        dataSource = new rally.sdk.data.RallyDataSource(
+                '__WORKSPACE_OID__',
+                '__PROJECT_OID__',
+                '__PROJECT_SCOPING_UP__',
+                '__PROJECT_SCOPING_DOWN__');
 
-function createUrl(type, identValue) {
-    // where type is a RALLY DB entity (User Story, Defect, Test Case, Test Case Result)
-    // and identValue is either FormattedID or ObjectID
-    var url = "__SERVER_URL__";
-    url += "/detail/" + shortUrl(type) + "/" + identValue;
-    return url;
-}
+        rally.sdk.ui.AppHeader.showPageTools(true);
+        rally.sdk.ui.AppHeader.addPageTool(rally.sdk.ui.PageTools.BuiltIn.Print);
+        rally.sdk.ui.AppHeader.setHelpUrl("http://www.rallydev.com/help/traceability-matrix-0");
 
-var TC_TABLE_START = "<table><tr><td>";
-var ROW_END = "     </td>\n  </tr>\n";
-var EMPTY_CELL = "     <td>&nbsp;</td>\n";
-var EMPTY_ROW = "  <tr>\n" + EMPTY_CELL + "</tr>\n";
-var TABLE_END = "</table>";
-var TC_LINK = "<div class=\"heading\"><a href=\"_TARGET_URL_\" target=\"_top\">_ID_ _NAME_</a>_WP_LINK_</div>";
-var WP_LINK = "(<a href=\"_WP_TARGET_\" target=\"_top\">_WP_TEXT_</a>)";
-var TCR_TABLE_START = "    <table width=\"180px\">\n";
-var TCR_HEADER_ROW = "<tr> <th>ID</th>" +
-        "<th>&nbsp;</th>" +
-        "<th>Build</th>" +
-        "<th>&nbsp;</th>" +
-        "<th>Date and Time</th>" +
-        "<th>&nbsp;</th>" +
-        "<th>Verdict</th>" +
-        "<th>&nbsp;</th>" +
-        "<th>Tester</th>" +
-        "</tr>";
-var EMPTY_TCR_TABLE = TCR_TABLE_START + "  <tr>\n    <th align=\"left\">None</th>\n  </tr>\n</table>\n";
-var TCR_TABLE = TCR_TABLE_START + "  " + TCR_HEADER_ROW + "\n";
-var TCR_ROW = "  <tr>\n" +
-        "     <td valign=\"middle\"><a href=\"_TCR_LINK_\" target=\"_top\">_TCR_IDENT_</a></td>\n" +
-        EMPTY_CELL +
-        "     <td valign=\"middle\" align=\"center\">_BUILD_</td>\n" +
-        EMPTY_CELL +
-        "     <td valign=\"middle\" align=\"center\">_DATE_</td>\n" +
-        EMPTY_CELL +
-        "     <td valign=\"middle\" align=\"center\">_VERDICT_BOX_</td>\n" +
-        EMPTY_CELL +
-        "     <td valign=\"middle\" align=\"center\">_TESTER_</td>\n" +
-        "  </tr>\n";
-
-// Here's what a Test Case Result table looks like:
-//<table width="180px">
-//   <HEADER_ROW>
-//   <tr>
-//      <td valign="middle"><a href=\"_TCR_LINK_\" target=\"_top\">_TCR_IDENT_</a></td>
-//      <td><&nbsp;</td>
-//      <td valign="middle" align="center">_BUILD_</td>
-//      <td><&nbsp;</td>
-//      <td valign="middle" align="center">_DATE_</td>
-//      <td><&nbsp;</td>
-//      <td valign="middle" align="center">_VERDICT_BOX_</td>
-//      <td><&nbsp;</td>
-//      <td valign="middle" align="center">_TESTER_</td>
-//   </tr>
-//   more testcaseresult rows...
-//</table>
-
-function byFormattedID(a, b) {
-    // compares the integer portion of TC22, TC9
-    var a_num = parseInt(a.substring(2, a.length), 10);
-    var b_num = parseInt(b.substring(2, b.length), 10);
-    return a_num - b_num;
-}
-
-var busySpinner;
-
-function showResults(queryResults) {
-    busySpinner.hide();
-    //console.log("Number of test cases returned by the Test Case/Test Case Results query: " +
-    //             queryResults.testcase.length);
-
-    if (queryResults.testcaseresults.length === 0) {
-        var message = "No Test Case information found for the current workspace and project";
-        document.getElementById("TestCaseInfo").innerHTML = message;
-
-        return;
-    }
-
-    var testCaseHolder = organizeResultsByTestCase(queryResults.testcaseresults);
-    var testCases = ascendingOrderedTestCases(testCaseHolder);
-    var table = assembleTestCaseAndResultsTable(testCases, testCaseHolder);
-    document.getElementById("TestCaseInfo").innerHTML = table;
-}
-
-function organizeResultsByTestCase(testCaseResults) {
-    var testCaseHolder = {};  // will be keyed by TestCase FormattedID with a value of
-    // {'TestCase': tc, 'results': [tcr, tcr, tcr, tcr, ...]}
-    var tcr, tc;
-    for (var ix = 0; ix < testCaseResults.length; ix++) {
-        tcr = testCaseResults[ix];
-        if (tcr.hasOwnProperty('TestCase'))   // and some TestCaseResult items won't
-        {
-            tc = tcr.TestCase;
-            if (tc !== undefined) {
-                if (!testCaseHolder.hasOwnProperty(tc.FormattedID))  // no existing entry for tc.FormattedID ?
-                {
-                    testCaseHolder[tc.FormattedID] = {'TestCase': tc, 'results': []};
-                }
-                testCaseHolder[tc.FormattedID].results.push(tcr);
-            }
-        }
-    }
-    return testCaseHolder;
-}
-
-function ascendingOrderedTestCases(testCaseHolder) {
-    var testCases = [];
-    rally.forEach(testCaseHolder, function (targetObj, formattedID) {
-        testCases.push(formattedID);
-    });
-    testCases.sort(byFormattedID);
-    return testCases;
-}
-
-function assembleTestCaseAndResultsTable(testCases, testCaseHolder) {
-    var table = "";
-    var testCase, testCaseResults;
-    var tcIdent, tcLink, tcDetailUrl;
-    var wpInfo,  wpLink, wpDetailUrl;
-    var tcFormattedID, tcrLink;
-
-    for (var ix = 0; ix < testCases.length; ix++) {
-        tcFormattedID = testCases[ix];
-        testCase = testCaseHolder[tcFormattedID].TestCase;
-        testCaseResults = testCaseHolder[tcFormattedID].results;
-        table += TC_TABLE_START;
-        tcDetailUrl = createUrl('Test Case', testCase.ObjectID);
-        tcLink = TC_LINK.replace('_TARGET_URL_', tcDetailUrl);
-        tcLink = tcLink.replace('_ID_', testCase.FormattedID);
-        tcLink = tcLink.replace('_NAME_', testCase.Name);
-        tcIdent = testCase.ObjectID + " " + testCase.FormattedID + " " + testCase.Name;
-        wpInfo = "";  // WorkProduct info (Ident + Name) for link purposes
-        wpLink = "";  // prime to be empty just in case the Test Case has no associated WorkProduct
-        if (testCase.WorkProduct !== null) {
-            wpInfo = testCase.WorkProduct.FormattedID + " " + testCase.WorkProduct.Name;
-            wpDetailUrl = "";
-            if (testCase.WorkProduct._type === 'HierarchicalRequirement') {
-                wpDetailUrl = createUrl("User Story", testCase.WorkProduct.ObjectID);
-            }
-            else if (testCase.WorkProduct._type === 'Defect') {
-                wpDetailUrl = createUrl("Defect", testCase.WorkProduct.ObjectID);
-            }
-            wpLink = WP_LINK.replace("_WP_TARGET_", wpDetailUrl).replace("_WP_TEXT_", wpInfo);
-        }
-        tcLink = tcLink.replace("_WP_LINK_", " &nbsp;&nbsp; " + wpLink);
-        //console.log(tcIdent + " (" + wpInfo + ")");
-        table += tcLink;
-        if (testCaseResults.length < 1) {
-            console.log("-----> no testcaseresults associated with this Test Case");
-            // wrap the 'None' indication table in a DIV
-            table += '<DIV class="tcrDiv">' + EMPTY_TCR_TABLE + '</DIV>';
-        }
-        else {
-            // add a nested table with a row for each TestCaseResult in testCaseResults,
-            // have the TestCaseResult.ObjectID field be a link to open up the detail for the TestCaseResult
-            // also show the build, the date the TestCaseresult was generated and the verdict (Pass/Fail)
-            //console.log("-----> " + testCaseResults.length + " results associated with this TestCase");
-            var tcrTable = createTestCaseResultTable(testCaseResults);
-            table += tcrTable;
-        }
-        table += ROW_END + EMPTY_ROW + TABLE_END;
-    }
-    return table;
-}
-
-function drawBox(verdict) {
-    verdictClass = 'pass-legend-inconclusive';
-    if (verdict === 'Pass') {
-        verdictClass = 'pass-legend';
-    }
-    if (verdict === 'Fail') {
-        verdictClass = 'pass-legend-fail';
-    }
-    return '<div class="' + verdictClass + '">' + verdict + '</div>';
-}
-
-function createTestCaseResultTable(testcaseresults) {
-    // construct a table with a header row for the testcaseresults
-    var tcrTable = TCR_TABLE;
-    // add a row in the table for each testcaseresult
-    for (rix = 0; rix < testcaseresults.length; rix++) {
-        var tcr = testcaseresults[rix];
-        var tcrDate = tcr.Date.replace('T', ' ').replace(/\.\d+Z/, ' UTC');
-        var verdictBox = drawBox(tcr.Verdict);
-        //console.log("    " + tcr.ObjectID + " " + tcr.Build + " " + tcrDate + " " + tcr.Verdict);
-        //console.log("    -- (" + tcr.WorkProduct.FormattedID + " " + tcr.WorkProduct.Name + ")");
-        tcrLink = createUrl('Test Case Result', tcr.ObjectID);
-
-        var tcrRow = TCR_ROW.replace('_TCR_LINK_', tcrLink);
-        tcrRow = tcrRow.replace('_TCR_IDENT_', tcr.ObjectID);
-        tcrRow = tcrRow.replace('_BUILD_', tcr.Build);
-        tcrRow = tcrRow.replace('_DATE_', tcrDate);
-        tcrRow = tcrRow.replace('_VERDICT_BOX_', verdictBox);
-        var tester = "";
-        if ((tcr.Tester !== null) && (tcr.Tester.DisplayName !== null)) {
-            tester = tcr.Tester.DisplayName;
-        }
-        tcrRow = tcrRow.replace('_TESTER_', tester);
-        tcrTable += tcrRow;
-    }
-    tcrTable += TABLE_END;
-    // wrap the Test Case Result table in a DIV
-    tcrTable = '<DIV class="tcrDiv">' + tcrTable + '</DIV>';
-
-    return tcrTable;
-}
-
-function previousDate(spanDays) {
-    var dayMillis = 86400 * 1000;   // seconds in 1 day times 1000 for milliseconds value
-    var today = new Date().getTime();  // in terms of epoch milliseconds
-    var prevDate = new Date(today - (spanDays * dayMillis));
-    var isoDate = rally.sdk.util.DateTime.toIsoFormatString(prevDate);
-    return isoDate;
-}
-
-function runMainQuery(rallyDataSource) {
-    document.getElementById("TestCaseInfo").innerHTML = "";
-    busySpinner = new rally.sdk.ui.basic.Wait({hideTarget: false});
-    busySpinner.display('spinner');
-    var daySpan = 30; // how many days back from today for TestCaseResult inclusion
-    var dateBoundingClause = '(Date >= "' + previousDate(daySpan) + '")';
-    querySpec = {
-        key   : "testcaseresults",
-        type  : "testcaseresults",
-        fetch : 'ObjectID,Build,Date,Verdict,Duration,Tester,UserName,DisplayName,TestCase,FormattedID,Name,WorkProduct',
-        query : dateBoundingClause,
-        order : 'Date Desc'
+        dataSource.find({
+            key:"prd",
+            type:"HierarchicalRequirement",
+            query: "( Tags.Name = PRD )",
+            fetch:"Name"
+        }, dojo.hitch(this, this._showChooserOrInstructions));
     };
 
-    rallyDataSource.findAll(querySpec, showResults);
+    this._showChooserOrInstructions = function(results) {
+        if (results.prd.length > 0) {
+            dojo.byId("signAndDate").innerHTML =
+                    'Signature _________________________<br/>' +
+                            'Date Printed ' + dojo.date.locale.format(new Date(), 'MM/DD/yyyy');
+
+            if (!chooseButton) {
+                chooseButton = new rally.sdk.ui.basic.Button({text:'Choose a Product Requirement'});
+                chooseButton.display('chooseButton', function() {
+                    chooser.display();
+                });
+            }
+
+            var chooserConfig = {
+                fetch:"FormattedID,Name,Description",
+                query:'Tags.Name = PRD',
+                title: 'Product Requirement Chooser'
+            };
+            chooser = new rally.sdk.ui.Chooser(chooserConfig, dataSource);
+            chooser.addEventListener('onClose', dojo.hitch(this, this._displayChosenPRD));
+            chooser.display();
+
+        } else {
+            var instructionsDiv = document.createElement("div");
+            dojo.addClass(instructionsDiv, "instructions");
+
+            var instructions = document.createElement("span");
+            dojo.addClass(instructions, "quote");
+            instructions.innerHTML = "<p><b>No PRDs Found.</b></p><p>This app keys off of special tags.  To get started, you'll need to let Rally know which user stories represent your Product Requirements Documents by tagging them 'PRD'.</p><p >The Traceability Matrix App allows you to show traceability from product requirements to the test cases that prove their implementation and the corresponding results.</p>";
+            instructionsDiv.appendChild(instructions);
+
+            var learnMoreLinkElement = document.createElement("a");
+            dojo.attr(learnMoreLinkElement, "href", "http://www.rallydev.com/help/traceability-matrix-0");
+            dojo.attr(learnMoreLinkElement, "target", "new");
+            learnMoreLinkElement.innerHTML = "Learn more about how to use the Traceability Matrix";
+            instructions.appendChild(learnMoreLinkElement);
+
+            var exampleImage = document.createElement("img");
+            dojo.attr(exampleImage, "src", "/apps/resources/TraceabilityMatrix/example.png");
+            dojo.addClass(exampleImage, "exampleImage");
+            instructionsDiv.appendChild(exampleImage);
+
+            dojo.byId("display").appendChild(instructionsDiv);
+        }
+    };
+
+    this._displayChosenPRD = function(chooser, args) {
+        dataSource.findAll({
+            key:"epicStories",
+            type:"HierarchicalRequirement",
+            query: "( ObjectID = " + rally.sdk.util.Ref.getOidFromRef(args.selectedItem._ref) + ")",
+            order:"Name",
+            fetch:"Children,Name,TestCases,LastVerdict,Source,Risk,Attachments,LastRun,FormattedID,,Results,Tester,Owner,Type"
+        }, dojo.hitch(this, this.showTables));
+    };
+
+    this.displayEpicTable = function(epic) {
+        var tableConfig = {
+            'columnKeys'   : ["FormattedId",'TestCaseFormattedId','TestCaseName',"Type",'Source', 'Risk','OwnerName','LastRun','LastVerdict','Attachment'],
+            'columnHeaders': ["User Story",'Test Case ID','Test Case Name',"Type",'Source', 'Risk','Owner','Last Run','Last Verdict','Design Output'],
+            sortingEnabled:false
+        };
+        var nameContainer = dojo.byId("prdName");
+        nameContainer.innerHTML = this.objectToLinkMarkup(epic.FormattedID, epic);
+        nameContainer.appendChild(document.createTextNode(" - " + epic.Name));
+        epicTable = new rally.sdk.ui.Table(tableConfig);
+        epicTable.addRows(this.createTableRowObject(epic, epic.Source));
+        epicTable.display("parentTable");
+    };
+
+    this.displayChildTable = function(epic) {
+        var tableConfig = {
+            'columnKeys'   : ["FormattedId",'TestCaseFormattedId','TestCaseName',"Type",'Source', 'Risk','OwnerName','LastRun','LastVerdict','Attachment'],
+            'columnHeaders': ["User Story",'Test Case ID','Test Case Name',"Type",'Source', 'Risk','Owner','Last Run','Last Verdict','Design Output'],
+            sortingEnabled:false
+        };
+        var rows = [];
+        dojo.forEach(epic.Children, function(child) {
+            rows = rows.concat(this.createTableRowObject(child, epic.Source));
+        }, this);
+        childTable = new rally.sdk.ui.Table(tableConfig);
+        childTable.addRows(rows);
+        childTable.display("childTable");
+
+    };
+
+    this.objectToLinkMarkup = function(text, object) {
+        return new rally.sdk.ui.basic.Link({
+            text: text,
+            item:object
+        }).renderToHtml();
+    };
+
+    this.createAttachmentLink = function(attachment) {
+        var href = "https://" + dataSource.getServer() + "/slm/attachment/" + rally.sdk.util.Ref.getOidFromRef(attachment) + "/" + attachment.Name;
+        var linkElement = document.createElement("a");
+        dojo.attr(linkElement, "href", href);
+        linkElement.appendChild(document.createTextNode(attachment.Name));
+        var container = document.createElement("div");
+        container.appendChild(linkElement);
+        var html = container.innerHTML;
+        dojo.destroy(container);
+        return html;
+    };
+
+    this.formatDate = function(dateString) {
+        var dateObject = rally.sdk.util.DateTime.fromIsoString(dateString);
+        return rally.sdk.util.DateTime.format(dateObject, "MM/dd/yyy");
+    };
+
+    this.createStoryRowObject = function(story, source) {
+        var tempObject;
+        tempObject = {};
+        tempObject.FormattedId = this.objectToLinkMarkup(story.FormattedID, story) + "<span>-" + story.Name + "</span>";
+        tempObject.Source = source;
+        tempObject.Name = story.Name;
+        return tempObject;
+    };
+
+    this.createTestCaseObject = function(story, source, testCase, attachment) {
+        var tempObject = this.createStoryRowObject(story, source);
+        if (attachment) {
+            tempObject.Attachment = this.createAttachmentLink(attachment);
+        }
+
+        if (testCase) {
+            tempObject.TestCase = testCase;
+            tempObject.Type = testCase.Type;
+            tempObject.OwnerName = testCase.Owner._refObjectName;
+            tempObject.TestCaseFormattedId = this.objectToLinkMarkup(testCase.FormattedID, testCase);
+            tempObject.TestCaseName = testCase.Name;
+            tempObject.LastVerdict = testCase.LastVerdict || "...";
+            tempObject.LastRun = testCase.LastRun ? this.formatDate(testCase.LastRun) : "...";
+            tempObject.Risk = testCase.Risk;
+        }
+
+        return tempObject;
+    };
+
+    this.createTableRowObject = function(input, source) {
+        try {
+            var results = [];
+            var story = dojo.clone(input);
+            while (story.Attachments.length + story.TestCases.length) {
+                var currentAttachment = story.Attachments.length ? story.Attachments.pop() : false;
+                var currentTestCase = story.TestCases.length ? story.TestCases.pop() : false;
+                results.push(this.createTestCaseObject(story, source, currentTestCase, currentAttachment));
+            }
+            if (results.length) {
+                results.sort(function(a, b) {
+                    if (a.FormattedId === b.FormattedId) {
+                        return a.TestCaseFormattedId > b.TestCaseFormattedId;
+                    }
+                    return a.FormattedId > b.FormattedId;
+                });
+                return results;
+            }
+            else {
+                return [this.createStoryRowObject(story, source)];
+            }
+        }
+        catch(ex) {
+            console.log(ex.stack);
+            throw ex;
+        }
+    };
+
+
+    this.showTables = function(results) {
+
+        if (epicTable) {
+            epicTable.destroy();
+        }
+
+        if (childTable) {
+            childTable.destroy();
+        }
+
+        if (!results.epicStories || !results.epicStories.length) {
+            console.log("No epic stories found for objectId");
+            return;
+        }
+        var story = results.epicStories.pop();
+        dojo.byId("parentTableContainer").style.display = "block";
+        dojo.byId("childTableContainer").style.display = "block";
+        this.displayEpicTable(story);
+        this.displayChildTable(story);
+
+    };
 }
-
-function testCasePassFailHistory() {
-    rally.sdk.ui.AppHeader.setHelpTopic("display/rlyhlp/Test+Case+PassFail+History+App");
-    rally.sdk.ui.AppHeader.showPageTools(true);
-
-    var rallyDataSource =
-            new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
-                    '__PROJECT_OID__',
-                    '__PROJECT_SCOPING_UP__',
-                    '__PROJECT_SCOPING_DOWN__');
-    runMainQuery(rallyDataSource);
-}
-
-rally.addOnLoad(testCasePassFailHistory);
 
 
 </script>
-</head>
 
+<style type="text/css">
+    .tableContainer {
+        display: none;
+        text-align: center;
+    }
+
+    .onlyPrint {
+        display: none;
+    }
+
+    #signAndDate {
+        font-size: 12px;
+        line-height: 18px;
+        margin-top: 50px;
+    }
+
+    .instructions {
+        max-width: 1000px;
+        font-size: 14px;
+        color: #333333;
+    }
+
+    .instructions .quote {
+        font-size: 14px;
+        color: #333333;
+        float: left;
+    }
+
+    .instructions p {
+        width: 400px;
+        font-size: 12px;
+    }
+
+    .instructionsTitle {
+        font-weight: bold;
+    }
+
+    .exampleImage {
+        float: left;
+        margin: 10px;
+        /* for IE */
+        filter: alpha(opacity = 70);
+        /* CSS3 standard */
+        opacity: 0.7;
+    }
+
+    @media print {
+        .noPrint {
+            display: none;
+        }
+
+        #date {
+            margin-bottom: 50px;
+        }
+
+        @page {
+            height: 7.5in;
+            width: 10in;
+            margin: .5in;
+            size: landscape;
+        }
+
+        .onlyPrint {
+            display: block;
+        }
+
+        #appHeaderright {
+            display: none;
+        }
+    }
+
+</style>
+
+<script type="text/javascript">
+
+    function onLoad() {
+
+        var traceabilityMatrix = new TraceabilityMatrix();
+        traceabilityMatrix.display();
+    }
+
+    rally.addOnLoad(onLoad);
+
+</script>
+</head>
 <body>
-<div id="spinner"></div>
-<div id="TestCaseInfo"></div>
+<div id="chooseButton" class="noPrint"></div>
+<div id="display">
+    <div id="parentTableContainer" class="tableContainer">
+        <h3><span id="prdName"></span></h3>
+
+        <div id="parentTable"></div>
+    </div>
+    <br/>
+
+    <div id="childTableContainer" class="tableContainer">
+        <h3>SRS Traceability Table</h3>
+
+        <div id="childTable"></div>
+    </div>
+</div>
+<div id="signAndDate" class="onlyPrint"></div>
 </body>
 </html>

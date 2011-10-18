@@ -11,6 +11,148 @@
 <script src="/slm/js/slm.js"></script>
 <script src="/apps/1.23/sdk.js"></script>
 
+<style type="text/css">
+    .story_tooltip {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        font-family: tahoma, geneva, helvetica, arial, antiqua, sans-serif;
+        font-size: 9pt;
+        font-weight: normal;
+        /* background-color: #D4EAF6;  */
+        background: #E8F8FE;
+        margin: 2px;
+        padding: 1px;
+        border: 1px solid gray;
+        cursor: default;
+        visibility: hidden;
+        display: none;
+    }
+
+    .legend {
+        font: 8pt Antiqua, Helvetica, sans-serif;
+        border-top: 1px solid gray;
+        margin: 2px;
+    }
+
+    .story_card {
+        font-family: tahoma, geneva, helvetica, arial, antiqua, sans-serif;
+        font-size: 8pt;
+        font-weight: normal;
+        border: 1px solid gray;
+        margin: 2px;
+        float: left;
+        width: 52px;
+        cursor: default;
+    }
+
+    .storyData {
+        font-family: Helvetica, Tahoma, Geneva, Arial, sans-serif;
+        font-weight: normal;
+        font-size: 9pt;
+        border-right: 2px dotted #BEBEBE;
+        border-bottom: 1px dotted #DEDEDE;
+        cursor: default;
+    }
+
+    .story_text {
+        padding: 2px;
+        font-weight: bold;
+        color: black;
+    }
+
+    .story_name {
+        padding: 2px;
+        display: none;
+        cursor: default;
+    }
+
+    .story_ID {
+        display: none;
+        cursor: default;
+    }
+
+    a:link {
+        color: #000;
+        text-decoration: none;
+    }
+
+    a:visited {
+        color: #000;
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: midnightblue;
+        text-decoration: none;
+    }
+
+    .accepted {
+        background-color: #6AB17D;
+    }
+
+        /* greenish color ...on official Rally color palette */
+    .on-track {
+        background-color: #5C9ACB;
+    }
+
+        /* bluish   color ...on official Rally color palette */
+    .future {
+        background-color: #FFFFFF;
+    }
+
+        /* white */
+    .blocked {
+        background-color: #EF3F35;
+    }
+
+        /* reddish  color ...on official Rally color palette */
+    .progress_bar {
+        background-color: #6AB17D;
+        cursor: default;
+    }
+
+    .story_points {
+        border: 1px solid gray;
+        padding: 2px;
+        background-color: white;
+        float: right;
+        cursor: default;
+    }
+
+    .estimate_bar {
+        height: 18px;
+        width: 100%;
+        clear: both;
+        background-color: white;
+        border-top: 1px solid gray;
+        cursor: default;
+    }
+
+    #efp_table th {
+        font-family: Helvetica, Tahoma, Geneva, Arial, sans-serif;
+        font-size: 10pt;
+        font-weight: bold;
+        border-bottom: 2px solid black;
+    }
+
+    #efp_table tbody tr {
+        border-bottom: 1px solid gray;
+    }
+
+        /*
+        #efp_table tbody td { border-right:  1px solid gray;
+                              font-family: Helvetica,Tahoma,Geneva,Arial,sans-serif;
+                              font-weight: normal;
+                              font-size: 9pt;
+                              cursor: default;
+                            }
+        */
+
+
+</style>
+
 
 <script type="text/javascript">
 var releaseDropdown = null;

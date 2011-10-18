@@ -236,6 +236,111 @@ function SystemRequirementValidationDocument() {
 
 </script>
 
+<style type="text/css">
+    #inputs {
+        margin-bottom: 10px;
+    }
+
+    #signAndDate {
+        font-size: 12px;
+        line-height: 18px;
+        margin-top: 50px;
+    }
+
+    .blankCell {
+        background-color: #fff;
+    }
+
+    .onlyPrint {
+        display: none;
+    }
+
+    .srsTable {
+        border: 1px solid #ffffff;
+        font-size: 12px;
+    }
+
+    .srsTable .header {
+        background-image: url("/slm/images/editor_section.gif");
+        background-repeat: no-repeat;
+        color: #464646;
+        font-weight: bold;
+        height: 23px;
+        padding: 0px 5px;
+    }
+
+    .srsTable th {
+        background-color: #eeeeee;
+        color: #666666;
+        font-weight: normal;
+        padding: 5px 10px 5px 0px;
+        text-align: right;
+        vertical-align: top;
+        width: 150px;
+    }
+
+    .srsTable td {
+        padding-top: 3px;
+    }
+
+    .srsTable .stepsCell th {
+        text-align: left;
+    }
+
+    .functionalLinks a {
+        line-height: 14pt;
+    }
+
+    .instructions {
+        max-width: 1000px;
+        font-size: 14px;
+        color: #333333;
+    }
+
+    .instructions .quote {
+        font-size: 14px;
+        color: #333333;
+        float: left;
+    }
+
+    .instructions p {
+        width: 400px;
+        font-size: 12px;
+    }
+
+    .instructionsTitle {
+        font-weight: bold;
+    }
+
+    .exampleImage {
+        float: left;
+        margin: 10px;
+        /* for IE */
+        filter: alpha(opacity = 70);
+        /* CSS3 standard */
+        opacity: 0.7;
+    }
+
+    @media print {
+        body {
+            width: 8.5in;
+            height: 10.5in;
+        }
+
+        .noPrint {
+            display: none;
+        }
+
+        #appHeaderright {
+            display: none;
+        }
+
+        .onlyPrint {
+            display: block;
+        }
+    }
+
+</style>
 
 <script type="text/javascript">
 

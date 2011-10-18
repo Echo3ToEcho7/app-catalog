@@ -1332,6 +1332,217 @@ KanbanReport = function(config, rallyDataSource) {
 
 </script>
 
+<style type="text/css">
+.typeFilterContainer {
+    float: right;
+    margin-right: 30px;
+    margin-top: -10px;
+}
+
+.typeFilterContainer .filterByTagsDropdown {
+    padding-right: 5px;
+}
+
+.typeFilterContainer .filterByTagsDropdown .dijitTextBox {
+    vertical-align: top;
+}
+
+.typeFilterContainer .filterByTagsDropdown .dropdownLabel {
+    vertical-align: baseline;
+}
+
+.kanbanBoard {
+    clear: both;
+}
+
+.overCapacity .columnHeader {
+    color: #FC5350;
+}
+
+.overCapacity .columnContent {
+    background-color: #F9E2E1;
+}
+
+.cardboard .columnHeader {
+    height: 35px;
+}
+
+.cardboard .capacityDisplay {
+    font-size: 12px;
+    line-height: 20px;
+}
+
+.cardboard .cardMenu {
+    height: 0;
+    background-color: #F4F7F8;
+    line-height: 18px;
+    padding-top: 1px;
+    overflow: hidden;
+}
+
+.cardboard .cardHeader {
+    background-color: #e0e0e0;
+}
+
+.cardboard .ready .cardContent, .cardboard .blocked .cardContent {
+    overflow: hidden; /*KRM - For Chrome*/
+}
+
+.cardboard .cardMenu.expanded {
+    border-top: 1px;
+    border-top-style: dotted;
+    border-top-color: #CCC;
+    padding: 0;
+}
+
+.cardboard .infinitySymbol {
+    font-size: 16px;
+    position: relative;
+    top: 2px;
+}
+
+.cardboard .readyIndicator, .cardboard .blockedIndicator {
+    width: 16px;
+    height: 16px;
+    float: right;
+    margin: 1px;
+    cursor: pointer;
+}
+
+.cardboard .readyIndicator {
+    background-image: url(/apps/images/unready.png);
+}
+
+.cardboard .ready .readyIndicator {
+    overflow: hidden; /*KRM - For Chrome*/
+    background-image: url(/apps/images/ready.png);
+}
+
+.cardboard .blockedIndicator {
+    background-image: url(/apps/images/not-blocked.png);
+}
+
+.cardboard .blocked .blockedIndicator {
+    overflow: hidden; /*KRM - For Chrome*/
+    background-image: url(/apps/images/blocked.png);
+}
+
+.cardboard .ready {
+    border: 3px solid #21CD18;
+}
+
+.cardboard .blocked {
+    border: 3px solid #EF3F36;
+}
+
+.cardboard .cardContent .tasks {
+    background-repeat: no-repeat;
+    border-top: 1px dotted #ccc;
+    color: #666;
+    margin-top: 5px;
+    padding-top: 5px;
+    padding-left: 16px;
+}
+
+.cardboard .cardContent .tasks.none {
+    background-image: url(/apps/resources/Kanban/status-defined-12.png);
+    background-position: left bottom;
+}
+
+.cardboard .cardContent .tasks.some {
+    background-image: url(/apps/resources/Kanban/status-inprogress-good-12.png);
+    background-position: left bottom;
+}
+
+.cardboard .cardContent .tasks.all {
+    background-image: url(/apps/resources/Kanban/status-good-12.png);
+    background-position: left bottom;
+}
+
+.cardboard .filterByFade {
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
+    filter: alpha(opacity = 30);
+    opacity: .3;
+    zoom: 1; /*ANS - necessary for IE7 opacity */
+}
+
+.cardboard .filterByFade.blocked,
+.cardboard .filterByFade.ready {
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
+    filter: alpha(opacity = 30);
+    opacity: .3;
+    zoom: 1; /*ANS - necessary for IE7 opacity */
+}
+
+.cardboard .editLinkContainer {
+    float: left;
+    padding-left: 5px;
+    vertical-align: middle;
+}
+
+.wipTextBoxContainer .dijitTextBox {
+    width: 40px;
+}
+
+#configPanel {
+    visibility: hidden;
+}
+
+.tableHeaderRow {
+    font-weight: bold;
+    text-align: left;
+}
+
+.configCheckBox {
+    text-align: center;
+}
+
+.configMessage {
+    margin-top: 5px;
+    word-wrap: break-word;
+    width: 300px;
+    color: #EF3F36;
+}
+
+.configHelp {
+    float: right;
+}
+
+.kanbanReport {
+    float: left;
+}
+
+#configTable {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.dijitTooltipContents {
+    font-size: 9.5px;
+}
+
+.buttonContainer.saveCancelButtons span,
+.buttonContainer.saveCancelButtons a {
+    vertical-align: middle;
+}
+
+#showAgeTextBoxInnerDivLabel {
+    vertical-align: baseline;
+}
+
+#widget_showAgeTextBoxInnerDiv {
+    vertical-align: top;
+}
+
+.cardboard .columnContent .agedCard {
+    border-top: 1px dotted #ccc;
+    color: #666666;
+    margin-top: 5px;
+    padding-top: 5px;
+}
+
+</style>
+
 
 <script type="text/javascript">
     /*configure following if you plan to run the Kanban app externally
