@@ -22,7 +22,6 @@
                     hideLastColumnIfReleased, showTaskCompletion, showDefectStatus,
                     lastState, artifactTypes,
                     colorByArtifactType, policyCheckBox;
-            var showNewFeatureTooltip = true;
         
             that._showThroughputReport = function() {
                 var config = {reportNumber: 180, reportName: "Throughput Report",
@@ -342,12 +341,6 @@
                     cardboard = new rally.sdk.ui.CardBoard(cardboardConfig, rallyDataSource);
                     cardboard.addEventListener("preUpdate", that._onBeforeItemUpdated);
                     cardboard.display("kanbanBoard");
-        
-                    if (showNewFeatureTooltip){
-                        rally.sdk.ui.basic.Tooltip.show('policy-', "New Kanban feature!<br> " +
-                                "<a href='http://www.rallydev.com/productblog/2011/10/28/tracking-readiness-on-rally-kanban-boards/' target='_blank'>Learn More</a>", "below", 12000);
-                        showNewFeatureTooltip = false;
-                    }
                 }
             };
         
