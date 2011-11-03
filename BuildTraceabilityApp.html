@@ -3,224 +3,224 @@
 
 <html>
 <head>
-<meta name="Name" content="App: Build Traceability"/>
-<meta name="Version" content="2011.01.18"/>
-<meta name="Vendor" content="Rally Software"/>
-<script type="text/javascript" src="/apps/1.22/sdk.js"></script>
+    <meta name="Name" content="App: Build Traceability"/>
+    <meta name="Version" content="2011.01.18"/>
+    <meta name="Vendor" content="Rally Software"/>
+    <script type="text/javascript" src="/apps/1.22/sdk.js"></script>
 
-<script type="text/javascript">
+    <script type="text/javascript">
     /*
-     Copyright (c) 2002-2011  Rally Software Development Corp. All rights reserved.
-     BuildTraceability.js
-     */
-    function BuildTraceability(rallyDataSource) {
-        var buildDropdown;
-        var projectObjectIds = [];
-        var buildTooltip;
-
-        //private method that builds table of changeset and artifact info
-        function display(tableElement, build) {
-            var detailPage, table, config, link;
-            var tableConfig = {'columnKeys' : ['ID', 'Name', 'State', 'Changeset', 'Changeset Message', 'Release']};
-
-            if (typeof table !== "undefined") {
-                table.destroy();
-            }
-
-            table = new rally.sdk.ui.Table(tableConfig);
-            var changesets = build.Changesets;
-            var row = 0;
-
-            if (typeof changesets !== "undefined" && changesets.length > 0) {
-                for (var i = 0; i < changesets.length; i++) {
-                    for (var cnt = 0; cnt < changesets[i].Artifacts.length; cnt++) {
-                        artifact = changesets[i].Artifacts[cnt];
-
-                        //ensure artifact associated to changeset is in scope
-                        if (dojo.indexOf(projectObjectIds, artifact.Project.ObjectID) !== -1) {
-                            //create link to artifact detail page
-                            table.setCell(row, 0, new rally.sdk.ui.basic.Link({item:artifact}).renderToHtml());
-
-                            table.setCell(row, 1, artifact.Name);
-
-                            //task does not have a schedule state
-                            table.setCell(row, 2, artifact.State || artifact.ScheduleState);
-
-                            //display link if changeset Uri is a "real" link
-                            if (changesets[i].Uri.match(/http/) || changesets[i].Uri.match(/svn/)) {
-                                table.setCell(row, 3, '<a href=' + changesets[i].Uri + ' target="_blank">' + changesets[i].Revision + '</a>');
-                            } else {
-                                table.setCell(row, 3, changesets[i].Revision);
+         Copyright (c) 2002-2011  Rally Software Development Corp. All rights reserved.
+         BuildTraceability.js 
+         */
+        function BuildTraceability(rallyDataSource) {
+            var buildDropdown;
+            var projectObjectIds = [];
+            var buildTooltip;
+        
+            //private method that builds table of changeset and artifact info
+            function display(tableElement, build) {
+                var detailPage, table, config, link;
+                var tableConfig = {'columnKeys' : ['ID', 'Name', 'State', 'Changeset', 'Changeset Message', 'Release']};
+        
+                if (typeof table !== "undefined") {
+                    table.destroy();
+                }
+        
+                table = new rally.sdk.ui.Table(tableConfig);
+                var changesets = build.Changesets;
+                var row = 0;
+        
+                if (typeof changesets !== "undefined" && changesets.length > 0) {
+                    for (var i = 0; i < changesets.length; i++) {
+                        for (var cnt = 0; cnt < changesets[i].Artifacts.length; cnt++) {
+                            artifact = changesets[i].Artifacts[cnt];
+        
+                            //ensure artifact associated to changeset is in scope
+                            if (dojo.indexOf(projectObjectIds, artifact.Project.ObjectID) !== -1) {
+                                //create link to artifact detail page
+                                table.setCell(row, 0, new rally.sdk.ui.basic.Link({item:artifact}).renderToHtml());
+        
+                                table.setCell(row, 1, artifact.Name);
+        
+                                //task does not have a schedule state
+                                table.setCell(row, 2, artifact.State || artifact.ScheduleState);
+        
+                                //display link if changeset Uri is a "real" link
+                                if (changesets[i].Uri.match(/http/) || changesets[i].Uri.match(/svn/)) {
+                                    table.setCell(row, 3, '<a href=' + changesets[i].Uri + ' target="_blank">' + changesets[i].Revision + '</a>');
+                                } else {
+                                    table.setCell(row, 3, changesets[i].Revision);
+                                }
+        
+                                table.setCell(row, 4, changesets[i].Message);
+        
+                                if (artifact.Release === null) {
+                                    table.setCell(row, 5, "");
+                                } else {
+                                    table.setCell(row, 5, artifact.Release.Name);
+                                }
+        
+                                row = row + 1;
                             }
-
-                            table.setCell(row, 4, changesets[i].Message);
-
-                            if (artifact.Release === null) {
-                                table.setCell(row, 5, "");
-                            } else {
-                                table.setCell(row, 5, artifact.Release.Name);
-                            }
-
-                            row = row + 1;
                         }
                     }
+                } else {
+                    table.addRows([]);
                 }
-            } else {
-                table.addRows([]);
-            }
-
-            if (row === 0) {
-                document.getElementById('msgDiv').innerHTML = "&nbsp;&nbsp;No artifacts found for this build.";
-            } else {
-                document.getElementById('msgDiv').innerHTML = "";
-            }
-
-            table.display(tableElement);
-        }
-
-        //private method that triggers when build dropdown value changes
-        function onBuildChange(sender, eventArgs) {
-            if (!sender.getValue() && eventArgs.items && eventArgs.items.length > 0) {
-                sender.setValue(eventArgs.items[0]._ref);
-                return;
-            }
-
-            if (typeof buildTooltip !== "undefined") {
-                buildTooltip.hide();
-            }
-            display("mainDiv", eventArgs.item);
-        }
-
-        //private method to create the build dropdown based on query results
-        function buildCallback(results) {
-
-            var buildConfig = {
-                valueProperty: "_ref",
-                displayValueProperty: "Number",
-                label: 'Builds',
-                showLabel: true
-            };
-
-            if (typeof buildDropdown !== "undefined") {
-                buildDropdown.destroy();
-            }
-
-            buildDropdown = new rally.sdk.ui.basic.Dropdown(buildConfig, rallyDataSource);
-            buildDropdown.setItems(results.builds);
-            buildDropdown.display("build", onBuildChange);
-
-            if (results.builds.length === 0) {
-                buildTooltip = rally.sdk.ui.basic.Tooltip.show("build", "No builds found.", "after");
-                document.getElementById('msgDiv').innerHTML = "";
-            }
-        }
-
-        //private method to query for builds if build def value changes
-        function onBuildDefSelectionChanged(sender, eventArgs) {
-            if (!eventArgs.value && eventArgs.items && eventArgs.items.length > 0) {
-                //Set a default if none found
-                sender.setValue(eventArgs.items[0]._ref);
-                return;
-            }
-
-            var selectedValue = eventArgs.value;
-
-            selectedValue = selectedValue.replace(".js", "");
-            if (selectedValue === "") {
-                return;
-            }
-
-            var buildObj = {
-                type: "Build",
-                key: "builds",
-                fetch: 'Number,Message,Revision,Uri,Changesets,Artifacts,Name,FormattedID,ScheduleState,Project,Release,ObjectID,State',
-                query: "(BuildDefinition = " + selectedValue + ")",
-                order: 'CreationDate desc',
-                pagesize: 20
-            };
-
-            rallyDataSource.find(buildObj, buildCallback);
-        }
-
-        // private method to build project query if running inside Rally
-        // if running app externally, modify this method
-        function buildProjectQuery() {
-            var projectQuery = [];
-
-
-            if (rally.sdk.util.Context.isInsideRally()) {
-                // create an array of project oids in scope
-                projectObjectIds = '__PROJECT_OIDS_IN_SCOPE__'.split(',');
-
-                if (projectObjectIds.length > 0) {
-                    //limit to 100 projects for performance reasons
-                    if (projectObjectIds.length > 100) {
-                        throw "Too many projects in scope. Select a different project.";
-                    }
-                    for (var i = 0; i < projectObjectIds.length; i++) {
-                        projectQuery.push('Projects contains /project/' + projectObjectIds[i]);
-                    }
-                    return new rally.sdk.util.Query.or(projectQuery);
+        
+                if (row === 0) {
+                    document.getElementById('msgDiv').innerHTML = "&nbsp;&nbsp;No artifacts found for this build.";
+                } else {
+                    document.getElementById('msgDiv').innerHTML = "";
                 }
-                // if running app externally, set the projectObjectIds var to array of project oids and return build project query
-            } else {
-                throw("App not supported outside Rally without modifying source code.");
-                //projectObjectIds = [1971104447];
-                //return "(Projects contains /project/1971104447)";
+        
+                table.display(tableElement);
             }
-        }
-
-        //private method to start building controls on page
-        //page consists of 2 dropdowns (builddef and build dropdowns) and a table
-        function initPage() {
-            try {
-                var projectQuery = buildProjectQuery();
-
-                //create build def dropdown
-                var buildDefConfig = {
-                    type: "BuildDefinition",
-                    attribute: "Name",
-                    fetch: 'Projects',
-                    query: projectQuery,
-                    label: 'Build Definition',
-                    showLabel: true,
-                    order: 'Name'
+        
+            //private method that triggers when build dropdown value changes
+            function onBuildChange(sender, eventArgs) {
+                if (!sender.getValue() && eventArgs.items && eventArgs.items.length > 0) {
+                    sender.setValue(eventArgs.items[0]._ref);
+                    return;
+                }
+        
+                if (typeof buildTooltip !== "undefined") {
+                    buildTooltip.hide();
+                }
+                display("mainDiv", eventArgs.item);
+            }
+        
+            //private method to create the build dropdown based on query results
+            function buildCallback(results) {
+        
+                var buildConfig = {
+                    valueProperty: "_ref",
+                    displayValueProperty: "Number",
+                    label: 'Builds',
+                    showLabel: true
                 };
-                var buildDefDropdown = new rally.sdk.ui.ObjectDropdown(buildDefConfig, rallyDataSource);
-                buildDefDropdown.display("buildDef", onBuildDefSelectionChanged);
-            } catch(err) {
-                throw(err);
+        
+                if (typeof buildDropdown !== "undefined") {
+                    buildDropdown.destroy();
+                }
+        
+                buildDropdown = new rally.sdk.ui.basic.Dropdown(buildConfig, rallyDataSource);
+                buildDropdown.setItems(results.builds);
+                buildDropdown.display("build", onBuildChange);
+        
+                if (results.builds.length === 0) {
+                    buildTooltip = rally.sdk.ui.basic.Tooltip.show("build", "No builds found.", "after");
+                    document.getElementById('msgDiv').innerHTML = "";
+                }
             }
-
+        
+            //private method to query for builds if build def value changes
+            function onBuildDefSelectionChanged(sender, eventArgs) {
+                if (!eventArgs.value && eventArgs.items && eventArgs.items.length > 0) {
+                    //Set a default if none found
+                    sender.setValue(eventArgs.items[0]._ref);
+                    return;
+                }
+        
+                var selectedValue = eventArgs.value;
+        
+                selectedValue = selectedValue.replace(".js", "");
+                if (selectedValue === "") {
+                    return;
+                }
+        
+                var buildObj = {
+                    type: "Build",
+                    key: "builds",
+                    fetch: 'Number,Message,Revision,Uri,Changesets,Artifacts,Name,FormattedID,ScheduleState,Project,Release,ObjectID,State',
+                    query: "(BuildDefinition = " + selectedValue + ")",
+                    order: 'CreationDate desc',
+                    pagesize: 20
+                };
+        
+                rallyDataSource.find(buildObj, buildCallback);
+            }
+        
+            // private method to build project query if running inside Rally
+            // if running app externally, modify this method
+            function buildProjectQuery() {
+                var projectQuery = [];
+        
+        
+                if (rally.sdk.util.Context.isInsideRally()) {
+                    // create an array of project oids in scope
+                    projectObjectIds = '__PROJECT_OIDS_IN_SCOPE__'.split(',');
+        
+                    if (projectObjectIds.length > 0) {
+                        //limit to 100 projects for performance reasons
+                        if (projectObjectIds.length > 100) {
+                            throw "Too many projects in scope. Select a different project.";
+                        }
+                        for (var i = 0; i < projectObjectIds.length; i++) {
+                            projectQuery.push('Projects contains /project/' + projectObjectIds[i]);
+                        }
+                        return new rally.sdk.util.Query.or(projectQuery);
+                    }
+                    // if running app externally, set the projectObjectIds var to array of project oids and return build project query
+                } else {
+                    throw("App not supported outside Rally without modifying source code.");
+                    //projectObjectIds = [1971104447];
+                    //return "(Projects contains /project/1971104447)";
+                }
+            }
+        
+            //private method to start building controls on page
+            //page consists of 2 dropdowns (builddef and build dropdowns) and a table
+            function initPage() {
+                try {
+                    var projectQuery = buildProjectQuery();
+        
+                    //create build def dropdown
+                    var buildDefConfig = {
+                        type: "BuildDefinition",
+                        attribute: "Name",
+                        fetch: 'Projects',
+                        query: projectQuery,
+                        label: 'Build Definition',
+                        showLabel: true,
+                        order: 'Name'
+                    };
+                    var buildDefDropdown = new rally.sdk.ui.ObjectDropdown(buildDefConfig, rallyDataSource);
+                    buildDefDropdown.display("buildDef", onBuildDefSelectionChanged);
+                } catch(err) {
+                    throw(err);
+                }
+        
+            }
+        
+            // only public method
+            this.display = function() {
+        
+                rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Build+Traceability+App");
+                rally.sdk.ui.AppHeader.showPageTools(true);
+        
+                initPage();
+            };
+        
         }
 
-        // only public method
-        this.display = function() {
+    </script>
+    <script type="text/javascript">
+        rally.addOnLoad(function() {
+            var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__', '__PROJECT_OID__',
+                    '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
+            var buildTraceability = new BuildTraceability(rallyDataSource);
+            buildTraceability.display();
+        });
+    </script>
 
-            rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Build+Traceability+App");
-            rally.sdk.ui.AppHeader.showPageTools(true);
-
-            initPage();
-        };
-
-    }
-
-</script>
-<script type="text/javascript">
-    rally.addOnLoad(function() {
-        var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__', '__PROJECT_OID__',
-                '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
-        var buildTraceability = new BuildTraceability(rallyDataSource);
-        buildTraceability.display();
-    });
-</script>
-
-<style type="text/css">
+    <style type="text/css">
     tbody {
-        font-size: 11px;
-    }
+            font-size: 11px;
+        }
 
-</style>
+    </style>
 
 </head>
 <body>

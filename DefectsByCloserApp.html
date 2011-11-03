@@ -9,15 +9,15 @@
     <script type="text/javascript" src="/apps/1.22/sdk.js"></script>
 
     <script type="text/javascript">
-        /*
+    /*
          Copyright (c) 2002-2011  Rally Software Development Corp. All rights reserved.
-         DefectsByCloser.js 
+         DefectsByCloser.js
          */
         function DefectsByCloser(rallyDataSource) {
             var releaseDiv, tableDiv;
             var releaseDropdown;
             var wait = null;
-
+        
             // private method the builds the table of defects and associated info
             function showResults(results) {
                 if (wait) {
@@ -28,7 +28,7 @@
                     tableDiv.innerHTML = "No Closed defects associated with the selected release were found";
                     return;
                 }
-
+        
                 var config =
                 { 'columnKeys'   : ['FormattedID' , 'Name',  'ClosedDate',  'Revision Number',    'ClosedBy' ] ,
                     'columnHeaders': ['Formatted ID', 'Name',  'Date Closed', 'Revision<br>Number', 'Closed By'] ,
@@ -36,20 +36,20 @@
                 };
                 var table = new rally.sdk.ui.Table(config);
                 table.addRows(results.defects);
-
+        
                 var linkConfig = null;
                 var defectLink = null;
-
+        
                 var cd = null; // for defect.ClosedDate formatting
                 var i, j, defect;
-
+        
                 for (i = 0; i < results.defects.length; i++) {
                     defect = results.defects[i];
                     //create link to defect
                     linkConfig = {item: {FormattedID: defect.FormattedID, "_ref" : defect._ref}};
                     defectLink = new rally.sdk.ui.basic.Link(linkConfig);
                     table.setCell(i, 0, defectLink.renderToHtml());
-
+        
                     //only parse revisions of defects that have been closed
                     if (defect.ClosedDate !== null) {
                         cd = '' + defect.ClosedDate;
@@ -65,10 +65,10 @@
                         }
                     }
                 }
-
+        
                 table.display(tableDiv);
             }
-
+        
             //private method to query for defects when release selection changes
             function runMainQuery(sender, eventArgs) {
                 var release = releaseDropdown.getSelectedName();
@@ -81,14 +81,14 @@
                     order : "FormattedID",
                     query : queryCriteria
                 };
-
+        
                 tableDiv.innerHTML = "";
                 wait = new rally.sdk.ui.basic.Wait({});
                 wait.display(tableDiv);
-
+        
                 rallyDataSource.findAll(queryConfig, showResults);
             }
-
+        
             //private method to start building controls on page
             //page consists of a dropdown to select the release and the table to hold the query results
             function initPage() {
@@ -101,18 +101,18 @@
                 releaseDropdown = new rally.sdk.ui.ReleaseDropdown(rdConfig, rallyDataSource);
                 releaseDropdown.display(releaseDiv, runMainQuery);
             }
-
+        
             // only public method
             this.display = function() {
-
+        
                 rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Defects+By+Closer");
                 rally.sdk.ui.AppHeader.showPageTools(true);
-
+        
                 initPage();
             };
-
+        
         }
-
+    
 
     </script>
     <script type="text/javascript">
@@ -134,3 +134,4 @@
 </body>
 
 </html>
+

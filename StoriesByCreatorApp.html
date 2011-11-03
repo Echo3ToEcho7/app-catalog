@@ -11,11 +11,11 @@
 
 
     <script type="text/javascript">
-        function StoriesByCreator(rallyDataSource) {
+    function StoriesByCreator(rallyDataSource) {
             var releaseHolder, tableHolder;
             var releaseDropdown;
             var wait = null;
-
+        
             // private method the builds the table of stories and associated info
             function showResults(results) {
                 if (wait) {
@@ -34,7 +34,7 @@
                         '150px',        '120px',      '120px', '120px']
                 };
                 var table = new rally.sdk.ui.Table(config);
-
+        
                 var i, j, story;
                 var linkConfig = null;
                 var storyLink = null;
@@ -45,7 +45,7 @@
                 var acceptor = null;
                 var creators = {};
                 var revision = null;
-
+        
                 for (i = 0; i < results.stories.length; i++) {
                     story = results.stories[i];
                     // somewhat counter-intuitively, the revisions are returned in last to first order
@@ -53,7 +53,7 @@
                     initialRevisionIx = story.RevisionHistory.Revisions.length - 1;
                     initialRevision = story.RevisionHistory.Revisions[initialRevisionIx];
                     creator = initialRevision.User._refObjectName;
-
+        
                     // fill an object that holds creator names so that we can later show table grouped in
                     // creator order
                     if (!(creator in creators)) {
@@ -84,17 +84,19 @@
                             }
                         }
                     }
-
+        
                     story.AcceptedBy = acceptor;
                     creators[creator].push(story);
                 }
-
+        
                 var creatorNames = [];
-                for (cn in creators) {
-                    creatorNames.push(cn);
+                for (var cn in creators) {
+                    if (creators.hasOwnProperty(cn)) {
+                        creatorNames.push(cn);
+                    }
                 }
                 creatorNames.sort();
-
+        
                 for (i = 0; i < creatorNames.length; i++) {
                     creator = creatorNames[i];
                     var stories = creators[creator];
@@ -108,10 +110,10 @@
                         table.addRow(story);
                     }
                 }
-
+        
                 table.display(tableHolder);
             }
-
+        
             //private method to query for stories when release selection changes
             function runMainQuery(sender, eventArgs) {
                 var release = releaseDropdown.getSelectedName();
@@ -128,14 +130,14 @@
                     order : "FormattedID",
                     query : queryCriteria
                 };
-
+        
                 tableHolder.innerHTML = "";
                 wait = new rally.sdk.ui.basic.Wait({});
                 wait.display(tableHolder);
-
+        
                 rallyDataSource.findAll(queryConfig, showResults);
             }
-
+        
             //private method to start building controls on page
             //page consists of a dropdown to select the release and the table to hold the query results
             function initPage() {
@@ -148,17 +150,17 @@
                 releaseDropdown = new rally.sdk.ui.ReleaseDropdown(rdConfig, rallyDataSource);
                 releaseDropdown.display(releaseHolder, runMainQuery);
             }
-
+        
             // only public method
             this.display = function() {
                 rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Stories+By+Creator");
                 rally.sdk.ui.AppHeader.showPageTools(true);
-
+        
                 initPage();
             };
-
+        
         }
-
+    
 
     </script>
     <script type="text/javascript">
@@ -181,3 +183,4 @@
 </body>
 
 </html>
+

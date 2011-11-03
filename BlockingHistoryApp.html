@@ -2,475 +2,461 @@
 <!-- Copyright (c) 2010  Rally Software Development Corp.  All rights reserved -->
 <html>
 <head>
-<title>User Story Blocking History</title>
-<meta name="Name" content="Blocking History"/>
-<meta name="Version" content="2.0"/>
-<meta name="Vendor" content="Rally Software"/>
+    <title>User Story Blocking History</title>
+    <meta name="Name" content="Blocking History"/>
+    <meta name="Version" content="2.0"/>
+    <meta name="Vendor" content="Rally Software"/>
 
-<script src="/apps/1.21/sdk.js"></script>
+    <script src="/apps/1.21/sdk.js"></script>
 
-<script type="text/javascript">
-var busySpinner = null;
-var rallyDataSource = null;
-var iterationDropdown = null;
-var ACTIVE = "Active";
-var BLOCKED = "Blocked";
-
-var blockedTasks = {};  // key with story.FormattedID, value is an Array with elements of:
-//    {task.FormattedID, task.Name,
-//     current schedule state of Task, task blocked status,
-//     task.RevisionHistory}
-
-
-function byRevisionNumber(a, b) {
-    return a.RevisionNumber - b.RevisionNumber;
-}
-
-
-function byTaskFormattedID(a, b) {
-    var a_num = parseInt(a.FormattedID.substring(2, a.length), 10);
-    var b_num = parseInt(b.FormattedID.substring(2, b.length), 10);
-    return a_num - b_num;
-}
-
-
-function detectBlockedStories(stories) {
-    var blocked_stories = [];   // this gets populated with UserStory objects
-    for (var ix = 0; ix < stories.length; ix++) {
-        var story = stories[ix];
-        var revisions = story.RevisionHistory.Revisions;
-        revisions.sort(byRevisionNumber);
-
-        var story_was_blocked = false;
-        // it doesn't matter how many revs have been in BLOCKED state, presence of one is sufficient
-        for (var rix = 0; rix < revisions.length && story_was_blocked === false; rix++) {
-            var rev = revisions[rix];
-            if (rev.Description.indexOf("BLOCKED changed from ") >= 0) {
-                story_was_blocked = true;
-            }
+    <script type="text/javascript">
+    var busySpinner = null;
+        var rallyDataSource = null;
+        var iterationDropdown = null;
+        var ACTIVE = "Active";
+        var BLOCKED = "Blocked";
+        
+        var blockedTasks = {};  // key with story.FormattedID, value is an Array with elements of:
+        //    {task.FormattedID, task.Name,
+        //     current schedule state of Task, task blocked status,
+        //     task.RevisionHistory}
+        
+        function byRevisionNumber(a, b) {
+            return a.RevisionNumber - b.RevisionNumber;
         }
-        if (!story_was_blocked)   // only iterate through the story tasks if the story itself has never been blocked
-        {
-            var tasks = story.Tasks;
+        
+        
+        function byTaskFormattedID(a, b) {
+            var a_num = parseInt(a.FormattedID.substring(2, a.length), 10);
+            var b_num = parseInt(b.FormattedID.substring(2, b.length), 10);
+            return a_num - b_num;
+        }
+        
+        
+        function detectBlockedStories(stories) {
+            var blocked_stories = [];   // this gets populated with UserStory objects
+            for (var ix = 0; ix < stories.length; ix++) {
+                var story = stories[ix];
+                var revisions = story.RevisionHistory.Revisions;
+                revisions.sort(byRevisionNumber);
+        
+                var story_was_blocked = false;
+                // it doesn't matter how many revs have been in BLOCKED state, presence of one is sufficient
+                for (var rix = 0; rix < revisions.length && story_was_blocked === false; rix++) {
+                    var rev = revisions[rix];
+                    if (rev.Description.indexOf("BLOCKED changed from ") >= 0) {
+                        story_was_blocked = true;
+                    }
+                }
+                if (!story_was_blocked)   // only iterate through the story tasks if the story itself has never been blocked
+                {
+                    var tasks = story.Tasks;
+                    var task = null;
+        
+                    var task_was_blocked = false;
+                    tasks.sort(byTaskFormattedID);
+                    for (var tix = 0; tix < tasks.length; tix++) {
+                        task = tasks[tix];
+                        task_was_blocked = false;
+                        var trevs = task.RevisionHistory.Revisions;
+                        trevs.sort(byRevisionNumber);
+                        for (var trix = 0; trix < trevs.length && !task_was_blocked; trix++) {
+                            var trev = trevs[trix];
+                            if (trev.Description.indexOf("BLOCKED changed from ") >= 0) {
+                                task_was_blocked = true;
+                            }
+                        }
+                        if (task_was_blocked === true) {
+                            story_was_blocked = true;
+                        }
+                    }
+                }
+        
+                if (story_was_blocked) {
+                    blocked_stories.push(story);
+                }
+            }
+            return blocked_stories;
+        }
+        
+        
+        function itemStatus(item, revisions) {
+            // given an item (story or task) and an array of revisions
+            // (either from UserStory or Task), iterate through the revisions
+            // The item.Blocked status trumps any 'BLOCKED' status detected in the revision list
+            var current_status = ACTIVE;   // prime the state value
+            var wasBlocked = false;
+            revisions.sort(byRevisionNumber);
+            for (var rix = 0; rix < revisions.length; rix++) {
+                var rev = revisions[rix];
+                if (rev.Description.indexOf("BLOCKED changed from [false] to [true]") >= 0) {
+                    current_status = BLOCKED;
+                    wasBlocked = true;
+                }
+                if (rev.Description.indexOf("BLOCKED changed from [true] to [false]") >= 0) {
+                    current_status = ACTIVE;
+                }
+            }
+            if (item.Blocked === true)  // in the case where rev hist doesn't show blockage but item is blocked
+            {
+                current_status = BLOCKED;
+                wasBlocked = true;
+            }
+            return {'currentStatus': current_status, 'wasBlocked': wasBlocked};
+        }
+        
+        
+        function currentStoryState(story) {
+            // blockedTasks is a purposeful global...
+            blockedTasks[story.FormattedID] = [];
+            var storyStatus = itemStatus(story, story.RevisionHistory.Revisions);
+            var state = storyStatus.currentStatus;
+        
+            //  iterate through the story tasks.  If the current state of any of the tasks
+            //  is blocked, then the story itself shall be classified as being blocked.
+            //  We are also going to update a running count of the number of tasks blocked for this story
+        
+            var tasks_blocked = 0;
             var task = null;
-
-            var task_was_blocked = false;
-            tasks.sort(byTaskFormattedID);
-            for (var tix = 0; tix < tasks.length; tix++) {
-                task = tasks[tix];
-                task_was_blocked = false;
-                var trevs = task.RevisionHistory.Revisions;
-                trevs.sort(byRevisionNumber);
-                for (var trix = 0; trix < trevs.length && !task_was_blocked; trix++) {
-                    var trev = trevs[trix];
-                    if (trev.Description.indexOf("BLOCKED changed from ") >= 0) {
-                        task_was_blocked = true;
-                    }
+            var taskStatus = null;
+            var taskInfo = {};
+            var storyInfo = {};
+        
+            for (var tix = 0; tix < story.Tasks.length; tix++) {
+                task = story.Tasks[tix];
+                taskStatus = itemStatus(task, task.RevisionHistory.Revisions);
+                if (taskStatus.wasBlocked) {
+                    taskInfo = {'taskID'  : task.FormattedID,
+                        'name'    : task.Name,
+                        'state'   : task.State,
+                        'status'  : taskStatus.currentStatus,
+                        'revHist' : task.RevisionHistory
+                    };
+                    blockedTasks[story.FormattedID].push(taskInfo);
                 }
-                if (task_was_blocked === true) {
-                    story_was_blocked = true;
+                if (taskStatus.currentStatus == BLOCKED) {
+                    tasks_blocked++;
                 }
             }
-        }
-
-        if (story_was_blocked) {
-            blocked_stories.push(story);
-        }
-    }
-    return blocked_stories;
-}
-
-
-function itemStatus(item, revisions) {
-    // given an item (story or task) and an array of revisions
-    // (either from UserStory or Task), iterate through the revisions
-    // The item.Blocked status trumps any 'BLOCKED' status detected in the revision list
-    var current_status = ACTIVE;   // prime the state value
-    var wasBlocked = false;
-    revisions.sort(byRevisionNumber);
-    for (var rix = 0; rix < revisions.length; rix++) {
-        var rev = revisions[rix];
-        if (rev.Description.indexOf("BLOCKED changed from [false] to [true]") >= 0) {
-            //console.log(item.FormattedID + " was   blocked on revision " + (rix+1));
-            current_status = BLOCKED;
-            wasBlocked = true;
-        }
-        if (rev.Description.indexOf("BLOCKED changed from [true] to [false]") >= 0) {
-            //console.log(item.FormattedID + " was UNblocked on revision " + (rix+1));
-            current_status = ACTIVE;
-        }
-    }
-    if (item.Blocked === true)  // in the case where rev hist doesn't show blockage but item is blocked
-    {
-        //console.log(item.FormattedID + " is marked as Blocked");
-        current_status = BLOCKED;
-        wasBlocked = true;
-    }
-    return {'currentStatus': current_status, 'wasBlocked': wasBlocked};
-}
-
-
-function currentStoryState(story) {
-    // blockedTasks is a purposeful global...
-    blockedTasks[story.FormattedID] = [];
-    var storyStatus = itemStatus(story, story.RevisionHistory.Revisions);
-    var state = storyStatus.currentStatus;
-
-    //  iterate through the story tasks.  If the current state of any of the tasks
-    //  is blocked, then the story itself shall be classified as being blocked.
-    //  We are also going to update a running count of the number of tasks blocked for this story
-
-    var tasks_blocked = 0;
-    var task = null;
-    var taskStatus = null;
-    var taskInfo = {};
-    var storyInfo = {};
-
-    for (var tix = 0; tix < story.Tasks.length; tix++) {
-        task = story.Tasks[tix];
-        taskStatus = itemStatus(task, task.RevisionHistory.Revisions);
-        if (taskStatus.wasBlocked) {
-            taskInfo = {'taskID'  : task.FormattedID,
-                'name'    : task.Name,
-                'state'   : task.State,
-                'status'  : taskStatus.currentStatus,
-                'revHist' : task.RevisionHistory
+        
+            if (tasks_blocked > 0) {
+                state = BLOCKED;
+                var blocked_tasks = blockedTasks[story.FormattedID];
+                var taskIDs = dojo.map(blocked_tasks, function (t) {
+                    return t.taskID;
+                });
+            }
+        
+            storyInfo = {'storyID'      : story.FormattedID,
+                'schedState'   : story.ScheduleState,
+                'blocked'      : story.Blocked.toString(),
+                'state'        : state,
+                'numTasks'     : story.Tasks.length.toString(),
+                'tasksBlocked' : tasks_blocked.toString()
             };
-            blockedTasks[story.FormattedID].push(taskInfo);
+        
+            return storyInfo;
         }
-        if (taskStatus.currentStatus == BLOCKED) {
-            tasks_blocked++;
+        
+        
+        function makeFuncLink(functionName, paramValues, linkText) {
+            // token substitution for FUNCTION_NAME, PARAMS and LINK_TEXT
+            // Note that each parm in the parm list must be enclosed in single quotes
+            var funcLink = '<a href=\"#\" onclick=\"FUNCTION_NAME(PARAMS); return false;\"><nobr>LINK_TEXT</nobr></a>';
+            funcLink = funcLink.replace('FUNCTION_NAME', functionName);
+            funcLink = funcLink.replace('LINK_TEXT', linkText);
+            var singleQuoteEnclose = function (parmValue) {
+                return "'" + parmValue + "'";
+            };
+            var parms = dojo.map(paramValues, singleQuoteEnclose);
+            funcLink = funcLink.replace('PARAMS', parms.join(", "));
+            return funcLink;
         }
-    }
-
-    if (tasks_blocked > 0) {
-        state = BLOCKED;
-        var blocked_tasks = blockedTasks[story.FormattedID];
-        var taskIDs = dojo.map(blocked_tasks, function (t) {
-            return t.taskID;
-        });
-        //console.log("    Story ID: " + story.FormattedID +
-        //            " has " + tasks_blocked + " blocked tasks: " + taskIDs.join(", "));
-    }
-
-    storyInfo = {'storyID'      : story.FormattedID,
-        'schedState'   : story.ScheduleState,
-        'blocked'      : story.Blocked.toString(),
-        'state'        : state,
-        'numTasks'     : story.Tasks.length.toString(),
-        'tasksBlocked' : tasks_blocked.toString()
-    };
-
-    return storyInfo;
-}
-
-
-function makeFuncLink(functionName, paramValues, linkText) {
-    // token substitution for FUNCTION_NAME, PARAMS and LINK_TEXT
-    // Note that each parm in the parm list must be enclosed in single quotes
-    var funcLink = '<a href=\"#\" onclick=\"FUNCTION_NAME(PARAMS); return false;\"><nobr>LINK_TEXT</nobr></a>';
-    funcLink = funcLink.replace('FUNCTION_NAME', functionName);
-    funcLink = funcLink.replace('LINK_TEXT', linkText);
-    var singleQuoteEnclose = function (parmValue) {
-        return "'" + parmValue + "'";
-    };
-    var parms = dojo.map(paramValues, singleQuoteEnclose);
-    funcLink = funcLink.replace('PARAMS', parms.join(", "));
-    return funcLink;
-}
-
-
-function showBlockedStories(blocked_stories) {
-    if (blocked_stories.length > 0) {
-        //console.log("there are " + blocked_stories.length + " stories that have been blocked.");
-
-        var tblConfig = { "columnKeys"    : ['StoryID', 'SchedState', 'Status', 'NumTasks',
-            'CurrBlockedTasks', 'TaskDetails'],
-            "columnHeaders" : ["User Story", "Schedule State", "Status", "# of Tasks",
-                "# Currently <br>Blocked Tasks", "Tasks Details"],
-            "columnWidths"  : ['75px', '90px', '75px', '70px', '85px', '90px'],
-            "width"  : "80%",
-            "height" : "180px"
-        };
-        var tbl = new rally.sdk.ui.Table(tblConfig);
-        var blocked = dojo.map(blocked_stories, currentStoryState);
-        var tasksLink = "";
-        for (var ix = 0; ix < blocked.length; ix++) {
-            var item = blocked[ix];
-            tbl.setCell(ix, 'StoryID', item.storyID);
-            tbl.setCell(ix, 'SchedState', item.schedState);
-            tbl.setCell(ix, 'Status', item.state);
-            tbl.setCell(ix, 'NumTasks', item.numTasks);
-            tbl.setCell(ix, 'CurrBlockedTasks', item.tasksBlocked);
-            if (item.numTasks > 0) {
-                tasksLink = makeFuncLink('showBlockingTasks', [item.storyID], 'Show Tasks');
-                tbl.setCell(ix, 'TaskDetails', tasksLink);
-            }
-            else {
-                tbl.setCell(ix, 'TaskDetails', "");
-            }
-        }
-        var blockHistDiv = document.getElementById('blockHistDiv');
-        tbl.display(blockHistDiv);
-    }
-    else {
-        var noBlockedStories = "<br>There are no stories that have ever been blocked for " +
-                iterationDropdown.getSelectedName();
-        document.getElementById('blockHistDiv').innerHTML = noBlockedStories;
-    }
-}
-
-
-function showBlockingTasks(storyID) {
-    document.getElementById('taskHistoryDiv').innerHTML = "";
-    var blockedTasksDiv = document.getElementById('blockedTasksDiv');
-    blockedTasksDiv.innerHTML = "";  // zero out any current contents of the div
-    blockedTasksDiv.innerHTML = "<h4>Tasks with Blocking History<br>User Story: " + storyID + "<\/h4>";
-
-    //  See if there have ever been any blocked tasks associated with the storyID
-    //  If not, blurt out text stating that
-    var blocked_tasks = blockedTasks[storyID];
-    if (blocked_tasks.length === 0) {
-        blockedTasksDiv.innerHTML += "<p>There are no tasks associated with this story that were ever blocked.</p>";
-        return;
-    }
-
-    // Otherwise, cook up a table and fill it with info related to the tasks associated with
-    // the storyID that have been blocked at some point.
-    var config = {};
-    config = {"id" : "blockedTasks",
-        "columnKeys"    : ["TaskID", "Name", "SchedState",     "CurrentStatus",  "TaskHistory"],
-        "columnHeaders" : ["Task",   "Name", "Schedule State", "Current Status", "Task History"],
-        "columnWidths"  : ['75px', '300px', '90px', '80px', '120px'],
-        //"width"  : "85%",
-        "height" : "140px"
-    };
-    var tbl = new rally.sdk.ui.Table(config);
-    var taskBlockingHistoryLink = "";
-    for (var ix = 0; ix < blocked_tasks.length; ix++) {
-        var blockedTask = blocked_tasks[ix];
-        tbl.setCell(ix, 'TaskID', blockedTask.taskID);
-        tbl.setCell(ix, 'Name', "<nobr>" + blockedTask.name + "</nobr>");
-        tbl.setCell(ix, 'SchedState', blockedTask.state);
-        tbl.setCell(ix, 'CurrentStatus', blockedTask.status);
-        taskBlockingHistoryLink = makeFuncLink('showBlockingTaskHistory', [storyID, blockedTask.taskID], 'Show Blocking History');
-        tbl.setCell(ix, 'TaskHistory', taskBlockingHistoryLink);
-    }
-    tbl.display(blockedTasksDiv);
-}
-
-
-function createBlockageEpisode(startDate, rev) {
-    var be =
-    {
-        'blockDate'    : dojo.date.stamp.fromISOString(startDate),
-        'blockRev'     : rev,
-        'unBlockDate'  : "",
-        'unBlockRev'   : "",
-        'lagTime'      : "NA",
-        'duration'     : function () {
-            //console.log("unBlockDate is " + "|" + this.unBlockDate + "|");
-            if (this.unBlockDate === "") {
-                this.unBlockDate = "Currently Blocked";
-            }
-            else {
-                this.unBlockDate = dojo.date.stamp.fromISOString(this.unBlockDate);
-                this.lagTime = this.calcDuration(this.blockDate, this.unBlockDate);
-            }
-        },
-        'calcDuration' : function (startDate, endDate) {
-            // Be aware that the dojo.date.difference function rounds when provided
-            // a unit in the form of 'year', 'month', 'week', 'day', 'hour' ...
-            // so the dur value that gets returned is often less than dead on the money precision.
-            // If fine-precision is desired you'd need to start at the other end of the unit
-            // spectrum ('second') and build up from there
-            // Note also, that we arbitrarily limit our dur return value to 2 units of measure,
-            // so you don't end up with something ridiculous like '4 years 11 months 3 weeks 6 days 5 hours'
-            var dateFormatSpec = {'datePattern' : 'yyyy/MM/dd', 'selector' : 'date'};
-            //console.log("    ... in calcDuration on startDate: " +
-            //            dojo.date.locale.format(startDate,   dateFormatSpec) +
-            //            " endDate: " +
-            //            dojo.date.locale.format(endDate,     dateFormatSpec));
-            var refDate = startDate;
-            var dur = "";
-            var time_units = ['year', 'month', 'week', 'day', 'hour'];
-            var unit = "";
-            var units_used = 0;
-            var interval = 0;
-            for (var ix = 0; ix < time_units.length && units_used < 2; ix++) {
-                unit = time_units[ix];
-                interval = dojo.date.difference(refDate, endDate, unit);
-                if (interval > 0) {
-                    dur += interval + " " + unit;
-                    if (interval > 1) {
-                        dur += "s";
+        
+        
+        function showBlockedStories(blocked_stories) {
+            if (blocked_stories.length > 0) {
+                var tblConfig = { "columnKeys"    : ['StoryID', 'SchedState', 'Status', 'NumTasks',
+                    'CurrBlockedTasks', 'TaskDetails'],
+                    "columnHeaders" : ["User Story", "Schedule State", "Status", "# of Tasks",
+                        "# Currently <br>Blocked Tasks", "Tasks Details"],
+                    "columnWidths"  : ['75px', '90px', '75px', '70px', '85px', '90px'],
+                    "width"  : "80%",
+                    "height" : "180px"
+                };
+                var tbl = new rally.sdk.ui.Table(tblConfig);
+                var blocked = dojo.map(blocked_stories, currentStoryState);
+                var tasksLink = "";
+                for (var ix = 0; ix < blocked.length; ix++) {
+                    var item = blocked[ix];
+                    tbl.setCell(ix, 'StoryID', item.storyID);
+                    tbl.setCell(ix, 'SchedState', item.schedState);
+                    tbl.setCell(ix, 'Status', item.state);
+                    tbl.setCell(ix, 'NumTasks', item.numTasks);
+                    tbl.setCell(ix, 'CurrBlockedTasks', item.tasksBlocked);
+                    if (item.numTasks > 0) {
+                        tasksLink = makeFuncLink('showBlockingTasks', [item.storyID], 'Show Tasks');
+                        tbl.setCell(ix, 'TaskDetails', tasksLink);
                     }
-                    dur += " ";
-                    refDate = dojo.date.add(refDate, unit, interval);
-                    units_used++;
+                    else {
+                        tbl.setCell(ix, 'TaskDetails', "");
+                    }
                 }
-
+                var blockHistDiv = document.getElementById('blockHistDiv');
+                tbl.display(blockHistDiv);
             }
-            dur = dur.length > 0 ? dur : "\< 1 hour";
-            return dur;
+            else {
+                var noBlockedStories = "<br>There are no stories that have ever been blocked for " +
+                        iterationDropdown.getSelectedName();
+                document.getElementById('blockHistDiv').innerHTML = noBlockedStories;
+            }
+        }
+        
+        
+        function showBlockingTasks(storyID) {
+            document.getElementById('taskHistoryDiv').innerHTML = "";
+            var blockedTasksDiv = document.getElementById('blockedTasksDiv');
+            blockedTasksDiv.innerHTML = "";  // zero out any current contents of the div
+            blockedTasksDiv.innerHTML = "<h4>Tasks with Blocking History<br>User Story: " + storyID + "<\/h4>";
+        
+            //  See if there have ever been any blocked tasks associated with the storyID
+            //  If not, blurt out text stating that
+            var blocked_tasks = blockedTasks[storyID];
+            if (blocked_tasks.length === 0) {
+                blockedTasksDiv.innerHTML += "<p>There are no tasks associated with this story that were ever blocked.</p>";
+                return;
+            }
+        
+            // Otherwise, cook up a table and fill it with info related to the tasks associated with
+            // the storyID that have been blocked at some point.
+            var config = {};
+            config = {"id" : "blockedTasks",
+                "columnKeys"    : ["TaskID", "Name", "SchedState",     "CurrentStatus",  "TaskHistory"],
+                "columnHeaders" : ["Task",   "Name", "Schedule State", "Current Status", "Task History"],
+                "columnWidths"  : ['75px', '300px', '90px', '80px', '120px'],
+                //"width"  : "85%",
+                "height" : "140px"
+            };
+            var tbl = new rally.sdk.ui.Table(config);
+            var taskBlockingHistoryLink = "";
+            for (var ix = 0; ix < blocked_tasks.length; ix++) {
+                var blockedTask = blocked_tasks[ix];
+                tbl.setCell(ix, 'TaskID', blockedTask.taskID);
+                tbl.setCell(ix, 'Name', "<nobr>" + blockedTask.name + "</nobr>");
+                tbl.setCell(ix, 'SchedState', blockedTask.state);
+                tbl.setCell(ix, 'CurrentStatus', blockedTask.status);
+                taskBlockingHistoryLink = makeFuncLink('showBlockingTaskHistory', [storyID, blockedTask.taskID], 'Show Blocking History');
+                tbl.setCell(ix, 'TaskHistory', taskBlockingHistoryLink);
+            }
+            tbl.display(blockedTasksDiv);
+        }
+        
+        
+        function createBlockageEpisode(startDate, rev) {
+            var be =
+            {
+                'blockDate'    : dojo.date.stamp.fromISOString(startDate),
+                'blockRev'     : rev,
+                'unBlockDate'  : "",
+                'unBlockRev'   : "",
+                'lagTime'      : "NA",
+                'duration'     : function () {
+                    if (this.unBlockDate === "") {
+                        this.unBlockDate = "Currently Blocked";
+                    }
+                    else {
+                        this.unBlockDate = dojo.date.stamp.fromISOString(this.unBlockDate);
+                        this.lagTime = this.calcDuration(this.blockDate, this.unBlockDate);
+                    }
+                },
+                'calcDuration' : function (startDate, endDate) {
+                    // Be aware that the dojo.date.difference function rounds when provided
+                    // a unit in the form of 'year', 'month', 'week', 'day', 'hour' ...
+                    // so the dur value that gets returned is often less than dead on the money precision.
+                    // If fine-precision is desired you'd need to start at the other end of the unit
+                    // spectrum ('second') and build up from there
+                    // Note also, that we arbitrarily limit our dur return value to 2 units of measure,
+                    // so you don't end up with something ridiculous like '4 years 11 months 3 weeks 6 days 5 hours'
+                    var dateFormatSpec = {'datePattern' : 'yyyy/MM/dd', 'selector' : 'date'};
+                    var refDate = startDate;
+                    var dur = "";
+                    var time_units = ['year', 'month', 'week', 'day', 'hour'];
+                    var unit = "";
+                    var units_used = 0;
+                    var interval = 0;
+                    for (var ix = 0; ix < time_units.length && units_used < 2; ix++) {
+                        unit = time_units[ix];
+                        interval = dojo.date.difference(refDate, endDate, unit);
+                        if (interval > 0) {
+                            dur += interval + " " + unit;
+                            if (interval > 1) {
+                                dur += "s";
+                            }
+                            dur += " ";
+                            refDate = dojo.date.add(refDate, unit, interval);
+                            units_used++;
+                        }
+        
+                    }
+                    dur = dur.length > 0 ? dur : "&lt; 1 hour";
+                    return dur;
+                }
+        
+            };
+            return be;
+        }
+        
+        
+        function taskBlockingHistory(storyID, taskID) {
+            // from the blockedStories hash, access the blocked tasks list and obtain the object
+            // associated with the taskID,
+            // iterate through the revisions.  Every time you see a blockage start, instantiate
+            // a BlockageEpisode object with blockDate, blockRev, set the lagTime to 'NA'
+            // and throw the BlockageEpisode on the blockages stack.
+            // When you see a blockage end, access the BlockageEpisode on the top of the blockages
+            // stack, and set the unblockDate and unblockRev.
+            // return the stack (array) of BlockageEpisode instances
+        
+            var blockages = [];
+            var blkg = null;
+            var tasks = blockedTasks[storyID];
+            var taskInfo = null;
+            for (var tix = 0; tix < tasks.length && taskInfo === null; tix++) {
+                var tskInfo = tasks[tix];
+                if (tskInfo.taskID === taskID) {
+                    taskInfo = tskInfo;
+                }
+            }
+            var revisions = taskInfo.revHist.Revisions;
+            revisions.sort(byRevisionNumber);
+            for (var rix = 0; rix < revisions.length; rix++) {
+                var revision = revisions[rix];
+                if (revision.RevisionNumber === 0) {
+                    blkg = createBlockageEpisode(revision.CreationDate, revision.RevisionNumber);
+                    blockages.push(blkg);
+                }
+        
+                if (revision.Description.indexOf("BLOCKED changed from [false] to [true]") >= 0) {
+                    blkg = createBlockageEpisode(revision.CreationDate, revision.RevisionNumber);
+                    blockages.push(blkg);
+                }
+                else if (revision.Description.indexOf("BLOCKED changed from [true] to [false]") >= 0) {
+                    var episode = blockages.pop();
+                    episode.unBlockDate = revision.CreationDate;
+                    episode.unBlockRev = revision.RevisionNumber;
+                    blockages.push(episode);
+                }
+            }
+            if (blockages.length > 1 && blockages[0].lagTime == 'NA') {
+                blockages.splice(0, 1);  // deletes the first element in blockages
+            }
+        
+            return blockages;
+        }
+        
+        
+        function showBlockingTaskHistory(storyID, taskID) {
+            var taskHistoryDiv = document.getElementById('taskHistoryDiv');
+            taskHistoryDiv.innerHTML = "";   // clear out for task history table
+            var tableHeader = "<br><br><h4>Blocking History for Task " + taskID + "</h4>";
+            var config = {};
+            config = {"id" : "taskBlockingHistory",
+                "columnKeys"    : ["BlockedDate",  "UnblockedDate",  "LagTime"],
+                "columnHeaders" : ["Blocked Date", "Unblocked Date", "Lag Time"],
+                "columnWidths"  : ['100px', '100px', '140px'],
+                //"width"  : "50%",
+                "height" : "100px"
+            };
+            var tbl = new rally.sdk.ui.Table(config);
+            var blockages = taskBlockingHistory(storyID, taskID);
+            var bd = null;
+            var dateFormatSpec = {'datePattern' : 'yyyy/MM/dd', 'selector' : 'date'};
+            for (var i = 0; i < blockages.length; i++) {
+                var blockage = blockages[i];
+                blockage.duration();   // call method to calculate and set the lagTime
+                bd = dojo.date.locale.format(blockage.blockDate, dateFormatSpec);
+                var ubd = "Currently Blocked";
+                if (blockage.unBlockDate !== "" && blockage.unBlockDate !== ubd) {
+                    ubd = dojo.date.locale.format(blockage.unBlockDate, dateFormatSpec);
+                }
+                tbl.setCell(i, 'BlockedDate', bd);
+                tbl.setCell(i, 'UnblockedDate', ubd);
+                tbl.setCell(i, 'LagTime', blockage.lagTime);
+            }
+        
+            tbl.display(taskHistoryDiv);
+            taskHistoryDiv.innerHTML = tableHeader + taskHistoryDiv.innerHTML;
+        }
+        
+        
+        function runMainQuery() {
+            // reset innerHTML content of blockHistDiv, otherwise you'll see an additional table
+            // added to the page whenever an iteration has any user story that has ever been blocked
+            // do the same for blockedTasksDiv and taskHistoryDiv
+            document.getElementById('blockHistDiv').innerHTML = "";
+            document.getElementById('blockedTasksDiv').innerHTML = "";
+            document.getElementById('taskHistoryDiv').innerHTML = "";
+            busySpinner.display("blockHistDiv");
+        
+            var showResults = function (results) {
+                busySpinner.hide();
+                document.getElementById('blockHistDiv').innerHTML = "<br>";
+                var blocked_stories = detectBlockedStories(results.stories);
+                showBlockedStories(blocked_stories);
+            };
+        
+            var targetIterationName = iterationDropdown.getSelectedName();
+            var queryConfig = { type : 'hierarchicalrequirement',
+                key  : 'stories',
+                fetch: 'Name,FormattedID,ScheduleState,CreationDate,' +
+                        'Blocked,RevisionHistory,Revisions,RevisionNumber,' +
+                        'Description,Tasks,State',
+                order: 'FormattedID',
+                query: '(Iteration.Name = ' + '\"' + targetIterationName + '\")'
+            };
+            rallyDataSource.findAll(queryConfig, showResults);
+        }
+    
+
+    </script>
+
+    <style type="text/css">
+        .blockedStories .dojoxGridCell {
+            text-align: right;
+            padding-right: 8px;
         }
 
-    };
-    return be;
-}
-
-
-function taskBlockingHistory(storyID, taskID) {
-    // from the blockedStories hash, access the blocked tasks list and obtain the object
-    // associated with the taskID,
-    // iterate through the revisions.  Every time you see a blockage start, instantiate
-    // a BlockageEpisode object with blockDate, blockRev, set the lagTime to 'NA'
-    // and throw the BlockageEpisode on the blockages stack.
-    // When you see a blockage end, access the BlockageEpisode on the top of the blockages
-    // stack, and set the unblockDate and unblockRev.
-    // return the stack (array) of BlockageEpisode instances
-
-    //console.log("obtaining taskBlockingHistory for " + storyID + " task: " + taskID);
-    var blockages = [];
-    var blkg = null;
-    var tasks = blockedTasks[storyID];
-    var taskInfo = null;
-    for (var tix = 0; tix < tasks.length && taskInfo === null; tix++) {
-        var tskInfo = tasks[tix];
-        if (tskInfo.taskID === taskID) {
-            taskInfo = tskInfo;
-        }
-    }
-    var revisions = taskInfo.revHist.Revisions;
-    revisions.sort(byRevisionNumber);
-    for (var rix = 0; rix < revisions.length; rix++) {
-        var revision = revisions[rix];
-        if (revision.RevisionNumber === 0) {
-            blkg = createBlockageEpisode(revision.CreationDate, revision.RevisionNumber);
-            blockages.push(blkg);
+        .blockedTasks   .dojoxGridCell {
+            text-align: left;
+            padding-right: 8px;
         }
 
-        if (revision.Description.indexOf("BLOCKED changed from [false] to [true]") >= 0) {
-            blkg = createBlockageEpisode(revision.CreationDate, revision.RevisionNumber);
-            blockages.push(blkg);
+        th, td {
+            font-size: smaller;
         }
-        else if (revision.Description.indexOf("BLOCKED changed from [true] to [false]") >= 0) {
-            var episode = blockages.pop();
-            episode.unBlockDate = revision.CreationDate;
-            episode.unBlockRev = revision.RevisionNumber;
-            blockages.push(episode);
+    </style>
+
+    <script type="text/javascript">
+
+        function blockingHistory() {
+            var loadDojoDateSugar = function() {
+                dojo.require("dojo.date");
+                dojo.require("dojo.date.stamp");
+                dojo.require("dojo.date.locale");
+            };
+            dojo.addOnLoad(loadDojoDateSugar);
+            busySpinner = new rally.sdk.ui.Wait({hideTarget : true});
+            rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
+                    '__PROJECT_OID__',
+                    '__PROJECT_SCOPING_UP__',
+                    '__PROJECT_SCOPING_DOWN__');
+            var iterConfig = {label: 'Select Iteration '};
+            iterationDropdown = new rally.sdk.ui.IterationDropdown(iterConfig, rallyDataSource);
+            iterationDropdown.display('iterations', runMainQuery);
         }
-    }
-    if (blockages.length > 1 && blockages[0].lagTime == 'NA') {
-        blockages.splice(0, 1);  // deletes the first element in blockages
-    }
 
-    return blockages;
-}
-
-
-function showBlockingTaskHistory(storyID, taskID) {
-    //console.log("   in showBlockingTaskHistory(" + storyID + ", " +  taskID + ")...");
-    var taskHistoryDiv = document.getElementById('taskHistoryDiv');
-    taskHistoryDiv.innerHTML = "";   // clear out for task history table
-    var tableHeader = "<br><br><h4>Blocking History for Task " + taskID + "</h4>";
-    var config = {};
-    config = {"id" : "taskBlockingHistory",
-        "columnKeys"    : ["BlockedDate",  "UnblockedDate",  "LagTime"],
-        "columnHeaders" : ["Blocked Date", "Unblocked Date", "Lag Time"],
-        "columnWidths"  : ['100px', '100px', '140px'],
-        //"width"  : "50%",
-        "height" : "100px"
-    };
-    var tbl = new rally.sdk.ui.Table(config);
-    var blockages = taskBlockingHistory(storyID, taskID);
-    var bd = null;
-    var dateFormatSpec = {'datePattern' : 'yyyy/MM/dd', 'selector' : 'date'};
-    for (var i = 0; i < blockages.length; i++) {
-        var blockage = blockages[i];
-        blockage.duration();   // call method to calculate and set the lagTime
-        bd = dojo.date.locale.format(blockage.blockDate, dateFormatSpec);
-        var ubd = "Currently Blocked";
-        if (blockage.unBlockDate !== "" && blockage.unBlockDate !== ubd) {
-            ubd = dojo.date.locale.format(blockage.unBlockDate, dateFormatSpec);
-        }
-        tbl.setCell(i, 'BlockedDate', bd);
-        tbl.setCell(i, 'UnblockedDate', ubd);
-        tbl.setCell(i, 'LagTime', blockage.lagTime);
-    }
-
-    tbl.display(taskHistoryDiv);
-    taskHistoryDiv.innerHTML = tableHeader + taskHistoryDiv.innerHTML;
-}
-
-
-function runMainQuery() {
-    // reset innerHTML content of blockHistDiv, otherwise you'll see an additional table
-    // added to the page whenever an iteration has any user story that has ever been blocked
-    // do the same for blockedTasksDiv and taskHistoryDiv
-    document.getElementById('blockHistDiv').innerHTML = "";
-    document.getElementById('blockedTasksDiv').innerHTML = "";
-    document.getElementById('taskHistoryDiv').innerHTML = "";
-    busySpinner.display("blockHistDiv");
-
-    var showResults = function (results) {
-        busySpinner.hide();
-        document.getElementById('blockHistDiv').innerHTML = "<br>";
-        //console.log("Query resulted in " + results.stories.length + " stories.");
-        var blocked_stories = detectBlockedStories(results.stories);
-        showBlockedStories(blocked_stories);
-    };
-
-    var targetIterationName = iterationDropdown.getSelectedName();
-    var queryConfig = { type : 'hierarchicalrequirement',
-        key  : 'stories',
-        fetch: 'Name,FormattedID,ScheduleState,CreationDate,' +
-                'Blocked,RevisionHistory,Revisions,RevisionNumber,' +
-                'Description,Tasks,State',
-        order: 'FormattedID',
-        query: '(Iteration.Name = ' + '\"' + targetIterationName + '\")'
-    };
-    rallyDataSource.findAll(queryConfig, showResults);
-}
-</script>
-
-<style type="text/css">
-    .blockedStories .dojoxGridCell {
-        text-align: right;
-        padding-right: 8px;
-    }
-
-    .blockedTasks   .dojoxGridCell {
-        text-align: left;
-        padding-right: 8px;
-    }
-
-    th, td {
-        font-size: smaller;
-    }
-</style>
-
-<script type="text/javascript">
-
-    function blockingHistory() {
-        var loadDojoDateSugar = function() {
-            dojo.require("dojo.date");
-            dojo.require("dojo.date.stamp");
-            dojo.require("dojo.date.locale");
-        };
-        dojo.addOnLoad(loadDojoDateSugar);
-        busySpinner = new rally.sdk.ui.Wait({hideTarget : true});
-        rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
-                '__PROJECT_OID__',
-                '__PROJECT_SCOPING_UP__',
-                '__PROJECT_SCOPING_DOWN__');
-        var iterConfig = {label: 'Select Iteration '};
-        iterationDropdown = new rally.sdk.ui.IterationDropdown(iterConfig, rallyDataSource);
-        iterationDropdown.display('iterations', runMainQuery);
-    }
-
-    rally.addOnLoad(blockingHistory);
-</script>
+        rally.addOnLoad(blockingHistory);
+    </script>
 </head>
 <body>
 <h3>Blocking History for Stories in an Iteration</h3>

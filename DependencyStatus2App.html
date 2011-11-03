@@ -2,553 +2,545 @@
 <!-- Copyright (c) 2002-2010  Rally Software Development Corp. All rights reserved. -->
 <html>
 <head>
-<meta name="Name" content="App: Dependency Status Dashboard 2"/>
-<meta name="Vendor" content="Rally Software"/>
-<meta name="Version" content="2010.4"/>
-<script type="text/javascript" src="/apps/1.21/sdk.js"></script>
+    <meta name="Name" content="App: Dependency Status Dashboard 2"/>
+    <meta name="Vendor" content="Rally Software"/>
+    <meta name="Version" content="2010.4"/>
+    <script type="text/javascript" src="/apps/1.21/sdk.js"></script>
 
-<script type="text/javascript">
-
-
-//Object to retrieve iteration and
-//user story dependency data
-function DependencyDataService() {
-    var onBeforeUserStoryQuery = [];
-    var onError = [];
-    var onDataRetrievalComplete;
-
-    var that = this;
-    var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__', '__PROJECT_OID__',
-            '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
-
-    //Public method to retrieve data
-    //Upon successful retrieval onCompletedCallback will be invoked
-    //passing the results
-    this.retrieveData = function (onCompletedCallback) {
-
-        //Save for later
-        onDataRetrievalComplete = onCompletedCallback;
-
-        //KRM - Query improvement?
-        //If iterations are never set to completed there may be
-        //a very large # of results.  Consider adding the following...
-        //AND (EndDate > Today)
-        var query = {
-            key : "iterations",
-            type : "iteration",
-            fetch : "ObjectID,StartDate,EndDate,State,Name,Project",
-            projectScopeUp : false,
-            projectScopeDown: false,
-            query : "(State != Accepted)",
-            order : "StartDate"
-        };
-
-        //Run the query
-        that.performQuery(query, retrieveDependencyData);
-
-    };
-
-    //Public method to
-    //add a handler for an event triggered
-    //before the main query is run
-    //Signature should be: function handler(iterations) {}
-    this.addOnBeforeUserStoryQueryHandler = function(handler) {
-        onBeforeUserStoryQuery.push(handler);
-    };
-
-    //Public method to
-    //add a handler for an event triggered
-    //when a query error occurs
-    //Signature should be: function handler(error) {}
-    this.addOnErrorHandler = function(handler) {
-        onError.push(handler);
-    };
-
-    //Public method to perform a query
-    //Provides error handling
-    this.performQuery = function(queries, callback) {
-        rallyDataSource.findAll(queries, function(results) {
-
-            //Check for errors
-            var errors = [];
-            for (var error in results.errors) {
-                for (var i = 0; i < results.errors[error].length; i++) {
-                    errors.push(results.errors[error][i]);
+    <script type="text/javascript">
+    
+        
+        //Object to retrieve iteration and
+        //user story dependency data
+        function DependencyDataService()
+        {
+            var onBeforeUserStoryQuery = [];
+            var onError = [];
+            var onDataRetrievalComplete;
+        
+            var that = this;
+            var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__', '__PROJECT_OID__',
+                '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
+        
+            //Public method to retrieve data
+            //Upon successful retrieval onCompletedCallback will be invoked
+            //passing the results
+            this.retrieveData = function (onCompletedCallback) {
+        
+                //Save for later
+                onDataRetrievalComplete = onCompletedCallback;
+        
+                //KRM - Query improvement?
+                //If iterations are never set to completed there may be
+                //a very large # of results.  Consider adding the following...
+                //AND (EndDate > Today) 
+                var query = {
+                    key : "iterations",
+                    type : "iteration",
+                    fetch : "ObjectID,StartDate,EndDate,State,Name,Project",
+                    projectScopeUp : false,
+                    projectScopeDown: false,
+                    query : "(State != Accepted)",
+                    order : "StartDate"
+                };
+        
+                //Run the query
+                that.performQuery(query, retrieveDependencyData);
+                
+            };
+        
+            //Public method to
+            //add a handler for an event triggered
+            //before the main query is run
+            //Signature should be: function handler(iterations) {}
+            this.addOnBeforeUserStoryQueryHandler = function(handler) {
+                onBeforeUserStoryQuery.push(handler);
+            };
+        
+            //Public method to
+            //add a handler for an event triggered
+            //when a query error occurs
+            //Signature should be: function handler(error) {}
+            this.addOnErrorHandler = function(handler) {
+                onError.push(handler);
+            };
+        
+            //Public method to perform a query
+            //Provides error handling
+            this.performQuery = function(queries, callback) {
+                rallyDataSource.findAll(queries, function(results) {
+        
+                    //Check for errors
+                    var errors = [];
+                    for(var error in results.errors) {
+                        for(var i = 0; i < results.errors[error].length; i++) {
+                            errors.push(results.errors[error][i]);
+                        }
+                    }
+        
+                    //No errors- perform callback with results
+                     if(errors.length === 0) {
+                         callback(results);
+                     } else {
+                        //An error occurred.
+                        //Invoke handlers
+                        var e = new Error("Error retrieving data.");
+                        error.errors = errors;
+                        for(var j = 0; j < onError.length; j++) {
+                            onError[j](error);
+                        }
+                    }
+        
+                });
+            };
+        
+            //Private helper method used as a callback for retrieveData
+            //that retrieves user story information once the iteration
+            //information has been returned
+            function retrieveDependencyData(iterationResults)
+            {
+                //Create the collection to be returned
+                var iterationInfo = [];
+        
+                //Create a series of queries to find the
+                //user story info for each iteration
+                var queries = [];
+                for(var i = 0; i < iterationResults.iterations.length; i++) {
+                    queries.push(
+                        {
+                            key : iterationResults.iterations[i].ObjectID + "UserStories",
+                            type : "hierarchicalrequirement",
+                            fetch : "Predecessors,ScheduleState,Blocked,FormattedID,Project,Name,ObjectID,Iteration,StartDate,EndDate",
+                            query : "(Iteration = " + iterationResults.iterations[i]._ref + " )"
+                        });
+                    iterationInfo.push(iterationResults.iterations[i]);
+                }
+        
+                //Execute the onBeforeQuery handlers
+                for(i = 0; i < onBeforeUserStoryQuery.length; i++) {
+                    onBeforeUserStoryQuery[i](iterationInfo, queries);
+                }
+        
+                that.performQuery(queries, function(results) {
+                        for(var i = 0; i < iterationInfo.length; i++) {
+                            iterationInfo[i].userStories = results[iterationInfo[i].ObjectID + "UserStories"];
+                        }
+        
+                        onDataRetrievalComplete(iterationInfo);
+                });
+            }
+        
+            return that;
+        }
+        
+        //Object to display iteration and user story
+        //dependency data returned from the DependencyDataService
+        function DependencyDataPresenter(displayElementName)
+        {
+            dojo.require("dojo.date.stamp");
+            var that = this;
+            var displayElement = dojo.byId(displayElementName);
+        
+            //Public method to display iteration and user story dependency data
+            this.populateView = function(dependencyData)
+            {
+                if(dependencyData.length > 0) {
+                    displayElement.innerHTML += '<div id="subtitle">What is <span id="project-name">' +
+                            dependencyData[0].Project.Name +
+                            '</span> waiting for, and from whom?</div><div id="iteration-box"></div>';
+        
+                    //Display each iteration returned
+                    for(var i = 0; i < dependencyData.length; i++) {
+                        displayIteration(dojo.byId("iteration-box"), dependencyData[i]);
+                    }
+                } else {
+                    displayElement.innerHTML += '<div id="subtitle">No iterations found.</div>';
+                }
+        
+            };
+        
+            //Function to handle query errors
+            this.displayError = function(error) {
+                var errorHtml = '<div class="queryError">' +
+                        error.message + '<ul>';
+                for(var i = 0; i < error.errors.length; i++) {
+                    errorHtml += '<li>' + error.errors[i] + '</li>';
+                }
+                displayElement.innerHTML += errorHtml + '</ul></div>';
+            };
+        
+            //Private helper function to format
+            //an ISO date into M/D
+            function formatDate(dateString)
+            {
+                //KRM - strip off the Z so dojo doesn't do
+                //auto time zone stuff
+                var date = parseDate(dateString);
+                return (date.getMonth() + 1) + "/" + date.getDate();
+            }
+        
+            function parseDate(dateString) {
+                return dojo.date.stamp.fromISOString(dateString.replace(/Z/,""));
+            }
+        
+            //Private helper function to display the
+            //specified iteration in the specified element.
+            function displayIteration(displayElement, iteration)
+            {
+                //KRM - A note on the iteration status link:
+                //This is currently supported as of this writing but may go away in the future.
+                displayElement.innerHTML += '<div class="d-iteration" id="iteration' + iteration.ObjectID +
+                    '"><div class="heading"><span class="label"><a target="_top" href="/slm/rally.sp?pp=pj%2fd%2fis&iterationKey=' +
+                            iteration.ObjectID + '">' + iteration.Name + '</a></span><br/>' +
+                            formatDate(iteration.StartDate) + ' - ' + formatDate(iteration.EndDate) +
+                            ' (' + iteration.State + ')</div></div>';
+                var dependencyDiv = dojo.byId("iteration" + iteration.ObjectID);
+                var dependenciesFound = false;
+                for(var i = 0; i < iteration.userStories.length; i++) {
+                    var userStory = iteration.userStories[i];
+                    if(that.displayDependencies(dependencyDiv, userStory)) {
+                        dependenciesFound = true;
+                    }
+                }
+        
+                if (!dependenciesFound) {
+                    dependencyDiv.innerHTML += '<div class="dependency">No dependencies.</div>';
                 }
             }
-
-            //No errors- perform callback with results
-            if (errors.length === 0) {
-                callback(results);
-            } else {
-                //An error occurred.
-                //Invoke handlers
-                var e = new Error("Error retrieving data.");
-                error.errors = errors;
-                for (var j = 0; j < onError.length; j++) {
-                    onError[j](error);
+        
+            //Public function to display the
+            //specified user story and its dependencies in the specified element
+            this.displayDependencies = function(displayElement, userStory) {
+                if(userStory.Predecessors.length > 0) {
+                    displayElement.innerHTML += '<div class="dependency" id="userStory' + userStory.ObjectID +
+                                                '">' + that.createArtifactLink(userStory) + '<br/></div>';
+                    var userStoryDiv = dojo.byId("userStory" + userStory.ObjectID);
+        
+                    //Display each dependency
+                    for(var i = 0; i < userStory.Predecessors.length; i++) {
+                        that.displayDependency(userStoryDiv, userStory,
+                                userStory.Predecessors[i]);
+                    }
+        
+                    return true;
+                }
+        
+                return false;
+            };
+        
+            //Public function to display the specified predecessor
+            //in the specified displayDependency
+            this.displayDependency = function(displayElement, userStory, predecessor) {
+                    var predecessorHtml =  '<div class="predecessor-container"><div class="predecessor-status"><div class="state-legend' +
+                            (predecessor.Blocked ? "-blocked" : "") + '" title="' + predecessor.ScheduleState + '">' +
+                            getStateAbbreviation(predecessor.ScheduleState) +
+                            '</div></div><div class="predecessor">Waiting on <b>' + predecessor.Project.Name +
+                            '</b> for <br/>' + that.createArtifactLink(predecessor) + '<br/><span class="statusDescription">';
+                    var warningImageHtml = '<img src="/slm/images/icon_alert_sm.gif" alt="Warning" title="Warning" /> ';
+        
+                    //Display the status of the predecessor
+                    if(predecessor.Iteration === null) {
+                        predecessorHtml += warningImageHtml + "Not yet scheduled";
+                    } else if(predecessor.ScheduleState == "Accepted") {
+                        predecessorHtml += "Accepted in " + predecessor.Iteration.Name +
+                                " for " + formatDate(predecessor.Iteration.EndDate);
+                    } else if(predecessor.Blocked) {
+                        predecessorHtml += warningImageHtml + "Blocked";
+                    } else if (
+                        //KRM - Allow not late if same iteration?
+                        //predecessor.Iteration._ref !== userStory.Iteration._ref &&
+                        parseDate(predecessor.Iteration.EndDate) >
+                               parseDate(userStory.Iteration.StartDate)) {
+                        predecessorHtml += warningImageHtml + "Scheduled for " +
+                                formatDate(predecessor.Iteration.EndDate) + " - too late";
+                    } else {
+                        predecessorHtml += "Scheduled for " + formatDate(predecessor.Iteration.EndDate);
+                    }
+        
+                    displayElement.innerHTML += predecessorHtml + '</span></div></div>';
+            };
+        
+            //Public function to create a link for
+            //the specified artifact
+            this.createArtifactLink = function(artifact) {
+                return '<a href="/slm/detail/' +
+                        (artifact._type === "HierarchicalRequirement" ? 'ar/' : 'df/') +
+                        artifact.ObjectID + '" target="_top">' + artifact.FormattedID + ': ' +
+                        artifact.Name + '</a>';
+            };
+        
+            //Private helper function to get the abbreviation
+            //for the specified user story state
+            function getStateAbbreviation(state) {
+                return state == "In-Progress" ? "P" : state.charAt(0);
+            }
+        
+            return that;
+        }
+    
+    //Object to retrieve iteration,
+        //user story and defect dependency data
+        function EnhancedDependencyDataService() {
+            //inherit DependencyDataService
+            DependencyDataService.call(this);
+            var that = this;
+        
+        
+            //Create a handler for the data service's
+            //onBeforeUserStoryQuery handler
+            //to modify the sort order and to include
+            //relevant defect data
+            function onBeforeUserStoryQuery(iterationInfo, queries) {
+                //Loop through the existing queries
+                //and edit them to order by rank
+                //and to also include the Rank and Plan Estimates fields
+                for (var i = 0; i < queries.length; i++) {
+                    queries[i].order = "Rank";
+                    queries[i].fetch += ",PlanEstimate,Rank,Defects,State,Owner,SubmittedBy,UserName";
                 }
             }
+        
+            //Register the onBeforeUserStoryQuery handler
+            this.addOnBeforeUserStoryQueryHandler(onBeforeUserStoryQuery);
+        
+            return that;
+        }
+        
+        //Object to display iteration, user story and defect
+        //dependency data returned from the EnhancedDependencyDataService
+        function EnhancedDependencyDataPresenter(displayElementName) {
+            //inherit DependencyDataPresenter
+            DependencyDataPresenter.call(this, displayElementName);
+            var that = this;
+        
+            //KRM - Flag to enable/disable
+            //display of defects on user stories within the iteration
+            //that do not have predecessors
+            var showRootDefects = false;
+        
+            //Private helper function to display
+            //the specified list of defects in the
+            //specified display element
+            function displayDefects(displayElement, defects, isPredecessor) {
+                var defectHtml = '';
+                for (var i = 0; i < defects.length; i++) {
+                    var defect = defects[i];
+                    defectHtml += '<div class="' + (isPredecessor ? "predecessor-" : "") +
+                            'defect-container"><div class="predecessor-status">' +
+                            '<img src="/slm/images/icon_defect.gif" /></div>' +
+                            '<div class="predecessor">' +
+                            defect.State + ' <b>' + defect.Project.Name + '</b> defect: <br/>' +
+                            that.createArtifactLink(defect) + '<br/>' +
+                            '<span class="statusDescription">';
+                    if (defect.SubmittedBy !== null) {
+                        defectHtml += 'Submitted by: ' + defect.SubmittedBy.UserName + '<br/>';
+                    }
+                    if (defect.Owner !== null) {
+                        defectHtml += 'Owned by: ' + defect.Owner.UserName + '<br/>';
+                    }
+                    defectHtml += '</span></div></div>';
+                }
+        
+                displayElement.innerHTML += defectHtml;
+            }
+        
+            //Override the base implementation of displayDependency
+            //to account for displaying defects
+            var baseDisplayDependency = that.displayDependency;
+            this.displayDependency = function(displayElement, userStory, predecessor) {
+                baseDisplayDependency(displayElement, userStory, predecessor);
+        
+                displayDefects(displayElement, filterClosedDefects(predecessor.Defects), true);
+        
+            };
+        
+            function filterClosedDefects(defects) {
+                var filteredDefects = [];
+                for (var i = 0; i < defects.length; i++) {
+                    if (defects[i].State != "Closed") {
+                        filteredDefects.push(defects[i]);
+                    }
+                }
+                return filteredDefects;
+            }
+        
+            //Override the base implementation of displayDependencies
+            //to account for the different user story display (story icon, plan estimates, etc)
+            //and to inject defects on the user story
+            this.displayDependencies = function(displayElement, userStory) {
+        
+                //Find the list of defects
+                var defects = filterClosedDefects(userStory.Defects);
+        
+        
+                //Only display if there are dependencies
+                //or defects
+                if (userStory.Predecessors.length > 0 ||
+                        (showRootDefects && defects.length > 0)) {
+                    displayElement.innerHTML += '<div class="dependency" id="userStory' + userStory.ObjectID + '">' +
+                            '<div class="userStoryIcon"><img src="/slm/images/icon_story.gif" /></div>' +
+                        //KRM - Rank is messed up? + Number(userStory.Rank).toFixed(1)
+                            ' <b>' + that.createArtifactLink(userStory) + '</b> ' +
+                            Number(userStory.PlanEstimate).toFixed(1) + ' pts.<br/></div>';
+                    var userStoryDiv = dojo.byId("userStory" + userStory.ObjectID);
+        
+                    //Display the defects
+                    displayDefects(userStoryDiv, defects);
+        
+                    //Display each dependency
+                    for (var i = 0; i < userStory.Predecessors.length; i++) {
+                        that.displayDependency(userStoryDiv, userStory,
+                                userStory.Predecessors[i]);
+                    }
+        
+                    return true;
+                }
+        
+                return false;
+            };
+        
+            return that;
+        }
+    
 
+    </script>
+    <script type="text/javascript">
+        rally.addOnLoad(function () {
+            //Create the data collection and display creation objects
+            var dataService = new EnhancedDependencyDataService();
+            var dataPresenter = new EnhancedDependencyDataPresenter("status");
+
+            //Retrieve the data and display it when available
+            dataService.addOnErrorHandler(dataPresenter.displayError);
+            dataService.retrieveData(dataPresenter.populateView);
         });
-    };
+    </script>
 
-    //Private helper method used as a callback for retrieveData
-    //that retrieves user story information once the iteration
-    //information has been returned
-    function retrieveDependencyData(iterationResults) {
-        //Create the collection to be returned
-        var iterationInfo = [];
-
-        //Create a series of queries to find the
-        //user story info for each iteration
-        var queries = [];
-        for (var i = 0; i < iterationResults.iterations.length; i++) {
-            queries.push(
-                    {
-                        key : iterationResults.iterations[i].ObjectID + "UserStories",
-                        type : "hierarchicalrequirement",
-                        fetch : "Predecessors,ScheduleState,Blocked,FormattedID,Project,Name,ObjectID,Iteration,StartDate,EndDate",
-                        query : "(Iteration = " + iterationResults.iterations[i]._ref + " )"
-                    });
-            iterationInfo.push(iterationResults.iterations[i]);
+    <style type="text/css">
+    
+        body {
+            font-family:tahoma,geneva,helvetica,arial,sans-serif;
+            font-size:11px;
+            background: EBEBD8;
         }
-
-        //Execute the onBeforeQuery handlers
-        for (i = 0; i < onBeforeUserStoryQuery.length; i++) {
-            onBeforeUserStoryQuery[i](iterationInfo, queries);
+        .d-iteration {
+            padding: 5px;
+            margin: 5px;
+            background: white;
+            border: solid 1px #cccccc;
+            border-top: solid 2px #cccccc;
+            font-family:tahoma,geneva,helvetica,arial,sans-serif;
+            font-size:11px;
+            width: 275px;
+            height: 400px;
+            overflow-y: auto;
+            float: left;
         }
-
-        that.performQuery(queries, function(results) {
-            for (var i = 0; i < iterationInfo.length; i++) {
-                iterationInfo[i].userStories = results[iterationInfo[i].ObjectID + "UserStories"];
-            }
-
-            onDataRetrievalComplete(iterationInfo);
-        });
-    }
-
-    return that;
-}
-
-//Object to display iteration and user story
-//dependency data returned from the DependencyDataService
-function DependencyDataPresenter(displayElementName) {
-    dojo.require("dojo.date.stamp");
-    var that = this;
-    var displayElement = dojo.byId(displayElementName);
-
-    //Public method to display iteration and user story dependency data
-    this.populateView = function(dependencyData) {
-        if (dependencyData.length > 0) {
-            displayElement.innerHTML += '<div id="subtitle">What is <span id="project-name">' +
-                    dependencyData[0].Project.Name +
-                    '</span> waiting for, and from whom?</div><div id="iteration-box"></div>';
-
-            //Display each iteration returned
-            for (var i = 0; i < dependencyData.length; i++) {
-                displayIteration(dojo.byId("iteration-box"), dependencyData[i]);
-            }
-        } else {
-            displayElement.innerHTML += '<div id="subtitle">No iterations found.</div>';
+        .heading {
+            border: 0px;
+            border-bottom: solid 1px #cccccc;
+            padding-bottom: 5px;
         }
-
-    };
-
-    //Function to handle query errors
-    this.displayError = function(error) {
-        var errorHtml = '<div class="queryError">' +
-                error.message + '<ul>';
-        for (var i = 0; i < error.errors.length; i++) {
-            errorHtml += '<li>' + error.errors[i] + '</li>';
+        
+        .heading .label {
+            font-weight: bold;
         }
-        displayElement.innerHTML += errorHtml + '</ul></div>';
-    };
-
-    //Private helper function to format
-    //an ISO date into M/D
-    function formatDate(dateString) {
-        //KRM - strip off the Z so dojo doesn't do
-        //auto time zone stuff
-        var date = parseDate(dateString);
-        return (date.getMonth() + 1) + "/" + date.getDate();
-    }
-
-    function parseDate(dateString) {
-        return dojo.date.stamp.fromISOString(dateString.replace(/Z/, ""));
-    }
-
-    //Private helper function to display the
-    //specified iteration in the specified element.
-    function displayIteration(displayElement, iteration) {
-        //KRM - A note on the iteration status link:
-        //This is currently supported as of this writing but may go away in the future.
-        displayElement.innerHTML += '<div class="d-iteration" id="iteration' + iteration.ObjectID +
-                '"><div class="heading"><span class="label"><a target="_top" href="/slm/rally.sp?pp=pj%2fd%2fis&iterationKey=' +
-                iteration.ObjectID + '">' + iteration.Name + '</a></span><br/>' +
-                formatDate(iteration.StartDate) + ' - ' + formatDate(iteration.EndDate) +
-                ' (' + iteration.State + ')</div></div>';
-        var dependencyDiv = dojo.byId("iteration" + iteration.ObjectID);
-        var dependenciesFound = false;
-        for (var i = 0; i < iteration.userStories.length; i++) {
-            var userStory = iteration.userStories[i];
-            if (that.displayDependencies(dependencyDiv, userStory)) {
-                dependenciesFound = true;
-            }
+        #d_titlebar {
+            font-family:tahoma,geneva,helvetica,arial,sans-serif;
+            font-weight: bold;
+            padding-left: 10px;
+                font-size: 14px;
         }
-
-        if (!dependenciesFound) {
-            dependencyDiv.innerHTML += '<div class="dependency">No dependencies.</div>';
+        #subtitle {
+            font-family:tahoma,geneva,helvetica,arial,sans-serif;
+            padding-left: 10px;
+            font-size: 11px;
+            display: block;
         }
-    }
-
-    //Public function to display the
-    //specified user story and its dependencies in the specified element
-    this.displayDependencies = function(displayElement, userStory) {
-        if (userStory.Predecessors.length > 0) {
-            displayElement.innerHTML += '<div class="dependency" id="userStory' + userStory.ObjectID +
-                    '">' + that.createArtifactLink(userStory) + '<br/></div>';
-            var userStoryDiv = dojo.byId("userStory" + userStory.ObjectID);
-
-            //Display each dependency
-            for (var i = 0; i < userStory.Predecessors.length; i++) {
-                that.displayDependency(userStoryDiv, userStory,
-                        userStory.Predecessors[i]);
-            }
-
-            return true;
+        .dependency {
+            padding-top: 5px;
+            padding-bottom: 3px;
+            padding-left: 3px;
+            float:left;
         }
-
-        return false;
-    };
-
-    //Public function to display the specified predecessor
-    //in the specified displayDependency
-    this.displayDependency = function(displayElement, userStory, predecessor) {
-        var predecessorHtml = '<div class="predecessor-container"><div class="predecessor-status"><div class="state-legend' +
-                (predecessor.Blocked ? "-blocked" : "") + '" title="' + predecessor.ScheduleState + '">' +
-                getStateAbbreviation(predecessor.ScheduleState) +
-                '</div></div><div class="predecessor">Waiting on <b>' + predecessor.Project.Name +
-                '</b> for <br/>' + that.createArtifactLink(predecessor) + '<br/><span class="statusDescription">';
-        var warningImageHtml = '<img src="/slm/images/icon_alert_sm.gif" alt="Warning" title="Warning" /> ';
-
-        //Display the status of the predecessor
-        if (predecessor.Iteration === null) {
-            predecessorHtml += warningImageHtml + "Not yet scheduled";
-        } else if (predecessor.ScheduleState == "Accepted") {
-            predecessorHtml += "Accepted in " + predecessor.Iteration.Name +
-                    " for " + formatDate(predecessor.Iteration.EndDate);
-        } else if (predecessor.Blocked) {
-            predecessorHtml += warningImageHtml + "Blocked";
-        } else if (
-        //KRM - Allow not late if same iteration?
-        //predecessor.Iteration._ref !== userStory.Iteration._ref &&
-                parseDate(predecessor.Iteration.EndDate) >
-                        parseDate(userStory.Iteration.StartDate)) {
-            predecessorHtml += warningImageHtml + "Scheduled for " +
-                    formatDate(predecessor.Iteration.EndDate) + " - too late";
-        } else {
-            predecessorHtml += "Scheduled for " + formatDate(predecessor.Iteration.EndDate);
+        .dependency .predecessor {
+            padding: 5px;
+            padding-left: 22px;
         }
-
-        displayElement.innerHTML += predecessorHtml + '</span></div></div>';
-    };
-
-    //Public function to create a link for
-    //the specified artifact
-    this.createArtifactLink = function(artifact) {
-        return '<a href="/slm/detail/' +
-                (artifact._type === "HierarchicalRequirement" ? 'ar/' : 'df/') +
-                artifact.ObjectID + '" target="_top">' + artifact.FormattedID + ': ' +
-                artifact.Name + '</a>';
-    };
-
-    //Private helper function to get the abbreviation
-    //for the specified user story state
-    function getStateAbbreviation(state) {
-        return state == "In-Progress" ? "P" : state.charAt(0);
-    }
-
-    return that;
-}
-
-
-//Object to retrieve iteration,
-//user story and defect dependency data
-function EnhancedDependencyDataService() {
-    //inherit DependencyDataService
-    DependencyDataService.call(this);
-    var that = this;
-
-
-    //Create a handler for the data service's
-    //onBeforeUserStoryQuery handler
-    //to modify the sort order and to include
-    //relevant defect data
-    function onBeforeUserStoryQuery(iterationInfo, queries) {
-        //Loop through the existing queries
-        //and edit them to order by rank
-        //and to also include the Rank and Plan Estimates fields
-        for (var i = 0; i < queries.length; i++) {
-            queries[i].order = "Rank";
-            queries[i].fetch += ",PlanEstimate,Rank,Defects,State,Owner,SubmittedBy,UserName";
+        .predecessor-container {
+            padding-left: 20px;
         }
-    }
-
-    //Register the onBeforeUserStoryQuery handler
-    this.addOnBeforeUserStoryQueryHandler(onBeforeUserStoryQuery);
-
-    return that;
-}
-
-//Object to display iteration, user story and defect
-//dependency data returned from the EnhancedDependencyDataService
-function EnhancedDependencyDataPresenter(displayElementName) {
-    //inherit DependencyDataPresenter
-    DependencyDataPresenter.call(this, displayElementName);
-    var that = this;
-
-    //KRM - Flag to enable/disable
-    //display of defects on user stories within the iteration
-    //that do not have predecessors
-    var showRootDefects = false;
-
-    //Private helper function to display
-    //the specified list of defects in the
-    //specified display element
-    function displayDefects(displayElement, defects, isPredecessor) {
-        var defectHtml = '';
-        for (var i = 0; i < defects.length; i++) {
-            var defect = defects[i];
-            defectHtml += '<div class="' + (isPredecessor ? "predecessor-" : "") +
-                    'defect-container"><div class="predecessor-status">' +
-                    '<img src="/slm/images/icon_defect.gif" /></div>' +
-                    '<div class="predecessor">' +
-                    defect.State + ' <b>' + defect.Project.Name + '</b> defect: <br/>' +
-                    that.createArtifactLink(defect) + '<br/>' +
-                    '<span class="statusDescription">';
-            if (defect.SubmittedBy !== null) {
-                defectHtml += 'Submitted by: ' + defect.SubmittedBy.UserName + '<br/>';
-            }
-            if (defect.Owner !== null) {
-                defectHtml += 'Owned by: ' + defect.Owner.UserName + '<br/>';
-            }
-            defectHtml += '</span></div></div>';
+        .predecessor-status {
+            float: left;
+            padding-top: 5px;
         }
-
-        displayElement.innerHTML += defectHtml;
-    }
-
-    //Override the base implementation of displayDependency
-    //to account for displaying defects
-    var baseDisplayDependency = that.displayDependency;
-    this.displayDependency = function(displayElement, userStory, predecessor) {
-        baseDisplayDependency(displayElement, userStory, predecessor);
-
-        displayDefects(displayElement, filterClosedDefects(predecessor.Defects), true);
-
-    };
-
-    function filterClosedDefects(defects) {
-        var filteredDefects = [];
-        for (var i = 0; i < defects.length; i++) {
-            if (defects[i].State != "Closed") {
-                filteredDefects.push(defects[i]);
-            }
+        .statusDescription {
+            color: #999999;
         }
-        return filteredDefects;
-    }
-
-    //Override the base implementation of displayDependencies
-    //to account for the different user story display (story icon, plan estimates, etc)
-    //and to inject defects on the user story
-    this.displayDependencies = function(displayElement, userStory) {
-
-        //Find the list of defects
-        var defects = filterClosedDefects(userStory.Defects);
-
-
-        //Only display if there are dependencies
-        //or defects
-        if (userStory.Predecessors.length > 0 ||
-                (showRootDefects && defects.length > 0)) {
-            displayElement.innerHTML += '<div class="dependency" id="userStory' + userStory.ObjectID + '">' +
-                    '<div class="userStoryIcon"><img src="/slm/images/icon_story.gif" /></div>' +
-                //KRM - Rank is messed up? + Number(userStory.Rank).toFixed(1)
-                    ' <b>' + that.createArtifactLink(userStory) + '</b> ' +
-                    Number(userStory.PlanEstimate).toFixed(1) + ' pts.<br/></div>';
-            var userStoryDiv = dojo.byId("userStory" + userStory.ObjectID);
-
-            //Display the defects
-            displayDefects(userStoryDiv, defects);
-
-            //Display each dependency
-            for (var i = 0; i < userStory.Predecessors.length; i++) {
-                that.displayDependency(userStoryDiv, userStory,
-                        userStory.Predecessors[i]);
-            }
-
-            return true;
+        a {
+            text-decoration:none;
         }
-
-        return false;
-    };
-
-    return that;
-}
-
-
-</script>
-<script type="text/javascript">
-    rally.addOnLoad(function () {
-        //Create the data collection and display creation objects
-        var dataService = new EnhancedDependencyDataService();
-        var dataPresenter = new EnhancedDependencyDataPresenter("status");
-
-        //Retrieve the data and display it when available
-        dataService.addOnErrorHandler(dataPresenter.displayError);
-        dataService.retrieveData(dataPresenter.populateView);
-    });
-</script>
-
-<style type="text/css">
-
-    body {
-        font-family: tahoma, geneva, helvetica, arial, sans-serif;
-        font-size: 11px;
-        background: EBEBD8;
-    }
-
-    .d-iteration {
-        padding: 5px;
-        margin: 5px;
-        background: white;
-        border: solid 1px #cccccc;
-        border-top: solid 2px #cccccc;
-        font-family: tahoma, geneva, helvetica, arial, sans-serif;
-        font-size: 11px;
-        width: 275px;
-        height: 400px;
-        overflow-y: auto;
-        float: left;
-    }
-
-    .heading {
-        border: 0px;
-        border-bottom: solid 1px #cccccc;
-        padding-bottom: 5px;
-    }
-
-    .heading .label {
-        font-weight: bold;
-    }
-
-    #d_titlebar {
-        font-family: tahoma, geneva, helvetica, arial, sans-serif;
-        font-weight: bold;
-        padding-left: 10px;
-        font-size: 14px;
-    }
-
-    #subtitle {
-        font-family: tahoma, geneva, helvetica, arial, sans-serif;
-        padding-left: 10px;
-        font-size: 11px;
-        display: block;
-    }
-
-    .dependency {
-        padding-top: 5px;
-        padding-bottom: 3px;
-        padding-left: 3px;
-        float: left;
-    }
-
-    .dependency .predecessor {
-        padding: 5px;
-        padding-left: 22px;
-    }
-
-    .predecessor-container {
-        padding-left: 20px;
-    }
-
-    .predecessor-status {
-        float: left;
-        padding-top: 5px;
-    }
-
-    .statusDescription {
-        color: #999999;
-    }
-
-    a {
-        text-decoration: none;
-    }
-
-    a:link {
-        color: #366AB7;
-    }
-
-    a:visited {
-        color: #366AB7;
-    }
-
-    a img {
-        cursor: pointer;
-    }
-
+        a:link {
+            color:#366AB7;
+        }
+        a:visited {
+            color:#366AB7;
+        }
+        a img {
+            cursor:pointer;
+        }
+        
         /* State Squares */
-
-    .state-legend {
-        background: #006600 none repeat scroll 0%;
-        border: 1px solid #DDDDDD;
-        color: #FFFFFF;
-        cursor: default;
-        float: left;
-        height: 14px;
-        line-height: 14px;
-        margin-right: 1px;
-        text-align: center;
-        width: 14px;
-    }
-
-    .state-legend-blocked {
-        background: transparent url(/slm/images/icon_blocked.gif) no-repeat scroll 0%;
-        color: #FFFFFF;
-        cursor: default;
-        display: inline;
-        float: left;
-        height: 16px;
-        line-height: 16px;
-        margin-right: 1px;
-        text-align: center;
-        width: 16px;
-    }
-
-    .queryError {
-        padding-left: 10px;
-        padding-top: 10px;
-        color: red
-    }
-
-        /*
+        
+        .state-legend {
+            background:#006600 none repeat scroll 0%;
+            border:1px solid #DDDDDD;
+            color:#FFFFFF;
+            cursor:default;
+            float:left;
+            height:14px;
+            line-height:14px;
+            margin-right:1px;
+            text-align:center;
+            width:14px;
+        }
+        
+        .state-legend-blocked {
+            background:transparent url(/slm/images/icon_blocked.gif) no-repeat scroll 0%;
+            color:#FFFFFF;
+            cursor:default;
+            display:inline;
+            float:left;
+            height:16px;
+            line-height:16px;
+            margin-right:1px;
+            text-align:center;
+            width:16px;
+        }
+        
+        .queryError {
+            padding-left:10px;
+            padding-top:10px;
+            color:red
+        }
+    
+    /*
         Put override styles here
         */
-    .defect-container {
-        padding-left: 18px;
-    }
+        .defect-container {
+            padding-left: 18px;
+        }
+        
+        .predecessor-defect-container {
+            padding-left: 38px;
+        }
+        
+        .userStoryIcon {
+            float: left;
+            padding-right: 5px;
+        }
 
-    .predecessor-defect-container {
-        padding-left: 38px;
-    }
-
-    .userStoryIcon {
-        float: left;
-        padding-right: 5px;
-    }
-
-</style>
+    </style>
 
 </head>
 <body>

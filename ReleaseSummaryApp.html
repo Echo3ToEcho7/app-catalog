@@ -9,7 +9,7 @@
     <script type="text/javascript" src="/apps/1.22/sdk.js"></script>
 
     <script type="text/javascript">
-        function ReleaseNotes() {
+    function ReleaseNotes() {
             var that = this;
             var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
                     '__PROJECT_OID__',
@@ -19,26 +19,26 @@
             var releaseNotesDiv;
             var wait;
             var loadingSpan;
-
+        
             this._renderReleaseNotes = function(items) {
-
+        
                 if (wait) {
                     wait.hide();
                     wait = null;
                 }
-
+        
                 var notesHeader = document.createElement("div");
                 dojo.addClass(notesHeader, "notesHeader");
                 releaseNotesDiv.appendChild(notesHeader);
                 notesHeader.appendChild(document.createTextNode("About this release:"));
-
+        
                 if (items.release && items.release.length > 0 && items.release[0].Notes) {
                     var notes = document.createElement("div");
                     dojo.addClass(notes, "notes");
                     releaseNotesDiv.appendChild(notes);
                     releaseNotesDiv.innerHTML += items.release[0].Notes; //user innerhtml so it will render html characters
                 }
-
+        
                 var additionalInfo = document.createElement("div");
                 dojo.addClass(additionalInfo, "additionalInfo");
                 releaseNotesDiv.appendChild(additionalInfo);
@@ -46,13 +46,13 @@
                 var releaseLink = new rally.sdk.ui.basic.Link({item: releaseDropdown.getSelectedItem(), text: "here"});
                 releaseLink.display(additionalInfo);
                 additionalInfo.appendChild(document.createTextNode("."));
-
+        
                 if (items.stories) {
                     var storiesHeader = document.createElement("div");
                     dojo.addClass(storiesHeader, "storiesHeader");
                     releaseNotesDiv.appendChild(storiesHeader);
                     storiesHeader.appendChild(document.createTextNode("Stories: " + items.stories.length));
-
+        
                     var stories = document.createElement("ul");
                     dojo.addClass(stories, "storiesList");
                     releaseNotesDiv.appendChild(stories);
@@ -67,13 +67,13 @@
                     });
                     stories.innerHTML = storyListContent.join("");
                 }
-
+        
                 if (items.defects) {
                     var defectsHeader = document.createElement("div");
                     dojo.addClass(defectsHeader, "defectsHeader");
                     releaseNotesDiv.appendChild(defectsHeader);
                     defectsHeader.appendChild(document.createTextNode("Defects: " + items.defects.length));
-
+        
                     var defects = document.createElement("ul");
                     dojo.addClass(defects, "defectsList");
                     releaseNotesDiv.appendChild(defects);
@@ -89,12 +89,12 @@
                     defects.innerHTML = defectListContent.join("");
                 }
             };
-
+        
             this._queryForItems = function() {
                 dojo.empty(releaseNotesDiv);
                 wait = new rally.sdk.ui.basic.Wait({});
                 wait.display(loadingSpan);
-
+        
                 var query = new rally.sdk.util.Query("ScheduleState = Accepted");
                 if (releaseDropdown.getQueryFromSelected()) {
                     query = query.and(releaseDropdown.getQueryFromSelected());
@@ -121,27 +121,28 @@
                         query: new rally.sdk.util.Query("ObjectID = " + rally.sdk.util.Ref.getOidFromRef(releaseDropdown.getSelectedItem()))
                     }
                 ], that._renderReleaseNotes);
-
+        
             };
-
+        
             this._createLayout = function(element) {
                 var headerDiv = document.createElement("div");
                 dojo.addClass(headerDiv, "header");
                 element.appendChild(headerDiv);
-
+        
                 var dropdownContainerSpan = document.createElement("span");
                 dojo.addClass(dropdownContainerSpan, "dropdownContainer");
                 headerDiv.appendChild(dropdownContainerSpan);
-
+        
                 loadingSpan = document.createElement("span");
                 dojo.addClass(loadingSpan, "loading");
                 headerDiv.appendChild(loadingSpan);
+                //IE7 requires child content to display wait/span correctly
                 loadingSpan.appendChild(document.createTextNode(" "));
-
+        
                 releaseNotesDiv = document.createElement("div");
                 dojo.addClass(releaseNotesDiv, "releaseNotes");
                 element.appendChild(releaseNotesDiv);
-
+        
                 //Create dropdowns
                 var dropdownConfig = {
                     showLabel: true,
@@ -150,39 +151,40 @@
                 releaseDropdown = new rally.sdk.ui.ReleaseDropdown(dropdownConfig, rallyDataSource);
                 releaseDropdown.display(dropdownContainerSpan, that._queryForItems);
             };
-
+        
             this.display = function(element) {
-
+        
                 rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Release+Summary+App");
                 rally.sdk.ui.AppHeader.showPageTools(true);
-
+        
                 //Build app layout
                 that._createLayout(element);
             };
         }
-
+        
+    
 
     </script>
 
     <style type="text/css">
-        .defectsHeader, .storiesHeader, .notesHeader {
+    .defectsHeader, .storiesHeader, .notesHeader {
             font-weight: bold;
             margin-top: 20px;
         }
-
+        
         .loading {
             margin-left: 20px;
         }
-
+        
         .header {
             line-height: 30px;
             vertical-align: middle;
         }
-
+        
         .notes, .additionalInfo {
             padding-top: 10px;
         }
-
+    
 
     </style>
 
@@ -196,3 +198,5 @@
 <body>
 </body>
 </html>
+
+              

@@ -8,18 +8,17 @@
     <script type="text/javascript" src="/apps/1.21/sdk.js"></script>
 
     <script type="text/javascript">
-
-        //Object to retrieve data
+    //Object to retrieve data
         //and create pie charts
         function ProjectStatusDashboard() {
             var that = this;
             var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__', '__PROJECT_OID__',
                     '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
-
+        
             //Private function to perform a query
             //and create a pie from the results
             function showPie(chartDiv, artifactType, artifactAttribute, title, colors) {
-
+        
                 var config = {
                     type: artifactType,
                     attribute: artifactAttribute,
@@ -28,11 +27,11 @@
                     width: 250,
                     colors: colors
                 };
-
+        
                 var pieChart = new rally.sdk.ui.PieChart(config, rallyDataSource);
                 pieChart.display(chartDiv);
             }
-
+        
             //Public function to display the tasks pie
             this.showTaskPie = function(element) {
                 showPie(element,
@@ -45,7 +44,7 @@
                         }
                 );
             };
-
+        
             //Public function to display the user story pie
             this.showUserStoryPie = function(element) {
                 showPie(element,
@@ -61,7 +60,7 @@
                         }
                 );
             };
-
+        
             //Public function to display the test pie
             this.showTestPie = function(element) {
                 showPie(element,
@@ -77,7 +76,7 @@
                         }
                 );
             };
-
+        
             //Public function to display the defect pie
             this.showDefectPie = function(element) {
                 showPie(element,
@@ -94,11 +93,11 @@
                         }
                 );
             };
-
-
+        
+        
             return that;
         }
-
+    
 
     </script>
     <script type="text/javascript">
@@ -112,8 +111,7 @@
     </script>
 
     <style type="text/css">
-
-        .chartDiv {
+    .chartDiv {
             width: 250px;
             height: 250px;
         }

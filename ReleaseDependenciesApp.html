@@ -9,12 +9,12 @@
     <script type="text/javascript" src="/apps/1.23/sdk.js"></script>
 
     <script type="text/javascript">
-        function ReleaseDependencies() {
+    function ReleaseDependencies() {
             var rallyDataSource;
             var relDropdown;
             var table;
             var header;
-
+        
             function setRow(prefix, row, story) {
                 var link = new rally.sdk.ui.basic.Link({item: story}).renderToHtml();
                 table.setCell(row, prefix + 'FormattedID', link);
@@ -22,7 +22,7 @@
                 table.setCell(row, prefix + 'Project', story.Project.Name);
                 table.setCell(row, prefix + 'ScheduleState', story.ScheduleState);
             }
-
+        
             function buildHeaders() {
                 var headerConfig = {
                     sortingEnabled : false,
@@ -33,7 +33,7 @@
                 };
                 header = new rally.sdk.ui.Table(headerConfig);
             }
-
+        
             function buildStoryTable() {
                 var tableConfig = {
                     sortingEnabled : false,
@@ -49,7 +49,7 @@
                 };
                 table = new rally.sdk.ui.Table(tableConfig);
             }
-
+        
             function showUserStoriesTable(results) {
                 buildHeaders();
                 buildStoryTable();
@@ -58,7 +58,7 @@
                     var story = results.stories[i];
                     var preds = results.stories[i].Predecessors;
                     var succs = results.stories[i].Successors;
-
+        
                     if (succs.length !== 0 || preds.length !== 0) {
                         if (preds.length !== 0) {
                             for (var pred = 0; pred < preds.length; pred++) {
@@ -78,7 +78,7 @@
                 header.display(document.getElementById('header'));
                 table.display(document.getElementById('stories'));
             }
-
+        
             function onReleaseSelected() {
                 if (table) {
                     table.destroy();
@@ -92,8 +92,8 @@
                 };
                 rallyDataSource.findAll(queryConfig, showUserStoriesTable);
             }
-
-
+        
+        
             this.display = function() {
                 rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
                         '__PROJECT_OID__',
@@ -110,7 +110,7 @@
     </script>
 
     <style type="text/css">
-        #header {
+    #header {
             margin-bottom: -22px;
         }
 

@@ -2,447 +2,447 @@
 <!-- Copyright (c) 2010  Rally Software Development Corp.  All rights reserved -->
 <html>
 <head>
-<title>Story Map</title>
-<meta name="Name" content="App: Story Map"/>
-<meta name="Version" content="2011.08.27"/>
-<meta name="Vendor" content="Rally Software Labs"/>
-<script type="text/javascript" src="/apps/1.26/sdk.js"></script>
+    <title>Story Map</title>
+    <meta name="Name" content="App: Story Map"/>
+    <meta name="Version" content="2011.08.27"/>
+    <meta name="Vendor" content="Rally Software Labs"/>
+    <script type="text/javascript" src="/apps/1.26/sdk.js"></script>
 
-<script type="text/javascript">
-function StoryMapBoard() {
-    var themeDropdown,storyBoardDiv,tag,newThemeNameInput,cardboard,columnStates,tagName = "Theme";
-    var that = this;
-    var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
-            '__PROJECT_OID__',
-            '__PROJECT_SCOPING_UP__',
-            '__PROJECT_SCOPING_DOWN__');
-
-    this._onError = function(response) {
-        var errors = response.Errors;
-
-        if (response.Errors.length > 0) {
-            msg = errors[0];
-            msg = msg.replace(/HierarchicalRequirement/gi, "Story");
-            if (msg.search(/should not be null/gi) > 0) {
-                msg += " This is a Rally Labs app. " +
-                        "Rally may consider supporting required fields in the future.";
-            }
-            rally.sdk.ui.AppHeader.showMessage("error", msg, 5000);
-            rally.Logger.warn(msg);
-        }
-    };
-
-    this._createStoryAsTheme = function() {
-        function success() {
-            that.refreshBoard();
-        }
-
-        rallyDataSource.create("HierarchicalRequirement", {
-            Name:newThemeNameInput.value,
-            Tags:[tag]
-        }, success, that._onError, {
-            rankTo: "Bottom"
-        });
-    };
-
-    this._itemAddEvent = function() {
-        if (themeDropdown && themeDropdown.getValue() === "New Theme") {
-            that._addTaggedStory();
-        }
-        else {
-            that.createChildStory(themeDropdown.getValue());
-        }
-    };
-
-    this.createChildStory = function(parentRef) {
-        function success() {
-            that.refreshBoard();
-        }
-
-        rallyDataSource.create("HierarchicalRequirement", {
-            Name:newThemeNameInput.value,
-            Parent:parentRef
-        }, success, that._onError, {
-            rankTo: "Bottom"
-        });
-    };
-
-    this._addTaggedStory = function() {
-
-        function getThemeTag(callback) {
-            function createNewTag(callback) {
-                rallyDataSource.create("Tag", {Name:tagName}, callback);
-            }
-
-            function retrieveOrCreateTag(results) {
-                if (results.tag.length > 0) {
-                    tag = results.tag.pop();
-                    callback();
+    <script type="text/javascript">
+    function StoryMapBoard() {
+            var themeDropdown,storyBoardDiv,tag,newThemeNameInput,cardboard,columnStates,tagName = "Theme";
+            var that = this;
+            var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
+                    '__PROJECT_OID__',
+                    '__PROJECT_SCOPING_UP__',
+                    '__PROJECT_SCOPING_DOWN__');
+        
+            this._onError = function(response) {
+                var errors = response.Errors;
+        
+                if (response.Errors.length > 0) {
+                    msg = errors[0];
+                    msg = msg.replace(/HierarchicalRequirement/gi, "Story");
+                    if (msg.search(/should not be null/gi) > 0) {
+                        msg += " This is a Rally Labs app. " +
+                                "Rally may consider supporting required fields in the future.";
+                    }
+                    rally.sdk.ui.AppHeader.showMessage("error", msg, 5000);
+                    rally.Logger.warn(msg);
+                }
+            };
+        
+            this._createStoryAsTheme = function() {
+                function success() {
+                    that.refreshBoard();
+                }
+        
+                rallyDataSource.create("HierarchicalRequirement", {
+                    Name:newThemeNameInput.value,
+                    Tags:[tag]
+                }, success, that._onError, {
+                    rankTo: "Bottom"
+                });
+            };
+        
+            this._itemAddEvent = function() {
+                if (themeDropdown && themeDropdown.getValue() === "New Theme") {
+                    that._addTaggedStory();
                 }
                 else {
-                    rallyDataSource.create("Tag", {Name:tagName}, function (ref) {
-                        tag = {_ref:ref};
-                        callback();
-                    });
+                    that.createChildStory(themeDropdown.getValue());
+                }
+            };
+        
+            this.createChildStory = function(parentRef) {
+                function success() {
+                    that.refreshBoard();
+                }
+        
+                rallyDataSource.create("HierarchicalRequirement", {
+                    Name:newThemeNameInput.value,
+                    Parent:parentRef
+                }, success, that._onError, {
+                    rankTo: "Bottom"
+                });
+            };
+        
+            this._addTaggedStory = function() {
+        
+                function getThemeTag(callback) {
+                    function createNewTag(callback) {
+                        rallyDataSource.create("Tag", {Name:tagName}, callback);
+                    }
+        
+                    function retrieveOrCreateTag(results) {
+                        if (results.tag.length > 0) {
+                            tag = results.tag.pop();
+                            callback();
+                        }
+                        else {
+                            rallyDataSource.create("Tag", {Name:tagName}, function (ref) {
+                                tag = {_ref:ref};
+                                callback();
+                            });
+                        }
+                    }
+        
+                    rallyDataSource.find({
+                        key:"tag",
+                        type:"Tag",
+                        query: "(Name = \"" + tagName + "\")"
+                    }, retrieveOrCreateTag);
+                }
+        
+                if (tag) {
+                    that._createStoryAsTheme();
+                }
+                else {
+                    getThemeTag(that._createStoryAsTheme);
+                }
+            };
+        
+            this._setBoardData = function(data) {
+                dojo.forEach(data.ChildStories, function(story) {
+                    story.Parent = rally.sdk.util.Ref.getRelativeRef(story.Parent._ref);
+                });
+        
+                var cardboardConfig = {
+                    types: ["HierarchicalRequirement"],
+                    attribute: "Parent",
+                    sortAscending: true,
+                    order: "Rank",
+                    columns:columnStates,
+                    items: data.ChildStories,
+                    maxColumnsPerBoard:20,
+                    cardRenderer:SimpleCardRenderer,
+                    columnRenderer: StoryMapBoardColumnRenderer
+                };
+        
+                if (!cardboard) {
+                    cardboard = new rally.sdk.ui.CardBoard(cardboardConfig, rallyDataSource);
+                    cardboard.display("storyBoard");
+                } else {
+                    cardboard.refresh(cardboardConfig);
+                }
+            };
+        
+            this._displayBoard = function() {
+                var childQuery = {
+                    key: "ChildStories",
+                    type: "HierarchicalRequirement",
+                    fetch: "Name,FormattedID,Owner,ObjectID,Rank,Parent",
+                    query: "(Parent.Tags.Name Contains \"" + tagName + "\")",
+                    order: "Rank"
+                };
+                rallyDataSource.findAll(childQuery, that._setBoardData);
+            };
+        
+            this._displayThemeDropdown = function(themes) {
+                var defaultThemeText = "Theme";
+                if (themeDropdown && themeDropdown.getDisplayedValue) {
+                    defaultThemeText = themeDropdown.getDisplayedValue();
+                    themeDropdown.destroy();
+                }
+                var data = [
+                    {label:"Theme",value:"New Theme"}
+                ];
+                rally.forEach(themes, function(theme) {
+                    data.push({label:'Child for "' + theme.Name + '"',value:theme._ref});
+                });
+                var config = {
+                    defaultDisplayValue:defaultThemeText,
+                    rememberSelection:false
+                };
+                themeDropdown = new rally.sdk.ui.basic.Dropdown(config);
+                themeDropdown.setItems(data);
+                themeDropdown.display("themeDropdown");
+            };
+        
+            function newStoryInput(pEvent) {
+                if (pEvent.keyCode === dojo.keys.ENTER) {
+                    that._itemAddEvent();
                 }
             }
-
-            rallyDataSource.find({
-                key:"tag",
-                type:"Tag",
-                query: "(Name = \"" + tagName + "\")"
-            }, retrieveOrCreateTag);
-        }
-
-        if (tag) {
-            that._createStoryAsTheme();
-        }
-        else {
-            getThemeTag(that._createStoryAsTheme);
-        }
-    };
-
-    this._setBoardData = function(data) {
-        dojo.forEach(data.ChildStories, function(story) {
-            story.Parent = rally.sdk.util.Ref.getRelativeRef(story.Parent._ref);
-        });
-
-        var cardboardConfig = {
-            types: ["HierarchicalRequirement"],
-            attribute: "Parent",
-            sortAscending: true,
-            order: "Rank",
-            columns:columnStates,
-            items: data.ChildStories,
-            maxColumnsPerBoard:20,
-            cardRenderer:SimpleCardRenderer,
-            columnRenderer: StoryMapBoardColumnRenderer
-        };
-
-        if (!cardboard) {
-            cardboard = new rally.sdk.ui.CardBoard(cardboardConfig, rallyDataSource);
-            cardboard.display("storyBoard");
-        } else {
-            cardboard.refresh(cardboardConfig);
-        }
-    };
-
-    this._displayBoard = function() {
-        var childQuery = {
-            key: "ChildStories",
-            type: "HierarchicalRequirement",
-            fetch: "Name,FormattedID,Owner,ObjectID,Rank,Parent",
-            query: "(Parent.Tags.Name Contains \"" + tagName + "\")",
-            order: "Rank"
-        };
-        rallyDataSource.findAll(childQuery, that._setBoardData);
-    };
-
-    this._displayThemeDropdown = function(themes) {
-        var defaultThemeText = "Theme";
-        if (themeDropdown && themeDropdown.getDisplayedValue) {
-            defaultThemeText = themeDropdown.getDisplayedValue();
-            themeDropdown.destroy();
-        }
-        var data = [
-            {label:"Theme",value:"New Theme"}
-        ];
-        rally.forEach(themes, function(theme) {
-            data.push({label:'Child for "' + theme.Name + '"',value:theme._ref});
-        });
-        var config = {
-            defaultDisplayValue:defaultThemeText,
-            rememberSelection:false
-        };
-        themeDropdown = new rally.sdk.ui.basic.Dropdown(config);
-        themeDropdown.setItems(data);
-        themeDropdown.display("themeDropdown");
-    };
-
-    function newStoryInput(pEvent) {
-        if (pEvent.keyCode === dojo.keys.ENTER) {
-            that._itemAddEvent();
-        }
-    }
-
-    this.display = function(element) {
-        var button = new rally.sdk.ui.basic.Button({text:"Add"});
-        button.display("newThemeButton");
-        button.addEventListener(button.getValidEvents().onClick, that._itemAddEvent);
-        newThemeNameInput = dojo.byId("newThemeName");
-        dojo.connect(newThemeNameInput, "onkeyup", newStoryInput);
-        newThemeNameInput.focus();
-        storyBoardDiv = document.createElement("div");
-        storyBoardDiv.id = "storyBoard";
-        dojo.addClass(storyBoardDiv, "storyBoard");
-        element.appendChild(storyBoardDiv);
-        that._createBoard();
-    };
-
-    this.refreshBoard = function() {
-        that._destroyBoard();
-        that._createBoard();
-        newThemeNameInput.value = "";
-        newThemeNameInput.focus();
-    };
-
-    this._createBoard = function() {
-        that._getThemes(that._decideBeginningAction);
-    };
-
-    this._destroyBoard = function() {
-        if (cardboard && cardboard.destroy) {
-            cardboard.destroy();
-        }
-        cardboard = null;
-        dojo.empty(storyBoardDiv);
-    };
-
-    this._decideBeginningAction = function(themes) {
-        if (themes) {
-            that._createColumns(themes);
-            that._displayThemeDropdown(themes);
-        }
-        else {
-            that._renderDefaultInstructions();
-        }
-
-    };
-
-    this._renderDefaultInstructions = function() {
-        var instructionsDiv = document.createElement("div");
-        dojo.addClass(instructionsDiv, "instructions");
-
-        var instructions = document.createElement("span");
-        dojo.addClass(instructions, "quote");
-        instructions.innerHTML = "<p>The Story Map helps you build a visual backlog of work based on user activities and goals.</p><p >For example, an auction site might use themes like <em>Create an Auction</em>, <em>Search</em>, and <em>Bid</em>. Each of these consists of many smaller user tasks.</p><p>To start, think of one of the big-picture activities that your product supports, and enter it in the box above.  These themes will be the backbone of your storymap.</p>";
-        instructionsDiv.appendChild(instructions);
-
-        var learnMoreLinkElement = document.createElement("a");
-        dojo.attr(learnMoreLinkElement, "href", "http://www.agileproductdesign.com/blog/the_new_backlog.html");
-        dojo.attr(learnMoreLinkElement, "target", "new");
-        learnMoreLinkElement.innerHTML = "Learn more about story maps";
-        instructions.appendChild(learnMoreLinkElement);
-
-        var exampleImage = document.createElement("img");
-        dojo.attr(exampleImage, "src", "/apps/resources/StoryMap/example-map.png");
-        dojo.addClass(exampleImage, "exampleImage");
-        instructionsDiv.appendChild(exampleImage);
-
-        dojo.byId("storyBoard").appendChild(instructionsDiv);
-    };
-
-    this._createColumns = function(themes) {
-        columnStates = {};
-        rally.forEach(themes, function(theme, i) {
-            columnStates[i] = {
-                displayValue:themes[i].Name,
-                item:themes[i]
+        
+            this.display = function(element) {
+                var button = new rally.sdk.ui.basic.Button({text:"Add"});
+                button.display("newThemeButton");
+                button.addEventListener(button.getValidEvents().onClick, that._itemAddEvent);
+                newThemeNameInput = dojo.byId("newThemeName");
+                dojo.connect(newThemeNameInput, "onkeyup", newStoryInput);
+                newThemeNameInput.focus();
+                storyBoardDiv = document.createElement("div");
+                storyBoardDiv.id = "storyBoard";
+                dojo.addClass(storyBoardDiv, "storyBoard");
+                element.appendChild(storyBoardDiv);
+                that._createBoard();
             };
-        });
-        that._displayBoard();
-    };
-
-    this._getThemes = function(callback) {
-
-        var themeQuery = {
-            key: "Themes",
-            type: "HierarchicalRequirement",
-            fetch: "Name,FormattedID,Owner,ObjectID,Rank",
-            query: "(Tags.Name Contains " + tagName + ")",
-            order: "Rank"
+        
+            this.refreshBoard = function() {
+                that._destroyBoard();
+                that._createBoard();
+                newThemeNameInput.value = "";
+                newThemeNameInput.focus();
+            };
+        
+            this._createBoard = function() {
+                that._getThemes(that._decideBeginningAction);
+            };
+        
+            this._destroyBoard = function() {
+                if (cardboard && cardboard.destroy) {
+                    cardboard.destroy();
+                }
+                cardboard = null;
+                dojo.empty(storyBoardDiv);
+            };
+        
+            this._decideBeginningAction = function(themes) {
+                if (themes) {
+                    that._createColumns(themes);
+                    that._displayThemeDropdown(themes);
+                }
+                else {
+                    that._renderDefaultInstructions();
+                }
+        
+            };
+        
+            this._renderDefaultInstructions = function() {
+                var instructionsDiv = document.createElement("div");
+                dojo.addClass(instructionsDiv, "instructions");
+        
+                var instructions = document.createElement("span");
+                dojo.addClass(instructions, "quote");
+                instructions.innerHTML = "<p>The Story Map helps you build a visual backlog of work based on user activities and goals.</p><p >For example, an auction site might use themes like <em>Create an Auction</em>, <em>Search</em>, and <em>Bid</em>. Each of these consists of many smaller user tasks.</p><p>To start, think of one of the big-picture activities that your product supports, and enter it in the box above.  These themes will be the backbone of your storymap.</p>";
+                instructionsDiv.appendChild(instructions);
+        
+                var learnMoreLinkElement = document.createElement("a");
+                dojo.attr(learnMoreLinkElement, "href", "http://www.agileproductdesign.com/blog/the_new_backlog.html");
+                dojo.attr(learnMoreLinkElement, "target", "new");
+                learnMoreLinkElement.innerHTML = "Learn more about story maps";
+                instructions.appendChild(learnMoreLinkElement);
+        
+                var exampleImage = document.createElement("img");
+                dojo.attr(exampleImage, "src", "/apps/resources/StoryMap/example-map.png");
+                dojo.addClass(exampleImage, "exampleImage");
+                instructionsDiv.appendChild(exampleImage);
+        
+                dojo.byId("storyBoard").appendChild(instructionsDiv);
+            };
+        
+            this._createColumns = function(themes) {
+                columnStates = {};
+                rally.forEach(themes, function(theme, i) {
+                    columnStates[i] = {
+                        displayValue:themes[i].Name,
+                        item:themes[i]
+                    };
+                });
+                that._displayBoard();
+            };
+        
+            this._getThemes = function(callback) {
+        
+                var themeQuery = {
+                    key: "Themes",
+                    type: "HierarchicalRequirement",
+                    fetch: "Name,FormattedID,Owner,ObjectID,Rank",
+                    query: "(Tags.Name Contains " + tagName + ")",
+                    order: "Rank"
+                };
+        
+                function processThemesQueryResults(results) {
+                    var themes = {};
+                    dojo.forEach(results.Themes, function(theme) {
+                        themes[rally.sdk.util.Ref.getRelativeRef(theme._ref)] = theme;
+                    });
+                    if (results.Themes && results.Themes.length === 0) {
+                        callback(false);
+                    }
+                    callback(themes);
+                }
+        
+        
+                rallyDataSource.find(themeQuery, processThemesQueryResults);
+            };
+        }
+        
+    
+    var SimpleCardRenderer = function(column, item) {
+            rally.sdk.ui.cardboard.BasicCardRenderer.call(this, column, item);
+            var that = this;
+            this.renderCard = function() {
+                var card = document.createElement("div");
+                dojo.addClass(card, "simpleCard");
+                dojo.addClass(card, rally.sdk.util.Ref.getTypeFromRef(item._ref));
+        
+                var textDiv = document.createElement("div");
+                dojo.addClass(textDiv, "cardContent");
+        
+                card.appendChild(textDiv);
+        
+                var link = new rally.sdk.ui.basic.Link({item: item, text: item.Name});
+                dojo.empty(textDiv);
+                link.display(textDiv);
+        
+                return card;
+            };
+        };
+    StoryMapBoardColumnRenderer = function(board, value, options) {
+            rally.sdk.ui.cardboard.BasicColumnRenderer.call(this, board, value, options);
+            var dndContainer;
+            var columnDiv;
+            var headerRenderer = new SimpleCardRenderer(null, options.item);
+            this.render = function() {
+                columnDiv = document.createElement("div");
+                dojo.addClass(columnDiv, "column");
+                var columnHeader = document.createElement("div");
+                dojo.addClass(columnHeader, "columnHeader");
+                var headerCard = headerRenderer.renderCard();
+                dojo.addClass(headerCard, "themeCard");
+                columnHeader.appendChild(headerCard);
+                columnDiv.appendChild(columnHeader);
+                dndContainer = document.createElement("div");
+                dojo.addClass(dndContainer, "columnContent");
+                columnDiv.appendChild(dndContainer);
+                return columnDiv;
+            };
+        
+            this.getDndContainer = function() {
+                return dndContainer;
+            };
+        
+            this.getColumnNode = function() {
+                return columnDiv;
+            };
         };
 
-        function processThemesQueryResults(results) {
-            var themes = {};
-            dojo.forEach(results.Themes, function(theme) {
-                themes[rally.sdk.util.Ref.getRelativeRef(theme._ref)] = theme;
-            });
-            if (results.Themes && results.Themes.length === 0) {
-                callback(false);
-            }
-            callback(themes);
+    </script>
+
+    <style type="text/css">
+    .storyBoard {
+            clear: both;
+        }
+        
+        .cardboard .columnHeader {
+            color: #808080;
+            font-size: 10px;
+            text-align: center;
+            font-weight: bold;
+            height: 69px;
+            padding: 5px 5px;
+        }
+        
+        #newThemeInputs {
+            float: left;
+            vertical-align: middle;
+        }
+        
+        .addNewLabel {
+            color: #333333;
+            font-size: 11px;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+        
+        #widget_themeDropdownInnerDiv {
+            font-family: arial, tahoma, helvetica, sans-serif;
+            vertical-align: middle;
+        }
+        
+        #newThemeName {
+            border: 1px solid #C6C6C6;
+            padding: 2px 1px 1px 2px;
+            margin: 0;
+            outline: none;
+            line-height: 13.667px;
+            height: 13.667px;
+            vertical-align: middle;
+        }
+        
+        #newThemeButton {
+            vertical-align: middle;
+        }
+        
+        .simpleCard {
+            border: solid 1px #C6C6C6;
+            color: #333333;
+            max-width: 148px;
+            font-family: arial, tahoma, helvetica, sans-serif;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .simpleCard a {
+            color: #333333;
+        }
+        
+        .simpleCard .cardContent {
+            background: #b2e3b6;
+            height: 45px;
+            font-size: 12px;
+            overflow: hidden;
+        }
+        
+        .simpleCard .cardContent a:hover {
+            text-decoration: underline;
+        }
+        
+        .themeCard {
+            height: 65px;
+            margin-left: auto;
+            margin-right: auto;
+            border-bottom: solid 2px #88ACBC;
+            border-right: solid 2px #88ACBC;
+        }
+        
+        .themeCard, .themeCard .cardContent {
+            background: #B5D8EB;
+        }
+        
+        .instructions {
+            max-width: 1000px;
+            font-size: 14px;
+            color: #333333;
+        }
+        
+        .instructions .quote {
+            font-size: 14px;
+            color: #333333;
+            float: left;
+            padding-top: 20px;
+        }
+        
+        .instructions p {
+            width: 400px;
+            font-size: 12px;
+        }
+        
+        .instructionsTitle {
+            font-weight: bold;
+        }
+        
+        .exampleImage {
+            float: left;
+            margin: 10px;
+            /* for IE */
+            filter: alpha(opacity = 70);
+            /* CSS3 standard */
+            opacity: 0.7;
         }
 
+    </style>
 
-        rallyDataSource.find(themeQuery, processThemesQueryResults);
-    };
-}
-
-
-var SimpleCardRenderer = function(column, item) {
-    rally.sdk.ui.cardboard.BasicCardRenderer.call(this, column, item);
-    var that = this;
-    this.renderCard = function() {
-        var card = document.createElement("div");
-        dojo.addClass(card, "simpleCard");
-        dojo.addClass(card, rally.sdk.util.Ref.getTypeFromRef(item._ref));
-
-        var textDiv = document.createElement("div");
-        dojo.addClass(textDiv, "cardContent");
-
-        card.appendChild(textDiv);
-
-        var link = new rally.sdk.ui.basic.Link({item: item, text: item.Name});
-        dojo.empty(textDiv);
-        link.display(textDiv);
-
-        return card;
-    };
-};
-StoryMapBoardColumnRenderer = function(board, value, options) {
-    rally.sdk.ui.cardboard.BasicColumnRenderer.call(this, board, value, options);
-    var dndContainer;
-    var columnDiv;
-    var headerRenderer = new SimpleCardRenderer(null, options.item);
-    this.render = function() {
-        columnDiv = document.createElement("div");
-        dojo.addClass(columnDiv, "column");
-        var columnHeader = document.createElement("div");
-        dojo.addClass(columnHeader, "columnHeader");
-        var headerCard = headerRenderer.renderCard();
-        dojo.addClass(headerCard, "themeCard");
-        columnHeader.appendChild(headerCard);
-        columnDiv.appendChild(columnHeader);
-        dndContainer = document.createElement("div");
-        dojo.addClass(dndContainer, "columnContent");
-        columnDiv.appendChild(dndContainer);
-        return columnDiv;
-    };
-
-    this.getDndContainer = function() {
-        return dndContainer;
-    };
-
-    this.getColumnNode = function() {
-        return columnDiv;
-    };
-};
-
-</script>
-
-<style type="text/css">
-    .storyBoard {
-        clear: both;
-    }
-
-    .cardboard .columnHeader {
-        color: #808080;
-        font-size: 10px;
-        text-align: center;
-        font-weight: bold;
-        height: 69px;
-        padding: 5px 5px;
-    }
-
-    #newThemeInputs {
-        float: left;
-        vertical-align: middle;
-    }
-
-    .addNewLabel {
-        color: #333333;
-        font-size: 11px;
-        font-weight: bold;
-        vertical-align: middle;
-    }
-
-    #widget_themeDropdownInnerDiv {
-        font-family: arial, tahoma, helvetica, sans-serif;
-        vertical-align: middle;
-    }
-
-    #newThemeName {
-        border: 1px solid #C6C6C6;
-        padding: 2px 1px 1px 2px;
-        margin: 0;
-        outline: none;
-        line-height: 13.667px;
-        height: 13.667px;
-        vertical-align: middle;
-    }
-
-    #newThemeButton {
-        vertical-align: middle;
-    }
-
-    .simpleCard {
-        border: solid 1px #C6C6C6;
-        color: #333333;
-        max-width: 148px;
-        font-family: arial, tahoma, helvetica, sans-serif;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .simpleCard a {
-        color: #333333;
-    }
-
-    .simpleCard .cardContent {
-        background: #b2e3b6;
-        height: 45px;
-        font-size: 12px;
-        overflow: hidden;
-    }
-
-    .simpleCard .cardContent a:hover {
-        text-decoration: underline;
-    }
-
-    .themeCard {
-        height: 65px;
-        margin-left: auto;
-        margin-right: auto;
-        border-bottom: solid 2px #88ACBC;
-        border-right: solid 2px #88ACBC;
-    }
-
-    .themeCard, .themeCard .cardContent {
-        background: #B5D8EB;
-    }
-
-    .instructions {
-        max-width: 1000px;
-        font-size: 14px;
-        color: #333333;
-    }
-
-    .instructions .quote {
-        font-size: 14px;
-        color: #333333;
-        float: left;
-        padding-top: 20px;
-    }
-
-    .instructions p {
-        width: 400px;
-        font-size: 12px;
-    }
-
-    .instructionsTitle {
-        font-weight: bold;
-    }
-
-    .exampleImage {
-        float: left;
-        margin: 10px;
-        /* for IE */
-        filter: alpha(opacity = 70);
-        /* CSS3 standard */
-        opacity: 0.7;
-    }
-
-</style>
-
-<script type="text/javascript">
-    rally.addOnLoad(function() {
-        rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Story+Map");
-        rally.sdk.ui.AppHeader.showPageTools(true);
-        var storyMapBoard = new StoryMapBoard();
-        storyMapBoard.display(dojo.body());
-    });
-</script>
+    <script type="text/javascript">
+        rally.addOnLoad(function() {
+            rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Story+Map");
+            rally.sdk.ui.AppHeader.showPageTools(true);
+            var storyMapBoard = new StoryMapBoard();
+            storyMapBoard.display(dojo.body());
+        });
+    </script>
 </head>
 <body>
 
@@ -460,3 +460,4 @@ StoryMapBoardColumnRenderer = function(board, value, options) {
 
 </body>
 </html>
+

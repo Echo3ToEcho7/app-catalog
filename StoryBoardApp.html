@@ -9,69 +9,69 @@
     <script type="text/javascript" src="/apps/1.24/sdk.js"></script>
 
     <script type="text/javascript">
-        StoryBoard = function() {
-
+    StoryBoard = function() {
+        
             function createLayout(element) {
                 var headerDiv = document.createElement("div");
                 element.appendChild(headerDiv);
-
+        
                 var dropdownContainerDiv = document.createElement("div");
                 dojo.addClass(dropdownContainerDiv, "dropdownContainer");
                 headerDiv.appendChild(dropdownContainerDiv);
-
+        
                 var dropdownDiv = document.createElement("div");
                 dropdownDiv.id = "dropdown";
                 dropdownContainerDiv.appendChild(dropdownDiv);
-
+        
                 var checkBoxContainerDiv = document.createElement("div");
                 dojo.addClass(checkBoxContainerDiv, "typeFilterContainer");
                 headerDiv.appendChild(checkBoxContainerDiv);
-
+        
                 var showSpan = document.createElement("span");
                 showSpan.appendChild(document.createTextNode("Show:"));
                 checkBoxContainerDiv.appendChild(showSpan);
-
+        
                 var userStoriesSpan = document.createElement("span");
                 userStoriesSpan.id = "userStories";
                 checkBoxContainerDiv.appendChild(userStoriesSpan);
-
+        
                 var defectsSpan = document.createElement("span");
                 defectsSpan.id = "defects";
                 checkBoxContainerDiv.appendChild(defectsSpan);
-
+        
                 var defectSuitesSpan = document.createElement("span");
                 defectSuitesSpan.id = "defectSuites";
                 checkBoxContainerDiv.appendChild(defectSuitesSpan);
-
+        
                 var addNewDiv = document.createElement("div");
                 addNewDiv.id = "addNew";
                 headerDiv.appendChild(addNewDiv);
-
+        
                 var addNewUserStorySpan = document.createElement("span");
                 addNewUserStorySpan.id = "addNewUserStory";
                 addNewDiv.appendChild(addNewUserStorySpan);
-
+        
                 var storyBoardDiv = document.createElement("div");
                 storyBoardDiv.id = "storyBoard";
                 dojo.addClass(storyBoardDiv, "storyBoard");
                 element.appendChild(storyBoardDiv);
             }
-
+        
             this.display = function(element) {
                 var cardboard;
-
+        
                 rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Story+Board+App");
                 rally.sdk.ui.AppHeader.showPageTools(true);
-
+        
                 //Build app layout
                 createLayout(element);
-
-
+        
+        
                 var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
                         '__PROJECT_OID__',
                         '__PROJECT_SCOPING_UP__',
                         '__PROJECT_SCOPING_DOWN__');
-
+        
                 //Create checkboxes
                 var checkBoxes = [];
                 var userStoriesCheckBox = new rally.sdk.ui.basic.CheckBox({
@@ -83,7 +83,7 @@
                 });
                 checkBoxes.push(userStoriesCheckBox);
                 userStoriesCheckBox.display("userStories");
-
+        
                 var defectsCheckBox = new rally.sdk.ui.basic.CheckBox({
                     showLabel: true,
                     label: "Defects",
@@ -92,7 +92,7 @@
                 });
                 checkBoxes.push(defectsCheckBox);
                 defectsCheckBox.display("defects");
-
+        
                 var defectSuitesCheckBox = new rally.sdk.ui.basic.CheckBox({
                     showLabel: true,
                     label: "Defect Suites",
@@ -101,7 +101,7 @@
                 });
                 checkBoxes.push(defectSuitesCheckBox);
                 defectSuitesCheckBox.display("defectSuites");
-
+        
                 function refreshBoard() {
                     var cardboardConfig = {
                         types: [],
@@ -109,17 +109,17 @@
                         sortAscending: true,
                         order: "Rank"
                     };
-
+        
                     //Build types based on checkbox selections
                     dojo.forEach(checkBoxes, function(checkBox) {
                         if (checkBox.getChecked()) {
                             cardboardConfig.types.push(checkBox.getValue());
                         }
                     });
-
+        
                     //Build query based on iteration dropdown
                     cardboardConfig.query = dropdown.getQueryFromSelected();
-
+        
                     if (!cardboard) {
                         if (cardboardConfig.types.length === 0) {
                             userStoriesCheckBox.setChecked(true);
@@ -131,7 +131,7 @@
                         cardboard.refresh(cardboardConfig);
                     }
                 }
-
+        
                 var dropdownConfig = {
                     showLabel: true
                 };
@@ -139,7 +139,7 @@
                 dropdown.addEventListener("onChange", refreshBoard);
                 dropdown.addEventListener("onLoad", refreshBoard);
                 dropdown.display("dropdown");
-
+        
                 function onAddNewPreCreate(addNewUserStory, eventArgs) {
                     var selectedOid = dropdown.getSelectedItem().ObjectID;
                     if (selectedOid) {
@@ -150,40 +150,40 @@
                         }
                     }
                 }
-
+        
                 var addNewUserStory = new rally.sdk.ui.AddNewArtifact({
                     types: ['hierarchicalrequirement','defect','defectsuite']
                 }, rallyDataSource);
                 addNewUserStory.addEventListener('onAdd', refreshBoard);
                 addNewUserStory.addEventListener("onPreCreate", onAddNewPreCreate);
                 addNewUserStory.display('addNewUserStory');
-
+        
                 //Wire up events
                 dojo.forEach(checkBoxes, function(checkBox) {
                     checkBox.addEventListener('onChange', refreshBoard);
                 });
             };
         };
-
+        
+    
 
     </script>
 
     <style type="text/css">
-
-        .dropdownContainer {
+    .dropdownContainer {
             float: left;
         }
-
+        
         .typeFilterContainer {
             float: right;
             margin-right: 30px;
         }
-
+        
         #addNew {
             clear: both;
             padding-top: 10px;
         }
-
+        
         .storyBoard {
             clear: both;
         }

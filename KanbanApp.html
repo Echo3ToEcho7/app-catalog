@@ -53,11 +53,11 @@
                 if (value.checked) {
                     that._showPolicies();
                 } else {
-                   that._hidePolicies();
+                    that._hidePolicies();
                 }
             };
         
-            that._showPolicies = function(button, args){
+            that._showPolicies = function(button, args) {
                 function resizeIt(textarea) {
                     var str = textarea.value;
                     var cols = textarea.cols;
@@ -66,8 +66,8 @@
                     var newLines = str.split("\n");
         
                     rally.forEach(newLines, function(line) {
-                        if (Math.ceil( line.length / cols ) > 2) {
-                            linecount += Math.ceil( line.length / cols ); // take into account long lines
+                        if (Math.ceil(line.length / cols) > 2) {
+                            linecount += Math.ceil(line.length / cols); // take into account long lines
                         } else {
                             linecount += 1;
                         }
@@ -77,14 +77,14 @@
                 }
         
                 var columnPolicies = dojo.query('.columnPolicy');
-                rally.forEach(columnPolicies, function(div){
+                rally.forEach(columnPolicies, function(div) {
                     dojo.removeClass(div, 'hidePolicy');
                     dojo.style(div, 'display', 'none');
                     var wipeArgs = {
                         node: div,
                         duration: 500
                     };
-                    rally.forEach(dojo.query('textarea', div), function(textarea){
+                    rally.forEach(dojo.query('textarea', div), function(textarea) {
                         resizeIt(textarea);
                     });
                     dojo.fx.wipeIn(wipeArgs).play();
@@ -93,7 +93,7 @@
         
             that._hidePolicies = function(button, args) {
                 var columnPolicies = dojo.query('.columnPolicy');
-                rally.forEach(columnPolicies, function(div){
+                rally.forEach(columnPolicies, function(div) {
                     dojo.style(div, 'height', '');
                     dojo.style(div, 'display', 'block');
                     var wipeArgs = {
@@ -140,25 +140,27 @@
                 dojo.addClass(filterByTagsSpan, "filterByTagsDropdown");
                 checkBoxContainerDiv.appendChild(filterByTagsSpan);
         
-                function populateFilterByDropdown(results){
-                    rally.forEach(results.tags, function(tag){
+                function populateFilterByDropdown(results) {
+                    rally.forEach(results.tags, function(tag) {
                         data.push({label: tag.Name, value: tag.ObjectID});
                     });
                     filterByTagsDropdown = new rally.sdk.ui.basic.Dropdown({label: "Filter by ",
-                                                                            items : data,
-                                                                            rememberSelection:false,
-                                                                            defaultValue: ""});
+                        items : data,
+                        rememberSelection:false,
+                        defaultValue: ""});
                     filterByTagsDropdown.display(filterByTagsSpan);
                     filterByTagsDropdown.addEventListener("onChange", that._updateBoardWithFilter);
                 }
         
-                var data = [{ label: "", value: ""}];
+                var data = [
+                    { label: "", value: ""}
+                ];
                 rallyDataSource.findAll(
-                    {key    : 'tags',
-                     order:   'Name',
-                     type   : 'Tags',
-                     fetch  : 'Name,ObjectID',
-                     query  : '(Archived = False)' }, populateFilterByDropdown);
+                        {key    : 'tags',
+                            order:   'Name',
+                            type   : 'Tags',
+                            fetch  : 'Name,ObjectID',
+                            query  : '(Archived = False)' }, populateFilterByDropdown);
         
                 var showSpan = document.createElement("span");
                 showSpan.appendChild(document.createTextNode("  | Show:"));
@@ -226,8 +228,6 @@
             };
         
             that._getAndStorePrefData = function(callback) {
-                rallyDataSource.preferences.getAppPreferences(populateConfigForm);
-        
                 function populateConfigForm(results) {
                     var parsedResults = rally.sdk.data.Preferences.parse(results);
                     var kanbanInfo;
@@ -266,6 +266,8 @@
                         configShow();
                     }
                 }
+        
+                rallyDataSource.preferences.getAppPreferences(populateConfigForm);
             };
         
             that._onBeforeItemUpdated = function(c, args) {
@@ -279,8 +281,8 @@
                 }
             };
         
-            that._updateBoardWithFilter = function(dropdown){
-                if(cardboard){
+            that._updateBoardWithFilter = function(dropdown) {
+                if (cardboard) {
                     cardboard.filterBoard({field: FILTER_FIELD, value: dropdown.getDisplayedValue()});
                 } else {
                     that._redisplayBoard();
@@ -288,10 +290,8 @@
             };
         
             that._redisplayBoard = function() {
-                that._getAndStorePrefData(displayBoard);
                 function displayBoard() {
                     artifactTypes = [];
-        
                     var cardboardConfig = {
                         types           : [],
                         attribute       : kanbanField,
@@ -309,11 +309,12 @@
                         fetch           : "Name,FormattedID,Owner,ObjectID,Rank,Ready,Blocked,LastUpdateDate,Tags,State"
                     };
         
-                    if(showTaskCompletion) {
+        
+                    if (showTaskCompletion) {
                         cardboardConfig.fetch += ",Tasks";
                     }
         
-                    if(showDefectStatus) {
+                    if (showDefectStatus) {
                         cardboardConfig.fetch += ",Defects";
                     }
         
@@ -322,10 +323,10 @@
                     }
         
                     if (filterByTagsDropdown && filterByTagsDropdown.getDisplayedValue()) {
-                        cardboardConfig.cardOptions.filterBy  = {field: FILTER_FIELD, value: filterByTagsDropdown.getDisplayedValue()};
+                        cardboardConfig.cardOptions.filterBy = {field: FILTER_FIELD, value: filterByTagsDropdown.getDisplayedValue()};
                     }
-        
                     //Build types based on checkbox selections
+        
                     dojo.forEach(checkBoxes, function(checkBox) {
                         if (checkBox.getChecked()) {
                             cardboardConfig.types.push(checkBox.getValue());
@@ -335,13 +336,14 @@
                     if (cardboard) {
                         cardboard.destroy();
                     }
-        
                     artifactTypes = cardboardConfig.types;
         
                     cardboard = new rally.sdk.ui.CardBoard(cardboardConfig, rallyDataSource);
+        
                     cardboard.addEventListener("preUpdate", that._onBeforeItemUpdated);
                     cardboard.display("kanbanBoard");
                 }
+                that._getAndStorePrefData(displayBoard);
             };
         
             that.display = function(element) {
@@ -448,12 +450,12 @@
         
             this.applyFilter = function() {
         
-                function applyFilterClass(){
+                function applyFilterClass() {
                     dojo.removeClass(card, 'filterByFade');
                     dojo.addClass(card, 'filterByShow');
                 }
         
-                if(options.filterBy.value && options.filterBy.value.length > 0){ //if the filter value is not empty string
+                if (options.filterBy.value && options.filterBy.value.length > 0) { //if the filter value is not empty string
                     dojo.removeClass(card, 'filterByShow');
                     dojo.addClass(card, 'filterByFade');
         
@@ -461,14 +463,14 @@
                     var filterField = filterFieldSplit[0];
                     var filterAttr = filterFieldSplit[filterFieldSplit.length - 1];
         
-                    if(item[filterField] === options.filterBy.value){ // field is string or number
+                    if (item[filterField] === options.filterBy.value) { // field is string or number
                         applyFilterClass();
                     } else if (filterField !== filterAttr) {
-                        if(item[filterField] && item[filterField][filterAttr] === options.filterBy.value){ // field is an object
+                        if (item[filterField] && item[filterField][filterAttr] === options.filterBy.value) { // field is an object
                             applyFilterClass();
                         } else { // field is a collection
-                            rally.forEach(item[filterField], function(field){
-                                if(field[filterAttr] === options.filterBy.value){
+                            rally.forEach(item[filterField], function(field) {
+                                if (field[filterAttr] === options.filterBy.value) {
                                     applyFilterClass();
                                 }
                             });
@@ -479,11 +481,11 @@
                 }
             };
         
-            this.applyArtifactTypeStyle = function(){
+            this.applyArtifactTypeStyle = function() {
                 dojo.addClass(card, rally.sdk.util.Ref.getTypeFromRef(item._ref));
             };
         
-            this._getColumnAgeDays = function(){
+            this._getColumnAgeDays = function() {
                 var daysOld = 0;
         
                 function getLastStateChange() {
@@ -540,7 +542,7 @@
         
                 var tasksDiv = dojo.query('.tasks', card);
         
-                if (tasksDiv.length > 0){
+                if (tasksDiv.length > 0) {
                     tasksDiv = tasksDiv[0];
                     dojo.empty(tasksDiv);
                     var completedTasks = 0;
@@ -561,7 +563,7 @@
                     var tasksLink = new rally.sdk.ui.basic.Link({
                         item: item,
                         text: completedTasks + " of " +
-                            item.Tasks.length + " tasks completed",
+                                item.Tasks.length + " tasks completed",
                         subPage: "tasks"
                     });
                     tasksLink.display(tasksDiv);
@@ -569,7 +571,7 @@
         
                 var defectsDiv = dojo.query('.defects', card);
         
-                if (defectsDiv.length > 0){
+                if (defectsDiv.length > 0) {
                     defectsDiv = defectsDiv[0];
                     dojo.empty(defectsDiv);
                     var closedDefects = 0;
@@ -590,7 +592,7 @@
                     var defectsLink = new rally.sdk.ui.basic.Link({
                         item: item,
                         text: closedDefects + " of " +
-                            item.Defects.length + " defects closed",
+                                item.Defects.length + " defects closed",
                         subPage: "defects"
                     });
                     defectsLink.display(defectsDiv);
@@ -666,14 +668,14 @@
                     statusDiv.appendChild(defectsDiv);
                 }
         
-                if(statusDiv.childNodes.length) {
+                if (statusDiv.childNodes.length) {
                     cardContent.appendChild(statusDiv);
                 }
         
-                if (options && options.showAgeAfter){
+                if (options && options.showAgeAfter) {
                     var ageDiv = document.createElement('div');
                     dojo.addClass(ageDiv, "age");
-                        cardContent.appendChild(ageDiv);
+                    cardContent.appendChild(ageDiv);
                 }
         
                 that._populateCard(card);
@@ -760,7 +762,7 @@
             var editPolicyHandlers = [];
         
             var kanbanPolicy = new KanbanPolicy(board.getRallyDataSource(), function(updatedVal) {
-                if(updatedVal !== null){
+                if (updatedVal !== null) {
                     options.policy = updatedVal;
                 }
                 that.updateColumn();
@@ -851,7 +853,7 @@
                 }
         
                 editPolicyElements = [columnPolicy, policyHeaderDiv, policySubheaderDiv, textArea];
-                rally.forEach(editPolicyElements, dojo.hitch(this, function(element){
+                rally.forEach(editPolicyElements, dojo.hitch(this, function(element) {
                     editPolicyHandlers.push(dojo.connect(element, 'onmouseenter', this, this._editCursor));
                 }));
             };
@@ -1088,7 +1090,7 @@
                 }
             };
         
-            that._alterAgeTextBox = function(textbox, args){
+            that._alterAgeTextBox = function(textbox, args) {
                 if (!args.value || isNaN(args.value) || args.value < 1) {
                     textbox.setValue(3);
                 }
@@ -1125,9 +1127,9 @@
                 that._addControlToRow(row, stringValue + "-checkBox-" + rows.length, checkbox, "configCheckBox");
         
                 var textBox = new rally.sdk.ui.basic.TextBox(
-                {   value:'',
-                    rememberValue:false
-                });
+                        {   value:'',
+                            rememberValue:false
+                        });
         
                 textBox.addEventListener("onChange", that._alterWipTextBox);
                 that._addControlToRow(row, stringValue + "-textBox-" + rows.length, textBox, "wipTextBoxContainer");
@@ -1306,15 +1308,7 @@
             };
         
             that._displayKanbanFieldDropdown = function(callback) {
-        
                 allAttributes = {};
-                rallyDataSource.find({
-                    type:"TypeDefinition",
-                    key: "types",
-                    query:'( Name = "Hierarchical Requirement" )',
-                    fetch:"Name,Attributes",
-                    project:null
-                }, gatherAttributes);
         
                 function gatherAttributes(results) {
         
@@ -1375,6 +1369,14 @@
                         rally.Logger.warn(ex);
                     }
                 }
+        
+                rallyDataSource.find({
+                    type:"TypeDefinition",
+                    key: "types",
+                    query:'( Name = "Hierarchical Requirement" )',
+                    fetch:"Name,Attributes",
+                    project:null
+                }, gatherAttributes);
             };
         
             //This wraps our controls to get their values
@@ -1410,13 +1412,7 @@
                 showAgeCheckBox.setChecked(currentPrefs.showAge);
                 showAgeTextBox.setValue(currentPrefs.showAgeAfter);
                 colorByArtifactTypeCheckBox.setChecked(currentPrefs.colorByArtifactType);
-                if (stateDropdown.getValue() !== currentPrefs.kanbanField) {
-                    stateDropdown.setValue(currentPrefs.kanbanField);
-                    var deleter = stateDropdown.addEventListener("onChange", setValues);
-                }
-                else {
-                    setValues();
-                }
+        
                 function setValues() {
                     var fieldInfos = currentPrefs.fieldInfos;
                     // remove the Event Handler from the dropdown
@@ -1429,11 +1425,17 @@
                         }
                     });
                 }
+        
+                if (stateDropdown.getValue() !== currentPrefs.kanbanField) {
+                    stateDropdown.setValue(currentPrefs.kanbanField);
+                    var deleter = stateDropdown.addEventListener("onChange", setValues);
+                }
+                else {
+                    setValues();
+                }
             };
         
             that._retrievePreferences = function(/*function*/callback) {
-                rallyDataSource.preferences.getAppPreferences(populateConfigForm);
-        
                 function populateConfigForm(results) {
                     var workspacePref;
                     var projectPref;
@@ -1466,11 +1468,14 @@
                         callback({});
                     }
                 }
+        
+                rallyDataSource.preferences.getAppPreferences(populateConfigForm);
             };
         
             that._saveComplete = function() {
                 dialog.hide();
-                that._retrievePreferences(function() {});
+                that._retrievePreferences(function() {
+                });
                 onConfigHide();
             };
         
@@ -1497,20 +1502,20 @@
                 if (!projectPrefRef) {
                     if (!workspacePrefRef) {
                         rallyDataSource.preferences.createAppPreference(
-                        {
-                            Name: "Kanban/WipSettings",
-                            Value: that._getValues(),
-                            Workspace:"/Workspace/" + rallyDataSource.workspaceOid
-                        },
+                                {
+                                    Name: "Kanban/WipSettings",
+                                    Value: that._getValues(),
+                                    Workspace:"/Workspace/" + rallyDataSource.workspaceOid
+                                },
                                 workspaceCallback,
                                 errorCallback);
                     }
                     rallyDataSource.preferences.createAppPreference(
-                    {
-                        Name: "Kanban/WipSettings",
-                        Value: that._getValues(),
-                        Project:"/Project/" + rallyDataSource.projectOid
-                    },
+                            {
+                                Name: "Kanban/WipSettings",
+                                Value: that._getValues(),
+                                Project:"/Project/" + rallyDataSource.projectOid
+                            },
                             callback,
                             errorProjectCallback);
                 }
@@ -1547,8 +1552,6 @@
             };
         
             that._retrievePreferences = function(prefCallback) {
-                rallyDataSource.preferences.getAppPreferences(getProjectOrWorkspacePref);
-        
                 function getProjectOrWorkspacePref(results) {
                     var workspacePref, projectPref, currentPrefs;
         
@@ -1576,6 +1579,7 @@
                     }
                     prefCallback(currentPrefs);
                 }
+                rallyDataSource.preferences.getAppPreferences(getProjectOrWorkspacePref);
             };
         
             that._storeValues = function(values) {
@@ -1712,7 +1716,7 @@
 
     <style type="text/css">
     .togglePoliciesContainer {
-            display:inline;
+            display: inline;
         }
         
         .typeFilterContainer {
@@ -1722,15 +1726,15 @@
             margin-top: -10px;
         }
         
-        .typeFilterContainer .filterByTagsDropdown{
-            padding-right:5px;
+        .typeFilterContainer .filterByTagsDropdown {
+            padding-right: 5px;
         }
         
-        .typeFilterContainer .filterByTagsDropdown .dijitTextBox{
-            vertical-align:top;
+        .typeFilterContainer .filterByTagsDropdown .dijitTextBox {
+            vertical-align: top;
         }
         
-        .typeFilterContainer .filterByTagsDropdown .dropdownLabel{
+        .typeFilterContainer .filterByTagsDropdown .dropdownLabel {
             vertical-align: baseline;
         }
         
@@ -1767,14 +1771,14 @@
         }
         
         .columnPolicy .policySubheaderDiv {
-           color: #808080;
-           display: none;
-           padding-bottom: 4px;
+            color: #808080;
+            display: none;
+            padding-bottom: 4px;
         }
         
         .columnPolicy textarea {
             color: #808080;
-            font: 11px arial,tahoma,helvetica,sans-serif;
+            font: 11px arial, tahoma, helvetica, sans-serif;
             resize: none;
         }
         
@@ -1786,8 +1790,8 @@
             color: #c6c6c6 !important;
         }
         
-        .columnPolicy .dijitTextBox{
-            background:none;
+        .columnPolicy .dijitTextBox {
+            background: none;
         }
         
         .editPolicyDiv {
@@ -1873,7 +1877,7 @@
         
         .cardboard .cardContent .status {
             border-top: 1px dotted #ccc;
-            margin-top:5px;
+            margin-top: 5px;
         }
         
         .cardboard .cardContent .status a {
@@ -1881,10 +1885,10 @@
         }
         
         .cardboard .cardContent .tasks, .defects {
-            background-repeat:no-repeat;
+            background-repeat: no-repeat;
             color: #666;
             padding-top: 5px;
-            padding-left:16px;
+            padding-left: 16px;
             line-height: 12px;
         }
         
@@ -1913,17 +1917,17 @@
             background-position: left bottom;
         }
         
-        .cardboard .filterByFade{
+        .cardboard .filterByFade {
             -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
-            filter: alpha(opacity=30);
+            filter: alpha(opacity = 30);
             opacity: .3;
-            zoom: 1;  /*ANS - necessary for IE7 opacity */
+            zoom: 1; /*ANS - necessary for IE7 opacity */
         }
         
         .cardboard .filterByFade.blocked,
-        .cardboard .filterByFade.ready{
+        .cardboard .filterByFade.ready {
             -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
-            filter: alpha(opacity=30);
+            filter: alpha(opacity = 30);
             opacity: .3;
             zoom: 1; /*ANS - necessary for IE7 opacity */
         }
@@ -1977,15 +1981,15 @@
         
         .buttonContainer.saveCancelButtons span,
         .buttonContainer.saveCancelButtons a {
-            vertical-align:middle;
+            vertical-align: middle;
         }
         
-        #showAgeTextBoxInnerDivLabel{
-            vertical-align:baseline;
+        #showAgeTextBoxInnerDivLabel {
+            vertical-align: baseline;
         }
         
-        #widget_showAgeTextBoxInnerDiv{
-            vertical-align:top;
+        #widget_showAgeTextBoxInnerDiv {
+            vertical-align: top;
         }
         
         .cardboard .columnContent .agedCard {
@@ -2001,7 +2005,7 @@
 
     <script type="text/javascript">
         /*configure following if you plan to run the Kanban app externally
-        rally.sdk.info.server = "https://community.rallydev.com/slm";*/
+         rally.sdk.info.server = "https://community.rallydev.com/slm";*/
         var WORKSPACE_OID = "1234";
         var PROJECT_OID = "54678";
         var PROJECT_SCOPE_UP = false;
