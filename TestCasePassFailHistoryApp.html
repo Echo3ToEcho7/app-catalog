@@ -7,7 +7,7 @@
     <meta name="Name" content="App: Test Case Pass/Fail History"/>
     <meta name="Version" content="2.2"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.22/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.27/sdk.js"></script>
 
     <style type="text/css">
     body {
@@ -350,7 +350,7 @@
             var dayMillis = 86400 * 1000;   // seconds in 1 day times 1000 for milliseconds value
             var today = new Date().getTime();  // in terms of epoch milliseconds
             var prevDate = new Date(today - (spanDays * dayMillis));
-            var isoDate = rally.sdk.util.DateTime.toIsoFormatString(prevDate);
+            var isoDate = rally.sdk.util.DateTime.toIsoString(prevDate);
             return isoDate;
         }
         
