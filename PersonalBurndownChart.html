@@ -93,12 +93,9 @@ function drawTable(results) {
         data.addRows(1);
         var column = 0;
         data.setCell(row, column++, row + 1);
-        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/detail/tk/" + task.ObjectID + "\" target=\"_parent\" " +
-                "onclick=\"parent.rallyPorthole.showDetail('/tk/view.sp','" + task.ObjectID + "','pj/b');return false;\">" + task.FormattedID + "</a>");
-        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/detail/tk/" + task.ObjectID + "\" target=\"_parent\" " +
-                "onclick=\"parent.rallyPorthole.showDetail('/tk/view.sp','" + task.ObjectID + "','pj/b');return false;\">" + task.Name + "</a>");
-        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/detail/ar/" + task.WorkProduct.ObjectID + "\" target=\"_parent\" " +
-                "onclick=\"parent.rallyPorthole.showDetail('/ar/view.sp','" + task.WorkProduct.ObjectID + "','pj/b');return false;\">" +
+        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/rally.sp#/detail/task/" + task.ObjectID + "\" target=\"_parent\">" + task.FormattedID + "</a>");
+        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/rally.sp#/detail/task/" + task.ObjectID + "\" target=\"_parent\">" + task.Name + "</a>");
+        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/rally.sp#/detail/userstory/" + task.WorkProduct.ObjectID + "\" target=\"_parent\">" +
                 task.WorkProduct.FormattedID + ": " + task.WorkProduct.Name + "</a>");
         if (task.Blocked == true) {
             data.setCell(row, column, "Blocked", null, {"style": "color: red;"});
