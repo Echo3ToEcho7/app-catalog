@@ -3,14 +3,15 @@
 <head>
     <title>Defect Summary Matrix</title>
     <meta name="Name" content="App: Defect Summary Matrix"/>
-    <meta name="Version" content="1"/>
+    <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script src="/apps/1.22/sdk.js"></script>
+    <script src="/apps/1.29/sdk.js"></script>
 
     <script type="text/javascript">
     rally.addOnLoad(function() {
         
             var defectData;
+            var table;
             var total = "Total";
             var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__', '__PROJECT_OID__',
                     '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
@@ -104,9 +105,20 @@
                 rallyDataSource.findAll(queryObject, populateTable);
             };
         
+            var destroyDefectList = function() {
+                if (defectList) {
+                    defectList.destroy();
+                    defectList = null;
+                    var displayHeader = dojo.byId('displayHeader');
+        
+                    if(displayHeader) {
+                        displayHeader.innerHTML = '';
+                    }
+                }
+            };
+        
             var populateTable = function (results) {
                 var tableDiv = document.getElementById('defects');
-                tableDiv.innerHTML = '';
                 var states = [];
                 states[0] = "&nbsp";
                 for (var i = 0; i < results.defectStates.length; i++) {
@@ -115,6 +127,10 @@
                 states[results.defectStates.length + 1] = total;
         
                 var config = { 'columnKeys': states, 'sortingEnabled' : false };
+        
+                if (table) {
+                    table.destroy();
+                }
                 table = new rally.sdk.ui.Table(config);
         
                 var priorities = [];
@@ -150,12 +166,15 @@
                         preface = "All ";
                     }
         
+                    destroyDefectList();
+        
                     displayHeaderDiv.innerHTML = preface + columnText + rowText + "Defects " + postface;
         
                     var displayDiv = dojo.byId('display');
                     var defectConfig = {
                         'columnKeys': ['FormattedID','Name','State','Priority', 'Owner']
                     };
+        
                     defectList = new rally.sdk.ui.Table(defectConfig);
                     defectList.addRows(defectData[col][row]);
                     for (var i = 0; i < defectData[col][row].length; i++) {
@@ -180,9 +199,7 @@
             var releaseDropdown = new rally.sdk.ui.ReleaseDropdown({}, rallyDataSource);
             var defectList = null;
             var releaseDropdownWrapper = function(obj, args) {
-                if (defectList) {
-                    defectList.destroy();
-                }
+                destroyDefectList();
                 defectQuery(obj, args);
             };
             releaseDropdown.display(releaseDiv, releaseDropdownWrapper);
@@ -193,7 +210,7 @@
 
 </head>
 <body>
-<div id="release"></div>
+<div id="release" style="margin-bottom: 15px"></div>
 <div id="defects"></div>
 <br/>
 <br/>

@@ -5,9 +5,9 @@
 <head>
     <title>Test Case Pass/Fail History</title>
     <meta name="Name" content="App: Test Case Pass/Fail History"/>
-    <meta name="Version" content="2.2"/>
+    <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.27/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
 
     <style type="text/css">
     body {
@@ -139,14 +139,6 @@
             return "error";
         }
         
-        function createUrl(type, identValue) {
-            // where type is a RALLY DB entity (User Story, Defect, Test Case, Test Case Result)
-            // and identValue is either FormattedID or ObjectID
-            var url = "__SERVER_URL__";
-            url += "/detail/" + shortUrl(type) + "/" + identValue;
-            return url;
-        }
-        
         var TC_TABLE_START = "<table><tr><td>";
         var ROW_END = "     </td>\n  </tr>\n";
         var EMPTY_CELL = "     <td>&nbsp;</td>\n";
@@ -256,7 +248,7 @@
                 var verdictBox = drawBox(tcr.Verdict);
                 //console.log("    " + tcr.ObjectID + " " + tcr.Build + " " + tcrDate + " " + tcr.Verdict);
                 //console.log("    -- (" + tcr.WorkProduct.FormattedID + " " + tcr.WorkProduct.Name + ")");
-                tcrLink = createUrl('Test Case Result', tcr.ObjectID);
+                tcrLink = rally.sdk.util.Navigation.createRallyDetailUrl(tcr);
         
                 var tcrRow = TCR_ROW.replace('_TCR_LINK_', tcrLink);
                 tcrRow = tcrRow.replace('_TCR_IDENT_', tcr.ObjectID);
@@ -289,7 +281,7 @@
                 testCase = testCaseHolder[tcFormattedID].TestCase;
                 testCaseResults = testCaseHolder[tcFormattedID].results;
                 table += TC_TABLE_START;
-                tcDetailUrl = createUrl('Test Case', testCase.ObjectID);
+                tcDetailUrl = rally.sdk.util.Navigation.createRallyDetailUrl(testCase);
                 tcLink = TC_LINK.replace('_TARGET_URL_', tcDetailUrl);
                 tcLink = tcLink.replace('_ID_', testCase.FormattedID);
                 tcLink = tcLink.replace('_NAME_', testCase.Name);
@@ -298,13 +290,7 @@
                 wpLink = "";  // prime to be empty just in case the Test Case has no associated WorkProduct
                 if (testCase.WorkProduct !== null) {
                     wpInfo = testCase.WorkProduct.FormattedID + " " + testCase.WorkProduct.Name;
-                    wpDetailUrl = "";
-                    if (testCase.WorkProduct._type === 'HierarchicalRequirement') {
-                        wpDetailUrl = createUrl("User Story", testCase.WorkProduct.ObjectID);
-                    }
-                    else if (testCase.WorkProduct._type === 'Defect') {
-                        wpDetailUrl = createUrl("Defect", testCase.WorkProduct.ObjectID);
-                    }
+                    wpDetailUrl = rally.sdk.util.Navigation.createRallyDetailUrl(testCase.WorkProduct);
                     wpLink = WP_LINK.replace("_WP_TARGET_", wpDetailUrl).replace("_WP_TEXT_", wpInfo);
                 }
                 tcLink = tcLink.replace("_WP_LINK_", " &nbsp;&nbsp; " + wpLink);
@@ -372,7 +358,7 @@
         }
         
         function testCasePassFailHistory() {
-            rally.sdk.ui.AppHeader.setHelpTopic("display/rlyhlp/Test+Case+PassFail+History+App");
+            rally.sdk.ui.AppHeader.setHelpTopic("256");
             rally.sdk.ui.AppHeader.showPageTools(true);
         
             var rallyDataSource =

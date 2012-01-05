@@ -4,9 +4,9 @@
 <head>
     <title>Estimation Board</title>
     <meta name="Name" content="App: Estimation Board"/>
-    <meta name="Version" content="2011.08.22"/>
+    <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.26/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
 
     <script type="text/javascript">
     function EstimationBoard(rallyDataSource, settingsShow, sizes) {
@@ -17,7 +17,7 @@
             this._createLayout = function(element) {
         
                 rally.sdk.ui.AppHeader.showPageTools(true);
-                rally.sdk.ui.AppHeader.setHelpUrl("http://www.rallydev.com/help/estimation-board");
+                rally.sdk.ui.AppHeader.setHelpTopic("236");
         
                 var headerDiv = document.createElement("div");
                 element.appendChild(headerDiv);

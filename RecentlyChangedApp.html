@@ -4,9 +4,9 @@
 <head>
     <title>Recently Changed</title>
     <meta name="Name" content="App: Recently Changed"/>
-    <meta name="Version" content="2011.04.18"/>
+    <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.23/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
 
     <script type="text/javascript">
     function RecentlyChanged() {
@@ -14,7 +14,7 @@
             this.display = function(element) {
                 var appHeader = rally.sdk.ui.AppHeader;
                 rally.sdk.ui.AppHeader.showPageTools(true);
-                rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Recently+Changed+App");
+                rally.sdk.ui.AppHeader.setHelpTopic("244");
                 var taskTable,defectTable,storyTable,lastWorkDate;
                 var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
                         '__PROJECT_OID__',

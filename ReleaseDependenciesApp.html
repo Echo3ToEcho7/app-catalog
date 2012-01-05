@@ -6,7 +6,7 @@
     <meta name="Name" content="App: Release Dependencies"/>
     <meta name="Version" content="2011.04.21"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.23/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
 
     <script type="text/javascript">
     function ReleaseDependencies() {
@@ -79,10 +79,19 @@
                 table.display(document.getElementById('stories'));
             }
         
-            function onReleaseSelected() {
+            function destroyTables() {
                 if (table) {
                     table.destroy();
                 }
+        
+                if(header) {
+                    header.destroy();
+                }
+            }
+        
+            function onReleaseSelected() {
+                destroyTables();
+        
                 var queryConfig = {
                     type : 'hierarchicalrequirement',
                     key  : 'stories',
@@ -101,7 +110,7 @@
                         '__PROJECT_SCOPING_DOWN__');
                 var relConfig = {};
                 rally.sdk.ui.AppHeader.showPageTools(true);
-                rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Release+Dependencies");
+                rally.sdk.ui.AppHeader.setHelpTopic("245");
                 relDropdown = new rally.sdk.ui.ReleaseDropdown(relConfig, rallyDataSource);
                 relDropdown.display(document.getElementById("releaseDiv"), onReleaseSelected);
             };

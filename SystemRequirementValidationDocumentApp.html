@@ -4,9 +4,9 @@
 <head>
     <title>System Requirement Validation Document</title>
     <meta name="Name" content="App: System Requirement Validation Document"/>
-    <meta name="Version" content="2011.09.19"/>
+    <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.27/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
 
     <script type="text/javascript">
     function SystemRequirementValidationDocument() {
@@ -16,7 +16,7 @@
             this.display = function() {
                 rally.sdk.ui.AppHeader.showPageTools(true);
                 rally.sdk.ui.AppHeader.removePageTool("popOut");
-                rally.sdk.ui.AppHeader.setHelpUrl("http://www.rallydev.com/help/system-requirement-validation-document-0");
+                rally.sdk.ui.AppHeader.setHelpTopic("255");
         
                 dataSource = new rally.sdk.data.RallyDataSource(
                         '__WORKSPACE_OID__',

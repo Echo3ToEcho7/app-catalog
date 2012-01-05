@@ -4,10 +4,10 @@
 <head>
     <title>Utilization Chart</title>
     <meta name="Name" content="App: Utilization Chart"/>
-    <meta name="Version" content="1.0"/>
+    <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Chris Jensen"/>
 
-    <script src="/apps/1.22/sdk.js"></script>
+    <script src="/apps/1.29/sdk.js"></script>
 
     <script type="text/javascript">
     function UtilizationChart() {
@@ -221,7 +221,7 @@
             }
         
             function initPage() {
-                rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Utilization+Chart+App");
+                rally.sdk.ui.AppHeader.setHelpTopic("259");
                 rally.sdk.ui.AppHeader.showPageTools(true);
                 rallyDataSource = new rally.sdk.data.RallyDataSource("__WORKSPACE_OID__", "__PROJECT_OID__",
                         "__PROJECT_SCOPING_UP__", "__PROJECT_SCOPING_DOWN__");

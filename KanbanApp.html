@@ -4,9 +4,9 @@
 <head>
     <title>Kanban Board</title>
     <meta name="Name" content="App: Kanban Board"/>
-    <meta name="Version" content="2012.01.05"/>
+    <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.27/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
 
     <script type="text/javascript">
     KanbanBoard = function(rallyDataSource, configShow) {
@@ -105,7 +105,7 @@
             };
         
             that._createLayout = function(element) {
-                rally.sdk.ui.AppHeader.setHelpUrl('http://www.rallydev.com/help/kanban-board');
+                rally.sdk.ui.AppHeader.setHelpTopic('238');
                 rally.sdk.ui.AppHeader.showPageTools(true);
         
                 rally.sdk.ui.AppHeader.addPageTool({
@@ -1303,7 +1303,7 @@
                 var configHelpElement = dojo.byId("configHelp");
                 dojo.addClass(configHelpElement, "configHelp");
                 var help = new rally.sdk.ui.Help();
-                help.setHelpTopic("/display/rlyhlp/Kanban+Settings+Dialog");
+                help.setHelpTopic("238");
                 help.display(configHelpElement);
             };
         

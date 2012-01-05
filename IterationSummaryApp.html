@@ -4,9 +4,9 @@
 <head>
     <title>Iteration Summary</title>
     <meta name="Name" content="App: Iteration Summary"/>
-    <meta name="Version" content="2011.09.20"/>
+    <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.28/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
     <script type="text/javascript">
         var rallyDataSource, iterationDropdown, timeboxOverview;
 
@@ -52,7 +52,7 @@
             if (_getMode() === 'panel') {
                 rally.sdk.ui.AppHeader.destroy();
             } else {
-                rally.sdk.ui.AppHeader.setHelpUrl('http://www.rallydev.com/help/iteration-summary');
+                rally.sdk.ui.AppHeader.setHelpTopic('237');
             }
 
             if (iterationSelected(iteration)) {
