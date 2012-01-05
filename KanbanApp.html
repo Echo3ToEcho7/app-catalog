@@ -4,7 +4,7 @@
 <head>
     <title>Kanban Board</title>
     <meta name="Name" content="App: Kanban Board"/>
-    <meta name="Version" content="2011.11.05"/>
+    <meta name="Version" content="2012.01.05"/>
     <meta name="Vendor" content="Rally Software"/>
     <script type="text/javascript" src="/apps/1.27/sdk.js"></script>
 
@@ -1480,7 +1480,9 @@
             };
         
             that._storeValues = function(callback) {
+        
                 function workspaceCallback(results) {
+        
                 }
         
                 function errorCallback(results) {
@@ -1497,6 +1499,15 @@
                         }
                         rally.sdk.ui.AppHeader.showMessage("error", error, 10000);
                     }
+                }
+        
+                function updateAppPreference(pref) {
+        
+                    currentPrefs = dojo.fromJson(pref.Value);
+                    var updatedPref = {_ref : projectPrefRef,
+                        Value:that._getValues()
+                    };
+                    rallyDataSource.preferences.update(updatedPref, callback, errorProjectCallback);
                 }
         
                 if (!projectPrefRef) {
@@ -1521,10 +1532,9 @@
                 }
                 else {
         
-                    var pref = {_ref : projectPrefRef,
-                        Value:that._getValues()
-                    };
-                    rallyDataSource.preferences.update(pref, callback, errorCallback);
+                    //Re-read pref before saving so we don't clobber anything
+                    rallyDataSource.getRallyObject(projectPrefRef, updateAppPreference, errorCallback);
+        
                 }
         
             };
