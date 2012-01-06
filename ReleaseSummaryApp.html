@@ -27,66 +27,44 @@
                     wait = null;
                 }
         
-                var notesHeader = document.createElement("div");
-                dojo.addClass(notesHeader, "notesHeader");
-                releaseNotesDiv.appendChild(notesHeader);
+                var notesHeader = dojo.create('div', {'class': 'notesHeader'}, releaseNotesDiv);
                 notesHeader.appendChild(document.createTextNode("About this release:"));
         
                 if (items.release && items.release.length > 0 && items.release[0].Notes) {
-                    var notes = document.createElement("div");
-                    dojo.addClass(notes, "notes");
-                    releaseNotesDiv.appendChild(notes);
-                    releaseNotesDiv.innerHTML += items.release[0].Notes; //user innerhtml so it will render html characters
+                    //use innerhtml so it will render html characters
+                    dojo.create('div', {'class': 'notes', innerHTML: items.release[0].Notes}, releaseNotesDiv);
                 }
         
-                var additionalInfo = document.createElement("div");
-                dojo.addClass(additionalInfo, "additionalInfo");
-                releaseNotesDiv.appendChild(additionalInfo);
+                var additionalInfo = dojo.create('div', {'class': 'additionalInfo'}, releaseNotesDiv);
                 additionalInfo.appendChild(document.createTextNode("Additional information is available "));
                 var releaseLink = new rally.sdk.ui.basic.Link({item: releaseDropdown.getSelectedItem(), text: "here"});
                 releaseLink.display(additionalInfo);
                 additionalInfo.appendChild(document.createTextNode("."));
         
                 if (items.stories) {
-                    var storiesHeader = document.createElement("div");
-                    dojo.addClass(storiesHeader, "storiesHeader");
-                    releaseNotesDiv.appendChild(storiesHeader);
+                    var storiesHeader = dojo.create('div', {'class': 'storiesHeader'}, releaseNotesDiv);
                     storiesHeader.appendChild(document.createTextNode("Stories: " + items.stories.length));
         
-                    var stories = document.createElement("ul");
-                    dojo.addClass(stories, "storiesList");
-                    releaseNotesDiv.appendChild(stories);
-                    var storyListContent = [];
+                    var stories = dojo.create('ul', {'class': 'storiesList'}, releaseNotesDiv);
                     rally.forEach(items.stories, function(s) {
-                        storyListContent.push("<li class=\"story\">");
+                        var li = dojo.create('li', {'class': 'story'}, stories);
                         var link = new rally.sdk.ui.basic.Link({item: s});
-                        storyListContent.push(link.renderToHtml());
-                        storyListContent.push(" - ");
-                        storyListContent.push(s.Name);
-                        storyListContent.push("</li>");
+                        link.display(li);
+                        dojo.create('span', {innerHTML: " - " + s.Name}, li);
                     });
-                    stories.innerHTML = storyListContent.join("");
                 }
         
                 if (items.defects) {
-                    var defectsHeader = document.createElement("div");
-                    dojo.addClass(defectsHeader, "defectsHeader");
-                    releaseNotesDiv.appendChild(defectsHeader);
+                    var defectsHeader = dojo.create('div', {'class': 'defectsHeader'}, releaseNotesDiv);
                     defectsHeader.appendChild(document.createTextNode("Defects: " + items.defects.length));
         
-                    var defects = document.createElement("ul");
-                    dojo.addClass(defects, "defectsList");
-                    releaseNotesDiv.appendChild(defects);
-                    var defectListContent = [];
+                    var defects = dojo.create('ul', {'class': 'defectsList'}, releaseNotesDiv);
                     rally.forEach(items.defects, function(d) {
-                        defectListContent.push("<li class=\"defect\">");
+                        var li = dojo.create('li', {'class': 'defect'}, defects);
                         var link = new rally.sdk.ui.basic.Link({item: d});
-                        defectListContent.push(link.renderToHtml());
-                        defectListContent.push(" - ");
-                        defectListContent.push(d.Name);
-                        defectListContent.push("</li>");
+                        link.display(li);
+                        dojo.create('span', {innerHTML: " - " + d.Name}, li);
                     });
-                    defects.innerHTML = defectListContent.join("");
                 }
             };
         
@@ -125,23 +103,14 @@
             };
         
             this._createLayout = function(element) {
-                var headerDiv = document.createElement("div");
-                dojo.addClass(headerDiv, "header");
-                element.appendChild(headerDiv);
+                var headerDiv = dojo.create('div', {'class': 'header'}, element);
+                var dropdownContainerSpan = dojo.create('span', {'class': 'dropdownContainer'}, headerDiv);
         
-                var dropdownContainerSpan = document.createElement("span");
-                dojo.addClass(dropdownContainerSpan, "dropdownContainer");
-                headerDiv.appendChild(dropdownContainerSpan);
-        
-                loadingSpan = document.createElement("span");
-                dojo.addClass(loadingSpan, "loading");
-                headerDiv.appendChild(loadingSpan);
+                loadingSpan = dojo.create('span', {'class': 'loading'}, headerDiv);
                 //IE7 requires child content to display wait/span correctly
                 loadingSpan.appendChild(document.createTextNode(" "));
         
-                releaseNotesDiv = document.createElement("div");
-                dojo.addClass(releaseNotesDiv, "releaseNotes");
-                element.appendChild(releaseNotesDiv);
+                releaseNotesDiv = dojo.create('div', {'class': 'releaseNotes'}, element);
         
                 //Create dropdowns
                 var dropdownConfig = {
