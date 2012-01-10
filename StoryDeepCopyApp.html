@@ -271,7 +271,8 @@
 
             rally.addOnLoad(function () {
                 goButton = new rally.sdk.ui.basic.Button({
-                    text: "Copy"
+                    text: "Copy",
+                    enabled: false
                 });
                 goButton.addEventListener('onClick', buttonPressed);
                 goButton.display('goButton');
