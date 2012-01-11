@@ -14,6 +14,7 @@
     function StoriesByCreator(rallyDataSource) {
             var releaseHolder, tableHolder;
             var releaseDropdown;
+            var table;
             var wait = null;
         
             // private method the builds the table of stories and associated info
@@ -33,7 +34,7 @@
                     'columnWidths'  : ['85px',         '360px',      '100px',
                         '150px',        '120px',      '120px', '120px']
                 };
-                var table = new rally.sdk.ui.Table(config);
+                table = new rally.sdk.ui.Table(config);
         
                 var i, j, story;
                 var linkConfig = null;
@@ -116,6 +117,13 @@
         
             //private method to query for stories when release selection changes
             function runMainQuery(sender, eventArgs) {
+                if (table) {
+                    table.destroy();
+                    table = null;
+                }
+        
+                tableHolder.innerHTML = "";
+        
                 var release = releaseDropdown.getSelectedName();
                 if ((release === null) || (release.length === 0)) {
                     tableHolder.innerHTML = "No release was defined. Please select another workspace/project.";
@@ -131,9 +139,8 @@
                     query : queryCriteria
                 };
         
-                tableHolder.innerHTML = "";
                 wait = new rally.sdk.ui.basic.Wait({});
-                wait.display(tableHolder);
+                wait.display('wait');
         
                 rallyDataSource.findAll(queryConfig, showResults);
             }
@@ -176,10 +183,9 @@
 </head>
 
 <body>
-<span id="release"></span>
-
-<div style="height: 15px;">&nbsp;</div>
-<span id="table"></span>
+<div id="release" style="float:left"></div>
+<div id="wait" style="float:left; height: 16px; width: 24px;"></div>
+<div id="table" style="clear:both;padding-top:15px"></div>
 </body>
 
 </html>
