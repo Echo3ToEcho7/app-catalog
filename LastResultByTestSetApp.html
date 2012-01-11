@@ -12,7 +12,7 @@
     <script type="text/javascript">
     rally.addOnLoad(function() {
         
-            var wait = null;
+            var wait = null, table;
             var noQualifiers = "There were no qualifying TestCaseResults in any TestSet for the selected release";
         
             function showResults(results) {
@@ -60,7 +60,7 @@
                     var testCaseLink = new rally.sdk.ui.basic.Link(linkConfig);
                     var testCaseIdent = testCaseLink.renderToHtml() + " " + testCase.Name;
                     var dateFormat = "yyyy-MM-dd HH:mm:ss";
-                    var tcrDate = rally.sdk.util.DateTime.formatDate(lastTestCaseResult.Date, dateFormat);
+                    var tcrDate = rally.sdk.util.DateTime.format(lastTestCaseResult.Date, dateFormat);
                     // assemble an object with info relevant to the last test case result
                     var ltcr = {'TestSet'    : testSetIdent,
                         'TestCase'   : testCaseIdent,
@@ -130,7 +130,10 @@
                     columnWidths : ['220px',    '280px',     '120px',              '150px'           ]
                 };
         
-                var table = new rally.sdk.ui.Table(tableConfig);
+                if (table) {
+                    table.destroy();
+                }
+                table = new rally.sdk.ui.Table(tableConfig);
                 table.addRows(lastTestCaseResults);
                 table.display(tableHolder);
                 if (lastTestCaseResults.length === 0) {
