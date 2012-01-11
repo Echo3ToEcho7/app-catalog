@@ -13,6 +13,7 @@
     var busySpinner;
         var iterDropdown;
         var rallyDataSource;
+        var defectTable, storyTable;
         var abbrev = {'User Story': 'ar', 'Defect': 'df', 'Task': 'tk', 'TestCase': 'tc'};
         
         function artifactLink(artifactName, artifact) {
@@ -43,9 +44,8 @@
         }
         
         function showStories(stories, contentDiv) {
-            document.getElementById(contentDiv).innerHTML = "";
             var tableData = [];
-            var tblConfig, table;
+            var tblConfig;
             var story,    storyLink,    storyInfo;
             var task,     taskLink,     taskInfo,    indentedTask;
             var defect,   defectLink,   defectInfo,  indentedDefect;
@@ -106,15 +106,14 @@
                 'columnWidths'   : ['400px',    '100px',  '100px'   ],
                 'sortingEnabled' : false
             };
-            table = new rally.sdk.ui.Table(tblConfig);
-            table.addRows(tableData);
-            table.display(contentDiv);
+            storyTable = new rally.sdk.ui.Table(tblConfig);
+            storyTable.addRows(tableData);
+            storyTable.display(contentDiv);
         }
         
         function showDefects(defects, contentDiv) {
-            document.getElementById(contentDiv).innerHTML = "";
             var tableData = [];
-            var tblConfig, table;
+            var tblConfig;
             var defect, defectLink, defectInfo;
             for (var d = 0; d < defects.length; d++) {
                 defect = defects[d];
@@ -130,17 +129,16 @@
                 'columnWidths'  : ['400px',      '100px',  '100px'   ],
                 'sortingEnabled' : false
             };
-            table = new rally.sdk.ui.Table(tblConfig);
-            table.addRows(tableData);
-            table.display(contentDiv);
+            defectTable = new rally.sdk.ui.Table(tblConfig);
+            defectTable.addRows(tableData);
+            defectTable.display(contentDiv);
         }
         
         function showResults(results) {
-            document.getElementById("stories_count").innerHTML = "";
-            document.getElementById("stories").innerHTML = "";
-            document.getElementById("defects_count").innerHTML = "";
-            document.getElementById("defects").innerHTML = "";
-            busySpinner.hide();
+            if(busySpinner) {
+                busySpinner.hide();
+                busySpinner = null;
+            }
             document.getElementById("stories_count").innerHTML = "Stories: " + results.stories.length;
             if (results.stories.length > 0) {
                 showStories(results.stories, "stories");
@@ -171,7 +169,17 @@
                 order: 'FormattedID'
             };
         
-            busySpinner.display("stories");
+            busySpinner = new rally.sdk.ui.basic.Wait({});
+            busySpinner.display("wait");
+        
+            if(storyTable) {
+                storyTable.destroy();
+                storyTable = null;
+            }
+            if(defectTable) {
+                defectTable.destroy();
+                defectTable = null;
+            }
             rallyDataSource.findAll(queryConfigs, showResults);
         }
     
@@ -179,7 +187,6 @@
     </script>
     <script type="text/javascript">
         function initPage() {
-            busySpinner = new rally.sdk.ui.Wait({hideTarget : true});
             rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
                     '__PROJECT_OID__',
                     '__PROJECT_SCOPING_UP__',
@@ -194,10 +201,10 @@
     </script>
 </head>
 <body style="font-size: 10pt;">
-<h3>Completed Stories and Defects by Iteration</h3>
 
-<div id="iterations"></div>
-<h4>Completed Items</h4>
+<div id="iterations" style="float:left"></div>
+<div id="wait" style="float:left; height: 16px; width: 24px;"></div>
+<h4 id="UserNameHeader" style="clear:both;padding-top:15px">Completed Items</h4>
 
 <div id="stories_count" style="margin-left: 10px; margin-bottom: 5px;"></div>
 <div id="stories"></div>
