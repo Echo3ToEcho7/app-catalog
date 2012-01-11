@@ -3,9 +3,9 @@
 <head>
     <title>Deep Copy Story</title>
     <meta name="Name" content="App: Deep Copy Story"/>
-    <meta name="Version" content="2012.01.14"/>
+    <meta name="Version" content="1.0"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.22/sdk.js"></script>
 
     <script type="text/javascript">
     rally.DeepCopyStory = function (rallyDataSource, config) {
@@ -217,13 +217,12 @@
             function storyCopied(storyOid) {
                 dojo.byId("currentInfo").innerHTML = "";
                 dojo.byId("storyLinkContainer").innerHTML = "";
-
-                var link = new rally.sdk.ui.basic.Link({
-                    text: 'Click here to go to your new story',
-                    item: { "_ref": "/hierarchicalrequirement/" + storyOid }
-                });
-
-                link.display('storyLinkContainer');
+                var link = document.createElement('a');
+                link.href = "/slm/detail/ar/" + storyOid;
+                link.target = "_top";
+                dijit.byId('goButton').attr('disabled', false);
+                link.innerHTML = "Click here to go to your new story";
+                dojo.byId("storyLinkContainer").appendChild(link);
             }
 
             function buttonPressed(value) {
@@ -259,9 +258,9 @@
             rally.addOnLoad(function () {
                 waiter = new rally.sdk.ui.Wait({hideTarget:true});
                 var button = new dijit.form.Button({
-                    label: "Copy story",
-                    onClick: buttonPressed
-                },
+                            label: "Copy story",
+                            onClick: buttonPressed
+                        },
                         "goButton");
                 waiter.display("container");
                 var storyConfig = {
@@ -273,7 +272,7 @@
                 searchStories = new rally.sdk.ui.ObjectDropdown(storyConfig, dataSource);
                 searchStories.display("storyBox", onDropdownComplete);
 
-                rally.sdk.ui.AppHeader.setHelpTopic("252");
+                rally.sdk.ui.AppHeader.setHelpTopic("/display/rlyhlp/Story+Deep+Copy");
             });
         });
 
