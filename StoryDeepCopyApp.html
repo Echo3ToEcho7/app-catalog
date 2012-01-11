@@ -105,7 +105,7 @@
             };
         
             this._copyStory = function(ref, parentRef, callback) {
-                that._getObjectByRef(ref, function (foundObject) {
+                rallyDataSource.getRallyObject(ref, function (foundObject) {
                     var type = getTypeFromRef(ref);
                     that._fireEvent("storyPreAdd", {story:foundObject});
                     if (parentRef) {
@@ -140,7 +140,7 @@
             };
         
             this._copyTask = function(ref, storyRef, callback) {
-                that._getObjectByRef(ref, function (foundObject) {
+                rallyDataSource.getRallyObject(ref, function (foundObject) {
                     var type = getTypeFromRef(ref);
                     foundObject.WorkProduct = storyRef;
                     that._fireEvent("taskPreAdd", {task:foundObject});
@@ -152,21 +152,6 @@
                     }, null);
                 });
             };
-        
-            //TODO: This will not return objects in a different scope
-            this._getObjectByRef = function(ref, callback) {
-                var queryObject = {
-                    key: "objects",
-                    type: getTypeFromRef(ref),
-                    fetch: true,
-                    project:null,
-                    query: "( ObjectId = " + rally.sdk.util.Ref.getOidFromRef(ref) + " )"
-                };
-                rallyDataSource.find(queryObject, function (results) {
-                    callback(results.objects.pop());
-                });
-            };
-        
         
             this.copyStory = function (ref, callback) {
                 that._copyStory(ref, undefined, that._copyAllFromBuffer);
@@ -182,8 +167,9 @@
             var tasksAdded = 0;
             var storiesAdded = 0;
             var searchStories;
-            var goButton, chooserButton;
+            var goButton, chooseButton;
             var chooser;
+            var waiter;
             var dataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__', '__PROJECT_OID__',
                     '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
 
@@ -215,16 +201,19 @@
 
 
             function storyCopied(story) {
-                dojo.byId("currentInfo").innerHTML = "";
-                dojo.byId("storyLinkContainer").innerHTML = "Copy complete: ";
+                dojo.byId("currentInfo").innerHTML = "Copy complete: ";
                 var link = new rally.sdk.ui.basic.Link({
                     item: story,
                     text: story._refObjectName
                 });
 
-                link.display('storyLinkContainer');
+                link.display('currentInfo');
                 goButton.setEnabled(true);
                 chooseButton.setEnabled(true);
+                if(waiter) {
+                    waiter.hide();
+                    waiter = null;
+                }
             }
 
             function buttonPressed() {
@@ -242,9 +231,12 @@
                     displayTasksAdded(tasksAdded);
                     storiesAdded = 0;
                     displayStoriesAdded(storiesAdded);
+                    dojo.byId("currentInfo").innerHTML = "";
                     var copy = new rally.StoryDeepCopy(dataSource, config);
                     goButton.setEnabled(false);
                     chooseButton.setEnabled(false);
+                    waiter = new rally.sdk.ui.basic.Wait({});
+                    waiter.display('wait');
                     copy.copyStory(rally.sdk.util.Ref.getRelativeRef(selectedValue), storyCopied);
                 }
 
@@ -293,21 +285,16 @@
 </head>
 <body>
 <div id="container">
-    <span id="chooseButton"></span>
-    <span id="storyBox" style="line-height:18px;vertical-align:middle"></span>
-    <span id="goButton"></span>
-
-    <div style="margin-left:5px;">
-        <div id="currentInfo" style="margin-top: 10px">
-        </div>
-        <div id="storyResult" style="margin-top:10px">
-
-        </div>
-        <div id="taskResult">
-
-        </div>
-        <div id="storyLinkContainer" style="margin-top:10px">
-        </div>
+    <div style="float:left">
+        <span id="chooseButton"></span>
+        <span id="storyBox" style="line-height:18px;vertical-align:middle">[No story selected]</span>
+        <span id="goButton"></span>
+    </div>
+    <div id="wait" style="float:left; height: 16px; width: 24px;"></div>
+    <div style="margin-left:5px;padding-top:10px;clear:both">
+        <div id="currentInfo" style="height:16px"></div>
+        <div id="storyResult" style="margin-top:10px"></div>
+        <div id="taskResult"></div>
     </div>
 </div>
 </body>
