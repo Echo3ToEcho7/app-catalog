@@ -16,6 +16,7 @@
         function DefectsByCloser(rallyDataSource) {
             var releaseDiv, tableDiv;
             var releaseDropdown;
+            var table;
             var wait = null;
         
             // private method the builds the table of defects and associated info
@@ -34,7 +35,7 @@
                     'columnHeaders': ['Formatted ID', 'Name',  'Date Closed', 'Revision<br>Number', 'Closed By'] ,
                     'columnWidths' : ['80px',         '360px', '150px',       '60px',               '120px'    ]
                 };
-                var table = new rally.sdk.ui.Table(config);
+                table = new rally.sdk.ui.Table(config);
                 table.addRows(results.defects);
         
                 var linkConfig = null;
@@ -71,6 +72,13 @@
         
             //private method to query for defects when release selection changes
             function runMainQuery(sender, eventArgs) {
+                if (table) {
+                    table.destroy();
+                    table = null;
+                }
+        
+                tableDiv.innerHTML = "";
+        
                 var release = releaseDropdown.getSelectedName();
                 var queryCriteria = '((Release.Name = "' + release + '") AND (State = "Closed"))';
                 var queryConfig =
@@ -82,9 +90,8 @@
                     query : queryCriteria
                 };
         
-                tableDiv.innerHTML = "";
                 wait = new rally.sdk.ui.basic.Wait({});
-                wait.display(tableDiv);
+                wait.display('wait');
         
                 rallyDataSource.findAll(queryConfig, showResults);
             }
@@ -128,9 +135,9 @@
 </head>
 
 <body>
-<div id="release"></div>
-<div style="height: 15px;">&nbsp;</div>
-<div id="table"></div>
+<div id="release" style="float:left"></div>
+<div id="wait" style="float:left; height: 16px; width: 24px;"></div>
+<div id="table" style="clear:both;padding-top:15px"></div>
 </body>
 
 </html>
