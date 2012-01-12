@@ -15,6 +15,7 @@
         var iterationDropdown = null;
         var ACTIVE = "Active";
         var BLOCKED = "Blocked";
+        var taskTable, storyTable, taskHistoryTable;
         
         var blockedTasks = {};  // key with story.FormattedID, value is an Array with elements of:
         //    {task.FormattedID, task.Name,
@@ -158,7 +159,6 @@
             return storyInfo;
         }
         
-        
         function makeFuncLink(functionName, paramValues, linkText) {
             // token substitution for FUNCTION_NAME, PARAMS and LINK_TEXT
             // Note that each parm in the parm list must be enclosed in single quotes
@@ -180,30 +180,29 @@
                     'CurrBlockedTasks', 'TaskDetails'],
                     "columnHeaders" : ["User Story", "Schedule State", "Status", "# of Tasks",
                         "# Currently <br>Blocked Tasks", "Tasks Details"],
-                    "columnWidths"  : ['75px', '90px', '75px', '70px', '85px', '90px'],
-                    "width"  : "80%",
+                    "columnWidths"  : ['75px', '90px', '75px', '70px', '85px', '100px'],
                     "height" : "180px"
                 };
-                var tbl = new rally.sdk.ui.Table(tblConfig);
+                storyTable = new rally.sdk.ui.Table(tblConfig);
                 var blocked = dojo.map(blocked_stories, currentStoryState);
                 var tasksLink = "";
                 for (var ix = 0; ix < blocked.length; ix++) {
                     var item = blocked[ix];
-                    tbl.setCell(ix, 'StoryID', item.storyID);
-                    tbl.setCell(ix, 'SchedState', item.schedState);
-                    tbl.setCell(ix, 'Status', item.state);
-                    tbl.setCell(ix, 'NumTasks', item.numTasks);
-                    tbl.setCell(ix, 'CurrBlockedTasks', item.tasksBlocked);
+                    storyTable.setCell(ix, 'StoryID', item.storyID);
+                    storyTable.setCell(ix, 'SchedState', item.schedState);
+                    storyTable.setCell(ix, 'Status', item.state);
+                    storyTable.setCell(ix, 'NumTasks', item.numTasks);
+                    storyTable.setCell(ix, 'CurrBlockedTasks', item.tasksBlocked);
                     if (item.numTasks > 0) {
                         tasksLink = makeFuncLink('showBlockingTasks', [item.storyID], 'Show Tasks');
-                        tbl.setCell(ix, 'TaskDetails', tasksLink);
+                        storyTable.setCell(ix, 'TaskDetails', tasksLink);
                     }
                     else {
-                        tbl.setCell(ix, 'TaskDetails', "");
+                        storyTable.setCell(ix, 'TaskDetails', "");
                     }
                 }
                 var blockHistDiv = document.getElementById('blockHistDiv');
-                tbl.display(blockHistDiv);
+                storyTable.display(blockHistDiv);
             }
             else {
                 var noBlockedStories = "<br>There are no stories that have ever been blocked for " +
@@ -214,9 +213,18 @@
         
         
         function showBlockingTasks(storyID) {
-            document.getElementById('taskHistoryDiv').innerHTML = "";
+            if(taskTable) {
+                taskTable.destroy();
+                taskTable = null;
+            }
+        
+            if(taskHistoryTable) {
+                taskHistoryTable.destroy();
+                taskHistoryTable = null;
+            }
+            dojo.byId('taskHistoryDiv').innerHTML = "";
+            
             var blockedTasksDiv = document.getElementById('blockedTasksDiv');
-            blockedTasksDiv.innerHTML = "";  // zero out any current contents of the div
             blockedTasksDiv.innerHTML = "<h4>Tasks with Blocking History<br>User Story: " + storyID + "<\/h4>";
         
             //  See if there have ever been any blocked tasks associated with the storyID
@@ -233,29 +241,28 @@
             config = {"id" : "blockedTasks",
                 "columnKeys"    : ["TaskID", "Name", "SchedState",     "CurrentStatus",  "TaskHistory"],
                 "columnHeaders" : ["Task",   "Name", "Schedule State", "Current Status", "Task History"],
-                "columnWidths"  : ['75px', '300px', '90px', '80px', '120px'],
-                //"width"  : "85%",
+                "columnWidths"  : ['75px', '300px', '90px', '80px', '150px'],
                 "height" : "140px"
             };
-            var tbl = new rally.sdk.ui.Table(config);
+            taskTable = new rally.sdk.ui.Table(config);
             var taskBlockingHistoryLink = "";
             for (var ix = 0; ix < blocked_tasks.length; ix++) {
                 var blockedTask = blocked_tasks[ix];
-                tbl.setCell(ix, 'TaskID', blockedTask.taskID);
-                tbl.setCell(ix, 'Name', "<nobr>" + blockedTask.name + "</nobr>");
-                tbl.setCell(ix, 'SchedState', blockedTask.state);
-                tbl.setCell(ix, 'CurrentStatus', blockedTask.status);
+                taskTable.setCell(ix, 'TaskID', blockedTask.taskID);
+                taskTable.setCell(ix, 'Name', "<nobr>" + blockedTask.name + "</nobr>");
+                taskTable.setCell(ix, 'SchedState', blockedTask.state);
+                taskTable.setCell(ix, 'CurrentStatus', blockedTask.status);
                 taskBlockingHistoryLink = makeFuncLink('showBlockingTaskHistory', [storyID, blockedTask.taskID], 'Show Blocking History');
-                tbl.setCell(ix, 'TaskHistory', taskBlockingHistoryLink);
+                taskTable.setCell(ix, 'TaskHistory', taskBlockingHistoryLink);
             }
-            tbl.display(blockedTasksDiv);
+            taskTable.display(blockedTasksDiv);
         }
         
         
         function createBlockageEpisode(startDate, rev) {
             var be =
             {
-                'blockDate'    : dojo.date.stamp.fromISOString(startDate),
+                'blockDate'    : rally.sdk.util.DateTime.fromIsoString(startDate, true),
                 'blockRev'     : rev,
                 'unBlockDate'  : "",
                 'unBlockRev'   : "",
@@ -265,12 +272,12 @@
                         this.unBlockDate = "Currently Blocked";
                     }
                     else {
-                        this.unBlockDate = dojo.date.stamp.fromISOString(this.unBlockDate);
+                        this.unBlockDate = rally.sdk.util.DateTime.fromIsoString(this.unBlockDate, true);
                         this.lagTime = this.calcDuration(this.blockDate, this.unBlockDate);
                     }
                 },
                 'calcDuration' : function (startDate, endDate) {
-                    // Be aware that the dojo.date.difference function rounds when provided
+                    // Be aware that the rally.sdk.util.DateTime.getDifference function rounds when provided
                     // a unit in the form of 'year', 'month', 'week', 'day', 'hour' ...
                     // so the dur value that gets returned is often less than dead on the money precision.
                     // If fine-precision is desired you'd need to start at the other end of the unit
@@ -286,14 +293,14 @@
                     var interval = 0;
                     for (var ix = 0; ix < time_units.length && units_used < 2; ix++) {
                         unit = time_units[ix];
-                        interval = dojo.date.difference(refDate, endDate, unit);
+                        interval = rally.sdk.util.DateTime.getDifference(endDate, refDate, unit);
                         if (interval > 0) {
                             dur += interval + " " + unit;
                             if (interval > 1) {
                                 dur += "s";
                             }
                             dur += " ";
-                            refDate = dojo.date.add(refDate, unit, interval);
+                            refDate = rally.sdk.util.DateTime.add(refDate, unit, interval);
                             units_used++;
                         }
         
@@ -356,51 +363,63 @@
         
         
         function showBlockingTaskHistory(storyID, taskID) {
+            if(taskHistoryTable) {
+                taskHistoryTable.destroy();
+                taskHistoryTable = null;
+            }
             var taskHistoryDiv = document.getElementById('taskHistoryDiv');
-            taskHistoryDiv.innerHTML = "";   // clear out for task history table
-            var tableHeader = "<br><br><h4>Blocking History for Task " + taskID + "</h4>";
+            taskHistoryDiv.innerHTML = "<br><br><h4>Blocking History for Task " + taskID + "</h4>";
             var config = {};
             config = {"id" : "taskBlockingHistory",
                 "columnKeys"    : ["BlockedDate",  "UnblockedDate",  "LagTime"],
                 "columnHeaders" : ["Blocked Date", "Unblocked Date", "Lag Time"],
                 "columnWidths"  : ['100px', '100px', '140px'],
-                //"width"  : "50%",
                 "height" : "100px"
             };
-            var tbl = new rally.sdk.ui.Table(config);
+            taskHistoryTable = new rally.sdk.ui.Table(config);
             var blockages = taskBlockingHistory(storyID, taskID);
             var bd = null;
-            var dateFormatSpec = {'datePattern' : 'yyyy/MM/dd', 'selector' : 'date'};
+            var dateFormatSpec = 'yyyy/MM/dd';
             for (var i = 0; i < blockages.length; i++) {
                 var blockage = blockages[i];
                 blockage.duration();   // call method to calculate and set the lagTime
-                bd = dojo.date.locale.format(blockage.blockDate, dateFormatSpec);
+                bd = rally.sdk.util.DateTime.format(blockage.blockDate, dateFormatSpec);
                 var ubd = "Currently Blocked";
                 if (blockage.unBlockDate !== "" && blockage.unBlockDate !== ubd) {
-                    ubd = dojo.date.locale.format(blockage.unBlockDate, dateFormatSpec);
+                    ubd = rally.sdk.util.DateTime.format(blockage.unBlockDate, dateFormatSpec);
                 }
-                tbl.setCell(i, 'BlockedDate', bd);
-                tbl.setCell(i, 'UnblockedDate', ubd);
-                tbl.setCell(i, 'LagTime', blockage.lagTime);
+                taskHistoryTable.setCell(i, 'BlockedDate', bd);
+                taskHistoryTable.setCell(i, 'UnblockedDate', ubd);
+                taskHistoryTable.setCell(i, 'LagTime', blockage.lagTime);
             }
         
-            tbl.display(taskHistoryDiv);
-            taskHistoryDiv.innerHTML = tableHeader + taskHistoryDiv.innerHTML;
+            taskHistoryTable.display(taskHistoryDiv);
         }
         
         
         function runMainQuery() {
-            // reset innerHTML content of blockHistDiv, otherwise you'll see an additional table
-            // added to the page whenever an iteration has any user story that has ever been blocked
-            // do the same for blockedTasksDiv and taskHistoryDiv
-            document.getElementById('blockHistDiv').innerHTML = "";
-            document.getElementById('blockedTasksDiv').innerHTML = "";
-            document.getElementById('taskHistoryDiv').innerHTML = "";
-            busySpinner.display("blockHistDiv");
         
+            if(taskTable) {
+                taskTable.destroy();
+                taskTable = null;
+            }
+            if(storyTable) {
+                storyTable.destroy();
+                storyTable = null;
+            }
+            if(taskHistoryTable) {
+                taskHistoryTable.destroy();
+                taskHistoryTable = null;
+            }
+            var blockHistDiv = dojo.byId('blockHistDiv');
+            blockHistDiv.innerHTML = "";
+            var blockedTasksDiv = dojo.byId('blockedTasksDiv');
+            blockedTasksDiv.innerHTML = "";
+            var taskHistoryDiv = dojo.byId('taskHistoryDiv');
+            taskHistoryDiv.innerHTML = "";
+            
             var showResults = function (results) {
                 busySpinner.hide();
-                document.getElementById('blockHistDiv').innerHTML = "<br>";
                 var blocked_stories = detectBlockedStories(results.stories);
                 showBlockedStories(blocked_stories);
             };
@@ -414,6 +433,9 @@
                 order: 'FormattedID',
                 query: '(Iteration.Name = ' + '\"' + targetIterationName + '\")'
             };
+        
+            busySpinner = new rally.sdk.ui.basic.Wait({});
+            busySpinner.display('wait');
             rallyDataSource.findAll(queryConfig, showResults);
         }
     
@@ -421,15 +443,7 @@
     </script>
 
     <style type="text/css">
-        .blockedStories .dojoxGridCell {
-            text-align: right;
-            padding-right: 8px;
-        }
-
-        .blockedTasks   .dojoxGridCell {
-            text-align: left;
-            padding-right: 8px;
-        }
+        
 
         th, td {
             font-size: smaller;
@@ -439,13 +453,6 @@
     <script type="text/javascript">
 
         function blockingHistory() {
-            var loadDojoDateSugar = function() {
-                dojo.require("dojo.date");
-                dojo.require("dojo.date.stamp");
-                dojo.require("dojo.date.locale");
-            };
-            dojo.addOnLoad(loadDojoDateSugar);
-            busySpinner = new rally.sdk.ui.Wait({hideTarget : true});
             rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
                     '__PROJECT_OID__',
                     '__PROJECT_SCOPING_UP__',
@@ -459,17 +466,10 @@
     </script>
 </head>
 <body>
-<h3>Blocking History for Stories in an Iteration</h3>
-
-<div id="iterations"></div>
-<br>
-
-<div class="blockedStories" id="blockHistDiv"></div>
-<br>
-
+<div id="iterations" style="float:left"></div>
+<div id="wait" style="float:left; height: 16px; width: 24px;"></div>
+<div class="blockedStories" id="blockHistDiv" style="clear:both;padding-top:15px"></div>
 <div class="blockedTasks" id="blockedTasksDiv"></div>
-<br>
-
 <div id="taskHistoryDiv"><p></p></div>
 </body>
 </html>
