@@ -16,14 +16,13 @@
         function BuildTraceability(rallyDataSource) {
             var buildDropdown;
             var projectObjectIds = [];
-            var buildTooltip;
+            var buildTooltip, table;
         
             //private method that builds table of changeset and artifact info
             function display(tableElement, build) {
-                var detailPage, table, config, link;
                 var tableConfig = {'columnKeys' : ['ID', 'Name', 'State', 'Changeset', 'Changeset Message', 'Release']};
         
-                if (typeof table !== "undefined") {
+                if (table) {
                     table.destroy();
                 }
         
@@ -101,7 +100,7 @@
                     showLabel: true
                 };
         
-                if (typeof buildDropdown !== "undefined") {
+                if (buildDropdown) {
                     buildDropdown.destroy();
                 }
         
