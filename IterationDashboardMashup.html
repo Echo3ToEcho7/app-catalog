@@ -50,7 +50,7 @@ function isValidChartDate(b, c, a) {
     return(RALLY.Mashup.Utilities.isWorkDay(b) && b >= c && b <= a) ? true : false
 }
 function initTodayBurndownObj(a) {
-    return{CardEstimateTotal:0,TaskEstimateTotal:0,CardToDoTotal:0,CreationDate:a}
+    return{CardEstimateTotal:0, TaskEstimateTotal:0, CardToDoTotal:0, CreationDate:a}
 }
 function formatDateValue(a) {
     return(a < 10) ? "0" + a : a
@@ -68,7 +68,7 @@ function calcNumberOfWorkDays(e, a) {
     return b
 }
 function findDateForDay(f, c) {
-    var e,b,a,d;
+    var e, b, a, d;
     a = RALLY.Mashup.Utilities.convertIsoDateOnly(f);
     d = Math.round(c);
     if (d <= 0) {
@@ -143,7 +143,7 @@ function addTodayToBurndownData(d, b, a, c) {
     var e = b.getMonth() + 1;
     var f = b.getFullYear() + "-" + formatDateValue(e) + "-" + formatDateValue(b.getDate()) + "T" + formatDateValue(b.getHours()) + ":" + formatDateValue(b.getMinutes()) + ":" + formatDateValue(b.getSeconds()) + ".000Z";
     if (typeof d.definedData === "undefined") {
-        d = {definedData:[initTodayBurndownObj(f)],inprogressData:[initTodayBurndownObj(f)],completedData:[initTodayBurndownObj(f)],acceptedData:[initTodayBurndownObj(f)]}
+        d = {definedData:[initTodayBurndownObj(f)], inprogressData:[initTodayBurndownObj(f)], completedData:[initTodayBurndownObj(f)], acceptedData:[initTodayBurndownObj(f)]}
     } else {
         d.definedData.push(initTodayBurndownObj(f));
         d.inprogressData.push(initTodayBurndownObj(f));
@@ -167,11 +167,11 @@ function addTodayToBurndownData(d, b, a, c) {
     return d
 }
 function sumTodayValues(k, j, m, d) {
-    var l = ["HierarchicalRequirement","Defect","DefectSuite"];
-    var b = ["PlanEstimate","TaskEstimateTotal","TaskRemainingTotal"];
-    var g = {PlanEstimate:"CardEstimateTotal",TaskEstimateTotal:"TaskEstimateTotal",TaskRemainingTotal:"CardToDoTotal"};
-    var e = {Defined:"defined","In-Progress":"inprogress",Completed:"completed",Accepted:"accepted"};
-    var f,a;
+    var l = ["HierarchicalRequirement", "Defect", "DefectSuite"];
+    var b = ["PlanEstimate", "TaskEstimateTotal", "TaskRemainingTotal"];
+    var g = {PlanEstimate:"CardEstimateTotal", TaskEstimateTotal:"TaskEstimateTotal", TaskRemainingTotal:"CardToDoTotal"};
+    var e = {Defined:"defined", "In-Progress":"inprogress", Completed:"completed", Accepted:"accepted"};
+    var f, a;
     if (m !== null) {
         e[m] = m
     }
@@ -202,8 +202,8 @@ function aggregateFlowDataPerDay(v, f, e, s, c) {
     var t = RALLY.Mashup.Utilities.convertIsoDateOnly(f);
     var d = RALLY.Mashup.Utilities.convertIsoDateOnly(e);
     var h = 0;
-    var k,l,g,n;
-    var u,b,r,o;
+    var k, l, g, n;
+    var u, b, r, o;
     g = RALLY.Mashup.Utilities.convertIsoDateOnly(v.definedData[0].CreationDate);
     b = calcNumberOfWorkDays(f, v.definedData[0].CreationDate.slice(0, 10));
     if (RALLY.Mashup.Utilities.isWorkDay(g) && g >= t) {
@@ -272,7 +272,7 @@ function aggregateFlowDataPerDay(v, f, e, s, c) {
         }
         k.setTime(addDaysToDate(k, 1))
     }
-    var a = {firstDataDay:b,lastDataDay:r,dates:j,definedPerDay:q,inprogressPerDay:p,completedPerDay:y,acceptedPerDay:x};
+    var a = {firstDataDay:b, lastDataDay:r, dates:j, definedPerDay:q, inprogressPerDay:p, completedPerDay:y, acceptedPerDay:x};
     if (s !== null) {
         a[s + "PerDay"] = m
     }
@@ -288,7 +288,7 @@ function aggregateFlowDataPerDay(v, f, e, s, c) {
  */
 var RALLY = RALLY || {};
 RALLY.Mashup = RALLY.Mashup || {};
-RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P) {
+RALLY.Mashup.SuperCustomizableChart = function (g, r, E, h, f, V, B, e, s, ah, P) {
     var y = "Defined";
     var z = "In-Progress";
     var J = "Completed";
@@ -297,8 +297,8 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
     var M = this;
     var F = {};
     var j;
-    var ab,af,ae,ac,Z,ad,L;
-    var N = {ChartType:"stacked-bar",Units:"story",BeforeStateName:null,AfterStateName:null,BeforeVisible:false,DefinedVisible:true,InProgressVisible:true,CompletedVisible:true,AcceptedVisible:true,AfterVisible:false,BeforeColor:"#EF3F35",DefinedColor:"#E57E3A",InProgressColor:"#5C9ACB",CompletedColor:"#B2E3B6",AcceptedColor:"#6AB17D",AfterColor:"#3A874F",BeforeTrend:false,DefinedTrend:false,InProgressTrend:false,CompletedTrend:false,AcceptedTrend:false,AfterTrend:false,BurndownIdealVisible:false,BurndownIdealColor:"#BBBBBB",BurnupIdealVisible:false,BurnupIdealColor:"#BBBBBB",TableVisible:false,LeftAxisLabelVisible:true,BottomAxisLabelVisible:true,RightAxisLabelVisible:true,LeftAxisVisible:true,BottomAxisVisible:true,RightAxisVisible:true,scopeUp:false,scopeDown:true};
+    var ab, af, ae, ac, Z, ad, L;
+    var N = {ChartType:"stacked-bar", Units:"story", BeforeStateName:null, AfterStateName:null, BeforeVisible:false, DefinedVisible:true, InProgressVisible:true, CompletedVisible:true, AcceptedVisible:true, AfterVisible:false, BeforeColor:"#EF3F35", DefinedColor:"#E57E3A", InProgressColor:"#5C9ACB", CompletedColor:"#B2E3B6", AcceptedColor:"#6AB17D", AfterColor:"#3A874F", BeforeTrend:false, DefinedTrend:false, InProgressTrend:false, CompletedTrend:false, AcceptedTrend:false, AfterTrend:false, BurndownIdealVisible:false, BurndownIdealColor:"#BBBBBB", BurnupIdealVisible:false, BurnupIdealColor:"#BBBBBB", TableVisible:false, LeftAxisLabelVisible:true, BottomAxisLabelVisible:true, RightAxisLabelVisible:true, LeftAxisVisible:true, BottomAxisVisible:true, RightAxisVisible:true, scopeUp:false, scopeDown:true};
     var ai = [];
 
     function K() {
@@ -342,13 +342,13 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
 
     function T(ao, an) {
         var al = (V === RALLY.Mashup.ITERATION) ? "iterationCumulativeFlowData" : "releaseCumulativeFlowData";
-        var am,ap;
+        var am, ap;
         if (an === null || an.length === 0) {
             am = '( CardState = "' + ao + '" )'
         } else {
             am = "(" + an + ' AND ( CardState = "' + ao + '" ))'
         }
-        ap = {key:"FlowData",type:al,fetch:"CreationDate,CardEstimateTotal,TaskEstimateTotal,CardToDoTotal",query:am,order:"CreationDate",project:null};
+        ap = {key:"FlowData", type:al, fetch:"CreationDate,CardEstimateTotal,TaskEstimateTotal,CardToDoTotal", query:am, order:"CreationDate", project:null};
         ak(ap);
         return ap
     }
@@ -360,7 +360,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
     function A(aq, an, al, ao, ap) {
         var ar = [];
         for (var am = al; am <= ao; am++) {
-            ar.push([am,an[am][ap],X(aq[am])])
+            ar.push([am, an[am][ap], X(aq[am])])
         }
         return ar
     }
@@ -369,7 +369,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
         if (typeof ap === "undefined" || ap === null) {
             ap = "left"
         }
-        var an = new EJSC.BarSeries(new EJSC.ArrayDataHandler(aq), {y_axis:ap,padding:{x_axis_min:w,x_axis_max:w,y_axis_min:w,y_axis_max:w}});
+        var an = new EJSC.BarSeries(new EJSC.ArrayDataHandler(aq), {y_axis:ap, padding:{x_axis_min:w, x_axis_max:w, y_axis_min:w, y_axis_max:w}});
         an.title = ar;
         an.color = al;
         an.opacity = 100;
@@ -517,7 +517,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
     }
 
     function R(ao, am, aq, al, an, ap) {
-        L = j.addSeries(new EJSC.StackedBarSeries({intervalOffset:0.7,padding:{x_axis_min:w,x_axis_max:w,y_axis_min:w,y_axis_max:w}}));
+        L = j.addSeries(new EJSC.StackedBarSeries({intervalOffset:0.7, padding:{x_axis_min:w, x_axis_max:w, y_axis_min:w, y_axis_max:w}}));
         if (N.AfterStateName !== null && N.AfterVisible) {
             ad = I(L, N.AfterStateName, ap, N.AfterColor, N.AfterTrend)
         }
@@ -539,7 +539,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
     }
 
     function W(ao, am, aq, al, an, ap) {
-        L = j.addSeries(new EJSC.StackedBarSeries({intervalOffset:0.7,padding:{x_axis_min:w,x_axis_max:w,y_axis_min:w,y_axis_max:w}}));
+        L = j.addSeries(new EJSC.StackedBarSeries({intervalOffset:0.7, padding:{x_axis_min:w, x_axis_max:w, y_axis_min:w, y_axis_max:w}}));
         if (N.BeforeStateName !== null && N.BeforeVisible) {
             Z = I(L, N.BeforeStateName, ao, N.BeforeColor, N.BeforeTrend)
         }
@@ -614,8 +614,8 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
 
     function p(am) {
         var an = new google.visualization.DataTable();
-        var au,al,ap;
-        var ar,aq,ao;
+        var au, al, ap;
+        var ar, aq, ao;
         ar = aj();
         if (N.ChartType === "burndown") {
             aq = "CardEstimateTotal"
@@ -653,7 +653,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
         }
         document.getElementById(s).style.visibility = "visible";
         var at = new google.visualization.Table(document.getElementById(s));
-        at.draw(an, {allowHtml:true,showRowNumber:false})
+        at.draw(an, {allowHtml:true, showRowNumber:false})
     }
 
     function aj() {
@@ -690,7 +690,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
     }
 
     function q(an, ao) {
-        var al,am;
+        var al, am;
         am = aj();
         al = an.definedPerDay[ao][am] + an.inprogressPerDay[ao][am] + an.completedPerDay[ao][am];
         if (N.BeforeStateName !== null) {
@@ -720,7 +720,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
     }
 
     function c(ao, an) {
-        var ap = 0,am = 0;
+        var ap = 0, am = 0;
         for (var al = ao.firstDataDay; al <= ao.lastDataDay; al++) {
             if (N.ChartType === "burndown") {
                 ap = Math.max(ap, q(ao, al));
@@ -736,16 +736,16 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
         if (am < 0.01) {
             am = 1
         }
-        return[ap,am]
+        return[ap, am]
     }
 
     function Y(an) {
-        var aH = null,aI = null;
-        var aD,aw,ay,am;
-        var at,aF;
-        var aq,ap,az,ax;
+        var aH = null, aI = null;
+        var aD, aw, ay, am;
+        var at, aF;
+        var aq, ap, az, ax;
         var ar = an.dates.length - 1;
-        var av,aC,aG,al;
+        var av, aC, aG, al;
         var ao = 300;
         av = aj();
         if (N.ChartType === "burndown") {
@@ -768,19 +768,19 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
         aG = c(an, av);
         var aE = X(an.dates[an.dates.length - 1]);
         var aB = [
-            [0,at,an.dates[0]],
-            [ar,0,aE]
+            [0, at, an.dates[0]],
+            [ar, 0, aE]
         ];
         var aA = [
-            [0,0,an.dates[0]],
-            [ar,aF,aE]
+            [0, 0, an.dates[0]],
+            [ar, aF, aE]
         ];
         az = "Ideal Burndown To Do";
         ax = "Ideal Burn-up Accepted";
         document.getElementById(e).style.visibility = "visible";
-        var au = function() {
+        var au = function () {
             EJSC.Formatter.__extendTo(this);
-            this.format = function(aJ) {
+            this.format = function (aJ) {
                 if (Math.round(aJ) !== aJ) {
                     return""
                 }
@@ -794,7 +794,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
         if (typeof j !== "undefined") {
             j.remove()
         }
-        j = new EJSC.Chart(e, {show_legend:false,allow_zoom:false,show_titlebar:false,axis_bottom:{caption:"",caption_class:"AxisCaption",label_class:"AxisTickLabel",size:0,min_extreme:0,max_extreme:ar,extremes_ticks:true,major_ticks:{opacity:100,min_interval:3,show:true,thickness:1},visible:N.BottomAxisVisible},axis_left:{caption:"",caption_class:"AxisCaption",label_class:"AxisTickLabel",size:0,min_extreme:0,formatter:new EJSC.NumberFormatter({variable_decimals:1}),visible:N.LeftAxisVisible},axis_right:{caption:"",caption_class:"AxisCaption",label_class:"AxisTickLabel",size:0,min_extreme:0,grid:{show:false},formatter:new EJSC.NumberFormatter({variable_decimals:1}),visible:N.RightAxisVisible}});
+        j = new EJSC.Chart(e, {show_legend:false, allow_zoom:false, show_titlebar:false, axis_bottom:{caption:"", caption_class:"AxisCaption", label_class:"AxisTickLabel", size:0, min_extreme:0, max_extreme:ar, extremes_ticks:true, major_ticks:{opacity:100, min_interval:3, show:true, thickness:1}, visible:N.BottomAxisVisible}, axis_left:{caption:"", caption_class:"AxisCaption", label_class:"AxisTickLabel", size:0, min_extreme:0, formatter:new EJSC.NumberFormatter({variable_decimals:1}), visible:N.LeftAxisVisible}, axis_right:{caption:"", caption_class:"AxisCaption", label_class:"AxisTickLabel", size:0, min_extreme:0, grid:{show:false}, formatter:new EJSC.NumberFormatter({variable_decimals:1}), visible:N.RightAxisVisible}});
         if (N.ChartType === "stacked-bar" || N.ChartType === "grouped-bar" || N.ChartType === "burndown") {
             j.axis_bottom.setExtremes(-0.35, ar + 0.35)
         }
@@ -834,7 +834,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
             }
         }
         j.axis_bottom.formatter = new au();
-        j.onShowHint = function(aJ, aK, aL, aN, aM) {
+        j.onShowHint = function (aJ, aK, aL, aN, aM) {
             if (aK.title.indexOf("Trend") >= 0) {
                 return"[series_title]<br/>Value: " + Math.round(aJ.y * 100) / 100
             } else {
@@ -914,7 +914,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
             }
         }
 
-        var am = {key:al,type:al,query:"((( " + ap() + " = " + h + ") AND (" + an() + " = " + f + ")) AND (" + ao() + ' = "' + E + '"))',fetch:"PlanEstimate,TaskEstimateTotal,TaskRemainingTotal,ScheduleState"};
+        var am = {key:al, type:al, query:"((( " + ap() + " = " + h + ") AND (" + an() + " = " + f + ")) AND (" + ao() + ' = "' + E + '"))', fetch:"PlanEstimate,TaskEstimateTotal,TaskRemainingTotal,ScheduleState"};
         if (ah !== null) {
             am.project = "/project/" + ah
         }
@@ -925,7 +925,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
     function a(aq, an, am, ao) {
         var al = [];
         aq = addTodayToBurndownData(aq, an, am, ao);
-        var ap = function(ar) {
+        var ap = function (ar) {
             aq = sumTodayValues(aq, ar, am, ao);
             i()
         };
@@ -953,7 +953,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
     }
 
     function o(am) {
-        var az = [],at = [],aq = {},ax;
+        var az = [], at = [], aq = {}, ax;
         if (r !== null) {
             ax = r.split(",");
             for (var ar = 0; ar < ax.length; ar++) {
@@ -1032,9 +1032,9 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
         var ao = U();
         var am = [];
         var al = "((( " + an + " = " + h + ") AND (" + ao + " = " + f + ')) AND (Name = "' + E + '"))';
-        am[0] = {key:"timeboxOids",type:V,fetch:"ObjectID,Name,project," + an + "," + ao,query:al,order:ao + " desc"};
+        am[0] = {key:"timeboxOids", type:V, fetch:"ObjectID,Name,project," + an + "," + ao, query:al, order:ao + " desc"};
         ak(am[0]);
-        am[1] = {key:"estimateUnit",type:"WorkspaceConfiguration",fetch:"TaskUnitName,IterationEstimateUnitName,ReleaseEstimateUnitName"};
+        am[1] = {key:"estimateUnit", type:"WorkspaceConfiguration", fetch:"TaskUnitName,IterationEstimateUnitName,ReleaseEstimateUnitName"};
         ak(am[1]);
         if (ah !== null) {
             am[0].project = "/project/" + ah
@@ -1042,10 +1042,10 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
         g.findAll(am, o)
     }
 
-    this.display = function() {
+    this.display = function () {
         u()
     };
-    this.redisplay = function(al) {
+    this.redisplay = function (al) {
         m(al);
         i()
     };
@@ -1087,7 +1087,7 @@ function calcWorkDays(b, f) {
     return a
 }
 function calculateHealth(b, o, f, a) {
-    var h = ["Good","At Risk","Critical","Not Started","Completed"];
+    var h = ["Good", "At Risk", "Critical", "Not Started", "Completed"];
     var c = 0;
     var q = convertDateStringToDateObject(b.slice(0, 10));
     var p = convertDateStringToDateObject(o.slice(0, 10));
@@ -1123,7 +1123,7 @@ function calculateHealth(b, o, f, a) {
             c = 2
         }
     }
-    return[h[c],s,j,r]
+    return[h[c], s, j, r]
 }
 function removeEmptyValues(a) {
     var b = [];
@@ -1206,12 +1206,12 @@ function drawLegend(allowedValues, config) {
     }
 
     var legendConfig = {
-        width: config.chartWidth,
-        height: 100,
-        legendClass: 'dashboard-legend',
-        id: 'myLegend',
-        boxClass: 'dashboard-boxstyle',
-        labelClass: 'dashboard-labelstyle'
+        width:config.chartWidth,
+        height:100,
+        legendClass:'dashboard-legend',
+        id:'myLegend',
+        boxClass:'dashboard-boxstyle',
+        labelClass:'dashboard-labelstyle'
     };
 
     if (config.showScheduledWorkChart === true) {
@@ -1259,23 +1259,23 @@ function showDashboard(results) {
     }
 
     var config = {
-        showBurndownChart: true,
-        showTestCaseChart: true,
-        showDefectChart: true,
-        showScheduledWorkChart: true,
-        showTitle: true,
-        browserWidth: CHART_WIDTH * 0.90,
-        chartWidth: calcChartWidth(CHART_WIDTH * 0.9, 200, 4),
-        LeftAxisVisible: true,
-        RightAxisVisible: true,
-        BottomAxisVisible: true,
-        mashupType: MASHUP_TYPE,
-        timeboxType: TIMEBOX_TYPE,
-        specialVersion: SPECIAL_VERSION,
-        burndownUnits: BURNDOWN_UNITS,
-        allowedValues: allowedValues,
-        projectOidsInScope: PROJECT_OIDS_IN_SCOPE,
-        workspaceOid: WORKSPACE_OID
+        showBurndownChart:true,
+        showTestCaseChart:true,
+        showDefectChart:true,
+        showScheduledWorkChart:true,
+        showTitle:true,
+        browserWidth:CHART_WIDTH * 0.90,
+        chartWidth:calcChartWidth(CHART_WIDTH * 0.9, 200, 4),
+        LeftAxisVisible:true,
+        RightAxisVisible:true,
+        BottomAxisVisible:true,
+        mashupType:MASHUP_TYPE,
+        timeboxType:TIMEBOX_TYPE,
+        specialVersion:SPECIAL_VERSION,
+        burndownUnits:BURNDOWN_UNITS,
+        allowedValues:allowedValues,
+        projectOidsInScope:PROJECT_OIDS_IN_SCOPE,
+        workspaceOid:WORKSPACE_OID
     };
 
     if (WIDGET_MODE) {
@@ -1318,10 +1318,10 @@ function showDashboard(results) {
 
     if (typeof DASHBOARD === "undefined") {
         if (MASHUP_TYPE === RALLY.Mashup.PROGRAM) {
-            RALLY.Mashup.Utilities.showMashupHelp('Program+Dashboard+App', '__SERVER_URL__');
+            RALLY.Mashup.Utilities.showHelpIcon('140');
             DASHBOARD = new RALLY.Mashup.ProgramHealth(BATCH_TOOLKIT, dashboardCallback);
         } else if (MASHUP_TYPE === RALLY.Mashup.RELEASE || MASHUP_TYPE === RALLY.Mashup.ITERATION) {
-            RALLY.Mashup.Utilities.showMashupHelp('Release+and+Iteration+Dashboard+App', '__SERVER_URL__');
+            RALLY.Mashup.Utilities.showHelpIcon('163');
             DASHBOARD = new RALLY.Mashup.TimeboxHealth(BATCH_TOOLKIT, dashboardCallback);
         } else if (MASHUP_TYPE === RALLY.Mashup.CURRENT) {
             DASHBOARD = new RALLY.Mashup.CurrentHealth(BATCH_TOOLKIT, dashboardCallback);
@@ -1339,26 +1339,26 @@ function runAllowedValuesQuery() {
     var queryArray = [];
 
     queryArray[0] = {
-        key: 'scheduleState',
-        type: 'Hierarchical Requirement',
-        attribute: 'Schedule State',
-        workspace: '/workspace/' + WORKSPACE_OID
+        key:'scheduleState',
+        type:'Hierarchical Requirement',
+        attribute:'Schedule State',
+        workspace:'/workspace/' + WORKSPACE_OID
     };
     queryArray[1] = {
-        key: 'testResult',
-        type: 'Test Case',
-        attribute: 'Last Verdict',
-        workspace: '/workspace/' + WORKSPACE_OID
+        key:'testResult',
+        type:'Test Case',
+        attribute:'Last Verdict',
+        workspace:'/workspace/' + WORKSPACE_OID
     };
     queryArray[2] = {
-        key: 'defectState',
-        type: 'Defect',
-        attribute: 'State',
-        workspace: '/workspace/' + WORKSPACE_OID
+        key:'defectState',
+        type:'Defect',
+        attribute:'State',
+        workspace:'/workspace/' + WORKSPACE_OID
     };
     try {
         BATCH_TOOLKIT.findAll(queryArray, showDashboard);
-    } catch(err) {
+    } catch (err) {
         console.error(err);
     }
 }
@@ -1414,7 +1414,7 @@ function initPage() {
  */
 var RALLY = RALLY || {};
 RALLY.Mashup = RALLY.Mashup || {};
-RALLY.Mashup.TimeboxHealth = function(e, d) {
+RALLY.Mashup.TimeboxHealth = function (e, d) {
     var t = 40;
     var y = {};
     var f = this;
@@ -1422,7 +1422,7 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
 
     function v(A) {
         var B = [];
-        var z = {Good:"check-icon.gif","At Risk":"caution-icon.gif",Critical:"error-icon.gif"};
+        var z = {Good:"check-icon.gif", "At Risk":"caution-icon.gif", Critical:"error-icon.gif"};
         if (A[0] === "Good" || A[0] === "At Risk" || A[0] === "Critical") {
             B[0] = '&nbsp;<img border="0" align="Absmiddle" src="/slm/mashup/1.15/images/' + z[A[0]] + '" alt="' + A[0] + '"/>&nbsp;' + x.timeboxType + " Health is <b>" + A[0] + "</b>.";
             B[1] = "&nbsp;With " + A[1] + " days remaining in a " + A[2] + "-day " + x.timeboxType.toLowerCase() + ", " + A[3] + "% has been accepted."
@@ -1434,7 +1434,7 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
     }
 
     function c(z, A, G, E, B) {
-        var D,F,C;
+        var D, F, C;
         D = document.createElement("DIV");
         D.innerHTML = "";
         D.style.marginLeft = G * t + "px";
@@ -1460,7 +1460,7 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
     }
 
     function w(J, C, A, I) {
-        var B,H,K,G;
+        var B, H, K, G;
         var D = x.chartWidth;
         var F = 0;
         var z = document.createElement("DIV");
@@ -1520,7 +1520,7 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
         }
 
         function B(M, O, Q, P) {
-            var R,N,S;
+            var R, N, S;
             if (H === "ScheduledWork") {
                 S = E(P);
                 if (S) {
@@ -1550,7 +1550,7 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
             D = G * 0.8
         }
         var F;
-        var K = {allowedValues:x.allowedValues,timeboxName:x.timeboxName,timeboxStart:x.timeboxStart,timeboxEnd:x.timeboxEnd,timeboxType:x.timeboxType,artifactType:H,artifactAttribute:I,chartDiv:C + "_inner",projectOid:z.ObjectID,workspaceOid:x.workspaceOid,pieWidth:G,pieHeight:D};
+        var K = {allowedValues:x.allowedValues, timeboxName:x.timeboxName, timeboxStart:x.timeboxStart, timeboxEnd:x.timeboxEnd, timeboxType:x.timeboxType, artifactType:H, artifactAttribute:I, chartDiv:C + "_inner", projectOid:z.ObjectID, workspaceOid:x.workspaceOid, pieWidth:G, pieHeight:D};
         F = document.getElementById(C);
         F.setAttribute("class", L);
         F.setAttribute("className", L);
@@ -1560,7 +1560,7 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
 
     function m(C, A) {
         var B;
-        var z = {BurndownIdealVisible:true,LeftAxisLabelVisible:false,BottomAxisLabelVisible:false,RightAxisLabelVisible:false,ChartType:"burndown",Units:x.burndownUnits,LeftAxisVisible:x.LeftAxisVisible,RightAxisVisible:x.RightAxisVisible,BottomAxisVisible:x.BottomAxisVisible};
+        var z = {BurndownIdealVisible:true, LeftAxisLabelVisible:false, BottomAxisLabelVisible:false, RightAxisLabelVisible:false, ChartType:"burndown", Units:x.burndownUnits, LeftAxisVisible:x.LeftAxisVisible, RightAxisVisible:x.RightAxisVisible, BottomAxisVisible:x.BottomAxisVisible};
         if (getBeforeState(x.allowedValues.scheduleStates) !== null) {
             z.BeforeStateName = getBeforeState(x.allowedValues.scheduleStates);
             z.BeforeVisible = true
@@ -1607,7 +1607,7 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
     }
 
     function o(A) {
-        var C,D,B,z;
+        var C, D, B, z;
         b();
         if (x.showTitle) {
             document.getElementById("title").style.display = "";
@@ -1712,10 +1712,10 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
     function q() {
         var B = x.projectOidsInScope.split(",");
         var A = r(B, "ObjectID");
-        var C = {key:"projects",type:"project",query:A,fetch:"ObjectID,Name,State,Children",order:"Name"};
+        var C = {key:"projects", type:"project", query:A, fetch:"ObjectID,Name,State,Children", order:"Name"};
         try {
             e.findAll(C, p)
-        } catch(z) {
+        } catch (z) {
             console.error(z)
         }
     }
@@ -1736,7 +1736,7 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
     }
 
     function h(A) {
-        x = {workspaceOid:A.workspaceOid,projectOid:A.projectOid,timeboxType:x.timeboxType,levels:1,showBurndownChart:true,showTestCaseChart:true,showDefectChart:true,showScheduledWorkChart:true,showTitle:true,chartWidth:(x.browserWidth - 200) / 4};
+        x = {workspaceOid:A.workspaceOid, projectOid:A.projectOid, timeboxType:x.timeboxType, levels:1, showBurndownChart:true, showTestCaseChart:true, showDefectChart:true, showScheduledWorkChart:true, showTitle:true, chartWidth:(x.browserWidth - 200) / 4};
         for (var z in A) {
             if (A.hasOwnProperty(z)) {
                 x[z] = A[z]
@@ -1744,14 +1744,14 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
         }
     }
 
-    this.display = function(z) {
+    this.display = function (z) {
         h(z);
         q()
     };
-    this.applyConfig = function(z) {
+    this.applyConfig = function (z) {
         h(z)
     };
-    this.parseProjectTree = function(A, z) {
+    this.parseProjectTree = function (A, z) {
         return j(A, z)
     };
     return f

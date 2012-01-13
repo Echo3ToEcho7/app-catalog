@@ -1318,10 +1318,10 @@ function showDashboard(results) {
 
     if (typeof DASHBOARD === "undefined") {
         if (MASHUP_TYPE === RALLY.Mashup.PROGRAM) {
-            RALLY.Mashup.Utilities.showMashupHelp('Program+Dashboard+App', '__SERVER_URL__');
+            RALLY.Mashup.Utilities.showHelpIcon('140');
             DASHBOARD = new RALLY.Mashup.ProgramHealth(BATCH_TOOLKIT, dashboardCallback);
         } else if (MASHUP_TYPE === RALLY.Mashup.RELEASE || MASHUP_TYPE === RALLY.Mashup.ITERATION) {
-            RALLY.Mashup.Utilities.showMashupHelp('Release+and+Iteration+Dashboard+App', '__SERVER_URL__');
+            RALLY.Mashup.Utilities.showHelpIcon('163');
             DASHBOARD = new RALLY.Mashup.TimeboxHealth(BATCH_TOOLKIT, dashboardCallback);
         } else if (MASHUP_TYPE === RALLY.Mashup.CURRENT) {
             DASHBOARD = new RALLY.Mashup.CurrentHealth(BATCH_TOOLKIT, dashboardCallback);
