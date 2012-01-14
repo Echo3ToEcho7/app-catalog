@@ -113,7 +113,7 @@ var createOldestDefectsTable = function() {
         var age = currentDate - defectDate;
         age = age / MILS_IN_DAY;
         age = Math.round(age * 10) / 10;
-        var href = HOST + "/slm/detail/df/" + defect.ObjectID;
+        var href = HOST + "__SERVER_URL__/detail/df/" + defect.ObjectID;
         var html = "<div style='width:100%;overflow:hidden'><div style='width:1000px'><a target='_blank' href='" + href + "'>" + defect.FormattedID + ' - ' + defect.Name + "</a></div></div>"
         lastDefectsTable.addRow({name:html, age: "<div style='text-align:right'>" + age + "</div>"});
     }

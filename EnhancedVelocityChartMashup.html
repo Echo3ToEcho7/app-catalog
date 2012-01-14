@@ -9,20 +9,20 @@
 <meta name="Version" content="2010.2"/>
 <meta name="Vendor" content="Rally Software"/>
 
-<link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
-<link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="__SERVER_URL__/css/rally/core.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="__SERVER_URL__/css/slm.css" charset="utf-8"/>
 
 <script type="text/javascript">
     var MASHUP_TYPE = 'Release';
     var SETTINGS_COOKIE_NAME = 'mu_enhanced_velocity_settings';
 </script>
 
-<script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
-<script type="text/javascript" src="/slm/js/slm.js"></script>
-<script type="text/javascript" src="/slm/js/help.js"></script>
-<script type="text/javascript" src="/slm/js-lib/ejsc/2.0.1/EJSChart.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.13/js/batch-toolkit.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.13/js/utilities.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/js/slm.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/js/help.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/js-lib/ejsc/2.0.1/EJSChart.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/mashup/1.13/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/mashup/1.13/js/utilities.js"></script>
 
 <script type="text/javascript" description="run compileJS.sh and then insert the resultant out file here...">
 dojo.require("dojo.date.stamp");
@@ -786,7 +786,7 @@ ProjectIterationSet.loadedEvent = "project_iterations_loaded";
         <td style="text-align: left; width: 99%;">
         <td style="text-align: right; width: 1%;">
             <img id="do" onmouseover="util.showcbButton();" onmouseout="hidecbMenu('buttons',event);"
-                 style="vertical-align: middle;" src="/slm/images/menu_actions.gif"/>
+                 style="vertical-align: middle;" src="__SERVER_URL__/images/menu_actions.gif"/>
 
             <div style="position:relative;top:5px" align="left">
                 <div id="buttons" class="do-menu" style="left:0px;"
@@ -804,7 +804,7 @@ ProjectIterationSet.loadedEvent = "project_iterations_loaded";
     <div id="divAverages" style="margin-bottom: 20px;"></div>
     <div id="divChart" style="width:100%; height: 300px;">
         <div>
-            <img alt="Progress" src="/slm/images/icon_spinner.gif"/>
+            <img alt="Progress" src="__SERVER_URL__/images/icon_spinner.gif"/>
             <em>loading chart...</em>
         </div>
     </div>

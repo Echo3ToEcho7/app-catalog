@@ -5,15 +5,15 @@
 <meta name="Name" content="App: Personal Burndown"/>
 <meta name="Version" content="1.0"/>
 <meta name="Vendor" content="Tony Huang"/>
-<link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
-<link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
-<link rel="stylesheet" type="text/css" href="/slm/css/sprites.css" charset="utf-8"/>
-<script type="text/javascript" src="/slm/js/slm.js"></script>
-<script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
-<script type="text/javascript" src="/slm/js-lib/ejsc/2.1/EJSChart.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.19/js/utilities.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.19/js/dropdown.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.19/js/batch-toolkit.js"></script>
+<link rel="stylesheet" type="text/css" href="__SERVER_URL__/css/rally/core.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="__SERVER_URL__/css/slm.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="__SERVER_URL__/css/sprites.css" charset="utf-8"/>
+<script type="text/javascript" src="__SERVER_URL__/js/slm.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/js-lib/ejsc/2.1/EJSChart.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/mashup/1.19/js/utilities.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/mashup/1.19/js/dropdown.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/mashup/1.19/js/batch-toolkit.js"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
 
@@ -93,9 +93,9 @@ function drawTable(results) {
         data.addRows(1);
         var column = 0;
         data.setCell(row, column++, row + 1);
-        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/rally.sp#/detail/task/" + task.ObjectID + "\" target=\"_parent\">" + task.FormattedID + "</a>");
-        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/rally.sp#/detail/task/" + task.ObjectID + "\" target=\"_parent\">" + task.Name + "</a>");
-        data.setCell(row, column++, "<a href=\"" + baseUrl + "/slm/rally.sp#/detail/userstory/" + task.WorkProduct.ObjectID + "\" target=\"_parent\">" +
+        data.setCell(row, column++, "<a href=\"" + baseUrl + "__SERVER_URL__/rally.sp#/detail/task/" + task.ObjectID + "\" target=\"_parent\">" + task.FormattedID + "</a>");
+        data.setCell(row, column++, "<a href=\"" + baseUrl + "__SERVER_URL__/rally.sp#/detail/task/" + task.ObjectID + "\" target=\"_parent\">" + task.Name + "</a>");
+        data.setCell(row, column++, "<a href=\"" + baseUrl + "__SERVER_URL__/rally.sp#/detail/userstory/" + task.WorkProduct.ObjectID + "\" target=\"_parent\">" +
                 task.WorkProduct.FormattedID + ": " + task.WorkProduct.Name + "</a>");
         if (task.Blocked == true) {
             data.setCell(row, column, "Blocked", null, {"style": "color: red;"});
@@ -107,7 +107,7 @@ function drawTable(results) {
         data.setCell(row, column++, task.ToDo);
         data.setCell(row, column++, task.Actuals);
         var text = "<a href='#' class=\"sprite-edit\" title=\"Edit Task " + task.FormattedID + "\"" +
-                "onclick=\"parent.popup('" + baseUrl + "/slm/tk/edit.sp?oid=" + task.ObjectID + "', " +
+                "onclick=\"parent.popup('" + baseUrl + "__SERVER_URL__/tk/edit.sp?oid=" + task.ObjectID + "', " +
                 "800, 600, 'littleN');return false;\">&nbsp;&nbsp;&nbsp;&nbsp;</a>";
         data.setCell(row, column++, text, null, {"style": "text-align: center;"});
 
@@ -479,7 +479,7 @@ function getAvailableWidth() {
             <td style="text-align: right; width: 1%;">
                 <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();"
                      onmouseout="hidecbMenu('buttons',event);" style="vertical-align: middle;"
-                     src="/slm/images/menu_actions.gif"/>
+                     src="__SERVER_URL__/images/menu_actions.gif"/>
 
                 <div style="position:relative;top:5px" align="left">
                     <div id="buttons" class="do-menu" style="left:0px;"

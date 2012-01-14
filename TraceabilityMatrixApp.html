@@ -125,7 +125,7 @@
             };
         
             this.createAttachmentLink = function(attachment) {
-                var href = "https://" + dataSource.getServer() + "/slm/attachment/" + rally.sdk.util.Ref.getOidFromRef(attachment) + "/" + attachment.Name;
+                var href = "https://" + dataSource.getServer() + "__SERVER_URL__/attachment/" + rally.sdk.util.Ref.getOidFromRef(attachment) + "/" + attachment.Name;
                 var linkElement = document.createElement("a");
                 dojo.attr(linkElement, "href", href);
                 linkElement.appendChild(document.createTextNode(attachment.Name));

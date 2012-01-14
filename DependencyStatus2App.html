@@ -184,7 +184,7 @@
                 //KRM - A note on the iteration status link:
                 //This is currently supported as of this writing but may go away in the future.
                 displayElement.innerHTML += '<div class="d-iteration" id="iteration' + iteration.ObjectID +
-                        '"><div class="heading"><span class="label"><a target="_top" href="/slm/rally.sp?pp=pj%2fd%2fis&iterationKey=' +
+                        '"><div class="heading"><span class="label"><a target="_top" href="__SERVER_URL__/rally.sp?pp=pj%2fd%2fis&iterationKey=' +
                         iteration.ObjectID + '">' + iteration.Name + '</a></span><br/>' +
                         formatDate(iteration.StartDate) + ' - ' + formatDate(iteration.EndDate) +
                         ' (' + iteration.State + ')</div></div>';
@@ -230,7 +230,7 @@
                         getStateAbbreviation(predecessor.ScheduleState) +
                         '</div></div><div class="predecessor">Waiting on <b>' + predecessor.Project.Name +
                         '</b> for <br/>' + that.createArtifactLink(predecessor) + '<br/><span class="statusDescription">';
-                var warningImageHtml = '<img src="/slm/images/icon_alert_sm.gif" alt="Warning" title="Warning" /> ';
+                var warningImageHtml = '<img src="__SERVER_URL__/images/icon_alert_sm.gif" alt="Warning" title="Warning" /> ';
         
                 //Display the status of the predecessor
                 if (predecessor.Iteration === null) {
@@ -257,7 +257,7 @@
             //Public function to create a link for
             //the specified artifact
             this.createArtifactLink = function(artifact) {
-                return '<a href="/slm/detail/' +
+                return '<a href="__SERVER_URL__/detail/' +
                         (artifact._type === "HierarchicalRequirement" ? 'ar/' : 'df/') +
                         artifact.ObjectID + '" target="_top">' + artifact.FormattedID + ': ' +
                         artifact.Name + '</a>';
@@ -321,7 +321,7 @@
                     var defect = defects[i];
                     defectHtml += '<div class="' + (isPredecessor ? "predecessor-" : "") +
                             'defect-container"><div class="predecessor-status">' +
-                            '<img src="/slm/images/icon_defect.gif" /></div>' +
+                            '<img src="__SERVER_URL__/images/icon_defect.gif" /></div>' +
                             '<div class="predecessor">' +
                             defect.State + ' <b>' + defect.Project.Name + '</b> defect: <br/>' +
                             that.createArtifactLink(defect) + '<br/>' +
@@ -372,7 +372,7 @@
                 if (userStory.Predecessors.length > 0 ||
                         (showRootDefects && defects.length > 0)) {
                     displayElement.innerHTML += '<div class="dependency" id="userStory' + userStory.ObjectID + '">' +
-                            '<div class="userStoryIcon"><img src="/slm/images/icon_story.gif" /></div>' +
+                            '<div class="userStoryIcon"><img src="__SERVER_URL__/images/icon_story.gif" /></div>' +
                         //KRM - Rank is messed up? + Number(userStory.Rank).toFixed(1)
                             ' <b>' + that.createArtifactLink(userStory) + '</b> ' +
                             Number(userStory.PlanEstimate).toFixed(1) + ' pts.<br/></div>';
@@ -512,7 +512,7 @@
         }
         
         .state-legend-blocked {
-            background: transparent url(/slm/images/icon_blocked.gif) no-repeat scroll 0%;
+            background: transparent url(__SERVER_URL__/images/icon_blocked.gif) no-repeat scroll 0%;
             color: #FFFFFF;
             cursor: default;
             display: inline;

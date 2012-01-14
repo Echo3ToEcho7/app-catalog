@@ -7,19 +7,19 @@
 <meta name="Name" content="Mashup: User Lookup"/>
 <meta name="Version" content="2009.4"/>
 <meta name="Vendor" content="Rally Software"/>
-<link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
-<link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
-<link rel="stylesheet" type="text/css" href="/slm/css/sprites.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="__SERVER_URL__/css/rally/core.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="__SERVER_URL__/css/slm.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="__SERVER_URL__/css/sprites.css" charset="utf-8"/>
 
-<script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
     google.load("visualization", "1", {packages:["table"]});
 </script>
-<script type="text/javascript" src="/slm/js/help.js"></script>
-<script type="text/javascript" src="/slm/js/slm.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.13/js/utilities.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.13/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/js/help.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/js/slm.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/mashup/1.13/js/utilities.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/mashup/1.13/js/batch-toolkit.js"></script>
 
 
 <script type="text/javascript" type="text/javascript">
@@ -131,7 +131,7 @@
                 if (!RALLY.Mashup.Utilities.isMashupRunningInsideRally()) {
                     url = 'https://' + batchToolkit.getServer();
                 }
-                var text = "<a href='#' class=\"sprite-edit\" onclick=\"popup('" + url + "/slm/user/edit.sp?oid=" + cachedResults.users[i].ObjectID + "', 800, 600, 'littleN');drawTable(cachedResults);return false;\">&nbsp;&nbsp;&nbsp;&nbsp;<\/a>";
+                var text = "<a href='#' class=\"sprite-edit\" onclick=\"popup('" + url + "__SERVER_URL__/user/edit.sp?oid=" + cachedResults.users[i].ObjectID + "', 800, 600, 'littleN');drawTable(cachedResults);return false;\">&nbsp;&nbsp;&nbsp;&nbsp;<\/a>";
                 data.setCell(count++, 4, text);
             }
         }
@@ -263,7 +263,7 @@
             <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();"
                  onmouseout="hidecbMenu('buttons',event);"
                  style="vertical-align: middle;"
-                 src="/slm/images/menu_actions.gif"/>
+                 src="__SERVER_URL__/images/menu_actions.gif"/>
 
             <div style="position:relative;top:5px" align="left">
                 <div id="buttons" class="do-menu" style="left:0px;"
