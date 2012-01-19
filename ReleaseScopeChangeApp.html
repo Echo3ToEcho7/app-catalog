@@ -261,11 +261,11 @@
                 dojo.byId('aggregate_data').innerHTML = "<table><tr>" +
                         "<td width=20></td><td width=140></td><th width=50 align=left><b>Count</th>" +
                         "<th width=100 align=left><b>" + planEstimateLabel + "</b></th>" +
-                        "<tr><td width=20 align=right><img src='__SERVER_URL__/mashup/1.11/images/plus.gif'></td>" +
+                        "<tr><td width=20 align=right><img src='/slm/mashup/1.11/images/plus.gif'></td>" +
                         "<th width=140 align=left>   Total Added </th>" +
                         "<td width=50 align=left>" + added + "</td>" +
                         "<td width=100 align=left>" + addedEst.toFixed(1) +
-                        "</td></tr><tr><td width=20 align=right><img src='__SERVER_URL__/mashup/1.11/images/minus.gif'></td>" +
+                        "</td></tr><tr><td width=20 align=right><img src='/slm/mashup/1.11/images/minus.gif'></td>" +
                         "<th width=140 align=left>   Total Removed </th>" +
                         "<td width=50 align=left>" + removed + "</td>" +
                         "<td width=100 align=left>" + removedEst.toFixed(1) +
@@ -291,7 +291,7 @@
                 var link = new rally.sdk.ui.basic.Link({item: workProduct}).renderToHtml();
                 var link2 = new rally.sdk.ui.basic.Link({item: workProduct, text: workProduct.Name}).renderToHtml();
         
-                var imgUrl = "__SERVER_URL__/mashup/1.11/images/";
+                var imgUrl = "/slm/mashup/1.11/images/";
         
                 return "<tr><td width=60 style='border-bottom: 0px;border-top: 0px'>" +
                         "<td width=20 style='border-bottom: 0px;border-top: 0px'>" +

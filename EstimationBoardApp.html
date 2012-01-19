@@ -467,7 +467,7 @@
             };
         
             that.displayAddLink = function() {
-                dojo.byId("addLinkCell").innerHTML = "<a href='' id='addLink'>Add <img src='__SERVER_URL__/analytics/images/plus-196b89-gr.png'></a>";
+                dojo.byId("addLinkCell").innerHTML = "<a href='' id='addLink'>Add <img src='/slm/analytics/images/plus-196b89-gr.png'></a>";
                 dojo.connect(dojo.byId('addLink'), "onclick", function(event) {
                     if (accessors.length < 12) {
                         var row = that._createTableRow({label:"", planEstimate:""});

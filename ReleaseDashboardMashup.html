@@ -7,34 +7,34 @@
 <meta name="Name" content="Mashup: Release Dashboard"/>
 <meta name="Version" content="2010.05.28"/>
 <meta name="Vendor" content="Rally Software"/>
-<link rel="stylesheet" type="text/css" href="__SERVER_URL__/css/rally/core.css" charset="utf-8"/>
-<link rel="stylesheet" type="text/css" href="__SERVER_URL__/css/slm.css" charset="utf-8"/>
-<link rel="stylesheet" type="text/css" href="__SERVER_URL__/js-lib/dojo/1.3.1/dijit/themes/nihilo/nihilo.css">
+<link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="/slm/js-lib/dojo/1.3.1/dijit/themes/nihilo/nihilo.css">
 
 <script type="text/javascript" description="CSS Selection">
     var fileref = document.createElement("link");
     fileref.setAttribute("rel", "stylesheet");
     fileref.setAttribute("type", "text/css");
     if ('__MODE__' == 'widget') {
-        fileref.setAttribute("href", "__SERVER_URL__/mashup/1.15/css/widget.css");
+        fileref.setAttribute("href", "/slm/mashup/1.15/css/widget.css");
     } else {
-        fileref.setAttribute("href", "__SERVER_URL__/mashup/1.15/css/mashup.css");
+        fileref.setAttribute("href", "/slm/mashup/1.15/css/mashup.css");
     }
     document.getElementsByTagName("head")[0].appendChild(fileref);
 </script>
 
-<script type="text/javascript" src="__SERVER_URL__/js-lib/dojo/rally-1.3.1/dojo/dojo.js"></script>
+<script type="text/javascript" src="/slm/js-lib/dojo/rally-1.3.1/dojo/dojo.js"></script>
 <script type="text/javascript">
     dojo.require('dijit.TitlePane');
 </script>
-<script type="text/javascript" src="__SERVER_URL__/js/help.js"></script>
-<script type="text/javascript" src="__SERVER_URL__/js/slm.js"></script>
-<script type="text/javascript" src="__SERVER_URL__/js-lib/ejsc/2.0.1/EJSChart.js"></script>
-<script type="text/javascript" src="__SERVER_URL__/mashup/1.15/js/utilities.js"></script>
-<script type="text/javascript" src="__SERVER_URL__/mashup/1.15/js/dropdown.js"></script>
-<script type="text/javascript" src="__SERVER_URL__/mashup/1.15/js/batch-toolkit.js"></script>
-<script type="text/javascript" src="__SERVER_URL__/mashup/1.16/js/pie.js"></script>
-<script type="text/javascript" src="__SERVER_URL__/mashup/1.15/js/legend.js"></script>
+<script type="text/javascript" src="/slm/js/help.js"></script>
+<script type="text/javascript" src="/slm/js/slm.js"></script>
+<script type="text/javascript" src="/slm/js-lib/ejsc/2.0.1/EJSChart.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.15/js/utilities.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.15/js/dropdown.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.15/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.16/js/pie.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.15/js/legend.js"></script>
 
 
 <script type="text/javascript">
@@ -1424,7 +1424,7 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
         var B = [];
         var z = {Good:"check-icon.gif","At Risk":"caution-icon.gif",Critical:"error-icon.gif"};
         if (A[0] === "Good" || A[0] === "At Risk" || A[0] === "Critical") {
-            B[0] = '&nbsp;<img border="0" align="Absmiddle" src="__SERVER_URL__/mashup/1.15/images/' + z[A[0]] + '" alt="' + A[0] + '"/>&nbsp;' + x.timeboxType + " Health is <b>" + A[0] + "</b>.";
+            B[0] = '&nbsp;<img border="0" align="Absmiddle" src="/slm/mashup/1.15/images/' + z[A[0]] + '" alt="' + A[0] + '"/>&nbsp;' + x.timeboxType + " Health is <b>" + A[0] + "</b>.";
             B[1] = "&nbsp;With " + A[1] + " days remaining in a " + A[2] + "-day " + x.timeboxType.toLowerCase() + ", " + A[3] + "% has been accepted."
         } else {
             B[0] = " - " + x.timeboxType + " is " + A;
@@ -1790,7 +1790,7 @@ RALLY.Mashup.TimeboxHealth = function(e, d) {
                 <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();"
                      onmouseout="hidecbMenu('buttons',event);"
                      style="vertical-align: middle;"
-                     src="__SERVER_URL__/images/menu_actions.gif"/>
+                     src="/slm/images/menu_actions.gif"/>
 
                 <div style="position:relative;top:5px" align="left">
                     <div id="buttons" class="do-menu" style="left:0px;"
