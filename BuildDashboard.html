@@ -1,325 +1,543 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- Copyright (c) 2012  Rally Software Development Corp.  All rights reserved -->
+<html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Build Dashboard</title>
-    <style type="text/css">
-        body {
-            font-family: tahoma, geneva, helvetica, arial, sans-serif;
-        }
+<title>BuildDashboard</title>
+<meta name="Name" content="App: Build Dashboard"/>
+<meta name="Version" content="2012.01.23"/>
+<meta name="Vendor" content="Rally Software"/>
+<script type="text/javascript" src="/apps/1.29/sdk.js"></script>
 
-        .d-build {
-            min-width: 450px;
-            min-height: 220px;
-        }
+<script type="text/javascript">
+function BuildDashboard() {
+    //Data
+    var rallyDataSource;
+    var buildDefs = [];
+    var buildResults = [];
 
-            /** Custom styles for this implementation **/
-        #wrapper {
-            margin: .8em;
-        }
+    //UI elements
+    var buildDefTable;
+    var buildDefWait;
+    var buildTrendReport;
 
-        #header {
-            border-bottom: 2px solid #666;
-            padding: .2em .3em;
-            margin-bottom: .4em;
-        }
+    //HTML
+    var buildDefTablediv = "buildDefTable";
 
-        #header #title {
-            float: left;
-            text-align: left;
-        }
+    //General Variables
+    var recentDate = rally.sdk.util.DateTime.add(new Date(), "week", -2);
+    var high_success_min = 75/100;
+    var med_success_min = 60/100;
 
-        #header #title h3 {
-            font-weight: bold;
-            font-size: 1.6em;
-        }
+    function loadBuilddefs() {
+        buildDefWait = new rally.sdk.ui.basic.Wait({hideTarget: false});
+        buildDefWait.display(buildDefTablediv);
 
-        #header #info {
-            float: right;
-            text-align: right;
-        }
-
-        .clear {
-            clear: both;
-            height: 0;
-        }
-
-            /** filter bar **/
-        #filter {
-            width: 100%;
-            background-color: #efefdf;
-            text-align: left;
-            font-size: .9em;
-            padding: .2em 0;
-        }
-    </style>
-</head>
-
-<link type="text/css" rel="stylesheet"
-      href="http://yui.yahooapis.com/2.5.2/build/reset-fonts-grids/reset-fonts-grids.css"/>
-<script type="text/javascript" charset="utf-8" src="/slm/js/xmlhttp.js"></script>
-<script type="text/javascript" charset="utf-8" src="/slm/js-lib/json.js"></script>
-<script type="text/javascript" charset="utf-8" src="/slm/js/jsonapi/jsonapi.js"></script>
-<script type="text/javascript" charset="utf-8">
-
-var api = new RALLY.JsonApi("__SERVER_URL__", '1.07', __WORKSPACE_OID__, __PROJECT_OID__, "__PROJECT_SCOPING_UP__", "__PROJECT_SCOPING_DOWN__", new RALLY.IntegrationInfo("Mashup: Build Dashboard", "1.1", "Rally Software"));
-var project = api.read("Project", __PROJECT_OID__);
-
-var releases = api.query(new RALLY.Query('Release', "((Project = " + project.getRef() + ") and (State != \"Planning\"))", "ReleaseStartDate desc", true));
-var defaultBuildDef = getDefaultBuild();
-var x = 0;
-var pass_percent = new Array();
-
-function initPage() {
-    getReleases();
-}
-
-function getReleases() {
-
-    if (releases.length() != 0) {
-        for (i = 0; i < releases.length(); i++) {
-            var release = releases.get(i);
-            addOption(release.getName(), i + 1);
-        }
-        allReleases();
-    }
-    else {
-        document.getElementById("buildDiv-add").innerHTML = "<h3>No releases found in an Active or Accepted state.</h3>";
+        var queryConfig = {
+            type : 'builddefinition',
+            key  : 'builddefs',
+            fetch: 'Name,Description,ObjectID,LastStatus',
+            order: 'Name',
+            pagesize: 200,
+            query: '(LastBuild != null)'
+        };
+        rallyDataSource.find(queryConfig, gatherBuildDefs);
     }
 
-}
+    function gatherBuildDefs(results) {
+        if (results.builddefs.length === 0) {
+            gatherBuildresults([]);
+        } else {
+            for (var i=0; i < results.builddefs.length; i++) {
+                buildDefs.push(results.builddefs[i]);
 
-function addOption(release, count) {
+                var builddefref = results.builddefs[i]._ref;
+                var query_key = "builds-" + results.builddefs[i].ObjectID;
+                var query_date = rally.sdk.util.DateTime.toIsoString(recentDate);
 
-    document.forms['testform'].testselect.options[count] = new Option(release, release);
+                var query_string = '((BuildDefinition = "' + builddefref + '") AND (CreationDate > "';
+                query_string = query_string + query_date + '" ))';
 
-}
-
-function onChange() {
-    document.getElementById("buildDiv-add").innerHTML = "";
-    document.getElementById("buildDiv-daily").innerHTML = "";
-    document.getElementById("buildAllDiv-add").innerHTML = "";
-
-    x = 0;
-
-    user_input = document.forms['testform'].testselect.value;
-    index = document.forms['testform'].testselect.selectedIndex;
-
-    if (index == 0) {
-        allReleases();
-    }
-    else {
-        readRelease(index);
-    }
-
-}
-
-function allReleases() {
-
-    for (d = 0; d < releases.length(); d++) {
-        var activeRelease = releases.get(d);
-        getBuilds(activeRelease);
-        x = x + 1;
-    }
-    drawBarChart();
-}
-
-function readRelease(index) {
-
-    activeRelease = releases.get(index - 1);
-    getBuilds(activeRelease);
-
-}
-
-function getBuilds(activeRelease) {
-    total_passes = new Array();
-    total_fails = new Array();
-    passes = 0;
-    fails = 0;
-    startDate = activeRelease.getReleaseStartDate();
-    endDate = activeRelease.getReleaseDate();
-    cnt = 0;
-
-    buildResults = api.query(new RALLY.Query('Build', "(((BuildDefinition = " + defaultBuildDef + ") and (CreationDate >= " + trimDate(startDate) + ")) and (CreationDate <= " + trimDate(endDate) + "))", "CreationDate", true));
-
-
-    if (buildResults.length() != 0) {
-        tmpdate = new Date();
-        dates = [displayDate(buildResults.get(0).getCreationDate())];
-
-        for (i = 0; i < buildResults.length(); i++) {
-            status = buildResults.get(i).getStatus().toString();
-            date = buildResults.get(i).getCreationDate();
-
-            if (trimDate(date) != trimDate(tmpdate)) {
-                cnt = cnt + 1;
-                passes = 0;
-                fails = 0;
-                dates[cnt] = displayDate(date);
-                tmpdate = date;
-                total_passes[cnt] = 0;
-                total_fails[cnt] = 0;
-                if (status === "true" || status === true) {
-                    total_passes[cnt] = passes + 1;
-                }
-                else {
-                    total_fails[cnt] = fails + 1;
-                }
-            }
-            else {
-
-
-                if (status === "true" || status === true) {
-                    passes = passes + 1;
-                    total_passes[cnt] = passes;
-                }
-                else {
-                    fails = fails + 1;
-                    total_fails[cnt] = fails;
-                }
+                var queryConfig = {
+                    type    : 'build',
+                    key     : query_key,
+                    fetch   : 'Status,CreationDate,Number',
+                    query   : query_string,
+                    order   : 'CreationDate Desc',
+                    pagesize: 20
+                };
+                rallyDataSource.find(queryConfig, gatherBuildresults);
             }
         }
-
-        createGoogleChart(activeRelease, dates, total_passes, total_fails);
-
-    }
-    else {
-        output = "<tr><td><div class=\"d-build\" id=\"" + x + "\">";
-        output2 = "<div class=\"d-build\" id=\"" + x + "\">";
-        document.getElementById("buildDiv-add").innerHTML += output + "" + activeRelease.getName() + ":<br>No build results found.</td>";
-        document.getElementById("buildDiv-daily").innerHTML += output2 + "</td>";
-        pass_percent[x] = 0;
-
     }
 
-}
-
-function createGoogleChart(release, dates, total_passes, total_fails) {
-    all_passes = 0;
-    all_fails = 0;
-
-    output = "<tr><td><div class=\"d-build\" id=\"" + x + "\">";
-    gChartUrl = "<img src='http://chart.apis.google.com/chart?cht=p3&chtt=" + release.getName() + "&chd=t:";
-
-    output2 = "<div class=\"d-build\" id=\"" + x + "\">";
-    gChartUrl2 = "<img src='http://chart.apis.google.com/chart?cht=bvs&chd=t:";
-
-    for (p in total_passes) {
-        all_passes = all_passes + total_passes[p];
-
-        gChartUrl2 += total_passes[p];
-        if (p != total_passes.length - 1) {
-            gChartUrl2 += ',';
+    function gatherBuildresults(results) {
+        if (buildDefs.length > 0) {
+            buildResults.push(results);
+        }
+        if (buildDefs.length === buildResults.length) {
+            showBuildDefTable();
         }
     }
 
-    gChartUrl2 += '|';
+    function showBuildDefTable() {
+        if (buildDefTable) { buildDefTable.destroy(); }
 
-    for (f in total_fails) {
-        all_fails = all_fails + total_fails[f];
+        var tableConfig = {
+            sortingEnabled : false,
+            columnKeys     : [ 'Name', 'LastStatus', 'MostRecentRatio' ],
+            columnHeaders  : [ 'Name', 'Last Build', 'Recent'],
+            noDataMessage  : "No Build Definitions available"
+        };
 
-        gChartUrl2 += total_fails[f];
-        if (f != total_fails.length - 1) {
-            gChartUrl2 += ',';
+        buildDefTable = new rally.sdk.ui.Table(tableConfig);
+
+        for ( var i = 0; i < buildDefs.length; i++) {
+            var tempkey = "builds-" + buildDefs[i].ObjectID;
+            var recentratio = getRecentRatio(tempkey);
+
+            var rowinfo = {
+                'Name'              : buildDefs[i].Name,
+                'LastStatus'        : buildDefs[i].LastStatus,
+                'MostRecentRatio'   : recentratio
+            };
+            buildDefTable.addRow(rowinfo);
+        }
+        buildDefTable.addEventListener(buildDefTable.getValidEvents().onCellClick, showBuildDefDetail);
+
+        buildDefWait.hide();
+
+        buildDefTable.display(document.getElementById(buildDefTablediv));
+
+        dijit.byId("buildDefTableGrid").selection.setSelected(0,true);
+        if (buildDefs.length > 0) {
+            showBuildDefDetail({}, {rowIndex:0});
         }
     }
 
-    sum = all_passes + all_fails;
-    pass_percent[x] = Math.round((all_passes / sum) * 100);
+    function getRecentRatio(buildkey) {
+        //Assuming SUCCESS and FAILURE - only counting Success vs other
+        var builds;
+        for (var i=0; i < buildResults.length; i++) {
+            if (buildResults[i][buildkey] === undefined) { continue; }
+            builds = buildResults[i][buildkey];
+        }
+        if (builds === undefined ) { return "No Recent Builds"; }
+        var successes = 0;
+        for (var j=0; j < builds.length; j++) {
+            if (builds[j].Status == "SUCCESS") { successes = successes + 1; }
+        }
 
-    gChartUrl += all_passes + "," + all_fails + ""
-    gChartUrl += "&chco=00ff00,ff0000&chs=440x150&chl=Pass " + Math.round((all_passes / sum) * 100) + "% | Fail " + Math.round((all_fails / sum) * 100) + "%";
-    gChartUrl += "'>";
+        var returnclass = "";
+        var successratio = successes / builds.length;
+        if (successratio > (high_success_min) ) { returnclass = "highsuccess"; }
+        else if ( successratio > (med_success_min) ) {returnclass = "medsuccess"; }
+        else { returnclass = "lowsuccess"; }
 
-    gChartUrl2 += "&chds=0,50&chtt=" + release.getName() + " Daily Build &chxt=y&chco=00ff00,ff0000&chs=280x150&chl=";
+        returnval = "<span class='" + returnclass + "'>" + successes + " / " + builds.length + "</span>";
+        return returnval;
+    }
 
-    for (v in total_passes) {
-        gChartUrl2 += (dates[v] + "");
-        if (v != total_passes.length - 1) {
-            gChartUrl2 += '|';
+    function showBuildDefDetail(sender, args) {
+        var buildDef = buildDefs[args.rowIndex];
+        if (buildTrendReport === undefined) {
+            buildTrendReport = new BuildTrendReport(rallyDataSource, "buildTrends");
+        }
+        buildTrendReport.showBuildTrend(buildDef);
+    }
+
+    this.display = function(element) {
+        rallyDataSource = new rally.sdk.data.RallyDataSource("__WORKSPACE_OID__",
+                "__PROJECT_OID__",
+                "__PROJECT_SCOPING_UP__",
+                "__PROJECT_SCOPING_DOWN__");
+
+        rally.sdk.ui.AppHeader.setHelpTopic("231");
+        loadBuilddefs();
+    };
+
+}
+
+function BuildTrendReport(rallydatasource, detail_div) {
+    var that = this;
+    var rallyDataSource;
+    var buildDef;
+
+    //UI elements
+    var buildTrendTable;
+    var buildTrendGraph;
+    var buildTrendLegend;
+    var buildTrendWait;
+    var buildTrendRadio;
+    var buildTrendReleaseDD;
+
+    //UI divs
+    var buildTrendLabeldiv;
+    var buildTrendDescriptiondiv;
+    var buildTrendStatusRatiodiv;
+    var buildTrendLegenddiv;
+    var buildTrendGraphdiv;
+    var buildTrendTablediv;
+    var buildTrendRadiodiv;
+    var buildTrendReleaseDDdiv;
+    var spinnerdiv;
+
+
+    function display() {
+        buildTrendLabeldiv.innerHTML = buildDef.Name;
+        buildTrendDescriptiondiv.innerHTML = buildDef.Description;
+
+        if (buildTrendRadio !== undefined) {
+            buildTrendRadio.destroy();
+            buildTrendReleaseDD.destroy();
+        }
+
+        showRadioGroup();
+        buildTrendRadio.setValue("30");
+        buildTrendTBchange({}, {value:"30"});
+    }
+
+    function showRadioGroup(){
+        dojo.style(buildTrendReleaseDDdiv, { "display" : "none"} );
+
+        var config = {
+            radios: [{label:"Last 30 days", value:"30"}, {label:"Last 90 days", value:"90"}, {label:"By Release", value:"Release"}],
+            groupName       :   "TrendTimebox",
+            showLabel       :   true,
+            labelPosition   :   "after",
+            defaultValue    :   "30"
+        };
+        buildTrendRadio = new rally.sdk.ui.basic.RadioButtonGroup(config);
+        buildTrendRadio.display(buildTrendRadiodiv, buildTrendTBchange);
+
+        var configDD = {
+            showLabel:false
+        };
+        buildTrendReleaseDD = new rally.sdk.ui.ReleaseDropdown(configDD, rallyDataSource);
+        buildTrendReleaseDD.display(buildTrendReleaseDDdiv, buildTrendReleaseDDChange);
+    }
+
+    function buildTrendTBchange(sender, args) {
+        var optionpicked = args.value;
+
+        if (optionpicked === "Release") {
+            dojo.style(buildTrendReleaseDDdiv, { "display" : "inline"} );
+            buildTrendReleaseDDChange();
+        }
+        else {
+            dojo.style(buildTrendReleaseDDdiv, { "display" : "none"} );
+
+            var today = new Date();
+            var gmtHours = today.getTimezoneOffset()/60;
+            today = rally.sdk.util.DateTime.add(today, "hour", gmtHours);
+
+            var delta = (optionpicked === 90) ? -90 : -30;
+            var subtr = rally.sdk.util.DateTime.add(today, "day", delta);
+
+            var startdate = rally.sdk.util.DateTime.toIsoString(subtr);
+            var enddate   = rally.sdk.util.DateTime.toIsoString(today);
+
+            queryBuildDefDetail(startdate, enddate);
         }
     }
 
-    gChartUrl2 += "'>";
-
-    document.getElementById("buildDiv-add").innerHTML += output + gChartUrl + "</td>";
-    document.getElementById("buildDiv-daily").innerHTML += output2 + gChartUrl2 + "</td></tr>";
-    return;
-
-}
-
-function drawBarChart() {
-    var total_pass_percent = 0;
-    var chl = "";
-
-    var gChartUrl = "<img src='http://chart.apis.google.com/chart?cht=lc&chd=t:";
-    for (n in pass_percent) {
-        total_pass_percent = total_pass_percent + "," + pass_percent[n] + "";
-        chl = chl + "|" + releases.get(n).getName();
+    function buildTrendReleaseDDChange(sender, args) {
+        if (dojo.style(buildTrendReleaseDDdiv,"display") !== "none") {
+            var startdate = buildTrendReleaseDD.getSelectedStart();
+            var enddate = buildTrendReleaseDD.getSelectedEnd();
+            queryBuildDefDetail(startdate,enddate);
+        }
     }
 
+    function queryBuildDefDetail(start_date,end_date) {
+        var builddefref = buildDef._ref;
 
-    gChartUrl += total_pass_percent + "&chl=" + chl + "&chtt=Build Success (%)&chxt=y&chm=s,000000,0,-1,5,1&chs=400x150";
-    gChartUrl += "'>";
+        buildTrendWait = new rally.sdk.ui.basic.Wait({hideTarget: false});
+        buildTrendWait.display(spinnerdiv);
 
+        var query_string = '((BuildDefinition = "' + builddefref + '") AND ((CreationDate > "';
+        query_string = query_string + start_date + '" ) AND (CreationDate < "' + end_date + '")))';
 
-    document.getElementById("buildAllDiv-add").innerHTML += gChartUrl;
-    return;
-}
+        var queryConfig = {
+            type    : 'build',
+            key     : 'buildtrend',
+            fetch   : 'Status,CreationDate,Number,URI,Duration',
+            query   : query_string,
+            order   : 'CreationDate Desc'
+        };
 
-function getDefaultBuild() {
-
-    buildQueryResult = api.query(new RALLY.Query('BuildDefinition', "(Project = " + project.getRef() + ")", null, false));
-
-    for (j = 0; j < buildQueryResult.length(); j++) {
-        var defaultBuildDef = buildQueryResult.get(j).getRef();
+        rallyDataSource.findAll(queryConfig, showBuildTrendInfo);
     }
 
-    return defaultBuildDef.replace(/.js/, "");
-}
+    function showBuildTrendInfo(results) {
 
-function trimDate(rawDate) {
-    rawDate = rawDate.getFullYear() + "-" + (rawDate.getMonth() + 1) + "-" + rawDate.getDate();
-    return rawDate;
-}
+        if (buildTrendTable !== undefined) {
+            buildTrendTable.destroy();
+        }
 
-function displayDate(rawDate) {
-    rawDate = (rawDate.getMonth() + 1) + "/" + rawDate.getDate();
-    return rawDate;
+        var tableConfig = {
+            sortingEnabled : false,
+            columnKeys     : [ 'Number', 'Date', 'Duration', 'Status' ],
+            columnHeaders  : [ 'Build #', 'Date', 'Duration(s)', 'Status' ],
+            columnWidths   : [ '15%', '30%', '25%', '30%' ],
+            noDataMessage  : "No Builds available"
+        };
+
+        buildTrendTable = new rally.sdk.ui.Table(tableConfig);
+
+        var successes = 0;
+
+        for ( var i = 0; i < results.buildtrend.length; i++) {
+            var numberlink = "<a href='"+ results.buildtrend[i].Uri + "' target='_blank'>" + results.buildtrend[i].Number  + "</a>";
+            var rowinfo = {
+                'Number'    : numberlink,
+                'Date'      : results.buildtrend[i].CreationDate,
+                'Duration'  : results.buildtrend[i].Duration,
+                'Status'    : results.buildtrend[i].Status
+            };
+            buildTrendTable.addRow(rowinfo);
+            if (results.buildtrend[i].Status === "SUCCESS") { successes++; }
+        }
+
+
+        var success_ratio = "<span>    " + successes + " / "+ results.buildtrend.length + "</span>";
+        buildTrendStatusRatiodiv.innerHTML = success_ratio;
+        buildTrendWait.hide();
+        buildTrendTable.display(buildTrendTablediv);
+        showBuildTrendGraph(results);
+    }
+
+    function showBuildTrendGraph(results){
+        var dates = [];
+        var buildSuccesses = [];
+        var buildOther = [];
+
+        if (buildTrendGraph) {
+            buildTrendGraph.destroy();
+        }
+
+        if (buildTrendLegend) {
+            buildTrendLegend.destroy();
+            buildTrendLegend = null;
+        }
+
+        if (results.buildtrend.length > 0) {
+            buildTrendGraph = new dojox.charting.Chart2D(buildTrendGraphdiv);
+            var chartconfig = {
+                type        :   "StackedColumns",
+                gap         :   3
+            };
+            buildTrendGraph.addPlot("default", chartconfig);
+
+            //Fill the data series
+            for (var i=(results.buildtrend.length - 1); i >= 0; i--) {
+                var buildDate = rally.sdk.util.DateTime.fromIsoString(results.buildtrend[i].CreationDate);
+                buildDate = rally.sdk.util.DateTime.format(buildDate, "yyyy-MM-dd");
+                var buildDateIndex = dojo.indexOf(dates, buildDate);
+                if ( buildDateIndex === -1 ) {
+                    dates.push(buildDate);
+                    buildSuccesses.push(0);
+                    buildOther.push(0);
+                    buildDateIndex = dates.length - 1;
+                }
+
+                if (results.buildtrend[i].Status === "SUCCESS") {
+                    buildSuccesses[buildDateIndex] = buildSuccesses[buildDateIndex] + 1;
+                }
+                else   {
+                    buildOther[buildDateIndex] = buildOther[buildDateIndex] + 1;
+                }
+            }
+
+            var datelabels = [];
+            for (var j = 0; j < dates.length; j++) {
+                datelabels.push( { value: j+1, text: dates[j].substring(5, dates[j].length) } );
+            }
+
+            //Horizontal Axis Config
+            var dateaxis = {
+                fixLower:"minor",
+                majorTickStep: 4,
+                minorTickStep: 1,
+                labels  : datelabels
+            };
+            buildTrendGraph.addAxis("x", dateaxis);
+
+            //Vertical Axis Config
+            var buildaxis = {
+                vertical    : true,
+                min: 0,
+                minorTicks: false
+            };
+            buildTrendGraph.addAxis("y", buildaxis);
+            buildTrendGraph.addSeries("Success", buildSuccesses);
+            buildTrendGraph.addSeries("Failure", buildOther);
+
+            setChartTheme();
+            buildTrendGraph.setTheme(buildDashboard.themes.rallybuilds);
+            var atooltip = new dojox.charting.action2d.Tooltip(buildTrendGraph, "default", {duration: 200, text: showTT});
+
+            buildTrendGraph.render();
+
+            buildTrendLegend = new dojox.charting.widget.Legend( {chart: buildTrendGraph},
+                    dojo.create("div", {}, buildTrendLegenddiv));
+        }
+        else { buildTrendGraph = undefined; }
+    }
+
+    function showTT(event) {
+        var datev = event.chart.axes.x.labels[event.index].text;
+        var h1 = event.chart.series[0].data[event.index];
+        var h2 = event.chart.series[1].data[event.index];
+        var height = event.y;
+        if (((h1+ h2) === height) && (h2 !== 0)) {height = h2;}
+        return "(" + datev + ") - " + height;
+    }
+
+    function setChartTheme(){
+        dojo.provide("buildDashboard.themes.rallybuilds");
+        buildDashboard.themes.rallybuilds = new dojox.charting.Theme({
+            colors: [
+                "#f47168",
+                "#6ab17d"
+            ]
+        });
+    }
+
+    function init(rallydatasource, detail_div) {
+        rallyDataSource = rallydatasource;
+        var detaildiv = dojo.byId(detail_div);
+
+        var labeldivs               = dojo.create("div", { style : { "display" : "block" }}, detaildiv);
+        buildTrendStatusRatiodiv    = dojo.create("div", {id: "buildTrendStatusRatio"}, labeldivs);
+        buildTrendLabeldiv          = dojo.create("div", {id: "buildTrendLabel"}, labeldivs);
+        buildTrendDescriptiondiv    = dojo.create("div", {id: "buildTrendDescription"}, labeldivs);
+
+        var radiodivs               = dojo.create("div", {id: "buildTrendControlDiv"}, detaildiv);
+        buildTrendRadiodiv          = dojo.create("div", {id: "buildTrendRadio"}, radiodivs);
+        buildTrendReleaseDDdiv      = dojo.create("div", {id: "buildTrendReleaseDD"}, radiodivs);
+
+        spinnerdiv                  = dojo.create("div", {id: "buildTrendspinner"}, detaildiv);
+
+        buildTrendLegenddiv         = dojo.create("div", {id: "buildTrendLegend"}, detaildiv);
+        buildTrendGraphdiv          = dojo.create("div", {id: "buildTrendGraph"}, detaildiv);
+        buildTrendTablediv          = dojo.create("div", {id: "buildTrendTable"}, detaildiv);
+
+        dojo.style(buildTrendRadiodiv, {"display" : "inline"});
+        dojo.style(buildTrendReleaseDDdiv, {"display" : "none"});
+
+        var tablestyle = {
+            "display"       : "block",
+            "marginLeft"   : "auto",
+            "marginRight"  : "auto"
+        };
+        dojo.style(buildTrendTablediv, tablestyle);
+
+        return that;
+    }
+
+    this.showBuildTrend = function(builddef) {
+        buildDef = builddef;
+        display();
+    };
+
+    this.destroy = function() {
+        buildTrendRadio.destroy();
+        buildTrendReleaseDD.destroy();
+
+        buildTrendLegend.destroy();
+        buildTrendGraph.destroy();
+        buildTrendTable.destroy();
+    };
+
+    init(rallydatasource, detail_div);
 }
 
 
 </script>
 
-<body onLoad="initPage(); return false;">
+<style type="text/css">
+    body{
+        width:950px;
+    }
+    .dijitTooltipContainer,
+    .dijitTooltipConnector {
+        display: none;
+    }
+    #buildDefTable{
+        display: inline;
+        float: left;
+        padding-right: 10px;
+        width: 300px;
+    }
+    #buildDefTable td{
+        cursor:pointer;
+    }
+    #buildTrends {
+        display: inline;
+        float: left;
+        width: 600px;
+        border-left: 1px solid #999;
+        padding-left:10px;
+    }
+    #buildTrendLabel {
+        font-size: 14px;
+        float:left;
+    }
+    #buildTrendDescription{
+        clear:left;
+        float:left;
+    }
+    #buildTrendStatusRatio{
+        display: inline;
+        float: right;
+        font-size: 14px;
+    }
+    #buildTrendControlDiv{
+        padding-top: 5px;
+        clear:both;
+        display: block;
+    }
+    #buildTrendReleaseDD{
+        padding-left: 5px;
+    }
+    #buildTrendspinner{
+        height:20px;
+        width:20px;
+    }
+    .lowsuccess
+    {
+        color:#f47168;
+    }
+    .medsuccess
+    {
+        color:#d9af4b;
+    }
+    .highsuccess
+    {
+        color:#6ab17d;
+    }
 
-<div id="wrapper">
-    <div id="header">
-        <div id="title"><h3>Build Dashboard</h3></div>
-        <div id="info"></div>
-        <div class="clear"></div>
-    </div>
-    <div id="filter">
-            <span id="testselect">   
-            <form name="testform">
-                <select name="testselect" size="1" onChange="onChange()">
-                    <option>All Releases</option>
-                </select>
-            </form>
-            </span>
-    </div>
-    <table border=1>
-        <tr>
-            <td valign="top">
-                <div class="d-build" id="buildAllDiv-add"></div>
-            </td>
-            <td>
-                <div class="d-build" id="buildDiv-add"></div>
-            </td>
-            <td>
-                <div id="buildDiv-daily"></div>
-        </tr>
-    </table>
+
+</style>
+
+<script type="text/javascript">
+
+    function onLoad() {
+        dojo.require("dojox.charting.Chart2D");
+        dojo.require("dojox.charting.widget.Legend");
+        dojo.require("dojox.charting.Theme");
+        dojo.require("dojox.charting.action2d.Tooltip");
+
+        var builddashboard = new BuildDashboard();
+        builddashboard.display(dojo.body());
+    }
+
+    rally.addOnLoad(onLoad);
+
+</script>
+</head>
+<body>
+<div id="buildDefTable"></div>
+<div id="buildTrends"></div>
 </body>
 </html>
