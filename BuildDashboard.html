@@ -184,7 +184,9 @@ function BuildTrendReport(rallydatasource, detail_div) {
 
     function display() {
         buildTrendLabeldiv.innerHTML = buildDef.Name;
-        buildTrendDescriptiondiv.innerHTML = buildDef.Description;
+        if (buildDef.Description) {
+            buildTrendDescriptiondiv.innerHTML = buildDef.Description;
+        }
 
         if (buildTrendRadio !== undefined) {
             buildTrendRadio.destroy();
@@ -299,8 +301,7 @@ function BuildTrendReport(rallydatasource, detail_div) {
         }
 
 
-        var success_ratio = "<span>    " + successes + " / "+ results.buildtrend.length + "</span>";
-        buildTrendStatusRatiodiv.innerHTML = success_ratio;
+        buildTrendStatusRatiodiv.innerHTML = "<span class='highsuccess'>" + successes + "</span> / " + results.buildtrend.length;
         buildTrendWait.hide();
         buildTrendTable.display(buildTrendTablediv);
         showBuildTrendGraph(results);
