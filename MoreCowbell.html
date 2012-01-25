@@ -1,19 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- Copyright (c) 2011  Rally Software Development Corp.  All rights reserved -->
 <html>
+<head>
+    <title>More Cowbell</title>
+    <meta name="Name" content="App: More Cowbell"/>
+    <meta name="Version" content="2012.01.28"/>
+    <meta name="Vendor" content="Rally Software"/>
+    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
+    <script type="text/javascript">
+        rally.addOnLoad(function() {
 
-<script type="text/javascript" charset="utf-8" src="/slm/js/xmlhttp.js"></script>
-<script type="text/javascript" charset="utf-8" src="/slm/js-lib/json.js"></script>
-<script type="text/javascript" charset="utf-8" src="/slm/js/jsonapi/jsonapi.js"></script>
+            var rallyDataSource = new rally.sdk.data.RallyDataSource(
+                    __WORKSPACE_OID__,
+                    __PROJECT_OID__,
+                    __PROJECT_SCOPING_UP__,
+                    __PROJECT_SCOPING_DOWN__);
 
-<script type="text/javascript">
-    var api = new RALLY.JsonApi("__SERVER_URL__", '1.09', __WORKSPACE_OID__, __PROJECT_OID__, "__PROJECT_SCOPING_UP__", "__PROJECT_SCOPING_DOWN__",
-            new RALLY.IntegrationInfo("Mashup: More Cowbell", "1.0", "Cowbell Software"));
-    var priorities = api.getAllowedValues("Defect", "Priority");
-</script>
+            //Make a small wsapi request so that we can track usage via request headers.
+            rallyDataSource.find({
+                key: 'user',
+                type: 'user',
+                fetch: 'ObjectID'}, showIframe);
 
+            function showIframe() {
+                var iframe = document.createElement("iframe");
+                iframe.src = "http://www.snotr.com/embed/261";
+                iframe.style.width = "400px";
+                iframe.style.height = "330px";
+                document.body.appendChild(iframe);
+            }
+        });
+    </script>
+</head>
 <body>
-<center>
-    <iframe src="http://www.snotr.com/embed/261" width="400" height="330" frameborder="0"></iframe>
-</center>
 </body>
-
 </html>
