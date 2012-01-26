@@ -184,9 +184,7 @@ function BuildTrendReport(rallydatasource, detail_div) {
 
     function display() {
         buildTrendLabeldiv.innerHTML = buildDef.Name;
-        if (buildDef.Description) {
-            buildTrendDescriptiondiv.innerHTML = buildDef.Description;
-        }
+        buildTrendDescriptiondiv.innerHTML = buildDef.Description || "";
 
         if (buildTrendRadio !== undefined) {
             buildTrendRadio.destroy();
@@ -232,7 +230,7 @@ function BuildTrendReport(rallydatasource, detail_div) {
             var gmtHours = today.getTimezoneOffset()/60;
             today = rally.sdk.util.DateTime.add(today, "hour", gmtHours);
 
-            var delta = (optionpicked === 90) ? -90 : -30;
+            var delta = (parseInt(optionpicked, 10) === 90) ? -90 : -30;
             var subtr = rally.sdk.util.DateTime.add(today, "day", delta);
 
             var startdate = rally.sdk.util.DateTime.toIsoString(subtr);
@@ -279,7 +277,7 @@ function BuildTrendReport(rallydatasource, detail_div) {
         var tableConfig = {
             sortingEnabled : false,
             columnKeys     : [ 'Number', 'Date', 'Duration', 'Status' ],
-            columnHeaders  : [ 'Build #', 'Date', 'Duration(s)', 'Status' ],
+            columnHeaders  : [ 'Build #', 'Date', 'Duration', 'Status' ],
             columnWidths   : [ '15%', '30%', '25%', '30%' ],
             noDataMessage  : "No Builds available"
         };
@@ -293,7 +291,7 @@ function BuildTrendReport(rallydatasource, detail_div) {
             var rowinfo = {
                 'Number'    : numberlink,
                 'Date'      : results.buildtrend[i].CreationDate,
-                'Duration'  : results.buildtrend[i].Duration,
+                'Duration'  : results.buildtrend[i].Duration || '',
                 'Status'    : results.buildtrend[i].Status
             };
             buildTrendTable.addRow(rowinfo);
@@ -350,6 +348,8 @@ function BuildTrendReport(rallydatasource, detail_div) {
             }
 
             var datelabels = [];
+            datelabels.push({value: 0, text: ""});
+
             for (var j = 0; j < dates.length; j++) {
                 datelabels.push( { value: j+1, text: dates[j].substring(5, dates[j].length) } );
             }
