@@ -58,7 +58,7 @@ function initTaskboard() {
         var paging = "&pagesize=100";
 
         return {
-            "currentProject"   : "/iteration:current/project",
+            "currentProject"   : "/project?query=(ObjectID = " + currentProjectOid + ")",
             "#storyType"        : "/typedefinition?query=(Name = \"Hierarchical Requirement\")",
 
             "taskUnit"          : "${iteration/workspace/workspaceConfiguration/taskUnitName}",
