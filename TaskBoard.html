@@ -58,7 +58,7 @@ function initTaskboard() {
         var paging = "&pagesize=100";
 
         return {
-            "currentProject"   : "/project?query=(ObjectID = " + currentProjectOid + ")",
+            "currentProject"   : "/iteration:current/project",
             "#storyType"        : "/typedefinition?query=(Name = \"Hierarchical Requirement\")",
 
             "taskUnit"          : "${iteration/workspace/workspaceConfiguration/taskUnitName}",
@@ -358,6 +358,10 @@ function initTaskboard() {
             setStatus('Loading...');
 
             if (this.dataSource) {
+                var queryWithParams = {
+                    adHocQuery: query,
+                    cpoid: currentProjectOid
+                };
                 this.dataSource.get(function(model) {
                     var i;
 
@@ -428,7 +432,7 @@ function initTaskboard() {
 
                     setStatus();
 
-                }, query);
+                }, queryWithParams);
             }
         },
 
