@@ -64,7 +64,7 @@ function initTaskboard() {
             "taskUnit"          : "${iteration/workspace/workspaceConfiguration/taskUnitName}",
             "storyStates"       : "${#storyType/attributes[name=schedule state]/allowedvalues/stringvalue}",
 
-            "iteration"         : "/iteration:current?fetch=name,objectid&order=StartDate",
+            "iteration"         : "/iteration:current?cpoid=" + currentProjectOid + "&fetch=name,objectid&order=StartDate",
             "iterations"        : "/iterations?fetch=name,objectid&order=StartDate,Name&project=${currentProject}&projectScopeUp=false&projectScopeDown=false" + paging,
 
             "users"             : "/users?fetch=displayname,loginname,emailaddress,objectid" + paging,
@@ -352,12 +352,16 @@ function initTaskboard() {
             if (itr) {
                 query.iteration = "/iterations?fetch=name,objectid&order=StartDate&query=(ObjectID = " + itr + ")";
             } else {
-                query.iteration = "/iteration:current?fetch=name,objectid&order=StartDate";
+                query.iteration = "/iteration:current?cpoid=" + currentProjectOid + "&fetch=name,objectid&order=StartDate";
             }
 
             setStatus('Loading...');
 
             if (this.dataSource) {
+                var queryWithParams = {
+                    adHocQuery: query,
+                    cpoid: currentProjectOid
+                };
                 this.dataSource.get(function(model) {
                     var i;
 
@@ -428,7 +432,7 @@ function initTaskboard() {
 
                     setStatus();
 
-                }, query);
+                }, queryWithParams);
             }
         },
 
