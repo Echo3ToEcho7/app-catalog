@@ -58,13 +58,13 @@ function initTaskboard() {
         var paging = "&pagesize=100";
 
         return {
-            "currentProject"   : "/project?query=(ObjectID = " + currentProjectOid + ")",
+            "currentProject"   : "/iteration:current/project",
             "#storyType"        : "/typedefinition?query=(Name = \"Hierarchical Requirement\")",
 
             "taskUnit"          : "${iteration/workspace/workspaceConfiguration/taskUnitName}",
             "storyStates"       : "${#storyType/attributes[name=schedule state]/allowedvalues/stringvalue}",
 
-            "iteration"         : "/iteration:current?cpoid=" + currentProjectOid + "&fetch=name,objectid&order=StartDate",
+            "iteration"         : "/iteration:current?fetch=name,objectid&order=StartDate",
             "iterations"        : "/iterations?fetch=name,objectid&order=StartDate,Name&project=${currentProject}&projectScopeUp=false&projectScopeDown=false" + paging,
 
             "users"             : "/users?fetch=displayname,loginname,emailaddress,objectid" + paging,
@@ -352,7 +352,7 @@ function initTaskboard() {
             if (itr) {
                 query.iteration = "/iterations?fetch=name,objectid&order=StartDate&query=(ObjectID = " + itr + ")";
             } else {
-                query.iteration = "/iteration:current?cpoid=" + currentProjectOid + "&fetch=name,objectid&order=StartDate";
+                query.iteration = "/iteration:current?fetch=name,objectid&order=StartDate";
             }
 
             setStatus('Loading...');
