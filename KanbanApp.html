@@ -528,7 +528,7 @@
                 var ownerName = dojo.query('.cardOwnerName', card)[0];
                 dojo.empty(ownerName);
         
-                if (item.Owner !== null) {
+                if (item.Owner) {
                     ownerImg.setAttribute("src", rally.sdk.util.Ref.getUserImage(item.Owner._ref));
                     ownerName.appendChild(document.createTextNode(item.Owner._refObjectName));
                 }
