@@ -4,7 +4,7 @@
 <head>
     <title>Print Story Cards</title>
     <meta name="Name" content="App: Print Story Cards"/>
-    <meta name="Version" content="2012.01.14"/>
+    <meta name="Version" content="2012.02.21"/>
     <meta name="Vendor" content="Rally Software"/>
     <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
 
@@ -105,7 +105,7 @@
                                 '<span class="estimate">' + estimate + '</span>' +
                                 '</div>';
         
-                if ((cardNum + 1) % 4 === 0) {
+                if ((cardNum + 1) % 2 === 0) {
                     theMarkup = theMarkup + '<div class=pb></div>';
                 } else if (cardNum === totalCards - 1) {
                     theMarkup = theMarkup + '<div class=cb>&nbsp;</div>';
@@ -200,7 +200,7 @@
             }
 
             .pb {
-                page-break-before: always;
+                page-break-after: always;
                 clear: both;
             }
         }
