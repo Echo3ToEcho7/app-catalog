@@ -56,7 +56,7 @@
                         estimate = "None";
                     }
         
-                    description = data[i].Description.slice(0, 240);
+                    description = data[i].Description;
         
                     theMarkup = createMarkup(i, data.length, name, ownerText, ownerClass, description,
                             storyId, taskId, estimate);
@@ -265,7 +265,9 @@
             margin: 0.25em auto 0 auto;
             padding-left: 1.0em;
             padding-right: 1.0em;
-            overflow: hidden;
+            overflow-y: hidden;
+            width: 100%;
+            word-wrap: break-word;
         }
 
         .owner {
@@ -294,7 +296,7 @@
         }
 
         .content {
-            height: 2.3in;
+            height: 2.4in;
             overflow: hidden;
             width: 4.3in;
         }
