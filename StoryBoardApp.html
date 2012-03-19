@@ -10,14 +10,15 @@
 
     <script type="text/javascript">
     StoryBoard = function() {
-        
+                
             function createLayout(element) {
-                var headerDiv = document.createElement("div");
-                element.appendChild(headerDiv);
+                var optionsDiv = document.createElement("div");
+                dojo.addClass(optionsDiv, "optionsContainer");
+                element.appendChild(optionsDiv);
         
                 var controlDiv = document.createElement("div");
                 dojo.addClass(controlDiv, "controlContainer");
-                headerDiv.appendChild(controlDiv);
+                optionsDiv.appendChild(controlDiv);
         
                 var dropdownContainerDiv = document.createElement("div");
                 dojo.addClass(dropdownContainerDiv, "dropdownContainer");
@@ -29,7 +30,7 @@
         
                 clearDiv = document.createElement("div");
                 dojo.addClass(clearDiv, "clearFloats");
-                headerDiv.appendChild(clearDiv);
+                optionsDiv.appendChild(clearDiv);
         
                 var dropdownDiv = document.createElement("div");
                 dropdownDiv.id = "dropdown";
@@ -53,7 +54,7 @@
         
                 var addNewDiv = document.createElement("div");
                 addNewDiv.id = "addNew";
-                headerDiv.appendChild(addNewDiv);
+                optionsDiv.appendChild(addNewDiv);
         
                 var addNewUserStorySpan = document.createElement("span");
                 addNewUserStorySpan.id = "addNewUserStory";
@@ -173,8 +174,6 @@
                 });
             };
         };
-        
-    
 
     </script>
 
