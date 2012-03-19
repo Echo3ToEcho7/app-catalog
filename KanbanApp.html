@@ -6,11 +6,10 @@
     <meta name="Name" content="App: Kanban Board"/>
     <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.31/sdk.js"></script>
 
     <script type="text/javascript">
     KanbanBoard = function(rallyDataSource, configShow) {
-        
             var FILTER_FIELD = 'Tags.Name';
         
             var cardboard;
@@ -132,19 +131,31 @@
                 var headerDiv = document.createElement("div");
                 element.appendChild(headerDiv);
         
+                var controlDiv = document.createElement("div");
+                dojo.addClass(controlDiv, "controlContainer");
+                headerDiv.appendChild(controlDiv);
+        
+                var dropdownContainerDiv = document.createElement("div");
+                dojo.addClass(dropdownContainerDiv, "dropdownContainer");
+                controlDiv.appendChild(dropdownContainerDiv);
+        
                 var checkBoxContainerDiv = document.createElement("div");
                 dojo.addClass(checkBoxContainerDiv, "typeFilterContainer");
-                headerDiv.appendChild(checkBoxContainerDiv);
+                controlDiv.appendChild(checkBoxContainerDiv);
+        
+                var clearDiv = document.createElement("div");
+                dojo.addClass(clearDiv, "clearFloats");
+                headerDiv.appendChild(clearDiv);
         
                 var filterByTagsSpan = document.createElement("span");
                 dojo.addClass(filterByTagsSpan, "filterByTagsDropdown");
-                checkBoxContainerDiv.appendChild(filterByTagsSpan);
+                dropdownContainerDiv.appendChild(filterByTagsSpan);
         
                 function populateFilterByDropdown(results) {
                     rally.forEach(results.tags, function(tag) {
                         data.push({label: tag.Name, value: tag.ObjectID});
                     });
-                    filterByTagsDropdown = new rally.sdk.ui.basic.Dropdown({label: "Filter by ",
+                    filterByTagsDropdown = new rally.sdk.ui.basic.Dropdown({label: "Filter by: ",
                         items : data,
                         rememberSelection:false,
                         defaultValue: ""});
@@ -163,7 +174,7 @@
                             query  : '(Archived = False)' }, populateFilterByDropdown);
         
                 var showSpan = document.createElement("span");
-                showSpan.appendChild(document.createTextNode("  | Show:"));
+                showSpan.appendChild(document.createTextNode("Show:"));
                 checkBoxContainerDiv.appendChild(showSpan);
         
                 var userStoriesSpan = document.createElement("span");
@@ -355,8 +366,6 @@
                 this._redisplayBoard();
             };
         };
-        
-    
     KanbanCardRenderer = function(column, item, options) {
             rally.sdk.ui.cardboard.BasicCardRenderer.call(this, column, item, options);
             var that = this;
@@ -1725,27 +1734,42 @@
     </script>
 
     <style type="text/css">
-    .togglePoliciesContainer {
+    .appHeaderContainer {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        
+        .appHeader {
+            position: relative;
+        }
+        
+        .togglePoliciesContainer {
             display: inline;
+        }
+        
+        .controlContainer {
+            margin-top: 10px;
+            margin-right: 20px;
+            float: right;
         }
         
         .typeFilterContainer {
-            display: inline;
-            float: right;
-            margin-right: 30px;
-            margin-top: -10px;
+            float: left;
+            margin-left: 3px;
         }
         
-        .typeFilterContainer .filterByTagsDropdown {
-            padding-right: 5px;
+        .dropdownContainer {
+            float: left;
+            margin-left: 3px;
+            margin-right: 10px;
         }
         
-        .typeFilterContainer .filterByTagsDropdown .dijitTextBox {
-            vertical-align: top;
+        .dropdownContainer .filterByTagsDropdown .dijitTextBox {
+            vertical-align: middle;
         }
         
-        .typeFilterContainer .filterByTagsDropdown .dropdownLabel {
-            vertical-align: baseline;
+        .dropdownContainer .filterByTagsDropdown .dropdownLabel {
+            vertical-align: middle;
         }
         
         .kanbanBoard {

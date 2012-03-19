@@ -6,7 +6,7 @@
     <meta name="Name" content="App: Estimation Board"/>
     <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.31/sdk.js"></script>
 
     <script type="text/javascript">
     function EstimationBoard(rallyDataSource, settingsShow, sizes) {
@@ -22,9 +22,13 @@
                 var headerDiv = document.createElement("div");
                 element.appendChild(headerDiv);
         
+                var controlDiv = document.createElement("div");
+                dojo.addClass(controlDiv, "controlContainer");
+                headerDiv.appendChild(controlDiv);
+        
                 var checkBoxContainerDiv = document.createElement("div");
                 dojo.addClass(checkBoxContainerDiv, "typeFilterContainer");
-                headerDiv.appendChild(checkBoxContainerDiv);
+                controlDiv.appendChild(checkBoxContainerDiv);
         
                 var showSpan = document.createElement("span");
                 showSpan.appendChild(document.createTextNode("Show:"));
@@ -69,6 +73,10 @@
                 });
                 checkBoxes.push(defectSuitesCheckBox);
                 defectSuitesCheckBox.display(defectSuitesSpan);
+        
+                var clearDiv = document.createElement("div");
+                dojo.addClass(clearDiv, "clearFloats");
+                headerDiv.appendChild(clearDiv);
         
                 var kanbanBoard = document.createElement("div");
                 kanbanBoard.id = "cardBoard";
@@ -558,9 +566,19 @@
 
     <style type="text/css">
     /*board styles*/
-        .typeFilterContainer {
+        .appHeaderContainer {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        
+        .appHeader {
+            position: relative;
+        }
+        
+        .controlContainer {
+            margin-top: 10px;
+            margin-right: 20px;
             float: right;
-            margin-right: 30px;
         }
         
         .board {

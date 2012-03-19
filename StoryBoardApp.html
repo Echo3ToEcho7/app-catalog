@@ -6,7 +6,7 @@
     <meta name="Name" content="App: Story Board"/>
     <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.31/sdk.js"></script>
 
     <script type="text/javascript">
     StoryBoard = function() {
@@ -15,17 +15,25 @@
                 var headerDiv = document.createElement("div");
                 element.appendChild(headerDiv);
         
+                var controlDiv = document.createElement("div");
+                dojo.addClass(controlDiv, "controlContainer");
+                headerDiv.appendChild(controlDiv);
+        
                 var dropdownContainerDiv = document.createElement("div");
                 dojo.addClass(dropdownContainerDiv, "dropdownContainer");
-                headerDiv.appendChild(dropdownContainerDiv);
+                controlDiv.appendChild(dropdownContainerDiv);
+        
+                var checkBoxContainerDiv = document.createElement("div");
+                dojo.addClass(checkBoxContainerDiv, "typeFilterContainer");
+                controlDiv.appendChild(checkBoxContainerDiv);
+        
+                clearDiv = document.createElement("div");
+                dojo.addClass(clearDiv, "clearFloats");
+                headerDiv.appendChild(clearDiv);
         
                 var dropdownDiv = document.createElement("div");
                 dropdownDiv.id = "dropdown";
                 dropdownContainerDiv.appendChild(dropdownDiv);
-        
-                var checkBoxContainerDiv = document.createElement("div");
-                dojo.addClass(checkBoxContainerDiv, "typeFilterContainer");
-                headerDiv.appendChild(checkBoxContainerDiv);
         
                 var showSpan = document.createElement("span");
                 showSpan.appendChild(document.createTextNode("Show:"));
@@ -133,6 +141,7 @@
                 }
         
                 var dropdownConfig = {
+                    label: 'Iteration:',
                     showLabel: true
                 };
                 var dropdown = new rally.sdk.ui.IterationDropdown(dropdownConfig, rallyDataSource);
@@ -170,13 +179,30 @@
     </script>
 
     <style type="text/css">
-    .dropdownContainer {
-            float: left;
+    .appHeaderContainer {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        
+        .appHeader {
+            position: relative;
+        }
+        
+        .controlContainer {
+            margin-top: 10px;
+            margin-right: 20px;
+            float: right;
         }
         
         .typeFilterContainer {
-            float: right;
-            margin-right: 30px;
+            float: left;
+            margin-left: 3px;
+        }
+        
+        .dropdownContainer {
+            float: left;
+            margin-left: 3px;
+            margin-right: 10px;
         }
         
         #addNew {
