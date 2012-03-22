@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Release Traceability</title>
@@ -14,6 +15,16 @@
         font-size: 14px;
         border: 0px;
         padding-bottom: 5px;
+    }
+
+    #lastMod table {
+        border: none;
+        border-top: 1px solid #888;
+        empty-cells: show;
+    }
+
+    #lastMod table td, #lastMod table th{
+        border: 1px inset #888;
     }
 
     td {
@@ -82,7 +93,7 @@
     }
 
     function startTable() {
-        var tblhtml = "<table width=100%  border=1 frame='above'><tr>";
+        var tblhtml = "<table width=100%><tr>";
         tblhtml += "<th width=34% class='taskh'>Task ID - Name<\/th><th width=50 class='taskh'>State<\/th><th width=50> <\/th>";
         tblhtml += "<th width=33% class='defecth'>Defect ID - Name<\/th><th width=50 class='defecth'>State<\/th><th width=50> <\/th>";
         tblhtml += "<th width=33% class='testh'>Test ID - Name<\/th><th width=50 class='testh'>State<\/th>";
@@ -113,9 +124,9 @@
             if (story.Tasks[rowcount].Blocked === true) {
                 dclass = "blocked";
             }
-            tblhtml += "<td class='" + dclass + "' border=1>" + tlink + "<\/td>";
+            tblhtml += "<td class='" + dclass + "'>" + tlink + "<\/td>";
             state = story.Tasks[rowcount].State;
-            tblhtml += "<td border=1><font bold>" + state + "<\/font><\/td>";
+            tblhtml += "<td><font bold>" + state + "<\/font><\/td>";
             tblhtml += emptytd;
         }
         else {
