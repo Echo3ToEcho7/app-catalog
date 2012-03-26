@@ -93,9 +93,10 @@
     }
 
     function startTable() {
+        var emptyDiv = "<div style='width:0px;'></div>";
         var tblhtml = "<table width=100%><tr>";
-        tblhtml += "<th width=34% class='taskh'>Task ID - Name<\/th><th width=50 class='taskh'>State<\/th><th width=50> <\/th>";
-        tblhtml += "<th width=33% class='defecth'>Defect ID - Name<\/th><th width=50 class='defecth'>State<\/th><th width=50> <\/th>";
+        tblhtml += "<th width=34% class='taskh'>Task ID - Name<\/th><th width=50 class='taskh'>State<\/th><th width=50>"+emptyDiv+"<\/th>";
+        tblhtml += "<th width=33% class='defecth'>Defect ID - Name<\/th><th width=50 class='defecth'>State<\/th><th width=50>"+emptyDiv+"<\/th>";
         tblhtml += "<th width=33% class='testh'>Test ID - Name<\/th><th width=50 class='testh'>State<\/th>";
         tblhtml += "<\/tr>";
         return tblhtml;
@@ -111,8 +112,8 @@
         var idname = " ";
         var state = " ";
         var tblhtml = "<tr>";
-        var emptyrow = "<td><\/td><td><\/td><td><\/td>";
-        var emptytd = "<td><\/td>";
+        var emptytd = "<td><div style='width:0px;'></div><\/td>";
+        var emptyrow = emptytd + emptytd + emptytd;
         var txtred = "#ef3f35";
         var txtgreen = "#3a874f";
         var txtblack = "#000000";
