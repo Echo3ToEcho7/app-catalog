@@ -1425,7 +1425,7 @@ RALLY.Mashup.TimeboxHealth = function (e, d) {
         var z = {Good:"check-icon.gif", "At Risk":"caution-icon.gif", Critical:"error-icon.gif"};
         if (A[0] === "Good" || A[0] === "At Risk" || A[0] === "Critical") {
             B[0] = '&nbsp;<img border="0" align="Absmiddle" src="/slm/mashup/1.15/images/' + z[A[0]] + '" alt="' + A[0] + '"/>&nbsp;' + x.timeboxType + " Health is <b>" + A[0] + "</b>.";
-            B[1] = "&nbsp;With " + A[1] + " days remaining in a " + A[2] + "-day " + x.timeboxType.toLowerCase() + ", " + A[3] + "% has been accepted."
+            B[1] = "&nbsp;With " + A[1] + " workdays remaining in a " + A[2] + "-workday " + x.timeboxType.toLowerCase() + ", " + A[3] + "% has been accepted."
         } else {
             B[0] = " - " + x.timeboxType + " is " + A;
             B[1] = ""
