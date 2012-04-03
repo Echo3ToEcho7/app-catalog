@@ -766,7 +766,7 @@
             var capacity = Infinity;
             var resourcesDisplay;
             var saveLinkHandler, cancelLinkHandler;
-            var columnHeader, fieldName, columnPolicy, policyHeaderDiv, policySubheaderDiv, policyTextboxDiv, policyTextArea, policyTextAreaExtension, editPolicyDiv;
+            var columnHeader, columnPolicy, policyHeaderDiv, policySubheaderDiv, policyTextboxDiv, policyTextArea, policyTextAreaExtension, editPolicyDiv;
             var editPolicyElements;
             var editPolicyHandlers = [];
         
@@ -788,7 +788,6 @@
             };
         
             this.render = function() {
-                fieldName = options.displayValue || value || "-- No Entry --";
         
                 columnDiv = document.createElement('div');
                 dojo.addClass(columnDiv, 'column');
@@ -836,7 +835,7 @@
             };
         
             this._populateColumn = function() {
-                columnHeader.innerHTML = fieldName;
+                columnHeader.innerHTML = options.displayValue || value || "-- No Entry --";
         
                 if (options && options.wipLimit) {
                     setCapacityText();
@@ -882,7 +881,7 @@
                 dojo.empty(editPolicyDiv);
                 dojo.style(policySubheaderDiv, 'display', 'none');
                 dojo.removeClass(editPolicyDiv, 'editPolicyDivExtraPadding');
-                kanbanPolicy.savePolicy(fieldName, policyTextAreaExtension.getValue());
+                kanbanPolicy.savePolicy(value, policyTextAreaExtension.getValue());
             };
         
             this._cancelPolicy = function(evt) {
@@ -2039,7 +2038,7 @@
 
     <script type="text/javascript">
         /*configure following if you plan to run the Kanban app externally
-         rally.sdk.info.server = "https://rally1.rallydev.com/slm";*/
+         rally.sdk.info.server = "https://community.rallydev.com/slm";*/
         var WORKSPACE_OID = "1234";
         var PROJECT_OID = "54678";
         var PROJECT_SCOPE_UP = false;
