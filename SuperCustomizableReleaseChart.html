@@ -15,9 +15,9 @@
 <script type="text/javascript" src="/slm/js/help.js"></script>
 <script type="text/javascript" src="/slm/js/slm.js"></script>
 <script type="text/javascript" src="/slm/js-lib/ejsc/2.0.1/EJSChart.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.15/js/batch-toolkit.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.15/js/utilities.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.15/js/dropdown.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/utilities.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/dropdown.js"></script>
 <script type="text/javascript">
     var MASHUP_TYPE = RALLY.Mashup.RELEASE;
     var SETTINGS_COOKIE_NAME = 'mu_super_customizable_release_settings';
@@ -334,7 +334,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
         } else {
             am = "(" + an + ' AND ( CardState = "' + ao + '" ))'
         }
-        ap = {key:"FlowData",type:al,fetch:"CreationDate,CardEstimateTotal,TaskEstimateTotal,CardToDoTotal",query:am,order:"CreationDate",project:null};
+        ap = {key:"FlowData",type:al,fetch:"CreationDate,CardEstimateTotal,TaskEstimateTotal,CardToDoTotal",query:am,order:"CreationDate,ObjectID",project:null};
         ak(ap);
         return ap
     }
@@ -1018,7 +1018,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
         var ao = U();
         var am = [];
         var al = "((( " + an + " = " + h + ") AND (" + ao + " = " + f + ')) AND (Name = "' + E + '"))';
-        am[0] = {key:"timeboxOids",type:V,fetch:"ObjectID,Name,project," + an + "," + ao,query:al,order:ao + " desc"};
+        am[0] = {key:"timeboxOids",type:V,fetch:"ObjectID,Name,project," + an + "," + ao,query:al,order:ao + " desc,ObjectID"};
         ak(am[0]);
         am[1] = {key:"estimateUnit",type:"WorkspaceConfiguration",fetch:"TaskUnitName,IterationEstimateUnitName,ReleaseEstimateUnitName"};
         ak(am[1]);
@@ -1663,7 +1663,7 @@ function initPage() {
         width: 36px;
         height: 49px;
         padding: 0 5px 0 0;
-        background: url(/slm/mashup/1.13/images/stackedbar.gif) no-repeat;
+        background: url(/slm/mashup/1.21/images/stackedbar.gif) no-repeat;
         display: block;
         clear: left;
         float: left;
@@ -1674,7 +1674,7 @@ function initPage() {
         width: 36px;
         height: 49px;
         padding: 0 5px 0 0;
-        background: url(/slm/mashup/1.13/images/bar.gif) no-repeat;
+        background: url(/slm/mashup/1.21/images/bar.gif) no-repeat;
         display: block;
         clear: left;
         float: left;
@@ -1685,7 +1685,7 @@ function initPage() {
         width: 36px;
         height: 49px;
         padding: 0 5px 0 0;
-        background: url(/slm/mashup/1.13/images/line.gif) no-repeat;
+        background: url(/slm/mashup/1.21/images/line.gif) no-repeat;
         display: block;
         clear: left;
         float: left;
@@ -1696,7 +1696,7 @@ function initPage() {
         width: 36px;
         height: 49px;
         padding: 0 5px 0 0;
-        background: url(/slm/mashup/1.13/images/area.gif) no-repeat;
+        background: url(/slm/mashup/1.21/images/area.gif) no-repeat;
         display: block;
         clear: left;
         float: left;
@@ -1707,7 +1707,7 @@ function initPage() {
         width: 36px;
         height: 49px;
         padding: 0 5px 0 0;
-        background: url(/slm/mashup/1.13/images/burndown.gif) no-repeat;
+        background: url(/slm/mashup/1.21/images/burndown.gif) no-repeat;
         display: block;
         clear: left;
         float: left;
