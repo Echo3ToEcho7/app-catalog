@@ -4,9 +4,9 @@
 <head>
     <title>Iteration Scope Change</title>
     <meta name="Name" content="App: Iteration Scope Change"/>
-    <meta name="Version" content="2012.04.21"/>
+    <meta name="Version" content="2012.01.14"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.31/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.29/sdk.js"></script>
 
     <script type="text/javascript">
     var APP_TYPE = 'Iteration';
@@ -561,6 +561,8 @@
                         prefixes[workProducts[i]] = results[workProducts[i]][0].FormattedID.replace(/[0-9]/g, "");
                     }
                 }
+        
+                getTableData();
             }
         
             function buildPrefixQuery(keyName, objectType) {
@@ -598,13 +600,11 @@
                 var config = {showLabel: true,
                     label: APP_TYPE};
                 dropdown = new rally.sdk.ui.IterationDropdown(config, rallyDataSource);
-                dropdown.display("dropdown", getTableData);
+                dropdown.display("dropdown", getWorkProductPrefixes);
         
                 dojo.connect(dojo.byId("all_work"), "onclick", drawTable);
                 dojo.connect(dojo.byId("added_work"), "onclick", drawTable);
                 dojo.connect(dojo.byId("removed_work"), "onclick", drawTable);
-        
-                getWorkProductPrefixes();
             };
         
         }
