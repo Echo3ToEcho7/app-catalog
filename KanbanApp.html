@@ -4,12 +4,12 @@
 <head>
     <title>Kanban Board</title>
     <meta name="Name" content="App: Kanban Board"/>
-    <meta name="Version" content="2012.01.14"/>
+    <meta name="Version" content="2012.05.10"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.31/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.32/sdk.js"></script>
 
     <script type="text/javascript">
-    KanbanBoard = function(rallyDataSource, configShow) {
+    KanbanBoard = function(rallyDataSource, configShow, isManualRankWorkspace) {
             var FILTER_FIELD = 'Tags.Name';
         
             var cardboard;
@@ -308,6 +308,7 @@
                         attribute       : kanbanField,
                         sortAscending   : true,
                         order           : "Rank",
+                        isManualRankWorkspace  : isManualRankWorkspace,
                         cardRenderer    : KanbanCardRenderer,
                         cardOptions     : {
                             showTaskCompletion: showTaskCompletion,
@@ -2081,8 +2082,18 @@
                 label: "Settings...",
                 onClick: configShow
             });
-            kanbanBoard = new KanbanBoard(rallyDataSource, configShow);
-            kanbanBoard.display(dojo.body());
+
+            rallyDataSource.find({
+                     key: 'WorkspaceConfiguration',
+                     type: 'WorkspaceConfiguration',
+                     fetch: 'DragDropRankingEnabled'
+                 }, function(results) {
+                     var isManualRankWorkspace = !results.WorkspaceConfiguration[0].DragDropRankingEnabled;
+                     kanbanBoard = new KanbanBoard(rallyDataSource, configShow, isManualRankWorkspace);
+                     kanbanBoard.display(dojo.body());
+                 }
+            );
+
 
         }
         rally.addOnLoad(onLoad);
