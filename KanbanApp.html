@@ -9,7 +9,7 @@
     <script type="text/javascript" src="/apps/1.32/sdk.js"></script>
 
     <script type="text/javascript">
-    KanbanBoard = function(rallyDataSource, configShow, isManualRankWorkspace) {
+    KanbanBoard = function(rallyDataSource, isManualRankWorkspace) {
             var FILTER_FIELD = 'Tags.Name';
         
             var cardboard;
@@ -21,6 +21,31 @@
                     hideLastColumnIfReleased, showTaskCompletion, showDefectStatus,
                     lastState, artifactTypes,
                     colorByArtifactType, policyCheckBox;
+        
+            that.shouldShowConfig = function() {
+                var query = window.location.href.split('?'), params, configShow;
+                if (query.length > 1) {
+                    params = dojo.queryToObject(query[1]);
+                }
+        
+                return (params && params.isEditable === 'true') ? true : false;
+            };
+        
+            that.showConfig = function(disableCancel) {
+                if (!that.shouldShowConfig()) {
+                    return;
+                }
+        
+                if (!that.configPanel) {
+                    that.configPanel = new KanbanConfigPanel(rallyDataSource, that._redisplayBoard);
+                    that.configPanel.disableCancel = disableCancel;
+                    that.configPanel.display();
+                }
+                else {
+                    that.configPanel.disableCancel = disableCancel;
+                    that.configPanel.show();
+                }
+            };
         
             that._showThroughputReport = function() {
                 var config = {reportNumber: 180, reportName: "Throughput Report",
@@ -274,7 +299,7 @@
                     }
                     else {
                         //no prefs found fire up dialog
-                        configShow();
+                        that.showConfig(true);
                     }
                 }
         
@@ -358,7 +383,18 @@
                 that._getAndStorePrefData(displayBoard);
             };
         
+            that._addAppHeaderMenuItems = function() {
+                if (that.shouldShowConfig()) {
+                    rally.sdk.ui.AppHeader.addPageTool({
+                        key:"showConfig",
+                        label: "Settings",
+                        onClick: function() {that.showConfig();}
+                    });
+                }
+            };
+        
             that.display = function(element) {
+                this._addAppHeaderMenuItems();
         
                 //Build app layout
                 this._createLayout(element);
@@ -1021,6 +1057,7 @@
         
             that.show = function() {
                 if (dialog) {
+                    that._disableCancelButton();
                     dialog.show();
                 }
             };
@@ -1028,6 +1065,12 @@
             that.hide = function() {
                 if (dialog) {
                     dialog.hide();
+                }
+            };
+        
+            that.destroy = function() {
+                if (dialog) {
+                    dialog.destroyRecursive();
                 }
             };
         
@@ -1064,6 +1107,7 @@
                     dialog.display();
                     that.displaySaveCancelFeatures();
                     that._displayHelpDialog();
+                    that._disableCancelButton();
                 }
         
                 that._retrievePreferences(createDialog);
@@ -1075,12 +1119,13 @@
         
                 var saveButton = new rally.sdk.ui.basic.Button({text:"Save", value:"Save"});
                 saveButton.display(buttonContainer, function() {
+                    dialog.hide();
                     that._storeValues(that._saveComplete);
                 });
         
-                var cancelLink = "<a href='' id='cancelLink'>Cancel</a>";
-                dojo.place(cancelLink, buttonContainer);
-                dojo.connect(dojo.byId('cancelLink'), "onclick", function(event) {
+                var cancelLink = "<a href=''>Cancel</a>";
+                that.cancelButton = dojo.place(cancelLink, buttonContainer);
+                dojo.connect(that.cancelButton, "onclick", function(event) {
                     dialog.hide();
                     that._setValues();
                     dojo.stopEvent(event);
@@ -1482,9 +1527,7 @@
             };
         
             that._saveComplete = function() {
-                dialog.hide();
-                that._retrievePreferences(function() {
-                });
+                that._retrievePreferences(function() {});
                 onConfigHide();
             };
         
@@ -1546,6 +1589,18 @@
         
                 }
         
+            };
+        
+            that._disableCancelButton = function() {
+                if (!that.cancelButton) {
+                    return;
+                }
+        
+                if (that.disableCancel) {
+                    dojo.style(that.cancelButton, 'display', 'none');
+                } else {
+                    dojo.style(that.cancelButton, 'display', 'inline');
+                }
             };
         
         };
@@ -2065,39 +2120,19 @@
             rallyDataSource.projectScopeUp = projectScopeUp;
             rallyDataSource.projectScopeDown = projectScopeDown;
 
-            var config, kanbanBoard;
-
-            function configShow() {
-                if (!config) {
-                    config = new KanbanConfigPanel(rallyDataSource, kanbanBoard._redisplayBoard);
-                    config.display();
-                }
-                else {
-                    config.show();
-                }
-            }
-
-            rally.sdk.ui.AppHeader.addPageTool({
-                key:"showConfig",
-                label: "Settings...",
-                onClick: configShow
-            });
-
+            var kanbanBoard;
             rallyDataSource.find({
                      key: 'WorkspaceConfiguration',
                      type: 'WorkspaceConfiguration',
                      fetch: 'DragDropRankingEnabled'
                  }, function(results) {
                      var isManualRankWorkspace = !results.WorkspaceConfiguration[0].DragDropRankingEnabled;
-                     kanbanBoard = new KanbanBoard(rallyDataSource, configShow, isManualRankWorkspace);
+                     kanbanBoard = new KanbanBoard(rallyDataSource, isManualRankWorkspace);
                      kanbanBoard.display(dojo.body());
                  }
             );
-
-
         }
         rally.addOnLoad(onLoad);
-
     </script>
 </head>
 <body>
