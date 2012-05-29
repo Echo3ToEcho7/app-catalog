@@ -20,7 +20,7 @@
                     columns, scheduleStatesMap,
                     hideLastColumnIfReleased, showTaskCompletion, showDefectStatus,
                     lastState, artifactTypes,
-                    colorByArtifactType, policyCheckBox;
+                    colorByArtifactType, policyCheckBox, releaseTypeAvailable;
         
             that.shouldShowConfig = function() {
                 var query = window.location.href.split('?'), params, configShow;
@@ -37,7 +37,7 @@
                 }
         
                 if (!that.configPanel) {
-                    that.configPanel = new KanbanConfigPanel(rallyDataSource, that._redisplayBoard);
+                    that.configPanel = new KanbanConfigPanel(rallyDataSource, that._redisplayBoard, releaseTypeAvailable);
                     that.configPanel.disableCancel = disableCancel;
                     that.configPanel.display();
                 }
@@ -302,8 +302,24 @@
                         that.showConfig(true);
                     }
                 }
+                function determineIfReleaseTypeAvailable(results) {
+                    var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
+                            '__PROJECT_OID__',
+                            '__PROJECT_SCOPING_UP__',
+                            '__PROJECT_SCOPING_DOWN__');
         
-                rallyDataSource.preferences.getAppPreferences(populateConfigForm);
+                    rallyDataSource.find({
+                        key: 'enabledTypeDefs',
+                        type: 'TypeDefinition',
+                        fetch  : 'Name,ElementName',
+                        query  : '(Name = "Release")'
+                    }, function(typeDefs) {
+                        releaseTypeAvailable = typeDefs.enabledTypeDefs.length > 0;
+                        populateConfigForm(results);
+                    });
+                }
+        
+                rallyDataSource.preferences.getAppPreferences(determineIfReleaseTypeAvailable);
             };
         
             that._onBeforeItemUpdated = function(c, args) {
@@ -355,8 +371,8 @@
                         cardboardConfig.fetch += ",Defects";
                     }
         
-                    if (hideLastColumnIfReleased) {
-                        cardboardConfig.query = new rally.sdk.util.Query("Release = null").or(kanbanField + " != " + '"' + lastState + '"');
+                    if (hideLastColumnIfReleased && releaseTypeAvailable) {
+                        cardboardConfig.query = new rally.sdk.util.Query("Release = null").or(kanbanField + ' != "' + lastState + '"');
                     }
         
                     if (filterByTagsDropdown && filterByTagsDropdown.getDisplayedValue()) {
@@ -1033,7 +1049,7 @@
          Copyright (c) 2011  Rally Software Development Corp.  All rights reserved
          */
         
-        KanbanConfigPanel = function(rallyDataSource, onConfigHide) {
+        KanbanConfigPanel = function(rallyDataSource, onConfigHide, hasReleaseType) {
             rally.sdk.ComponentBase.call(this);
         
             this.getValidEvents = function() {
@@ -1045,6 +1061,7 @@
             var stateDropdown, dialog;
             var allAttributes = {}, scheduleStateValues = {};
             var controls = [], rows = [], accessors = [];
+            var releaseTypeAvailable = hasReleaseType;
             var hideCardsCheckBox, showTasksCheckBox, showDefectsCheckBox, showAgeCheckBox, showAgeTextBox, colorByArtifactTypeCheckBox;
         
             var notMappedKey = "NotMapped";
@@ -1273,14 +1290,16 @@
             };
         
             that._displayTogglePreferences = function() {
-                hideCardsCheckBox = new rally.sdk.ui.basic.CheckBox({
-                    label:"Hide cards in last visible column if assigned to a release",
-                    showLabel:true,
-                    labelPosition:"after",
-                    checked: true,
-                    rememberChecked: true
-                });
-                hideCardsCheckBox.display("hideCardsCheckBox");
+                if (releaseTypeAvailable) {
+                    hideCardsCheckBox = new rally.sdk.ui.basic.CheckBox({
+                        label:"Hide cards in last visible column if assigned to a release",
+                        showLabel:true,
+                        labelPosition:"after",
+                        checked: true,
+                        rememberChecked: true
+                    });
+                    hideCardsCheckBox.display("hideCardsCheckBox");
+                }
         
                 showTasksCheckBox = new rally.sdk.ui.basic.CheckBox({
                     label:"Show task status for cards with tasks",
@@ -1439,13 +1458,15 @@
                     kanbanField:stateDropdown.getValue(),
                     reportKanbanField:stateDropdown.getDisplayedValue(),
                     fieldInfos:{},
-                    hideLastColumnIfReleased:hideCardsCheckBox.getChecked(),
                     showTaskCompletion: showTasksCheckBox.getChecked(),
                     showDefectStatus: showDefectsCheckBox.getChecked(),
                     showAge: showAgeCheckBox.getChecked(),
                     showAgeAfter: showAgeTextBox.getValue(),
                     colorByArtifactType: colorByArtifactTypeCheckBox.getChecked()
                 };
+                if (hideCardsCheckBox) {
+                    values.hideLastColumnIfReleased = hideCardsCheckBox.getChecked();
+                }
                 rally.forEach(accessors, function(value) {
                     values.fieldInfos[value.field] = value.get();
         
@@ -1460,7 +1481,9 @@
         
             //this wraps the controls and sets their values.
             that._setValues = function() {
-                hideCardsCheckBox.setChecked(currentPrefs.hideLastColumnIfReleased);
+                if (hideCardsCheckBox) {
+                    hideCardsCheckBox.setChecked(currentPrefs.hideLastColumnIfReleased);
+                }
                 showTasksCheckBox.setChecked(currentPrefs.showTaskCompletion);
                 showDefectsCheckBox.setChecked(currentPrefs.showDefectStatus);
                 showAgeCheckBox.setChecked(currentPrefs.showAge);
