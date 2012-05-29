@@ -67,7 +67,7 @@
             }
         
             this.display = function(element) {
-                var cardboard;
+                var that = this;
         
                 rally.sdk.ui.AppHeader.setHelpTopic("251");
                 rally.sdk.ui.AppHeader.showPageTools(true);
@@ -75,41 +75,23 @@
                 //Build app layout
                 createLayout(element);
         
-        
                 var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
                         '__PROJECT_OID__',
                         '__PROJECT_SCOPING_UP__',
                         '__PROJECT_SCOPING_DOWN__');
         
-                //Create checkboxes
-                var checkBoxes = [];
-                var userStoriesCheckBox = new rally.sdk.ui.basic.CheckBox({
-                    showLabel: true,
-                    label: "User Stories",
-                    labelPosition: "after",
-                    value: "HierarchicalRequirement",
-                    checked: true
-                });
-                checkBoxes.push(userStoriesCheckBox);
-                userStoriesCheckBox.display("userStories");
+                rallyDataSource.find({
+                    key: 'enabledTypeDefs',
+                    type: 'TypeDefinition',
+                    fetch  : 'Name,ElementName',
+                    query  : this._buildTypeDefQuery()
+                }, function(typeDefs) {that._draw(typeDefs, rallyDataSource);});
+            };
         
-                var defectsCheckBox = new rally.sdk.ui.basic.CheckBox({
-                    showLabel: true,
-                    label: "Defects",
-                    labelPosition: "after",
-                    value: "Defect"
-                });
-                checkBoxes.push(defectsCheckBox);
-                defectsCheckBox.display("defects");
-        
-                var defectSuitesCheckBox = new rally.sdk.ui.basic.CheckBox({
-                    showLabel: true,
-                    label: "Defect Suites",
-                    labelPosition: "after",
-                    value: "DefectSuite"
-                });
-                checkBoxes.push(defectSuitesCheckBox);
-                defectSuitesCheckBox.display("defectSuites");
+            this._draw = function(typeDefs, rallyDataSource) {
+                var cardboard,
+                    enabledTypeDefs = this._getEnabledTypeDefs(typeDefs),
+                    checkBoxes = this._drawCheckboxes(enabledTypeDefs);
         
                 function refreshBoard() {
                     var cardboardConfig = {
@@ -131,8 +113,11 @@
         
                     if (!cardboard) {
                         if (cardboardConfig.types.length === 0) {
-                            userStoriesCheckBox.setChecked(true);
-                            cardboardConfig.types.push(userStoriesCheckBox.getValue());
+                            var activeCheckBox = checkBoxes[0];
+                            if (activeCheckBox) {
+                                activeCheckBox.setChecked(true);
+                                cardboardConfig.types.push(activeCheckBox.getValue());
+                            }
                         }
                         cardboard = new rally.sdk.ui.CardBoard(cardboardConfig, rallyDataSource);
                         cardboard.display("storyBoard");
@@ -161,17 +146,89 @@
                     }
                 }
         
-                var addNewUserStory = new rally.sdk.ui.AddNewArtifact({
-                    types: ['hierarchicalrequirement','defect','defectsuite']
-                }, rallyDataSource);
+                var addNewUserStory = this._drawAddNew(enabledTypeDefs, rallyDataSource);
                 addNewUserStory.addEventListener('onAdd', refreshBoard);
                 addNewUserStory.addEventListener("onPreCreate", onAddNewPreCreate);
-                addNewUserStory.display('addNewUserStory');
         
                 //Wire up events
                 dojo.forEach(checkBoxes, function(checkBox) {
                     checkBox.addEventListener('onChange', refreshBoard);
                 });
+            };
+        
+            this._drawCheckboxes = function(enabledTypes) {
+                var checkBoxes = [];
+        
+                if (enabledTypes.hasOwnProperty('HierarchicalRequirement')) {
+                    var userStoriesCheckBox = new rally.sdk.ui.basic.CheckBox({
+                        showLabel: true,
+                        label: "User Stories",
+                        labelPosition: "after",
+                        value: "HierarchicalRequirement",
+                        checked: true
+                    });
+                    checkBoxes.push(userStoriesCheckBox);
+                    userStoriesCheckBox.display("userStories");
+                }
+        
+                if (enabledTypes.hasOwnProperty('Defect')) {
+                    var defectsCheckBox = new rally.sdk.ui.basic.CheckBox({
+                        showLabel: true,
+                        label: "Defects",
+                        labelPosition: "after",
+                        value: "Defect"
+                    });
+                    checkBoxes.push(defectsCheckBox);
+                    defectsCheckBox.display("defects");
+                }
+        
+                if (enabledTypes.hasOwnProperty('DefectSuite')) {
+                    var defectSuitesCheckBox = new rally.sdk.ui.basic.CheckBox({
+                        showLabel: true,
+                        label: "Defect Suites",
+                        labelPosition: "after",
+                        value: "DefectSuite"
+                    });
+                    checkBoxes.push(defectSuitesCheckBox);
+                    defectSuitesCheckBox.display("defectSuites");
+                }
+        
+                return checkBoxes;
+            };
+        
+            this._drawAddNew = function(enabledTypeDefs, rallyDataSource) {
+                var artifactTypes = dojo.filter(['HierarchicalRequirement','Defect','DefectSuite'], function(artifactType) {
+                    if (enabledTypeDefs.hasOwnProperty(artifactType)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+        
+                var addNewUserStory = new rally.sdk.ui.AddNewArtifact({types: artifactTypes}, rallyDataSource);
+                addNewUserStory.display('addNewUserStory');
+                return addNewUserStory;
+            };
+        
+            this._buildTypeDefQuery = function() {
+                var query = '';
+                dojo.forEach(['Hierarchical Requirement','Defect','Defect Suite'], function(typeDef) {
+                    var filter = '(Name = "' + typeDef + '")';
+                    if (query.length > 0) {
+                        query = '(' + query + ' OR ' + filter + ')';
+                    } else {
+                        query = filter;
+                    }
+                });
+                return query;
+            };
+        
+            this._getEnabledTypeDefs = function(typeDefs) {
+                var enabledTypes = {};
+                dojo.forEach(typeDefs.enabledTypeDefs, function(typeDef) {
+                    enabledTypes[typeDef.ElementName] = typeDef;
+                });
+                return enabledTypes;
             };
         };
 
