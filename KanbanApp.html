@@ -132,27 +132,6 @@
                 rally.sdk.ui.AppHeader.setHelpTopic('238');
                 rally.sdk.ui.AppHeader.showPageTools(true);
         
-                rally.sdk.ui.AppHeader.addPageTool({
-                    key: "showCycleTimeReport",
-                    label: "Show Cycle Time Report",
-                    onClick: that._showCycleTimeReport
-                });
-        
-                rally.sdk.ui.AppHeader.addPageTool({
-                    key: "showThroughputReport",
-                    label: "Show Throughput Report",
-                    onClick: that._showThroughputReport
-                });
-        
-                if (rally.sdk.util.Context.isInsideRally() && window.top !== window.self) {
-                    rally.sdk.ui.AppHeader.addPageTool({
-                        key: "newStory",
-                        label: "Add New Story",
-                        onClick: that._showNewStoryEditor
-                    });
-                    rally.sdk.ui.AppHeader.addPageTool(rally.sdk.ui.PageTools.BuiltIn.OpenInNewWindow);
-                }
-        
                 var headerDiv = document.createElement("div");
                 element.appendChild(headerDiv);
         
@@ -406,6 +385,29 @@
                         label: "Settings",
                         onClick: function() {that.showConfig();}
                     });
+                }
+        
+                rally.sdk.ui.AppHeader.addPageTool({
+                    key: "showCycleTimeReport",
+                    label: "Show Cycle Time Report",
+                    onClick: that._showCycleTimeReport
+                });
+        
+                rally.sdk.ui.AppHeader.addPageTool({
+                    key: "showThroughputReport",
+                    label: "Show Throughput Report",
+                    onClick: that._showThroughputReport
+                });
+        
+                if (rally.sdk.util.Context.isInsideRally() && window.top !== window.self) {
+                    rally.sdk.util.Login.isNotViewerOfProject(rallyDataSource.getProject(), function() {
+                        rally.sdk.ui.AppHeader.addPageTool({
+                            key: "newStory",
+                            label: "Add New Story",
+                            onClick: that._showNewStoryEditor
+                        });
+                        rally.sdk.ui.AppHeader.addPageTool(rally.sdk.ui.PageTools.BuiltIn.OpenInNewWindow);
+                    }, function(){}, function(){});
                 }
             };
         
