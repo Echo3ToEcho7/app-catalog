@@ -241,6 +241,7 @@
             that.show = function() {
                 if (dialog) {
                     dialog.show();
+                    that._alignSettingsDialog();
                 }
             };
         
@@ -440,6 +441,7 @@
                 });
                 dojo.addClass(validationDiv, "hide");
                 dialog.display();
+                that._alignSettingsDialog();
                 that.displaySaveCancelFeatures();
         
                 that.restrictDialogHeight();
@@ -489,6 +491,13 @@
                 });
                 that.displayUnits();
             };
+        
+            that._alignSettingsDialog = function() {
+                var dialogContainer = dojo.query(".dijitDialog");
+                if (dialogContainer.length > 0) {
+                    dojo.style(dialogContainer[0], 'top', '10px');
+                }
+            },
         
             that._setPreferenceValues = function(values) {
                 sizesObject = {};
