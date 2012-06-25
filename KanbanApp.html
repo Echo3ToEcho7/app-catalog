@@ -399,7 +399,7 @@
                     onClick: that._showThroughputReport
                 });
         
-                if (rally.sdk.util.Context.isInsideRally() && window.top !== window.self) {
+                if (that._inIframeInsideRally()) {
                     rally.sdk.util.Login.isNotViewerOfProject(rallyDataSource.getProject(), function() {
                         rally.sdk.ui.AppHeader.addPageTool({
                             key: "newStory",
@@ -419,6 +419,10 @@
         
                 //Redisplay the board
                 this._redisplayBoard();
+            };
+        
+            that._inIframeInsideRally = function() {
+                return rally.sdk.util.Context.isInsideRally() && window.top !== window.self;
             };
         };
     KanbanCardRenderer = function(column, item, options) {
@@ -1078,6 +1082,7 @@
                 if (dialog) {
                     that._disableCancelButton();
                     dialog.show();
+                    that._alignSettingsDialog();
                 }
             };
         
@@ -1124,6 +1129,7 @@
                         that.fireEvent(that.getValidEvents().onHide, {});
                     });
                     dialog.display();
+                    that._alignSettingsDialog();
                     that.displaySaveCancelFeatures();
                     that._displayHelpDialog();
                     that._disableCancelButton();
@@ -1149,6 +1155,13 @@
                     that._setValues();
                     dojo.stopEvent(event);
                 });
+            };
+        
+            that._alignSettingsDialog = function() {
+                var dialogContainer = dojo.query(".dijitDialog");
+                if (dialogContainer.length > 0) {
+                    dojo.style(dialogContainer[0], 'top', '10px');
+                }
             };
         
             that._alterWipTextBox = function(textbox, args) {
