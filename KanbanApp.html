@@ -1069,6 +1069,7 @@
             var controls = [], rows = [], accessors = [];
             var releaseTypeAvailable = hasReleaseType;
             var hideCardsCheckBox, showTasksCheckBox, showDefectsCheckBox, showAgeCheckBox, showAgeTextBox, colorByArtifactTypeCheckBox;
+            var dialogId = new Date().toString();
         
             var notMappedKey = "NotMapped";
             var notMappedVal = "-- Not Mapped --";
@@ -1116,7 +1117,7 @@
                         title = "Configure Default Settings";
                     }
                     dialog = new rally.sdk.ui.basic.Dialog({
-                        id : new Date().toString(),
+                        id : dialogId,
                         title: title,
                         width: 400,
                         height: 350,
@@ -1162,6 +1163,9 @@
                 if (dialogContainer.length > 0) {
                     dojo.style(dialogContainer[0], 'top', '10px');
                 }
+                //Hack to force dojo widget to maintain position relative to container
+                var dialog = dijit.byId(dialogId);
+                dialog._relativePosition = dojo.position(dialog.domNode);
             };
         
             that._alterWipTextBox = function(textbox, args) {
@@ -1642,6 +1646,7 @@
             };
         
         };
+    
     /**
          Copyright (c) 2011  Rally Software Development Corp.  All rights reserved
          */
