@@ -6,7 +6,7 @@
     <meta name="Name" content="App: Kanban Board"/>
     <meta name="Version" content="2012.05.10"/>
     <meta name="Vendor" content="Rally Software"/>
-    <script type="text/javascript" src="/apps/1.32/sdk.js"></script>
+    <script type="text/javascript" src="/apps/1.32/sdk.js?apiVersion=1.38"></script>
 
     <script type="text/javascript">
     KanbanBoard = function(rallyDataSource, isManualRankWorkspace) {
@@ -1286,7 +1286,28 @@
                 });
                 rows = [];
             };
-
+        
+            that._checkReadyField = function(readyFieldExist) {
+                if (!readyFieldExist) {
+                    var msgText = "To enable the 'ready to pull' feature, create a custom field named 'Ready' on the User Story and Defect work products.";
+                    var messageElement = document.createElement("div");
+                    messageElement.id = "appSettingsDialogMsg";
+        
+                    var messageTextElement = document.createElement("span");
+                    messageElement.appendChild(messageTextElement);
+        
+                    var textNode = document.createTextNode(msgText);
+                    if (messageTextElement.firstChild) {
+                        messageTextElement.replaceChild(textNode, messageTextElement.firstChild);
+                    } else {
+                        messageTextElement.appendChild(textNode);
+                    }
+        
+                    dojo.addClass(messageElement, "configMessage");
+                    dojo.byId("msgContainer").appendChild(messageElement);
+                }
+            };
+        
             that._displayTogglePreferences = function() {
                 if (releaseTypeAvailable) {
                     hideCardsCheckBox = new rally.sdk.ui.basic.CheckBox({
@@ -1429,6 +1450,8 @@
                         stateDropdown.display("stateDropdown");
         
                         that._displayTogglePreferences();
+        
+                        that._checkReadyField(readyFieldExist);
         
                     }
                     catch(ex) {
