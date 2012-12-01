@@ -291,35 +291,35 @@
                 rally.forEach(accessors, function(value) {
                     if (dojo.trim(value.get().label) === "") {
                         var columnError = "Please enter a value for all your column names.";
-                        if (validationErrors.indexOf(columnError) === -1) {
+                        if (dojo.indexOf(validationErrors, columnError) === -1) {
                             validationErrors.push(columnError);
                         }
                     }
-                    if (uniqueColumns.indexOf(dojo.trim(value.get().label)) === -1) {
+                    if (dojo.indexOf(uniqueColumns, dojo.trim(value.get().label)) === -1) {
                         uniqueColumns.push(dojo.trim(value.get().label));
                     } else {
                         var uniqueColumnError = "Please enter unique values for all your column names.";
-                        if (validationErrors.indexOf(uniqueColumnError) === -1) {
+                        if (dojo.indexOf(validationErrors, uniqueColumnError) === -1) {
                             validationErrors.push(uniqueColumnError);
                         }
                     }
                     if (dojo.trim(value.get().planEstimate) === "" || isNaN(value.get().planEstimate) || value.get().planEstimate < 0) {
                         var planEstimateError = "Please enter a positive number for all your plan estimates.";
-                        if (validationErrors.indexOf(planEstimateError) === -1) {
+                        if (dojo.indexOf(validationErrors, planEstimateError) === -1) {
                             validationErrors.push(planEstimateError);
                         }
                     }
-                    if (uniqueEstimates.indexOf(dojo.trim(value.get().planEstimate)) === -1) {
+                    if (dojo.indexOf(uniqueEstimates, dojo.trim(value.get().planEstimate)) === -1) {
                         uniqueEstimates.push(dojo.trim(value.get().planEstimate));
                     } else {
                         var uniqueEstimateError = "Please enter unique numbers for all your plan estimates.";
-                        if (validationErrors.indexOf(uniqueEstimateError) === -1) {
+                        if (dojo.indexOf(validationErrors, uniqueEstimateError) === -1) {
                             validationErrors.push(uniqueEstimateError);
                         }
                     }
                     if (!isNaN(value.get().planEstimate) && (dojo.trim(value.get().planEstimate) >= 1000 || dojo.trim(value.get().planEstimate).split('.')[1] > 100 )) {
                         var tooManyDigitsError = "Please enter a number with a maximum of 3 digits before and 2 digits after the decimal point.";
-                        if (validationErrors.indexOf(tooManyDigitsError) === -1) {
+                        if (dojo.indexOf(validationErrors, tooManyDigitsError) === -1) {
                             validationErrors.push(tooManyDigitsError);
                         }
                     }
@@ -464,7 +464,7 @@
             that.displayUnits = function() {
                 function displayRetrievedUnits(results) {
                     if (results && results.units[0]) {
-                        units = results.units[0].IterationEstimateUnitName;
+                        var units = results.units[0].IterationEstimateUnitName;
                         dojo.byId("units").innerHTML = "(" + units + ")";
                     }
                     that.connectDeleteLinkHandlers();
@@ -497,7 +497,7 @@
                 if (dialogContainer.length > 0) {
                     dojo.style(dialogContainer[0], 'top', '10px');
                 }
-            },
+            };
         
             that._setPreferenceValues = function(values) {
                 sizesObject = {};
