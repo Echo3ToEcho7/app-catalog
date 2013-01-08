@@ -1111,6 +1111,9 @@ function calculateHealth(b, o, f, a) {
         l += Math.round(a[n])
     }
     var r = Math.round((m / l) * 100);
+    if (isNaN(r)) {
+        r = 0.0;
+    }
     var j = calcWorkDays(q, p);
     var e = calcWorkDays(q, g) - 1;
     var s = calcWorkDays(g, p);
