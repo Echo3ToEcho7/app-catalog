@@ -1,0 +1,64 @@
+.kanban .header {
+    padding-right: 5px;
+}
+
+.kanban .show-label {
+    line-height: 24px;
+    margin-top: 3px;
+}
+
+.kanban .checkbox {
+    margin: 5px;
+}
+
+.kanban .checkbox  label {
+    position: relative;
+    top: 1px;
+}
+
+.kanban .header .add-new {
+    line-height: normal;
+    margin: 5px;
+}
+
+.kanban .cardboard .column.overCapacity .columnContent {
+    background-color: #d67972;
+}
+
+.kanban .cardboard .column.overCapacity .columnHeader {
+    color: #ffffff;
+    background-color: #b81c10;
+}
+
+.cardboard .status-field.RevisionHistory {
+    line-height: 18px;
+}
+
+.kanban .cardboard .rui-card-header.defect {
+    background-color: rgba(255, 102, 0, 0.7); /*this will not work in ie*/
+}
+
+.column-settings .settings-grid {
+    border: 1px solid #FFF;
+}
+
+.column-settings .settings-grid.rally-invalid-field {
+    border: 1px solid #F00;
+}
+
+.card-fields.rally-invalid td > div {
+    position: absolute;
+    top: -12px;
+    left: -7px;
+    z-index: 10;
+}
+
+.card-fields.rally-invalid td > div > ul {
+    padding: 0 10px;
+    list-style-type: none;
+    background-color: red;
+    color: white;
+    font-size: 11px;
+    position: relative;
+    top: -5px;
+}

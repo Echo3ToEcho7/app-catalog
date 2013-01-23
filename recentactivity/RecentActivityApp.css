@@ -1,0 +1,68 @@
+.recent-activity-view ul.list {
+    list-style-type: none;
+    margin: 5px 5px 25px 5px;
+    padding: 0;
+}
+
+.recent-activity-view ul.list li.list-item {
+    padding-top: 5px;
+    color: #333;
+    font-weight: bold;
+    border-top: 1px solid #c6c6c6;
+    clear: left;
+}
+
+.recent-activity-view ul.list li.first {
+    border: none;
+}
+
+.recent-activity-view .list-item-info .inactive {
+    color: gray;
+}
+
+.recent-activity-view .list-item-info {
+    margin: 8px 0 0 0;
+    font-weight: normal;
+}
+
+.recent-activity-view .list-item-user {
+    width: 60px !important;
+    height: 60px;
+    margin-right: -5px;
+    float: left;
+}
+
+.recent-activity-view .list-item-details {
+    padding-left: 60px;
+}
+
+.recent-activity-view .list-item-user img.profile {
+    border: 1px solid #CCC;
+    width: 50px;
+    height: 50px;
+    margin-right: -10px;
+    float: left;
+}
+
+.recent-activity-view .list-item-details img.quote {
+    margin-bottom: 5px;
+}
+
+.recent-activity-view .list-item-details .status {
+    color: #333;
+}
+
+.recent-activity-view .list-item-details .reply {
+    margin-bottom: 0.5em;
+}
+
+.recent-activity-view .list-item-details .detail-text {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    word-wrap: break-word;
+}
+
+.recent-activity-view .show-more-ct {
+    padding-left: 5px;
+    padding-bottom: 5px;
+}

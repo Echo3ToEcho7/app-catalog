@@ -1,0 +1,14 @@
+.portfolio-cfd-app {
+    background-color: transparent;
+    margin: 10px;
+    padding-right: 20px;
+}
+
+.portfolio-cfd-app .rally-help-icon {
+    float: right;
+}
+
+.portfolio-cfd-app .chart {
+    margin-top: 1em;
+    min-height: 4em;
+}
