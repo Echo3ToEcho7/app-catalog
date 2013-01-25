@@ -6,6 +6,7 @@
      */
     Ext.define('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', {
         extend: 'Rally.app.App',
+        alias: 'widget.rallyroadmapplanningboard',
         componentCls: 'app',
         
         cls: 'roadmapPlanningBoardApp',
@@ -104,10 +105,20 @@
                 columnConfig: {
                     xtype: 'roadmapplanningboardcolumn',
                     additionalFetchFields: ['PlannedEndDate']
+                },
+                listeners: {
+                    load: this._onBoardLoad,
+                    scope: this
                 }
             });
 
             this.add(cardboard);
+        },
+
+        _onBoardLoad: function() {
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
+            }
         }
     });
 

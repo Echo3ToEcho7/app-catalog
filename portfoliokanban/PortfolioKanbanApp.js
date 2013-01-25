@@ -242,6 +242,7 @@
                 cls: 'no-type-text',
                 html: '<p>This Type has no states defined.</p>'
             });
+            this._publishContentUpdated();
         },
 
         /**
@@ -345,6 +346,9 @@
 
         _publishContentUpdated: function() {
             this.fireEvent('contentupdated');
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
+            }
         },
 
         _publishContentUpdatedNoDashboardLayout: function() {

@@ -51,7 +51,7 @@
                     }
                 },
                 listeners: {
-                    load: this._publishContentUpdated,
+                    load: this._onLoad,
                     toggle: this._publishContentUpdated,
                     recordupdate: this._publishContentUpdatedNoDashboardLayout,
                     recordcreate: this._publishContentUpdatedNoDashboardLayout,
@@ -70,6 +70,13 @@
                 },
                 scope: this
             });
+        },
+
+        _onLoad: function() {
+            this._publishContentUpdated();
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
+            }
         },
 
         _publishContentUpdated: function() {

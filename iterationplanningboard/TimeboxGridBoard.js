@@ -124,6 +124,9 @@
                 timeboxType: this.timeboxType,
                 context: this.getContext()
             });
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
+            }
         },
 
         _onTimeboxesLoad: function(store) {

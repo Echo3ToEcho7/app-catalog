@@ -341,6 +341,9 @@
 
         _publishContentUpdated: function() {
             this.fireEvent('contentupdated');
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
+            }
         },
 
         _publishContentUpdatedNoDashboardLayout: function() {
