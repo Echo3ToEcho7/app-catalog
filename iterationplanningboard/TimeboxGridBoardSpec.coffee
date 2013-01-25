@@ -13,6 +13,7 @@ describe 'Rally.apps.iterationplanningboard.TimeboxGridBoard', ->
         renderTo: 'testDiv'
         context: @context
         messageBus: Ext.create 'Rally.MessageBus'
+      @waitForComponentReady @gridBoard
 
   afterEach ->
     if @gridBoard
@@ -30,25 +31,29 @@ describe 'Rally.apps.iterationplanningboard.TimeboxGridBoard', ->
 
         @once
           condition: =>
-            Ext.isEmpty @gridBoard.getGridOrBoard().originalBoard
+            @gridBoard.getGridOrBoard()? and Ext.isEmpty @gridBoard.getGridOrBoard().originalBoard
           description: 'gridOrBoard refreshed'
 
     beforeEach ->
       @ajax.whenQuerying('iteration').respondWith([])
-      @createGridBoard()
 
     it 'should display blank slate', ->
-      expect(@gridBoard.items.getCount()).toBe 2
-      expect(@gridBoard.items.getAt(1).getEl().down('.blank-slate-msg')).not.toBe null
+      @createGridBoard().then =>
+        expect(@gridBoard.items.getCount()).toBe 2
+        expect(@gridBoard.items.getAt(1).getEl().down('.blank-slate-msg')).not.toBe null
 
     it 'should include PortfolioItem in columnConfig.additionalFetchFields', ->
-      expect(@gridBoard.getGridOrBoard().columnConfig.additionalFetchFields).toContain 'PortfolioItem'
+      @createGridBoard().then =>
+        expect(@gridBoard.getGridOrBoard().columnConfig.additionalFetchFields).toContain 'PortfolioItem'
 
     it 'should refresh after objectCreate is published', ->
-      @shouldRefreshAfterIterationMessage Rally.Message.objectCreate
+      @createGridBoard().then =>
+        @shouldRefreshAfterIterationMessage Rally.Message.objectCreate
 
     it 'should refresh after objectUpdate is published', ->
-      @shouldRefreshAfterIterationMessage Rally.Message.objectUpdate
+      @createGridBoard().then =>
+        @shouldRefreshAfterIterationMessage Rally.Message.objectUpdate
 
     it 'should refresh after objectDestroy is published', ->
-      @shouldRefreshAfterIterationMessage Rally.Message.objectDestroy
+      @createGridBoard().then =>
+        @shouldRefreshAfterIterationMessage Rally.Message.objectDestroy

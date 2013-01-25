@@ -27,6 +27,8 @@ describe 'Rally.apps.iterationtrackingboard.App', ->
         renderTo: 'testDiv'
       , config))
 
+      @waitForComponentReady(@app)
+
   beforeEach ->
     @ajax.whenReading('project').respondWith {
       TeamMembers: []
@@ -46,35 +48,34 @@ describe 'Rally.apps.iterationtrackingboard.App', ->
     @app?.destroy()
 
   it 'resets view on scope change', ->
-    @createApp()
-    removeStub = @stub(@app, 'remove')
-    addContentStub = @stub(@app, 'addContent')
+    @createApp().then =>
+      removeStub = @stub(@app, 'remove')
+      addContentStub = @stub(@app, 'addContent')
 
-    newScope = Ext.create('Rally.app.TimeboxScope',
-      record: new @IterationModel @iterationData[1]
-    )
+      newScope = Ext.create('Rally.app.TimeboxScope',
+        record: new @IterationModel @iterationData[1]
+      )
 
-    @app.onTimeboxScopeChange newScope
+      @app.onTimeboxScopeChange newScope
 
-    sinon.assert.calledOnce removeStub
-    sinon.assert.calledWith removeStub, 'gridBoard'
+      sinon.assert.calledOnce removeStub
+      sinon.assert.calledWith removeStub, 'gridBoard'
 
-    sinon.assert.calledOnce addContentStub
-    sinon.assert.calledWith addContentStub, newScope
+      sinon.assert.calledOnce addContentStub
+      sinon.assert.calledWith addContentStub, newScope
 
   it 'fires contentupdated event after board load', ->
     contentUpdatedHandlerStub = @stub()
-    @createApp
+    @createApp(
       listeners:
         contentupdated: contentUpdatedHandlerStub
+    ).then =>
+      contentUpdatedHandlerStub.reset()
+      @app.gridboard.fireEvent('load')
 
-    contentUpdatedHandlerStub.reset()
-    @app.gridboard.fireEvent('load')
-
-    sinon.assert.calledOnce contentUpdatedHandlerStub
+      sinon.assert.calledOnce contentUpdatedHandlerStub
 
   it 'should include PortfolioItem in columnConfig.additionalFetchFields', ->
-    @createApp()
+    @createApp().then =>
 
-    expect(@app.gridboard.getGridOrBoard().columnConfig.additionalFetchFields).toContain 'PortfolioItem'
-
+      expect(@app.gridboard.getGridOrBoard().columnConfig.additionalFetchFields).toContain 'PortfolioItem'
