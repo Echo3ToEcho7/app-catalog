@@ -15,11 +15,6 @@
 
         items: [
             {
-                xtype: 'rallyleftright',
-                itemId: 'header',
-                cls: 'header'
-            },
-            {
                 xtype: 'container',
                 itemId: 'bodyContainer'
             }
@@ -43,7 +38,6 @@
 
         launch: function() {
             this.setLoading();
-            this._addHeaderContent();
 
             Rally.data.ModelFactory.getModel({
                 type: 'UserStory',
@@ -81,73 +75,81 @@
             this._addCardboardContent();
         },
 
-        _addHeaderContent: function() {
-            var headerItems = [
-                {
-                    xtype: 'label',
-                    cls: 'show-label',
-                    text: 'Show: '
-                },
-                {
-                    xtype: 'rallycheckboxfield',
-                    cls: 'checkbox type-checkbox userstory-type-checkbox',
-                    boxLabel: 'User Stories',
-                    inputValue: 'HierarchicalRequirement',
-                    workItemType: 'G',
-                    itemId: 'showStories',
-                    checked: true,
-                    handler: this._onCheckboxChecked,
-                    scope: this
-                },
-                {
-                    xtype: 'rallycheckboxfield',
-                    cls: 'checkbox type-checkbox defect-type-checkbox',
-                    boxLabel: 'Defects',
-                    inputValue: 'Defect',
-                    workItemType: 'D',
-                    itemId: 'showDefects',
-                    handler: this._onCheckboxChecked,
-                    scope: this
-                },
-                {
-                    xtype: 'checkboxfield',
-                    cls: 'checkbox agreements-checkbox',
-                    boxLabel: 'Agreements',
-                    itemId: 'showAgreements',
-                    handler: this._onShowAgreementsChecked,
-                    scope: this
-                }
-            ];
+        _addCardboardContent: function() {
+            var cardboardConfig = this._getCardboardConfig();
 
-            this.down('#header').getRight().add(headerItems);
+            var columnSetting = this._getColumnSetting();
+            if (columnSetting) {
+                cardboardConfig.columns = this._getColumnConfig(columnSetting);
+            }
 
-            if (Rally.environment.getContext().getPermissions().isProjectEditor(this.getContext().getProject()._ref)) {
-                this.down('#header').getLeft().add({
-                    xtype: 'rallyaddnew',
-                    recordTypes: ['User Story', 'Defect'],
-                    ignoredRequiredFields: ['Name', 'Project', 'ScheduleState', 'State'],
-                    comboCfg: {
-                        editable: false
-                    },
+            this.gridboard = this.down('#bodyContainer').add(this._getGridboardConfig(cardboardConfig));
+
+            this.cardboard = this.gridboard.getGridOrBoard();
+        },
+
+        _getGridboardConfig: function(cardboardConfig) {
+            return {
+                xtype: 'rallygridboard',
+                cardBoardConfig: cardboardConfig,
+                plugins: [
+                    'rallygridboardaddnew',
+                    {
+                        ptype: 'rallygridboardartifacttypechooser',
+                        artifactTypePreferenceKey: 'kanbanapp.rallygridboardartifacttypechooser',
+                        additionalTypesConfig: [this._getAgreementsTypeConfig()]
+                    }
+                ],
+                context: this.getContext(),
+                modelNames: this._getDefaultTypes(),
+                addNewPluginConfig: {
                     listeners: {
                         beforecreate: this._onBeforeCreate,
                         beforeeditorshow: this._onBeforeEditorShow,
                         create: this._onCreate,
                         scope: this
                     }
-                });
-            }
+                }
+            };
         },
 
-        _addCardboardContent: function() {
+        _getColumnConfig: function(columnSetting) {
+            var columns = [];
+            Ext.Object.each(columnSetting, function(column, values) {
+                var columnName = column || 'None';
+                var columnConfig = {
+                    wipLimit: values.wip,
+                    value: column,
+                    displayValue: columnName,
+                    policyCmpConfig: {
+                        xtype: 'rallykanbanpolicy',
+                        policies: this.getSetting(columnName + 'Policy'),
+                        prefConfig: {
+                            appID: this.getAppId(),
+                            project: this.getContext().getProject()
+                        },
+                        title: 'Exit Agreement'
+                    }
+                };
+                columns.push(columnConfig);
+            }, this);
+
+            columns[columns.length - 1].storeConfig = {
+                filters: this._getLastColumnFilter()
+            };
+
+            return columns;
+        },
+
+        _getCardboardConfig: function() {
             var additionalFetchFields = [];
             if (this.getSetting('showCardAge')) {
                 Ext.Array.push(additionalFetchFields, ['LastUpdateDate']);
-            }
+            };
 
-            var cardboardConfig = {
+            return {
                 xtype: 'rallycardboard',
-                types: Ext.Array.pluck(this._getShownTypes(), 'inputValue'),
+                types: this._getDefaultTypes(),
                 attribute: this.getSetting('groupByField'),
                 margin: '10px',
                 context: this.getContext(),
@@ -181,37 +183,6 @@
                         Rally.data.QueryFilter.fromQueryString(this.getSetting('query')) : []
                 }
             };
-
-            var columnSetting = this._getColumnSetting();
-            if (columnSetting) {
-                var columns = [];
-                Ext.Object.each(columnSetting, function(column, values) {
-                    var columnName = column || 'None';
-                    var columnConfig = {
-                        wipLimit: values.wip,
-                        value: column,
-                        displayValue: columnName,
-                        policyCmpConfig: {
-                            xtype: 'rallykanbanpolicy',
-                            policies: this.getSetting(columnName + 'Policy'),
-                            prefConfig: {
-                                appID: this.getAppId(),
-                                project: this.getContext().getProject()
-                            },
-                            title: 'Exit Agreement'
-                        }
-                    };
-                    columns.push(columnConfig);
-                }, this);
-
-                columns[columns.length - 1].storeConfig = {
-                    filters: this._getLastColumnFilter()
-                };
-
-                cardboardConfig.columns = columns;
-            }
-
-            this.cardboard = this.down('#bodyContainer').add(cardboardConfig);
         },
 
         _getLastColumnFilter: function() {
@@ -227,11 +198,6 @@
         _getColumnSetting: function() {
             var columnSetting = this.getSetting('columns');
             return columnSetting && Ext.JSON.decode(columnSetting);
-        },
-
-        _getPolicySetting: function() {
-            var policySetting = this.getSetting('policies');
-            return policySetting && Ext.JSON.decode(policySetting);
         },
 
         _buildReportConfig: function(report) {
@@ -263,7 +229,11 @@
         },
 
         _getShownTypes: function() {
-            return this.query('checkboxfield{hasCls("type-checkbox")}{getValue()}');
+            return this.gridboard.artifactTypeChooserPlugin.getChosenTypesConfig();
+        },
+
+        _getDefaultTypes: function() {
+            return ['User Story', 'Defect'];
         },
 
         _buildStandardReportConfig: function(reportConfig) {
@@ -308,6 +278,18 @@
         _onBoardLoad: function() {
             this._publishContentUpdated();
             this.setLoading(false);
+            this._initializeChosenTypes();
+        },
+
+        _initializeChosenTypes: function() {
+            var artifactsPref = this.gridboard.artifactTypeChooserPlugin.artifactsPref;
+            var allowedArtifacts = this.gridboard.getHeader().getRight().query('checkboxfield');
+            if(!Ext.isEmpty(artifactsPref) && artifactsPref.length !== allowedArtifacts.length){
+                this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref);
+            }
+            if (Ext.Array.contains(artifactsPref,'agreement')) {
+                this._onShowAgreementsClicked(null, true);
+            }
         },
 
         _onCheckboxChecked: function(checkbox, checked) {
@@ -321,9 +303,9 @@
             this.cardboard.refresh({ types: types });
         },
 
-        _onShowAgreementsChecked: function(checkbox) {
+        _onShowAgreementsClicked: function(checkbox, checked) {
             Ext.each(this.cardboard.getColumns(), function(column) {
-                column.togglePolicy(checkbox.getValue());
+                column.togglePolicy(checked);
             });
 
             this.cardboard.resizeAllColumns();
@@ -373,6 +355,18 @@
                     card.getRecord().set('ScheduleState', setting.scheduleStateMapping);
                 }
             }
+        },
+
+        _getAgreementsTypeConfig: function() {
+            return {
+                xtype: 'checkboxfield',
+                cls: 'type-checkbox agreements-checkbox',
+                boxLabel: 'Agreements',
+                itemId: 'showAgreements',
+                inputValue: 'agreement',
+                handler: this._onShowAgreementsClicked,
+                scope: this
+            };
         }
     });
 })();
