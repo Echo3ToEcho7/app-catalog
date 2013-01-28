@@ -145,7 +145,7 @@
             var additionalFetchFields = [];
             if (this.getSetting('showCardAge')) {
                 Ext.Array.push(additionalFetchFields, ['LastUpdateDate']);
-            };
+            }
 
             return {
                 xtype: 'rallycardboard',
