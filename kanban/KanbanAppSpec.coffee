@@ -56,19 +56,28 @@ describe 'Rally.apps.kanban.App', ->
     Assert.areEqual(columnSettings.Defined.wip, columns[0].wipLimit);
     Assert.areEqual(columnSettings['In-Progress'].wip, columns[1].wipLimit);
 
-  it 'should refresh the board when a type checkbox is clicked', ->
+  it 'should filter the board when a type checkbox is clicked', ->
     @createApp()
     board = @app.down('rallycardboard')
-    refreshSpy = @spy board, 'refresh'
+    filterSpy = @spy board, 'addLocalFilter'
 
+#   Clicking defect will uncheck it as its checked by default
     @driver.findElement(By.css('.defect-type-checkbox input')).click()
 
     once(
-      condition: => refreshSpy.calledOnce
-      description: 'highlighting to finish'
+      condition: => filterSpy.calledOnce
+      description: 'filter to be called without defect'
     ).then =>
-      args = refreshSpy.getCall(0).args
-      expect(args[0].types).toEqual ['HierarchicalRequirement', 'Defect']
+      args = filterSpy.getCall(0).args
+      expect(args[1]).toEqual ['hierarchicalrequirement']
+
+    @driver.findElement(By.css('.defect-type-checkbox input')).click()
+    once(
+      condition: => filterSpy.calledTwice
+      description: 'filter to be called with defect'
+    ).then =>
+      args = filterSpy.getCall(1).args
+      expect(args[1]).toEqual ['hierarchicalrequirement', 'defect']
 
   it 'should contain menu options', ->
     @createApp()
@@ -79,22 +88,22 @@ describe 'Rally.apps.kanban.App', ->
     Assert.areEqual('Show Throughput Report', options[1].text)
     Assert.areEqual('Print', options[2].text)
 
-  it 'should correctly build report config for non schedule state field and all work items', ->
+  it 'should correctly build report config for non schedule state field stories', ->
     @createApp()
     @stub(@app, 'getSetting').returns('KanbanState')
-    @stub(@app, '_getShownTypes').returns(['G', 'D'])
+    @stub(@app, '_getShownTypes').returns([{workItemType: 'G'}])
     report_config = @app._buildReportConfig(Rally.ui.report.StandardReport.Reports.CycleLeadTime)
 
     Assert.areEqual(@app.groupByField.displayName, report_config.filter_field)
-    Assert.areEqual('N', report_config.work_items)
+    Assert.areEqual('G', report_config.work_items)
     Assert.areEqual(Rally.ui.report.StandardReport.Reports.CycleLeadTime.id, report_config.report.id)
 
-  it 'should correctly build report config for schedule state field and stories', ->
+  it 'should correctly build report config for schedule state field with story and defect types', ->
     @createApp()
     report_config = @app._buildReportConfig(Rally.ui.report.StandardReport.Reports.Throughput)
 
     Assert.isUndefined(report_config.filter_field)
-    Assert.areEqual('G', report_config.work_items)
+    Assert.areEqual('N', report_config.work_items)
     Assert.areEqual(Rally.ui.report.StandardReport.Reports.Throughput.id, report_config.report.id)
 
   it 'should correctly build standard report component config', ->
@@ -106,6 +115,11 @@ describe 'Rally.apps.kanban.App', ->
     Assert.areEqual(@app.getContext().getDataContext().projectScopeDown, standard_report_config.projectScopeDown)
     Assert.areEqual(@app.getContext().getDataContext().projectScopeUp, standard_report_config.projectScopeUp)
     Assert.areEqual(report_config, standard_report_config.reportConfig)
+
+  it 'should display Agreements row when checked', ->
+    @createApp()
+    @click(css: '.agreements-checkbox input').then =>
+      @waitForVisible(css: '.kanban .columnHeader .policy')
 
   helpers
     createApp: (settings = {}) ->
