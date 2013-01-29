@@ -330,7 +330,7 @@ describe 'Rally.apps.iterationplanningboard.App', ->
         projectOid: 431439,
         scopeUp: false
         scopeDown: true
-      editorOpenedStub = @stub(window, 'popup')
+      editorOpenedStub = @stub(Rally.nav.Manager, 'create')
 
       addNewHelper = new Helpers.AddNewHelper '.planning-board'
       addNewHelper.addWithDetails('foo').then ->
