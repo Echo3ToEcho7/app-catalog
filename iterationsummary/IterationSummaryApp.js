@@ -176,7 +176,7 @@
         },
 
         _onEditLinkClick: function() {
-            Rally.nav.Manager.popupEditPage(this.getIteration().get('_ref'));
+            Rally.nav.Manager.edit(this.getIteration().get('_ref'));
         },
 
         _buildDaysRemainingMessage: function() {

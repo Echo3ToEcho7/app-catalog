@@ -90,11 +90,7 @@
 
         _drawHeader: function(){
             var header = this.down('#header');
-
-            if(Rally.alm){
-                header.add(this._buildHelpComponent());
-            }
-
+            header.add(this._buildHelpComponent());
             header.add(this._buildFilterInfo());
         },
 

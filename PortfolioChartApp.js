@@ -23,9 +23,7 @@
         },
 
         _addHelpComponent:function () {
-            if (Rally.alm) {
-                this.down('#header').add(this._buildHelpComponent());
-            }
+            this.down('#header').add(this._buildHelpComponent());
         },
 
         _buildHelpComponent:function () {

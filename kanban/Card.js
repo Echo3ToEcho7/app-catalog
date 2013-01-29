@@ -44,7 +44,9 @@
 
         _onFieldClick: function(fieldName) {
             if (fieldName === 'RevisionHistory') {
-                Rally.nav.Manager.goToDetailPage(this.getRecord(), 'revisions');
+                Rally.nav.Manager.showDetail(this.getRecord(), {
+                    subpage: 'revisions'
+                });
             }
         },
 
