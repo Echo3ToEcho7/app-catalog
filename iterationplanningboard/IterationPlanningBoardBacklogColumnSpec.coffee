@@ -82,7 +82,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
     refreshStub = @stub(@column, 'refresh')
 
     @enterSearchText(searchText).then =>
-      @driver.findElement(By.css '.search-button').click().then =>
+      @click(className: 'search-button').then =>
         @assertSearch(refreshStub, searchText)
 
   it 'should clear search filter on enter in empty search box', ->
@@ -125,9 +125,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
       expect(filter[0].value).toBeNull()
 
     enterSearchText: (text) ->
-      el = @driver.findElement(By.css '.search-text input')
-      el.click().then =>
-        el.sendKeys(text)
+      @click(css: '.search-text input').sendKeys text
 
     assertSearch: (refreshStub, searchText) ->
       sinon.assert.calledOnce(refreshStub)
