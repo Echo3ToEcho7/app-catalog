@@ -1,6 +1,11 @@
 Ext = window.Ext4 || window.Ext
 
-describe 'Rally.apps.iterationtrackingboard.App', ->
+Ext.require [
+  'Rally.util.DateTime',
+  'Rally.alm.FeatureToggle'
+], ->
+
+describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
   
   helpers
     createApp: (config)->
@@ -16,7 +21,7 @@ describe 'Rally.apps.iterationtrackingboard.App', ->
       @IterationModel = Rally.mock.data.ModelFactory.getIterationModel()
       @iterationRecord = new @IterationModel @iterationData[0]
       
-      @app = Ext.create('Rally.apps.iterationtrackingboard.App', Ext.apply(
+      @app = Ext.create('Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', Ext.apply(
         context: Ext.create('Rally.app.Context',
           initialValues:
             timebox: @iterationRecord

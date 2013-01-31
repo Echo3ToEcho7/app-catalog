@@ -1,7 +1,6 @@
 Ext = window.Ext4 || window.Ext
-describe 'Orca.timeline.data.model.Timeframe', ->
+describe 'Rally.apps.roadmapplanningboard.TimeframeModel', ->
 
-    beforeEach ->
-
-    it 'is defined', ->
-        expect(Orca.timeline.data.model.Timeframe).toBeTruthy()
+  it 'is defined', ->
+    record = Ext.create 'Rally.apps.roadmapplanningboard.TimeframeModel'
+    expect(record).toBeDefined()
