@@ -7,6 +7,15 @@
     Ext.define('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', {
         extend: 'Rally.app.App',
         alias: 'widget.rallyroadmapplanningboard',
+        
+        requires: [
+            'Rally.ui.LeftRight',
+            'Rally.data.util.PortfolioItemHelper',
+            'Rally.apps.roadmapplanningboard.TimeframeModel',
+            'Rally.apps.roadmapplanningboard.PlanningModel',
+            'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardColumn'
+        ],
+        
         componentCls: 'app',
         
         cls: 'roadmapPlanningBoardApp',
@@ -42,7 +51,7 @@
         loadTimeframes: function () {
 
             this.timeframeStore = Ext.create('Ext.data.Store', {
-                model: Orca.timeline.data.model.Timeframe,
+                model: Rally.apps.roadmapplanningboard.TimeframeModel,
                 data: [
                     {id: '1', name: 'Q4', start: new Date('10/01/2012'), end: new Date('12/31/2012')},
                     {id: '2', name: 'Q1', start: new Date('1/01/2013'), end: new Date('3/31/2013')},
@@ -58,7 +67,7 @@
 
         fetchedPlans: function (store) {
             this.planningStore = Ext.create('Ext.data.Store', {
-                model: Orca.planning.data.model.Plan,
+                model: Rally.apps.roadmapplanningboard.PlanningModel,
                 data: [
                     {id: '1', name: 'Plan 1', timeframe: '1', capacity: '50'},
                     {id: '2', name: 'Plan 2', timeframe: '2', capacity: '60'},
@@ -96,7 +105,7 @@
 
             var columns = this._getColumns(store);
 
-            var cardboard = Ext.widget('rallycardboard', {
+            var cardboard = Ext.create('Rally.ui.cardboard.CardBoard', {
                 types: this.piTypeName,
                 cardConfig: {
                     useCollectionSummary: this.getContext().isFeatureEnabled('SUMMARY_COLLECTIONS_FOR_CARDS')

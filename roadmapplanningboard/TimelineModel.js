@@ -4,14 +4,14 @@
     /**
      * Timeline Model
      */
-    Ext.define('Orca.timeline.data.model.Timeline', {
+    Ext.define('Rally.apps.roadmapplanningboard.TimelineModel', {
         extend: 'Ext.data.Model',
         fields: [
             { name: 'id', type: 'string' },
             { name: 'name', type: 'string' }
         ],
 
-        hasMany: { model: 'Orca.timeline.data.store.Timeframe', name: 'timeframes' },
+        hasMany: { model: 'Rally.apps.roadmapplanningboard.TimeframeModel', name: 'timeframes' },
 
         proxy: {
             type: 'memory',

@@ -5,7 +5,7 @@
      * Iteration Planning Board App
      * The Iteration Planning Board can be used to visualize and assign your User Stories and Defects within the appropriate iteration.
      */
-    Ext.define('Rally.apps.iterationplanningboard.App', {
+    Ext.define('Rally.apps.iterationplanningboard.IterationPlanningBoardApp', {
         extend: 'Rally.app.App',
         requires: [
             'Rally.data.ModelFactory',

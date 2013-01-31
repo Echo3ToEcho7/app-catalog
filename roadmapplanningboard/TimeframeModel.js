@@ -4,7 +4,7 @@
     /**
      * Timeframe Model
      */
-    Ext.define('Orca.timeline.data.model.Timeframe', {
+    Ext.define('Rally.apps.roadmapplanningboard.TimeframeModel', {
         extend: 'Ext.data.Model',
         fields: [
             { name: 'id', type: 'string' },
@@ -14,7 +14,7 @@
         ],
 
         belongsTo: {
-            model: 'Orca.timeline.data.store.Timeline',
+            model: 'Rally.apps.roadmapplanningboard.TimelineModel',
             foreignKey: 'timelineId'
         },
         

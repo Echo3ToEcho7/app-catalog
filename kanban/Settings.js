@@ -8,7 +8,10 @@
         singleton: true,
         requires: [
             'Rally.apps.kanban.ColumnSettingsField',
-            'Rally.apps.kanban.CardAgeSettingsField'
+            'Rally.apps.kanban.CardAgeSettingsField',
+            'Rally.ui.combobox.FieldComboBox',
+            'Rally.ui.picker.FieldPicker',
+            'Rally.ui.CheckboxField'
         ],
 
         getFields: function() {

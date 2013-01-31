@@ -1,11 +1,19 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define('Rally.apps.kanban.App', {
+    Ext.define('Rally.apps.kanban.KanbanApp', {
         extend: 'Rally.app.App',
         requires: [
             'Rally.apps.kanban.Settings',
-            'Rally.apps.kanban.Card'
+            'Rally.apps.kanban.Card',
+            'Rally.ui.gridboard.GridBoard',
+            'Rally.ui.gridboard.plugin.GridBoardAddNew',
+            'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
+            'Rally.ui.cardboard.KanbanPolicy',
+            'Rally.ui.cardboard.CardBoard',
+            'Rally.ui.cardboard.KanbanColumn',
+            'Rally.apps.kanban.Card',
+            'Rally.ui.report.StandardReport'
         ],
         cls: 'kanban',
         alias: 'widget.kanbanapp',

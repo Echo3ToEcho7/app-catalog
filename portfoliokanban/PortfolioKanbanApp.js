@@ -10,10 +10,14 @@
         requires: [
             'Rally.data.util.PortfolioItemHelper',
             'Rally.apps.portfoliokanban.PortfolioKanbanCard',
+            'Rally.apps.portfoliokanban.PortfolioKanbanPolicy',
             'Rally.ui.cardboard.KanbanColumn',
             'Rally.ui.cardboard.KanbanPolicy',
             'Rally.ui.cardboard.CardBoard',
-            'Rally.ui.cardboard.Card'
+            'Rally.ui.cardboard.Card',
+            'Rally.data.QueryFilter',
+            'Rally.ui.notify.Notifier',
+            'Rally.util.Help'
         ],
         layout: 'auto',
         appName: 'Portfolio Kanban',

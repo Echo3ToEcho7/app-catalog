@@ -4,6 +4,16 @@
     Ext.define('Rally.apps.grid.GridApp', {
         extend: 'Rally.app.App',
         layout: 'fit',
+        
+        requires: [
+            'Rally.ui.menu.item.Edit',
+            'Rally.ui.menu.item.Copy',
+            'Rally.ui.menu.item.Delete',
+            'Rally.ui.grid.Grid',
+            'Rally.ui.grid.RowActionColumn',
+            'Rally.data.util.Sorter',
+            'Rally.data.QueryFilter'
+        ],
 
         launch: function() {
             // TODO: need to pass dataScope here

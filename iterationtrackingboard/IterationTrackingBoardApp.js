@@ -5,7 +5,7 @@
      * Iteration Tracking Board App
      * The Iteration Tracking Board can be used to visualize and manage your User Stories and Defects within an Iteration.
      */
-    Ext.define('Rally.apps.iterationtrackingboard.App', {
+    Ext.define('Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', {
         extend: 'Rally.app.TimeboxScopedApp',
         requires: [
             'Rally.data.ModelFactory',

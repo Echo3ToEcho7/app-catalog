@@ -4,7 +4,7 @@
     /**
      * Planning model
      */
-    Ext.define('Orca.planning.data.model.Plan', {
+    Ext.define('Rally.apps.roadmapplanningboard.PlanningModel', {
         extend: 'Ext.data.Model',
         fields: [
             { name: 'id', type: 'string' },
@@ -15,15 +15,15 @@
         
         hasOne: {
             associationKey: 'timeframe',
-            model: 'Orca.timeline.data.store.Timeframe',
+            model: 'Rally.apps.roadmapplanningboard.TimelineModel',
             foreignKey: 'timeframe'
         },
          
-         proxy: {
-             type: 'memory',
-             reader: {
-                  type: 'json'
-             }
-         }
+        proxy: {
+            type: 'memory',
+            reader: {
+                 type: 'json'
+            }
+        }
     });
 })();
