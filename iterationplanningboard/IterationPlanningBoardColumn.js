@@ -62,10 +62,10 @@
 
         constructor: function(config) {
             this.mergeConfig(config);
-            config.value = Rally.util.Ref.getRelativeUri(this._getTimeboxRecord());
-            config.displayValue = this._getTimeboxRecord().get('Name');
+            this.config.value = Rally.util.Ref.getRelativeUri(this._getTimeboxRecord());
+            this.config.displayValue = this._getTimeboxRecord().get('Name');
 
-            this.callParent([config]);
+            this.callParent([this.config]);
         },
 
         initComponent: function() {
