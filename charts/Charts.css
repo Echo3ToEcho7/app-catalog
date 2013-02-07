@@ -1,14 +1,16 @@
+.portfolio-cfd-app,
 .portfolio-burnup-app {
     background-color: transparent;
     margin: 10px;
     padding-right: 20px;
 }
 
+.portfolio-cfd-app .rally-help-icon,
 .portfolio-burnup-app .rally-help-icon {
     float: right;
 }
 
+.portfolio-cfd-app .chart,
 .portfolio-burnup-app .chart {
-    margin-top: 1em;
-    min-height: 4em;
+    min-height: 2em;
 }
