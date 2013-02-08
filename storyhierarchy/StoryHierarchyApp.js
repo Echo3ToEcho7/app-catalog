@@ -7,6 +7,11 @@
      */
     Ext.define('Rally.apps.storyhierarchy.StoryHierarchyApp', {
         extend: 'Rally.app.App',
+        
+        requires: [
+            'Rally.ui.tree.UserStoryTree',
+            'Rally.util.Help'
+        ],
 
         layout: 'auto',
 

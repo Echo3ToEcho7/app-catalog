@@ -7,7 +7,12 @@
      */
     Ext.define('Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', {
         extend: 'Rally.app.App',
-        requires: ['Rally.ui.tooltip.PercentDoneToolTip'],
+        requires: [
+            'Rally.ui.tooltip.PercentDoneToolTip',
+            'Rally.data.util.PortfolioItemHelper',
+            'Rally.ui.notify.Notifier',
+            'Rally.data.QueryFilter'
+        ],
 
         layout: 'auto',
 
@@ -67,7 +72,7 @@
                 }
             }
 
-            return Ext.widget('rallyportfoliotree', {
+            return Ext.create('Rally.ui.tree.PortfolioTree', {
                 stateful: true,
                 stateId: this.getAppId() + 'rallyportfoliotree',
                 topLevelModel: typeRecord.get('TypePath'),
