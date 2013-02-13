@@ -223,7 +223,7 @@
         },
 
         _updateQueryConfig: function (chartComponentConfig, portfolioItem) {
-            chartComponentConfig.queryConfig.find._ItemHierarchy = portfolioItem.ObjectID;
+            chartComponentConfig.storeConfig.rawFind._ItemHierarchy = portfolioItem.ObjectID;
         },
 
         _setErrorTextMessage: function (message) {

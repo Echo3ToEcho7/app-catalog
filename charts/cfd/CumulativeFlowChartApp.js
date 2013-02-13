@@ -34,8 +34,9 @@
                 }
             },
 
-            queryConfig: {
-                find: {
+            storeType: 'Rally.data.lookback.SnapshotStore',
+            storeConfig: {
+                rawFind: {
                     "_TypeHierarchy": -51038,
                     "Children": null
                 },
