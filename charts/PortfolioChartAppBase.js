@@ -42,20 +42,21 @@
                     type: "buttonchooser",
                     label: "Portfolio Item",
                     config: {
-                        type: "portfolioitem"
+                        type: "portfolioitem",
+                        cls: "pichooser"
                     }
                 },
                 {
                     xtype: "rallycombobox",
                     name: "chartAggregationType",
-                    fieldLabel: "Chart Type",
+                    fieldLabel: "Data Type",
                     queryMode: "local",
                     editable: false,
                     store: {
                         xtype: "store",
                         fields: ["name", "value"],
                         data: [
-                            {name: "Story Points", value: "storypoints"},
+                            {name: "Story Plan Estimate", value: "storypoints"},
                             {name: "Story Count", value: "storycount"}
                         ]
                     },
