@@ -144,8 +144,6 @@ Ext.require [
       @ajax.whenQuerying('userstory').respondWith()
       @ajax.whenQuerying('defect').respondWith()
       @ajax.whenQuerying('preference').respondWith({})
-      toggleStub = @stub(Rally.alm.FeatureToggle, 'isEnabled')
-      toggleStub.withArgs('SHOW_DESCRIPTION_ON_CARDS').returns(true)
       @stub(Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser.prototype, '_saveArtifactTypePreference')
   
     afterEach ->
