@@ -59,7 +59,6 @@
                 cardConfig: {
                     editable: true,
                     showHeaderMenu: true,
-                    enableDescriptionHover: this.getContext().isFeatureEnabled('SHOW_DESCRIPTION_ON_CARDS'),
                     fields: ['Parent', 'Tasks', 'Defects', 'Discussion']
                 }
             });
