@@ -148,10 +148,9 @@ Ext.require [
           _ref: '/user/1'
           _refObjectName: 'Name of Owner'
         State: '/state/1'
-        Discussion: [
-          ObjectID: 5940385
-          _ref: '/conversationpost/5940385'
-        ]
+        Summary:
+          Discussion:
+            Count: 1
   
       @ajax.whenQuerying('PortfolioItem/Feature').respondWith [feature]
   
