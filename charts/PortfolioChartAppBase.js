@@ -34,6 +34,10 @@
             }
         ],
 
+        /**
+         * Setup the components for the settings panel
+         * @return {Array} ext components for settings panels
+         */
         getSettingsFields: function () {
             var self = this;
 
@@ -63,7 +67,7 @@
                     displayField: "name",
                     valueField: "value",
                     onLoad: function() {
-                        this.setValue(self.getSetting("chartAggregationType") || "storypoints");
+                        this.setValue(self.getSetting("chartAggregationType") || "storycount");
                     }
                 }
             ];
@@ -78,6 +82,11 @@
             }
         },
 
+        /**
+         * Setup configuration values based on the portfolio item retrieved from the server.
+         * @param chartComponentConfig the configuration object for the chart component
+         * @param portfolioItem the portfolio item retrieved from the server
+         */
         setDynamicConfigValues: function (chartComponentConfig, portfolioItem) {
             var dateFormat = this.getContext().getWorkspace().WorkspaceConfiguration.DateFormat,
                 chartConfig = chartComponentConfig.chartConfig;
@@ -90,7 +99,7 @@
                 chartComponentConfig.chartConfig.title.text = portfolioItem.FormattedID + ": " + portfolioItem.Name;
             }
 
-            var aggregationType = this.getSetting("chartAggregationType") || "storypoints";
+            var aggregationType = this.getSetting("chartAggregationType") || "storycount";
             chartComponentConfig.calculatorConfig.chartAggregationType = aggregationType;
 
             var yaxis = chartComponentConfig.chartConfig.yAxis[0];
@@ -171,6 +180,11 @@
             Rally.environment.getMessageBus().publish(Rally.Message.piChartAppReady);
         },
 
+        /**
+         * Set the schedule states based on the schedule states that are configured in Rally
+         * @param model the user story model
+         * @private
+         */
         _setScheduleStateFieldValues: function (model) {
             if (!model) {
                 this.chartComponentConfig.calculatorConfig.scheduleStates = this.scheduleStates;
@@ -209,6 +223,14 @@
             chartComponentConfig.chartConfig.xAxis.tickInterval = this._configureChartTicks(startDate, endDate);
         },
 
+        /**
+         * Configure the ticks on the chart based on the date range of the data, the width of the chart being displayed
+         * and a width for each date tick
+         * @param startDate
+         * @param endDate
+         * @return {Number} the Highcharts tick spacing
+         * @private
+         */
         _configureChartTicks: function (startDate, endDate) {
             var tickWidth = 125,
                 width = this.getWidth(),
@@ -222,6 +244,12 @@
             return Math.floor(days / ticks);
         },
 
+        /**
+         * Update the query config with dynamic values based on the portfolio item
+         * @param chartComponentConfig the chart component configuration
+         * @param portfolioItem the portfolio item
+         * @private
+         */
         _updateQueryConfig: function (chartComponentConfig, portfolioItem) {
             chartComponentConfig.storeConfig.rawFind._ItemHierarchy = portfolioItem.ObjectID;
         },
@@ -260,6 +288,12 @@
             return date.toISOString();
         },
 
+        /**
+         * Parse the date format set on the rally workspace
+         * @param rallyDateFormat the format of the date on the workspace
+         * @param chartConfig the chart configuration object
+         * @private
+         */
         _parseRallyDateFormat: function (rallyDateFormat, chartConfig) {
             rallyDateFormat = this._parseRallyDateFormatToHighchartsDateFormat(rallyDateFormat);
 
@@ -272,6 +306,12 @@
             };
         },
 
+        /**
+         * Helper function to convert the date format on the rally workspace to something Highcharts can use
+         * @param rallyDateFormat the format of the date on the workspace
+         * @return {*}
+         * @private
+         */
         _parseRallyDateFormatToHighchartsDateFormat: function (rallyDateFormat) {
             var i, length;
             for (i = 0, length = this.dateFormatters.length; i < length; i++) {

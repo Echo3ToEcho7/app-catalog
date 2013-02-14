@@ -2,7 +2,7 @@
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define("Rally.apps.charts.cfd.Calculator", {
-        extend: "Rally.apps.charts.TimeSeriesCalculator",
+        extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
 
         getDerivedFieldsOnInput: function () {
             var self = this,

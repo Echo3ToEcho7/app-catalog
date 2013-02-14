@@ -1,9 +1,8 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-
     Ext.define("Rally.apps.charts.burn.Calculator", {
-        extend: "Rally.apps.charts.TimeSeriesCalculator",
+        extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
 
         getDerivedFieldsOnInput: function () {
             var completedStateNames = this.config.completedScheduleStateNames;
