@@ -176,7 +176,6 @@
                 cardConfig: {
                     xtype: 'kanbancard',
                     editable: true,
-                    showSplitInHeaderMenu: this.getContext().isFeatureEnabled('SHOW_SPLIT_IN_CARD_HEADER_MENU'),
                     showHeaderMenu: true,
                     fields: this.getSetting('cardFields').split(','),
                     columnField: this.groupByField,

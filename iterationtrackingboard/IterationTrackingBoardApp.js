@@ -45,7 +45,6 @@
                         additionalFetchFields: ['PortfolioItem']
                     },
                     cardConfig: {
-                        showSplitInHeaderMenu: this.getContext().isFeatureEnabled('SHOW_SPLIT_IN_CARD_HEADER_MENU'),
                         fields: ['Parent', 'Tasks', 'Defects', 'Discussion'],
                         useCollectionSummary: this.getContext().isFeatureEnabled('SUMMARY_COLLECTIONS_FOR_CARDS')
                     }

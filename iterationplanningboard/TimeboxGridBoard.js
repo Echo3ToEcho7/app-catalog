@@ -60,7 +60,6 @@
                     editable: true,
                     showHeaderMenu: true,
                     enableDescriptionHover: this.getContext().isFeatureEnabled('SHOW_DESCRIPTION_ON_CARDS'),
-                    showSplitInHeaderMenu: this.getContext().isFeatureEnabled('SHOW_SPLIT_IN_CARD_HEADER_MENU'),
                     fields: ['Parent', 'Tasks', 'Defects', 'Discussion']
                 }
             });
