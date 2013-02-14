@@ -45,8 +45,7 @@
                         additionalFetchFields: ['PortfolioItem']
                     },
                     cardConfig: {
-                        fields: ['Parent', 'Tasks', 'Defects', 'Discussion'],
-                        useCollectionSummary: this.getContext().isFeatureEnabled('SUMMARY_COLLECTIONS_FOR_CARDS')
+                        fields: ['Parent', 'Tasks', 'Defects', 'Discussion']
                     }
                 },
                 listeners: {

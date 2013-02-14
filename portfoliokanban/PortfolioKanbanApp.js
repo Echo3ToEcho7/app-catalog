@@ -179,8 +179,7 @@
             var cardConfig = {
                 xtype: 'rallyportfoliokanbancard',
                 editable: true,
-                showHeaderMenu: true,
-                useCollectionSummary: this.getContext().isFeatureEnabled('SUMMARY_COLLECTIONS_FOR_CARDS')
+                showHeaderMenu: true
             };
 
             var fields = this.getSetting('fields');

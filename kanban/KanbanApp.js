@@ -180,8 +180,7 @@
                     fields: this.getSetting('cardFields').split(','),
                     columnField: this.groupByField,
                     showCardAge: this.getSetting('showCardAge'),
-                    cardAgeThreshold: this.getSetting('cardAgeThreshold'),
-                    useCollectionSummary: this.getContext().isFeatureEnabled('SUMMARY_COLLECTIONS_FOR_CARDS')
+                    cardAgeThreshold: this.getSetting('cardAgeThreshold')
                 },
                 loadMask: false,
                 storeConfig: {

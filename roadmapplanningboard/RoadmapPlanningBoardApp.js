@@ -107,9 +107,6 @@
 
             var cardboard = Ext.create('Rally.ui.cardboard.CardBoard', {
                 types: this.piTypeName,
-                cardConfig: {
-                    useCollectionSummary: this.getContext().isFeatureEnabled('SUMMARY_COLLECTIONS_FOR_CARDS')
-                },
                 columns: columns,
                 columnConfig: {
                     xtype: 'roadmapplanningboardcolumn',

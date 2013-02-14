@@ -58,9 +58,6 @@
                             }
                         },
                         scope: this
-                    },
-                    cardConfig: {
-                        useCollectionSummary: this.getContext().isFeatureEnabled('SUMMARY_COLLECTIONS_FOR_CARDS')
                     }
                 },
                 listeners: {
