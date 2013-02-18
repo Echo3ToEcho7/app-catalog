@@ -135,3 +135,19 @@ Ext.require [
         expect(standard_report_config.projectScopeDown).toBe @app.getContext().getDataContext().projectScopeDown
         expect(standard_report_config.projectScopeUp).toBe @app.getContext().getDataContext().projectScopeUp
         expect(standard_report_config.reportConfig).toBe report_config
+
+    it 'should exclude items with a release set in the last column', ->
+      @createApp(hideReleasedCards: true).then =>
+        columns = @app.down('rallycardboard').getColumns()
+        lastColumn = columns[columns.length-1]
+
+        expect(lastColumn.storeConfig.filters.length).toBe 1
+        expect(lastColumn.storeConfig.filters[0].property).toBe 'Release'
+        expect(lastColumn.storeConfig.filters[0].value).toBeNull()
+
+    it 'should not exclude items with a release set in the last column', ->
+      @createApp(hideReleasedCards: false).then =>
+        columns = @app.down('rallycardboard').getColumns()
+        lastColumn = columns[columns.length-1]
+
+        expect(lastColumn.storeConfig.filters.length).toBe 0
