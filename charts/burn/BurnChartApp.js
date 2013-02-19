@@ -21,6 +21,8 @@
                 }
             },
 
+            noDataMessage: "There could be no stories available or started for this portfolio item, missing plan estimate values, or work on this portfolio item has not yet been started.",
+
             storeType: 'Rally.data.lookback.SnapshotStore',
             storeConfig: {
                 rawFind: {
