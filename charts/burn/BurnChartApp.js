@@ -4,6 +4,10 @@
     Ext.define("Rally.apps.chart.burn.BurnChartApp", {
         extend: "Rally.apps.charts.PortfolioChartAppBase",
         cls: "portfolio-burnup-app",
+        
+        requires: [
+            'Rally.ui.chart.Chart'
+        ],
 
         help: {
             cls:'piburnup-help-container',

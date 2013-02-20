@@ -4,6 +4,10 @@
     Ext.define("Rally.apps.charts.PortfolioChartAppBase", {
         extend: "Rally.app.App",
         settingsScope: "project",
+        
+        requires: [
+            'Rally.ui.combobox.ComboBox'
+        ],
 
         scheduleStates: ["Defined", "In-Progress", "Completed", "Accepted"],
 

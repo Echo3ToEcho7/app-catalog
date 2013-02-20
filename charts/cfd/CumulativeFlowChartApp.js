@@ -4,6 +4,10 @@
     Ext.define("Rally.apps.charts.cfd.CumulativeFlowChartApp", {
         extend: "Rally.apps.charts.PortfolioChartAppBase",
         cls: "portfolio-cfd-app",
+        
+        requires: [
+            'Rally.ui.chart.Chart'
+        ],
 
         help: {
             cls: 'portfolio-cfd-help-container',

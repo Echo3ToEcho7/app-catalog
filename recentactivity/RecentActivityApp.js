@@ -1,10 +1,12 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define('Rally.apps.recentactivity.App', {
+    Ext.define('Rally.apps.recentactivity.RecentActivityApp', {
         extend: 'Rally.app.App',
 
-        requires: ['Rally.ui.discussion.DiscussionRichTextStreamView'],
+        requires: [
+            'Rally.ui.discussion.DiscussionRichTextStreamView'
+        ],
 
         appName: 'Recent Activity',
 
