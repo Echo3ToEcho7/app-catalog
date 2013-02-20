@@ -39,13 +39,13 @@
                 return [
                     {
                         "field": "StoryCount",
-                        "as": "Story Count",
+                        "as": "Planned",
                         "f": "sum",
                         "display": "line"
                     },
                     {
                         "field": "CompletedStoryCount",
-                        "as": "Completed Stories",
+                        "as": "Completed",
                         "f": "sum",
                         "display": "column"
                     }
