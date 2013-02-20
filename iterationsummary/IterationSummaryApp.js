@@ -33,7 +33,7 @@
             CURRENT_WITH_SOME_UNACCEPTED_WORK: "Try to accept work well before the end of the Iteration.",
             CURRENT_WITH_NO_ACCEPTED_WORK: "You still have time, but try to accept your first story today or tomorrow.",
             PAST_WITH_DEFECTS: "Defects were not closed before the end of the Iteration.",
-            CURRENT_WITH_DEFECTS: "We recommend addressing defectsz before considering a story \"done\".",
+            CURRENT_WITH_DEFECTS: "We recommend addressing defects before considering a story \"done\".",
             CURRENT_TESTS_FAILING_TITLE: "{PERCENT}% Tests Passing",
             CURRENT_TESTS_FAILING_MESSAGE: "All tests should be passing before the iteration ends.",
             CURRENT_TESTS_PASSING: "All Tests Passing.",
