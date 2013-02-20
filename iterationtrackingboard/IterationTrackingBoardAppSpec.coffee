@@ -3,7 +3,7 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.util.DateTime',
   'Rally.alm.FeatureToggle'
-], ->
+]
 
 describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
   
