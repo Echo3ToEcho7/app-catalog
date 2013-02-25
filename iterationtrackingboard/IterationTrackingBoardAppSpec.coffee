@@ -47,7 +47,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
     @toggleStub = @stub(Rally.alm.FeatureToggle, "isEnabled").returns false
 
-    @tooltipHelper = new Helpers.TooltipHelper(this, null)
+    @tooltipHelper = new Helpers.TooltipHelper this
 
   afterEach ->
     @app?.destroy()
