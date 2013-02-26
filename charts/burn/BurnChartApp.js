@@ -11,7 +11,7 @@
         },
 
         chartComponentConfig: {
-            xtype: "rallychartcomponent",
+            xtype: "rallychart",
 
             updateBeforeRender: function() {
                 var length = this.calculatorConfig.scheduleStates.length,
@@ -36,7 +36,7 @@
                 }
             },
 
-            calculatorType: "Rally.apps.charts.burn.Calculator",
+            calculatorType: "Rally.apps.charts.burn.BurnCalculator",
             calculatorConfig: {
                 workDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
                 timeZone: "GMT",

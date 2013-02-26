@@ -11,7 +11,7 @@
         },
 
         chartComponentConfig: {
-            xtype: "rallychartcomponent",
+            xtype: "rallychart",
 
             updateBeforeRender: function () {
                 var calcConfig = this.calculatorConfig,
@@ -49,7 +49,7 @@
                 }
             },
 
-            calculatorType: "Rally.apps.charts.cfd.Calculator",
+            calculatorType: "Rally.apps.charts.cfd.CumulativeFlowCalculator",
             calculatorConfig: {
                 timeZone: "GMT",
                 setColorsForCustomScheduleStates: true
