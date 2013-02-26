@@ -116,11 +116,12 @@
         },
 
         _addBoardBlankSlate: function(board) {
-            board.add({
+            Ext.widget({
                 xtype: 'rallytimeboxblankslate',
                 flex: 2/3,
                 timeboxType: this.timeboxType,
-                context: this.getContext()
+                context: this.getContext(),
+                renderTo: board.getEl()
             });
             if (Rally.BrowserTest) {
                 Rally.BrowserTest.publishComponentReady(this);
