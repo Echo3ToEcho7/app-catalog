@@ -17,7 +17,7 @@ Ext.require [
           @createColumn
               name: iterationName
   
-          expect(@column.getEl().down('.columnTitle').getHTML()).toEqual(iterationName)
+          expect(@column.getColumnHeaderCell().down('.columnTitle').getHTML()).toEqual(iterationName)
   
       it 'should render the current iteration column', ->
           iterationName = 'talking bout my iteration'
@@ -25,14 +25,16 @@ Ext.require [
               name: iterationName
               currentTimebox: true
   
-          expect(@column.hasCls('current-timebox')).toBe true
-  
+          expect(@column.getColumnHeaderCell().hasCls('current-timebox')).toBe true
+          expect(@column.getContentCell().hasCls('current-timebox')).toBe true
+
       it 'should defaultly render a noncurrent iteration column', ->
           iterationName = 'talking bout my iteration'
           @createColumn
               name: iterationName
   
-          expect(@column.hasCls('current-timebox')).toBe false
+          expect(@column.getColumnHeaderCell().hasCls('current-timebox')).toBe false
+          expect(@column.getContentCell().hasCls('current-timebox')).toBe false
   
       it 'should render the iteration dates', ->
           startDate = Ext.Date.parse('2012-11-06', 'Y-m-d')
@@ -45,7 +47,7 @@ Ext.require [
               Rally.util.DateTime.formatWithNoYearWithDefault(startDate),
               Rally.util.DateTime.formatWithNoYearWithDefault(endDate)
   
-          expect(@column.getEl().down('.timeboxDates').getHTML()).toEqual(expectedResult)
+          expect(@column.getColumnHeaderCell().down('.timeboxDates').getHTML()).toEqual(expectedResult)
   
       it 'should include the correct timebox filters when querying for data', ->
           @createColumn
@@ -247,6 +249,8 @@ Ext.require [
               @column = Ext.create 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn',
                   types: ['HierarchicalRequirement']
                   renderTo: 'testDiv'
+                  headerCell: Ext.get 'testDiv'
+                  contentCell: Ext.get 'testDiv'
                   attribute: 'Iteration'
                   timeboxRecords: timeboxRecords,
                   currentTimebox: options.currentTimebox || false,
@@ -257,10 +261,10 @@ Ext.require [
   
           createUserStoryRecord: (options) ->
               Model = Rally.mock.data.ModelFactory.getUserStoryModel()
-              new Model(options)
+              new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 1000)}, options))
   
-          getProgressBarLabel: -> @column.getEl().down('.progress-bar-label')
+          getProgressBarLabel: -> @column.getColumnHeaderCell().down('.progress-bar-label')
   
-          getProgressBar: -> @column.getEl().down('.progress-bar')
+          getProgressBar: -> @column.getColumnHeaderCell().down('.progress-bar')
   
-          getProgressBarBackgroundContainer: -> @column.getEl().down('.progress-bar-background')
+          getProgressBarBackgroundContainer: -> @column.getColumnHeaderCell().down('.progress-bar-background')

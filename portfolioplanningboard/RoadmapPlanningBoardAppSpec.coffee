@@ -33,14 +33,14 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
 
   it 'has features in columns', ->
     @createApp().then =>
-      cards = @app.down('roadmapplanningboardcolumn').query('rallycard')
+      cards = @app.down('rallycardboard').getColumns()[0].getCards()
       expect(cards.length).toBe 1
 
   describe 'Manage timeline columns', ->
     helpers
       getColumns: ->
         @createApp().then =>
-          @app.query('roadmapplanningboardcolumn')
+          @app.down('rallycardboard').getColumns()
 
     it 'should load columns for each timeframe', ->
       @getColumns().then (columns) =>
