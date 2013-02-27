@@ -102,10 +102,8 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
 
       @column = Ext.create('Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn',
         types: ['HierarchicalRequirement']
-        renderTo: Ext.getBody().createChild()
-        attribute: 'Iteration'
-        contentCell: Ext.get('testDiv')
-        headerCell: Ext.get('testDiv')
+        renderTo: Ext.getBody().createChild(),
+        attribute: 'Iteration',
         context: Ext.create('Rally.app.Context',
           initialValues:
             featureToggles: Rally.alm.FeatureToggle

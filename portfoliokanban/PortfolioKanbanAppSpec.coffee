@@ -85,8 +85,9 @@ Ext.require [
         }
       ])
   
-      @_createApp(type:'/typedefinition/1').then =>
-        expect(@app.down('rallycardboard').getColumns().length).toEqual 3
+      app = @_createApp(type:'/typedefinition/1').then =>
+  
+        expect(@app.down('#bodyContainer').query('.rallykanbancolumn').length).toEqual 3
   
     it 'shows message if no states are found', ->
       @ajax.whenQuerying('state').respondWith()
@@ -154,7 +155,8 @@ Ext.require [
       @ajax.whenQuerying('PortfolioItem/Feature').respondWith [feature]
   
       @_createApp().then (app) =>
-        expect(app.down('rallycardboard').getColumns()[1].getCards()[0].getEl().down('.status-field.Discussion')).not.toBeNull()
+  
+        expect(app.down('.rallyportfoliokanbancard').getEl().down('.status-field.Discussion')).not.toBeNull()
   
     it 'displays mandatory fields on the cards', ->
       @ajax.whenQuerying('state').respondWith([

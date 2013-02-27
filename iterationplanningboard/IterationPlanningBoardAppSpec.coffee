@@ -53,12 +53,12 @@ Ext.require [
   
       createAppWithBacklogData: ->
         userStoryRecord = @createUserStoryRecord
-          Name: 'A User Story'
+          Name: 'A User Story',
           Iteration: null
         @ajax.whenQuerying('userstory').respondWith([userStoryRecord.data])
   
         defectRecord = @createDefectRecord
-          Name: 'A Defect'
+          Name: 'A Defect',
           Iteration: null
         @ajax.whenQuerying('defect').respondWith([defectRecord.data])
   
@@ -78,12 +78,12 @@ Ext.require [
       createUserStoryRecord: (options = {}) ->
         Model = Rally.mock.data.ModelFactory.getUserStoryModel()
         options._type = 'hierarchicalrequirement'
-        new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 10000)}, options))
+        new Model(options)
   
       createDefectRecord: (options = {}) ->
         Model = Rally.mock.data.ModelFactory.getDefectModel()
         options._type = 'defect'
-        new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 10000)}, options))
+        new Model(options)
   
       getVisibleCards: (type) ->
         additionalClass = if type? then ".#{type}" else ''
@@ -93,6 +93,15 @@ Ext.require [
   
       getVisibleCardNames: ->
         Ext.query '.rui-card .rui-card-content .field-content.Name'
+  
+      assertColumnHeaderHeightsAreCorrect: ->
+        columns = @getColumns()
+        tallestColumnHeight = 0
+        Ext.Array.each columns, (column) ->
+          tallestColumnHeight = column.getColumnHeader().getHeight()
+  
+        Ext.Array.each columns, (column) ->
+          expect(column.getColumnHeader().getHeight()).toBe tallestColumnHeight unless column.currentTimebox
   
       filterByType: (type, expectedVisibleCards = 0) ->
         @click(css: ".#{type}-type-checkbox input").then =>
@@ -107,10 +116,10 @@ Ext.require [
             @click(className: 'search-button')
   
       getProgressBar: (columnIndex) ->
-        @getColumns()[columnIndex].getColumnHeaderCell().down('.progress-bar')
+        @getColumns()[columnIndex].getEl().down('.progress-bar')
   
       getProgressBarHtml: (columnIndex) ->
-        @getColumns()[columnIndex].getColumnHeaderCell().down('.progress-bar-label').getHTML()
+        @getColumns()[columnIndex].getEl().down('.progress-bar-label').getHTML()
   
       # could not get actionsequence mouseMove to work in FF
       simulateMouseEnterFormattedID: () ->
@@ -372,7 +381,21 @@ Ext.require [
         @app.gridboard.fireEvent('load')
   
         sinon.assert.calledOnce contentUpdatedHandlerStub
-
+  
+    it 'should resize all column headers correctly when there are progress bars', ->
+      @createApp(plannedVelocity: 5).then =>
+  
+        expect(@getProgressBar(1)).not.toBeNull()
+  
+        @assertColumnHeaderHeightsAreCorrect()
+  
+    it 'should resize all column headers correctly when there are no progress bars', ->
+      @createApp(plannedVelocity: 0).then =>
+  
+        expect(@getProgressBar(1)).toBeNull()
+  
+        @assertColumnHeaderHeightsAreCorrect()
+  
     it 'should exclude filtered artifact types when filtering by custom search query on the backlog column', ->
       @createAppWithBacklogData().then =>
         columns = @getColumns()

@@ -19,8 +19,6 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardColumn', ->
 
     column = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardColumn',
       renderTo: 'testDiv'
-      headerCell: Ext.get 'testDiv'
-      contentCell: Ext.get 'testDiv'
     
     filter = column.getStoreFilter()
     expect(filter).toEqual [{
@@ -36,8 +34,6 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardColumn', ->
       endDate: endDate
       capacity: 50
       renderTo: 'testDiv'
-      headerCell: Ext.get 'testDiv'
-      contentCell: Ext.get 'testDiv'
     }
 
     filter = column.getStoreFilter()
@@ -58,8 +54,6 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardColumn', ->
       endDate: endDate
       capacity: 50
       renderTo: 'testDiv'
-      headerCell: Ext.get 'testDiv'
-      contentCell: Ext.get 'testDiv'
     }
 
     record = Ext.create Rally.mock.data.ModelFactory.getUserStoryModel(), {
@@ -83,8 +77,6 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardColumn', ->
       displayValue: 'foo'
       types: 'portfolioitem/feature'
       renderTo: 'testDiv'
-      headerCell: Ext.get 'testDiv'
-      contentCell: Ext.get 'testDiv'
       listeners:
         load: onLoad
     }
