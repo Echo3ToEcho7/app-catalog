@@ -100,10 +100,14 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
         subscription:
           StoryHierarchyEnabled: options.subscriptionStoryHierarchyEnabled ? true
 
+      headerCell = Ext.get('testDiv').createChild {tag: 'div'}
+      contentCell = Ext.get('testDiv').createChild {tag: 'div'}
       @column = Ext.create('Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn',
         types: ['HierarchicalRequirement']
-        renderTo: Ext.getBody().createChild(),
-        attribute: 'Iteration',
+        renderTo: contentCell
+        attribute: 'Iteration'
+        contentCell: contentCell
+        headerCell: headerCell
         context: Ext.create('Rally.app.Context',
           initialValues:
             featureToggles: Rally.alm.FeatureToggle
