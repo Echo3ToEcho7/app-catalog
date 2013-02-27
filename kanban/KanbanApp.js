@@ -40,7 +40,8 @@
                 cardFields: 'Name,Discussion,Tasks,Defects',
                 hideReleasedCards: false,
                 showCardAge: true,
-                cardAgeThreshold: 3
+                cardAgeThreshold: 3,
+                pageSize: 25
             }
         },
 
@@ -185,6 +186,7 @@
                 loadMask: false,
                 storeConfig: {
                     context: this.getContext().getDataContext(),
+                    pageSize: this.getSetting('pageSize'),
                     filters: this.getSetting('query') ?
                         Rally.data.QueryFilter.fromQueryString(this.getSetting('query')) : []
                 }
@@ -313,8 +315,6 @@
             Ext.each(this.cardboard.getColumns(), function(column) {
                 column.togglePolicy(checked);
             });
-
-            this.cardboard.resizeAllColumns();
         },
 
         _onBeforeCreate: function(addNew, record, params) {

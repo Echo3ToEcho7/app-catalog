@@ -54,7 +54,7 @@
             currentTimebox: false
         },
 
-        cls: 'column planning-column',
+        cls: 'column',
 
         requires: [
             'Ext.XTemplate'
@@ -72,9 +72,15 @@
             this.callParent(arguments);
             this.on('beforecarddroppedsave', this._onBeforeCardDrop, this);
 
-            if (this.currentTimebox) {
-                this.addCls('current-timebox');
-            }
+            this.on('afterrender', function() {
+                var cls = 'planning-column';
+                if (this.currentTimebox) {
+                    cls += ' current-timebox';
+
+                }
+                this.getContentCell().addCls(cls);
+                this.getColumnHeaderCell().addCls(cls);
+            }, this, {single: true});
         },
 
         getStoreFilter: function(type) {

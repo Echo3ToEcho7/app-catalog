@@ -9,7 +9,7 @@
         extend: 'Rally.ui.cardboard.Column',
         alias: 'widget.iterationplanningboardappbacklogcolumn',
 
-        cls: 'column planning-column backlog',
+        cls: 'column',
 
         requires: [
             'Rally.ui.TextField'
@@ -66,19 +66,29 @@
             );
         },
 
+        initComponent: function() {
+            this.callParent(arguments);
+
+            this.on('afterrender', function() {
+                var cls = 'planning-column backlog';
+                this.getContentCell().addCls(cls);
+                this.getColumnHeaderCell().addCls(cls);
+            }, this, {single: true});
+        },
+
         _onSearchClicked: function() {
-            this._refreshColumn(this.down('#searchText').getValue());
+            this._refreshColumn(this.getColumnHeader().down('#searchText').getValue());
         },
 
         _onSearchTextSpecialKey: function(searchTextField, e) {
             if (e.getKey() == e.ENTER) {
-                this._refreshColumn(searchTextField.getValue());
+                this._refreshColumn(this.getColumnHeader().down('#searchText').getValue());
             }
         },
 
         _refreshColumn: function(searchValue) {
+            this.setMaskTarget(this.getContentCell());
             this.showMask();
-
             this._deactivatedCards = [];
 
             this.on('load', function() {
