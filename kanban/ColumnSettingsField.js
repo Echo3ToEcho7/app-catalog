@@ -171,7 +171,7 @@
             Ext.Array.each(field.allowedValues, function(allowedValue) {
 
                 var columnName = allowedValue.StringValue;
-                var pref = this._getColumnValue(columnName);
+                var pref = this._store.getCount() === 0 ? this._getColumnValue(columnName) : null;
 
                 var column = {
                     column: columnName,

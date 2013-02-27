@@ -21,11 +21,10 @@
     margin: 5px;
 }
 
-.kanban td.card-column.over-capacity, .kanban td.card-column.dnd-over.over-capacity {
+.kanban .column-container .card-column.over-capacity, .kanban .column-container .card-column.over-capacity.dnd-over {
     background-color: #d67972;
 }
-
-.kanban th.card-column.over-capacity {
+.kanban .column-container th.card-column.over-capacity {
     background-color: #b81c10;
 }
 
