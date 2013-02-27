@@ -203,6 +203,7 @@
                 columns: columns,
                 maxColumnsPerBoard: columns.length,
                 ddGroup: this.currentType.get('TypePath'),
+                enableRanking: this.getContext().get('workspace').WorkspaceConfiguration.DragDropRankingEnabled,
                 columnConfig: columnConfig,
                 cardConfig: cardConfig,
                 storeConfig: {
@@ -225,6 +226,7 @@
             this._attachPercentDoneToolTip(cardboard);
 
             this._renderPolicies();
+            Ext.EventManager.onWindowResize(cardboard.resizeAllColumns, cardboard);
         },
 
         getMaskId: function() {
@@ -306,6 +308,8 @@
             Ext.each(this.cardboard.getColumns(), function(column) {
                 column.togglePolicy(showPoliciesCheckbox.getValue());
             });
+
+            this.cardboard.resizeAllColumns();
         },
 
         _buildShowPolicies: function() {

@@ -21,16 +21,13 @@
     margin: 5px;
 }
 
-.kanban td.card-column.over-capacity, .kanban td.card-column.dnd-over.over-capacity {
+.kanban .cardboard .column.overCapacity .columnContent {
     background-color: #d67972;
 }
 
-.kanban th.card-column.over-capacity {
+.kanban .cardboard .column.overCapacity .columnHeader {
+    color: #ffffff;
     background-color: #b81c10;
-}
-
-.kanban th.card-column.over-capacity .column-header {
-    color: #fff;
 }
 
 .cardboard .status-field.RevisionHistory {

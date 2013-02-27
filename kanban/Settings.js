@@ -91,19 +91,14 @@
                     name: 'hideReleasedCards',
                     xtype: 'rallycheckboxfield',
                     fieldLabel: 'Options',
-                    margin: '10 0 0 0',
+                    margin: '10px 0 0 0',
                     boxLabel: 'Hide cards in last visible column if assigned to a release'
                 },
                 {
                     xtype: 'kanbancardagesettingsfield',
                     fieldLabel: '',
-                    margin: '5 0 10 80',
+                    margin: '5px 0 0 80px',
                     mapsToMultiplePreferenceKeys: ['showCardAge', 'cardAgeThreshold']
-                },
-                {
-                    name: 'pageSize',
-                    xtype: 'rallynumberfield',
-                    fieldLabel: 'Page Size'
                 },
                 {
                     type: 'query'
