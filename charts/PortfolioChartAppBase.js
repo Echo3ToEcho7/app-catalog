@@ -80,6 +80,10 @@
             if (savedPortfolioItem) {
                 this._loadPortfolioItem(savedPortfolioItem);
             }
+            else {
+                // this.owner is the panel this app belongs to
+                this.owner.showSettings();
+            }
         },
 
         /**
