@@ -151,11 +151,6 @@
         },
 
         _getCardboardConfig: function() {
-            var additionalFetchFields = [];
-            if (this.getSetting('showCardAge')) {
-                Ext.Array.push(additionalFetchFields, ['LastUpdateDate']);
-            }
-
             return {
                 xtype: 'rallycardboard',
                 types: this._getDefaultTypes(),
@@ -171,7 +166,6 @@
                 },
                 columnConfig: {
                     xtype: 'rallykanbancolumn',
-                    additionalFetchFields: additionalFetchFields,
                     enablePolicies: true
                 },
                 cardConfig: {

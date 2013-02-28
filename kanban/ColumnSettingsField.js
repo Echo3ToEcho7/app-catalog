@@ -84,13 +84,9 @@
                         editor: {
                             xtype: 'rallytextfield',
                             maskRe: /[0-9]/,
-                            getErrors: function() {
-                                var errors = [];
-                                var value = parseInt(this.getValue(), 10);
-                                if (value < 1 || value > 9999) {
-                                    errors.push('WIP must be > 0 and < 9999.');
-                                }
-                                return errors;
+                            validator: function(value) {
+                                var val = parseInt(value, 10);
+                                return (value === '' || (val > 0 && val <= 9999)) || 'WIP must be > 0 and < 9999.';
                             }
                         }
                     },
