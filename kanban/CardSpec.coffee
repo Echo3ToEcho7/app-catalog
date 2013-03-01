@@ -48,13 +48,13 @@ Ext.require [
     helpers
       createRecord: (options) ->
         StoryModel = Rally.mock.data.ModelFactory.getUserStoryModel()
-        @record = new StoryModel Ext.apply
+        @record = new StoryModel Ext.apply(
           ObjectID: 1
           Name: 'Foo'
-        , options
+        , options)
 
       createCard: (options) ->
-        @card = new Rally.apps.kanban.Card Ext.apply
+        @card = new Rally.apps.kanban.Card Ext.apply(
           renderTo: 'testDiv'
           record: @createRecord()
-        , options
+        , options)
