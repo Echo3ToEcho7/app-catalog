@@ -50,10 +50,6 @@
             },
 
             calculatorType: "Rally.apps.charts.cfd.CumulativeFlowCalculator",
-            calculatorConfig: {
-                timeZone: "GMT",
-                setColorsForCustomScheduleStates: true
-            },
 
             chartConfig: {
                 chart: {
@@ -92,13 +88,10 @@
                         },
                         groupPadding: 0.01
                     },
-                    line: {
-                        color: "#000"
-                    },
                     area: {
                         stacking: 'normal',
                         lineColor: '#666666',
-                        lineWidth: 1,
+                        lineWidth: 2,
                         marker: {
                             enabled: false
                         }

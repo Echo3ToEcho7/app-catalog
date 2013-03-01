@@ -7,6 +7,8 @@
 
         scheduleStates: ["Defined", "In-Progress", "Completed", "Accepted"],
 
+        PI_SETTING: "buttonchooser",
+
         items: [
             {
                 xtype: 'container',
@@ -16,31 +18,14 @@
         ],
 
         dateFormatters: [
-            {
-                key: "MMM",
-                value: "%b"
-            },
-            {
-                key: "MM",
-                value: "%m"
-            },
-            {
-                key: "dd",
-                value: "%d"
-            },
-            {
-                key: "yyyy",
-                value: "%Y"
-            }
+            {key: "MMM", value: "%b"},
+            {key: "MM", value: "%m"},
+            {key: "dd", value: "%d"},
+            {key: "yyyy", value: "%Y"}
         ],
 
-        /**
-         * Setup the components for the settings panel
-         * @return {Array} ext components for settings panels
-         */
         getSettingsFields: function () {
             var self = this;
-
             return [
                 {
                     type: "buttonchooser",
@@ -66,7 +51,7 @@
                     },
                     displayField: "name",
                     valueField: "value",
-                    onLoad: function() {
+                    onLoad: function () {
                         this.setValue(self.getSetting("chartAggregationType") || "storycount");
                     }
                 }
@@ -75,8 +60,9 @@
 
         launch: function () {
             this._addHelpComponent();
+            this._setDefaultConfigValues();
 
-            var savedPortfolioItem = this._validatePortfolioItem();
+            var savedPortfolioItem = this._loadSavedPortfolioItem();
             if (savedPortfolioItem) {
                 this._loadPortfolioItem(savedPortfolioItem);
             }
@@ -86,53 +72,66 @@
             }
         },
 
-        /**
-         * Setup configuration values based on the portfolio item retrieved from the server.
-         * @param chartComponentConfig the configuration object for the chart component
-         * @param portfolioItem the portfolio item retrieved from the server
-         */
-        setDynamicConfigValues: function (chartComponentConfig, portfolioItem) {
-            var dateFormat = this.getContext().getWorkspace().WorkspaceConfiguration.DateFormat,
-                chartConfig = chartComponentConfig.chartConfig;
-            this._parseRallyDateFormat(dateFormat, chartConfig);
+        _addHelpComponent: function () {
+            this.down('#header').add(this._buildHelpComponent());
+        },
 
-            if (portfolioItem) {
-                if (!chartComponentConfig.chartConfig.hasOwnProperty('title')) {
-                    chartComponentConfig.chartConfig.title = {};
+        _setDefaultConfigValues: function () {
+            var config = Ext.clone(this.chartComponentConfig);
+
+            config.storeConfig.rawFind = config.storeConfig.rawFind || {};
+
+            config.calculatorConfig = config.calculatorConfig || {};
+
+            config.chartConfig = config.chartConfig || {};
+            config.chartConfig.title = config.chartConfig.title || {};
+            config.chartConfig.xAxis = config.chartConfig.xAxis || {};
+            config.chartConfig.xAxis.type = config.chartConfig.xAxis.type || "datetime";
+            config.chartConfig.yAxis = config.chartConfig.yAxis || [
+                {
+                    title: {}
                 }
-                chartComponentConfig.chartConfig.title.text = portfolioItem.FormattedID + ": " + portfolioItem.Name;
-            }
+            ];
 
-            var aggregationType = this.getSetting("chartAggregationType") || "storycount";
-            chartComponentConfig.calculatorConfig.chartAggregationType = aggregationType;
-
-            var yaxis = chartComponentConfig.chartConfig.yAxis[0];
-            if(aggregationType === "storypoints") {
-                yaxis.title.text = "Points";
-            } else {
-                yaxis.title.text = "Count";
-            }
+            this.chartComponentConfig = config;
         },
 
-        _validatePortfolioItem: function () {
-            var settingsJson = this.getSetting('buttonchooser');
-            if (!settingsJson) {
-                this._setErrorTextMessage('Please click the gear and "Edit Settings" to choose a portfolio item.');
-                return;
-            }
-
-            var artifactWithContext = Ext.JSON.decode(settingsJson);
-            if (!this._savedPortfolioItemValid(artifactWithContext)) {
-                this._portfolioItemNotValid();
-                return;
-            }
-
-            return artifactWithContext;
+        _buildHelpComponent: function () {
+            return Ext.create('Ext.Component', {
+                renderTpl: Rally.util.Help.getIcon({
+                    cls: Rally.util.Test.toBrowserTestCssClass(this.help.cls),
+                    id: this.help.id
+                })
+            });
         },
 
-        _loadPortfolioItem: function (artifactWithContext) {
-            var context = artifactWithContext.context;
-            var portfolioItem = artifactWithContext.artifact;
+        _loadSavedPortfolioItem: function () {
+            var piJson = this.getSetting(this.PI_SETTING);
+            if (!piJson) {
+                return false;
+            }
+
+            var savedPi = Ext.JSON.decode(piJson);
+            if (!this._savedPortfolioItemValid(savedPi)) {
+                return false;
+            }
+
+            return savedPi;
+        },
+
+        _savedPortfolioItemValid: function (savedPi) {
+            return savedPi &&
+                savedPi.context &&
+                savedPi.context.workspace &&
+                savedPi.context.project &&
+                savedPi.artifact &&
+                savedPi.artifact._type &&
+                savedPi.artifact.ObjectID;
+        },
+
+        _loadPortfolioItem: function (savedPortfolioItem) {
+            var context = savedPortfolioItem.context;
+            var portfolioItem = savedPortfolioItem.artifact;
 
             Rally.data.ModelFactory.getModel({
                 context: context,
@@ -145,99 +144,107 @@
         },
 
         _onModelRetrieved: function (model, portfolioItemOid) {
-            if (!model) {
+            if (model) {
+                model.find({
+                    filters: {
+                        property: "ObjectID",
+                        value: portfolioItemOid
+                    },
+                    scope: this,
+                    callback: this._onPortfolioItemRetrieved
+                });
+            } else {
                 this._portfolioItemNotValid();
-                return;
             }
-
-            model.find({
-                filters: {
-                    property: "ObjectID",
-                    value: portfolioItemOid
-                },
-                scope: this,
-                callback: this._onPortfolioItemRetrieved
-            });
         },
 
         _onPortfolioItemRetrieved: function (portfolioItemRecord) {
-            if (!portfolioItemRecord) {
-                this._portfolioItemNotValid();
-                return;
+            if (portfolioItemRecord) {
+                Rally.data.ModelFactory.getModel({
+                    type: 'UserStory',
+                    success: function (model) {
+                        this._onUserStoryModelRetrieved(model, portfolioItemRecord);
+                    },
+                    scope: this
+                });
+            } else {
+                this._setErrorTextMessage("A server error occurred, please refresh the page.");
             }
-
-            Rally.data.ModelFactory.getModel({
-                type: 'UserStory',
-                success: function (model) {
-                    this._onUserStoryModelRetrieved(model, portfolioItemRecord);
-                },
-                scope: this
-            });
         },
 
         _onUserStoryModelRetrieved: function (model, portfolioItemRecord) {
-            this._setScheduleStateFieldValues(model);
-
-            var chartConfig = this._setupChartComponent(portfolioItemRecord.data);
-            this.add(chartConfig);
+            this._updateChartComponentConfig(model, portfolioItemRecord.data);
+            this.add(this.chartComponentConfig);
 
             Rally.environment.getMessageBus().publish(Rally.Message.piChartAppReady);
         },
 
-        /**
-         * Set the schedule states based on the schedule states that are configured in Rally
-         * @param model the user story model
-         * @private
-         */
+        _updateChartComponentConfig: function (model, portfolioItem) {
+            this._setScheduleStateFieldValues(model);
+            this._setDynamicConfigValues(portfolioItem);
+            this._calculateDateRange(portfolioItem);
+            this._updateQueryConfig(portfolioItem);
+        },
+
         _setScheduleStateFieldValues: function (model) {
-            if (!model) {
+            if (model) {
+                var allowedScheduleStates = model.getField('ScheduleState').allowedValues;
+                var i, length, scheduleStateValues = [];
+
+                for (i = 0, length = allowedScheduleStates.length; i < length; i++) {
+                    scheduleStateValues.push(allowedScheduleStates[i].StringValue);
+                }
+
+                this.chartComponentConfig.calculatorConfig.scheduleStates = scheduleStateValues;
+            } else {
                 this.chartComponentConfig.calculatorConfig.scheduleStates = this.scheduleStates;
-                return;
             }
+        },
 
-            var allowedScheduleStates = model.getField('ScheduleState').allowedValues;
-            var i, length, scheduleStateValues = [];
+        _setDynamicConfigValues: function (portfolioItem) {
+            this._updateChartConfigDateFormat();
+            this.chartComponentConfig.chartConfig.title.text = this._buildChartTitle(portfolioItem);
 
-            for (i = 0, length = allowedScheduleStates.length; i < length; i++) {
-                scheduleStateValues.push(allowedScheduleStates[i].StringValue);
+            this.chartComponentConfig.calculatorConfig.chartAggregationType = this._getAggregationType();
+            this.chartComponentConfig.chartConfig.yAxis[0].title.text = this._getYAxisTitle();
+        },
+
+        _updateChartConfigDateFormat: function () {
+            var rallyDateFormat = this._parseRallyDateFormatToHighchartsDateFormat();
+
+            this.chartComponentConfig.chartConfig.xAxis.labels = {
+                formatter: function () {
+                    return Highcharts.dateFormat(rallyDateFormat, new Date(this.value).getTime());
+                }
+            };
+        },
+
+        _parseRallyDateFormatToHighchartsDateFormat: function () {
+            var rallyDateFormat = this._getWorkspaceConfiguredDateFormat(),
+                i, length;
+
+            for (i = 0, length = this.dateFormatters.length; i < length; i++) {
+                rallyDateFormat = rallyDateFormat.replace(this.dateFormatters[i].key, this.dateFormatters[i].value);
             }
-
-            this.chartComponentConfig.calculatorConfig.scheduleStates = scheduleStateValues;
+            return rallyDateFormat;
         },
 
-        _setupChartComponent: function (portfolioItem) {
-            var chartComponentConfig = Ext.clone(this.chartComponentConfig);
+        _calculateDateRange: function (portfolioItem) {
+            var calcConfig = this.chartComponentConfig.calculatorConfig;
+            calcConfig.startDate = calcConfig.startDate || this._getChartStartDate(portfolioItem);
+            calcConfig.endDate = calcConfig.endDate || this._getChartEndDate(portfolioItem);
+            calcConfig.timeZone = calcConfig.timeZone || this._getTimeZone();
 
-            this.setDynamicConfigValues(chartComponentConfig, portfolioItem);
-            this._calculateDateRange(chartComponentConfig, portfolioItem);
-            this._updateQueryConfig(chartComponentConfig, portfolioItem);
-
-            return chartComponentConfig;
+            this.chartComponentConfig.chartConfig.xAxis.tickInterval = this._configureChartTicks(calcConfig.startDate, calcConfig.endDate);
         },
 
-        _calculateDateRange: function (chartComponentConfig, portfolioItem) {
-            var startDate = chartComponentConfig.calculatorConfig.startDate || this._getChartStartDate(portfolioItem),
-                endDate = chartComponentConfig.calculatorConfig.endDate || this._getChartEndDate(portfolioItem),
-                timeZone = chartComponentConfig.calculatorConfig.timeZone || this._getTimeZone();
-
-            chartComponentConfig.calculatorConfig.startDate = startDate;
-            chartComponentConfig.calculatorConfig.endDate = endDate;
-            chartComponentConfig.calculatorConfig.timeZone = timeZone;
-
-            chartComponentConfig.chartConfig.xAxis.tickInterval = this._configureChartTicks(startDate, endDate);
+        _updateQueryConfig: function (portfolioItem) {
+            this.chartComponentConfig.storeConfig.rawFind._ItemHierarchy = portfolioItem.ObjectID;
         },
 
-        /**
-         * Configure the ticks on the chart based on the date range of the data, the width of the chart being displayed
-         * and a width for each date tick
-         * @param startDate
-         * @param endDate
-         * @return {Number} the Highcharts tick spacing
-         * @private
-         */
         _configureChartTicks: function (startDate, endDate) {
-            var tickWidth = 125,
-                width = this.getWidth(),
+            var tickWidth = 125, // in pixels
+                width = this.getWidth(), // app width
                 ticks = Math.floor(width / tickWidth);
 
             var startDateObj = new Date(startDate),
@@ -245,41 +252,29 @@
 
             var days = Math.floor((endDateObj - startDateObj) / 86400000); // Converting ms to days
 
-            return Math.floor(days / ticks);
+            return Math.floor(days / ticks); // number of dates that will fit on the xAxis
         },
 
-        /**
-         * Update the query config with dynamic values based on the portfolio item
-         * @param chartComponentConfig the chart component configuration
-         * @param portfolioItem the portfolio item
-         * @private
-         */
-        _updateQueryConfig: function (chartComponentConfig, portfolioItem) {
-            chartComponentConfig.storeConfig.rawFind._ItemHierarchy = portfolioItem.ObjectID;
+        _getWorkspaceConfiguredDateFormat: function () {
+            return this.getContext().getWorkspace().WorkspaceConfiguration.DateFormat;
         },
 
-        _setErrorTextMessage: function (message) {
-            this.down('#header').add({
-                xtype: 'displayfield',
-                value: message
-            });
+        _buildChartTitle: function (portfolioItem) {
+            if (portfolioItem) {
+                return portfolioItem.FormattedID + ": " + portfolioItem.Name;
+            } else {
+                return "Portfolio Item Chart";
+            }
         },
 
-        _savedPortfolioItemValid: function (savedPortfolioItemSetting) {
-            return savedPortfolioItemSetting &&
-                savedPortfolioItemSetting.context &&
-                savedPortfolioItemSetting.context.workspace &&
-                savedPortfolioItemSetting.context.project &&
-                savedPortfolioItemSetting.artifact &&
-                savedPortfolioItemSetting.artifact.ObjectID;
+        _getAggregationType: function () {
+            return this.getSetting("chartAggregationType") || "storycount";
         },
 
-        _portfolioItemNotValid: function () {
-            this._setErrorTextMessage('Cannot find the chosen portfolio item.  Please click the gear and "Edit Settings" to choose another.');
-        },
-
-        _getTimeZone: function () {
-            return this.getContext().getUser().UserProfile.TimeZone || this.getContext().getWorkspace().WorkspaceConfiguration.TimeZone;
+        _getYAxisTitle: function () {
+            return this._getAggregationType() === "storypoints" ?
+                "Points" :
+                "Count";
         },
 
         _getChartStartDate: function (portfolioItem) {
@@ -292,48 +287,18 @@
             return date.toISOString();
         },
 
-        /**
-         * Parse the date format set on the rally workspace
-         * @param rallyDateFormat the format of the date on the workspace
-         * @param chartConfig the chart configuration object
-         * @private
-         */
-        _parseRallyDateFormat: function (rallyDateFormat, chartConfig) {
-            rallyDateFormat = this._parseRallyDateFormatToHighchartsDateFormat(rallyDateFormat);
-
-            chartConfig.xAxis = chartConfig.xAxis || {};
-            chartConfig.xAxis.type = chartConfig.xAxis.type || "datetime";
-            chartConfig.xAxis.labels = {
-                formatter: function () {
-                    return Highcharts.dateFormat(rallyDateFormat, new Date(this.value).getTime());
-                }
-            };
+        _getTimeZone: function () {
+            return this.getContext().getUser().UserProfile.TimeZone || this.getContext().getWorkspace().WorkspaceConfiguration.TimeZone;
         },
 
-        /**
-         * Helper function to convert the date format on the rally workspace to something Highcharts can use
-         * @param rallyDateFormat the format of the date on the workspace
-         * @return {*}
-         * @private
-         */
-        _parseRallyDateFormatToHighchartsDateFormat: function (rallyDateFormat) {
-            var i, length;
-            for (i = 0, length = this.dateFormatters.length; i < length; i++) {
-                rallyDateFormat = rallyDateFormat.replace(this.dateFormatters[i].key, this.dateFormatters[i].value);
-            }
-            return rallyDateFormat;
+        _portfolioItemNotValid: function () {
+            this._setErrorTextMessage('Cannot find the chosen portfolio item.  Please click the gear and "Edit Settings" to choose another.');
         },
 
-        _addHelpComponent: function () {
-            this.down('#header').add(this._buildHelpComponent());
-        },
-
-        _buildHelpComponent: function () {
-            return Ext.create('Ext.Component', {
-                renderTpl: Rally.util.Help.getIcon({
-                    cls:Rally.util.Test.toBrowserTestCssClass(this.help.cls),
-                    id: this.help.id
-                })
+        _setErrorTextMessage: function (message) {
+            this.down('#header').add({
+                xtype: 'displayfield',
+                value: message
             });
         }
     });
