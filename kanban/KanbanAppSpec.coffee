@@ -54,7 +54,23 @@ Ext.require [
     it 'shows add new for user who is a project editor', ->
       @createApp().then =>
         expect(@app.down 'rallyaddnew').toBeDefined()
-  
+
+    it 'should not schedule a new item in an iteration', ->
+      @createApp().then =>
+        editorOpenedStub = @stub(Rally.nav.Manager, 'create')
+        addNewHelper = new Helpers.AddNewHelper '.kanban'
+        addNewHelper.addWithDetails('foo').then =>
+          sinon.assert.calledOnce editorOpenedStub
+          expect(editorOpenedStub.getCall(0).args[1].iteration).toBe 'u'
+
+    it 'should set group by field to first column value', ->
+      @createApp().then =>
+        editorOpenedStub = @stub(Rally.nav.Manager, 'create')
+        addNewHelper = new Helpers.AddNewHelper '.kanban'
+        addNewHelper.addWithDetails('foo').then =>
+          sinon.assert.calledOnce editorOpenedStub
+          expect(editorOpenedStub.getCall(0).args[1]['c_' + @app.getSetting('groupByField')]).toBe @app.cardboard.getColumns()[0].getValue()
+
     it 'should show correct fields on cards', ->
       @createApp({cardFields: 'Name,Defects,Project'}).then =>
   
