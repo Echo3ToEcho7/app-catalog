@@ -112,3 +112,9 @@ th.planning-column {
     margin-top: 4px;
     cursor: pointer;
 }
+
+.planning-board .no-timebox .columns tr td.blank-slate-column {
+    width: 66%;
+    text-align: center;
+    vertical-align: top;
+}

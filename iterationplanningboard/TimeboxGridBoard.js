@@ -116,13 +116,17 @@
         },
 
         _addBoardBlankSlate: function(board) {
+            this.addCls('no-timebox');
+            board.getEl().down('.columns tr td').setStyle('width', '33%');
+            var blankSlateTd = Ext.DomHelper.append(board.getEl().down('.columns tr'), '<td class="blank-slate-column"></td>', true);
+
             Ext.widget({
                 xtype: 'rallytimeboxblankslate',
-                flex: 2/3,
                 timeboxType: this.timeboxType,
                 context: this.getContext(),
-                renderTo: board.getEl()
+                renderTo: blankSlateTd
             });
+
             if (Rally.BrowserTest) {
                 Rally.BrowserTest.publishComponentReady(this);
             }
