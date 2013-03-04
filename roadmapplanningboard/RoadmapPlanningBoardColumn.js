@@ -105,8 +105,8 @@
                 width: '80%'
             });
             var html = tpl.apply({
-                percentDone: this.getCardCount() / this.capacity,
-                amountComplete: this.getCardCount(),
+                percentDone: this.getCards().length / this.capacity,
+                amountComplete: this.getCards().length,
                 total: this.capacity
             });
 
