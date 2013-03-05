@@ -2,6 +2,8 @@ Ext = window.Ext4 || window.Ext
 
 describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn', ->
   beforeEach ->
+    @storyModel = Rally.mock.data.ModelFactory.getUserStoryModel()
+    @defectModel = Rally.mock.data.ModelFactory.getDefectModel()
     @ajax.whenQuerying('HierarchicalRequirement').respondWith()
 
   afterEach ->
@@ -9,26 +11,26 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
 
   it 'show user stories that are not scheduled in an iteration', ->
     @createColumn()
-    filter = @column.getStoreFilter('HierarchicalRequirement')
+    filter = @column.getStoreFilter(@storyModel)
 
     @shouldHaveFilterByNullIteration(filter)
 
   it 'show user stories that have no direct children', ->
     @createColumn()
-    filter = @column.getStoreFilter('HierarchicalRequirement')
+    filter = @column.getStoreFilter(@storyModel)
 
     expect(filter[1].property).toBe 'DirectChildrenCount'
     expect(filter[1].value).toBe 0
 
   it 'show defects that are not scheduled in an iteration', ->
     @createColumn()
-    filter = @column.getStoreFilter('Defect')
+    filter = @column.getStoreFilter(@defectModel)
 
     @shouldHaveFilterByNullIteration(filter)
 
   it 'show defects that are not associated to a requirement', ->
     @createColumn()
-    filter = @column.getStoreFilter('Defect')
+    filter = @column.getStoreFilter(@defectModel)
 
     expect(filter[1].property).toBe 'Requirement'
     expect(filter[1].value).toBeNull()
@@ -62,7 +64,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
     record = @createStoryRecord
       Iteration: null
     @createColumn subscriptionStoryHierarchyEnabled: false
-    filter = @column.getStoreFilter('HierarchicalRequirement')
+    filter = @column.getStoreFilter(@storyModel)
 
     @shouldHaveFilterByNullIteration(filter)
     expect(filter.length).toBe 1
@@ -103,7 +105,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
       headerCell = Ext.get('testDiv').createChild {tag: 'div'}
       contentCell = Ext.get('testDiv').createChild {tag: 'div'}
       @column = Ext.create('Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn',
-        types: ['HierarchicalRequirement']
+        models: [@storyModel]
         renderTo: contentCell
         attribute: 'Iteration'
         contentCell: contentCell

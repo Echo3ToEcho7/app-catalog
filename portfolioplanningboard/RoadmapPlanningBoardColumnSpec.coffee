@@ -81,7 +81,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardColumn', ->
       endDate: endDate
       capacity: 50
       displayValue: 'foo'
-      types: 'portfolioitem/feature'
+      models: [Rally.mock.data.ModelFactory.getPortfolioItemFeatureModel()]
       renderTo: 'testDiv'
       headerCell: Ext.get 'testDiv'
       contentCell: Ext.get 'testDiv'
