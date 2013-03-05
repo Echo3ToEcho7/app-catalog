@@ -120,11 +120,15 @@
             board.getEl().down('.columns tr td').setStyle('width', '33%');
             var blankSlateTd = Ext.DomHelper.append(board.getEl().down('.columns tr'), '<td class="blank-slate-column"></td>', true);
 
-            Ext.widget({
+            var blankSlate = Ext.widget({
                 xtype: 'rallytimeboxblankslate',
                 timeboxType: this.timeboxType,
                 context: this.getContext(),
                 renderTo: blankSlateTd
+            });
+
+            this.on('destroy', function() {
+                blankSlate.destroy();
             });
 
             if (Rally.BrowserTest) {
