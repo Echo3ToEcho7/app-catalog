@@ -85,8 +85,10 @@
                             xtype: 'rallytextfield',
                             maskRe: /[0-9]/,
                             validator: function(value) {
-                                var val = parseInt(value, 10);
-                                return (value === '' || (val > 0 && val <= 9999)) || 'WIP must be > 0 and < 9999.';
+                                return (value === '' || (value > 0 && value <= 9999)) || 'WIP must be > 0 and < 9999.';
+                            },
+                            rawToValue: function(value) {
+                                return value === '' ? value : parseInt(value, 10);
                             }
                         }
                     },
