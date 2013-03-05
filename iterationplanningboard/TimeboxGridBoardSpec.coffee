@@ -57,3 +57,9 @@ describe 'Rally.apps.iterationplanningboard.TimeboxGridBoard', ->
     it 'should refresh after objectDestroy is published', ->
       @createGridBoard().then =>
         @shouldRefreshAfterIterationMessage Rally.Message.objectDestroy
+
+    it 'should destroy blank slate', ->
+      @createGridBoard().then =>
+        @gridBoard.destroy()
+        expect(Ext.ComponentQuery.query('rallytimeboxblankslate').length).toBe 0
+
