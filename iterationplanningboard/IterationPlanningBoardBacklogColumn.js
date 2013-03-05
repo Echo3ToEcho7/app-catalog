@@ -103,17 +103,17 @@
             });
         },
 
-        getStoreFilter: function(type) {
+        getStoreFilter: function(model) {
             var filters = [];
             Ext.Array.push(filters, this.callParent(arguments));
-            if (type === 'HierarchicalRequirement') {
+            if (model.elementName === 'HierarchicalRequirement') {
                 if (this.context.getSubscription().StoryHierarchyEnabled) {
                     filters.push({
                         property: 'DirectChildrenCount',
                         value: 0
                     });
                 }
-            } else if (type === 'Defect') {
+            } else if (model.elementName === 'Defect') {
                 filters.push({
                     property: 'Requirement',
                     value: null

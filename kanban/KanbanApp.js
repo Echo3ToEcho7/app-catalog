@@ -6,13 +6,12 @@
         requires: [
             'Rally.apps.kanban.Settings',
             'Rally.apps.kanban.Card',
+            'Rally.apps.kanban.Column',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.cardboard.KanbanPolicy',
             'Rally.ui.cardboard.CardBoard',
-            'Rally.ui.cardboard.KanbanColumn',
-            'Rally.apps.kanban.Card',
             'Rally.ui.report.StandardReport'
         ],
         cls: 'kanban',
@@ -127,6 +126,7 @@
             Ext.Object.each(columnSetting, function(column, values) {
                 var columnName = column || 'None';
                 var columnConfig = {
+                   xtype: 'kanbancolumn',
                     wipLimit: values.wip,
                     value: column,
                     displayValue: columnName,
@@ -182,7 +182,7 @@
                     context: this.getContext().getDataContext(),
                     pageSize: this.getSetting('pageSize'),
                     filters: this.getSetting('query') ?
-                        Rally.data.QueryFilter.fromQueryString(this.getSetting('query')) : []
+                        [Rally.data.QueryFilter.fromQueryString(this.getSetting('query'))] : []
                 }
             };
         },

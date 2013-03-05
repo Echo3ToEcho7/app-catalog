@@ -83,7 +83,7 @@
             }, this, {single: true});
         },
 
-        getStoreFilter: function(type) {
+        getStoreFilter: function(model) {
             var modelName = this._getTimeboxRecord().self.displayName;
             return [
                 {
