@@ -3,7 +3,7 @@
 
     Ext.define("Rally.apps.charts.PortfolioChartAppBase", {
         extend: "Rally.app.App",
-        settingsScope: "project",
+        settingsScope: "workspace",
         
         requires: [
             'Rally.ui.combobox.ComboBox'
@@ -83,7 +83,7 @@
         _setDefaultConfigValues: function () {
             var config = Ext.clone(this.chartComponentConfig);
 
-            config.storeConfig.rawFind = config.storeConfig.rawFind || {};
+            config.storeConfig.find = config.storeConfig.find || {};
 
             config.calculatorConfig = config.calculatorConfig || {};
 
@@ -243,7 +243,7 @@
         },
 
         _updateQueryConfig: function (portfolioItem) {
-            this.chartComponentConfig.storeConfig.rawFind._ItemHierarchy = portfolioItem.ObjectID;
+            this.chartComponentConfig.storeConfig.find._ItemHierarchy = portfolioItem.ObjectID;
         },
 
         _configureChartTicks: function (startDate, endDate) {
