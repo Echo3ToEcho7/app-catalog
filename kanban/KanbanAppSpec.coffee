@@ -113,7 +113,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         description: 'filter to be called with defect'
       ).then =>
         args = filterSpy.getCall(1).args
-        expect(args[1]).toEqual ['hierarchicalrequirement', 'defect']
+        expect(args[1]).toEqual ['defect', 'hierarchicalrequirement']
 
   it 'should contain menu options', ->
     @createApp().then =>
