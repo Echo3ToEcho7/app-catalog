@@ -40,7 +40,7 @@
 
             var subscription = this.getContext().getSubscription();
             if (subscription.isHsEdition() || subscription.isExpressEdition()) {
-                Ext.Array.splice(plugins, 2, 0, {ptype: 'rallygridboardmanageiterations'});
+                plugins.push({ptype: 'rallygridboardmanageiterations'});
             }
 
             this.gridboard = this.add({

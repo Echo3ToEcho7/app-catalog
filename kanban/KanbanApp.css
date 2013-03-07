@@ -1,9 +1,13 @@
-.kanban .header {
-    padding-right: 5px;
+.kanban .show-label {
+    margin-top: 3px;
+    float: right;
 }
 
-.kanban .show-label {
-    line-height: 24px;
+.kanban .right table {
+    float: right;
+}
+
+.kanban .right table label {
     margin-top: 3px;
 }
 
@@ -11,19 +15,10 @@
     margin: 5px;
 }
 
-.kanban .checkbox  label {
-    position: relative;
-    top: 1px;
-}
-
-.kanban .header .add-new {
-    line-height: normal;
-    margin: 5px;
-}
-
 .kanban .column-container .card-column.over-capacity, .kanban .column-container .card-column.over-capacity.dnd-over {
     background-color: #d67972;
 }
+
 .kanban .column-container th.card-column.over-capacity {
     background-color: #b81c10;
 }
