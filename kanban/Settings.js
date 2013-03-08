@@ -87,8 +87,10 @@
                     msgTarget: 'under',
                     invalidCls: 'rally-invalid',
                     handlesEvents: {
-                        fieldselected: function(field) {
-                            this.alignPicker();
+                        fieldselected: function() {
+                            if(this.picker) {
+                                this.alignPicker();
+                            }
                         }
                     }
                 },

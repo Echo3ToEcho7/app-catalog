@@ -12,7 +12,8 @@
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.cardboard.KanbanPolicy',
             'Rally.ui.cardboard.CardBoard',
-            'Rally.ui.report.StandardReport'
+            'Rally.ui.report.StandardReport',
+            'Rally.ui.tooltip.FilterInfo'
         ],
         cls: 'kanban',
         alias: 'widget.kanbanapp',
@@ -117,8 +118,22 @@
                         create: this._onCreate,
                         scope: this
                     }
+                },
+                listeners: {
+                    afterrender: this._onGridBoardAfterRender,
+                    scope: this
                 }
             };
+        },
+
+        _onGridBoardAfterRender: function(gridBoard) {
+            gridBoard.getHeader().getRight().add({
+                xtype: 'rallyfilterinfo',
+                projectName: this.getSetting('project') && this.getContext().getProject().Name || 'Following Global Project Setting',
+                scopeUp: this.getSetting('projectScopeUp'),
+                scopeDown: this.getSetting('projectScopeDown'),
+                query: this.getSetting('query')
+            });
         },
 
         _getColumnConfig: function(columnSetting) {
@@ -126,7 +141,7 @@
             Ext.Object.each(columnSetting, function(column, values) {
                 var columnName = column || 'None';
                 var columnConfig = {
-                   xtype: 'kanbancolumn',
+                    xtype: 'kanbancolumn',
                     wipLimit: values.wip,
                     value: column,
                     displayValue: columnName,
@@ -286,10 +301,10 @@
         _initializeChosenTypes: function() {
             var artifactsPref = this.gridboard.artifactTypeChooserPlugin.artifactsPref;
             var allowedArtifacts = this.gridboard.getHeader().getRight().query('checkboxfield');
-            if(!Ext.isEmpty(artifactsPref) && artifactsPref.length !== allowedArtifacts.length){
+            if (!Ext.isEmpty(artifactsPref) && artifactsPref.length !== allowedArtifacts.length) {
                 this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref);
             }
-            if (Ext.Array.contains(artifactsPref,'agreement')) {
+            if (Ext.Array.contains(artifactsPref, 'agreement')) {
                 this._onShowAgreementsClicked(null, true);
             }
         },
@@ -325,7 +340,7 @@
             params.iteration = 'u';
 
             var groupByFieldName = this.groupByField.name;
-            if(!this.getContext().isFeatureEnabled('WSAPI_2_0_LIVE')) {
+            if (!this.getContext().isFeatureEnabled('WSAPI_2_0_LIVE')) {
                 groupByFieldName = 'c_' + groupByFieldName;
             }
             params[groupByFieldName] = this.cardboard.getColumns()[0].getValue();
