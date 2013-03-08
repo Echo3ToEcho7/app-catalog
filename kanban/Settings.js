@@ -85,7 +85,12 @@
                     },
                     labelAlign: 'left',
                     msgTarget: 'under',
-                    invalidCls: 'rally-invalid'
+                    invalidCls: 'rally-invalid',
+                    handlesEvents: {
+                        fieldselected: function(field) {
+                            this.alignPicker();
+                        }
+                    }
                 },
                 {
                     name: 'hideReleasedCards',
