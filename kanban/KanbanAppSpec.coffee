@@ -12,7 +12,8 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         context: Ext.create('Rally.app.Context',
           initialValues:
             project:
-              _ref: @projectRef
+              _ref: @projectRef,
+              Name: 'Project 1'
         ),
         settings: settings,
         renderTo: 'testDiv'
@@ -167,3 +168,23 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       lastColumn = columns[columns.length-1]
 
       expect(lastColumn.storeConfig.filters.length).toBe 0
+
+  it 'should show filter info when following global project', ->
+    @createApp().then =>
+      filterInfo = @app.down('rallyfilterinfo')
+      expect(filterInfo.getProjectName()).toBe 'Following Global Project Setting'
+
+  it 'should show filter info when scoped to a specific project', ->
+      projectScopeUp = true
+      projectScopeDown = false
+      @createApp(project: @projectRef, projectScopeUp: projectScopeUp, projectScopeDown: projectScopeDown).then =>
+        filterInfo = @app.down('rallyfilterinfo')
+        expect(filterInfo.getProjectName()).toBe @app.getContext().getProject().Name
+        expect(filterInfo.getScopeUp()).toBe projectScopeUp
+        expect(filterInfo.getScopeDown()).toBe projectScopeDown
+
+  it 'should show filter info when a query is set', ->
+      query = '(Name contains Foo)'
+      @createApp(query: query).then =>
+        filterInfo = @app.down('rallyfilterinfo')
+        expect(filterInfo.getQuery()).toBe query
