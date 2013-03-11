@@ -62,9 +62,24 @@
             ];
         },
 
+        clientMetrics: [
+            {
+                method: 'launch',
+                defaultUserAction: 'pichartapp - user loading chart'
+            },
+            {
+                beginEvent: 'updateBeforeRender',
+                endEvent: 'updateAfterRender',
+                defaultUserAction: 'pichartapp - elapsed chart load'
+            }
+        ],
+
         launch: function () {
+            this._setupEvents();
+
             this._addHelpComponent();
             this._setDefaultConfigValues();
+            this._setupUpdateBeforeRender();
 
             var savedPortfolioItem = this._loadSavedPortfolioItem();
             if (savedPortfolioItem) {
@@ -74,6 +89,44 @@
                 // this.owner is the panel this app belongs to
                 this.owner.showSettings();
             }
+        },
+
+        _setupUpdateBeforeRender: function() {
+            this.chartComponentConfig.updateBeforeRender = this._setupDynamicHooksWithEvents(
+                this.chartComponentConfig.updateBeforeRender,
+                'updateBeforeRender'
+            );
+
+            this.chartComponentConfig.updateAfterRender = this._setupDynamicHooksWithEvents(
+                this.chartComponentConfig.updateAfterRender,
+                'updateAfterRender'
+            );
+
+//            var self = this;
+//            var updateBeforeRender = this.chartComponentConfig.updateBeforeRender;
+//
+//            this.chartComponentConfig.updateBeforeRender = function() {
+//                self.fireEvent('updateBeforeRender');
+//                updateBeforeRender.apply(this);
+//            }
+        },
+
+        _setupDynamicHooksWithEvents: function(func, event) {
+            var self = this;
+
+            return function() {
+                self.fireEvent(event);
+                if ('function' === typeof func) {
+                    func.apply(this);
+                }
+            };
+        },
+
+        _setupEvents: function () {
+            this.addEvents(
+                'updateBeforeRender',
+                'updateAfterRender'
+            );
         },
 
         _addHelpComponent: function () {
