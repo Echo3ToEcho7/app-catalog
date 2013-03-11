@@ -11,7 +11,8 @@
             'Rally.apps.kanban.CardAgeSettingsField',
             'Rally.ui.combobox.FieldComboBox',
             'Rally.ui.picker.FieldPicker',
-            'Rally.ui.CheckboxField'
+            'Rally.ui.CheckboxField',
+            'Rally.ui.plugin.FieldValidationUi'
         ],
 
         getFields: function() {
@@ -53,6 +54,7 @@
                     name: 'cardFields',
                     fieldLabel: 'Card Fields',
                     xtype: 'rallyfieldpicker',
+                    plugins: ['rallyfieldvalidationui'],
                     cls: 'card-fields',
                     modelType: 'userstory',
                     alwaysExpanded: true,
@@ -83,9 +85,6 @@
                             picker.validate();
                         }
                     },
-                    labelAlign: 'left',
-                    msgTarget: 'under',
-                    invalidCls: 'rally-invalid',
                     handlesEvents: {
                         fieldselected: function() {
                             if(this.picker) {

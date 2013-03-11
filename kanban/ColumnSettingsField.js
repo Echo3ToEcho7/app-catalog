@@ -17,14 +17,12 @@
     Ext.define('Rally.apps.kanban.ColumnSettingsField', {
         extend: 'Ext.form.field.Base',
         alias: 'widget.kanbancolumnsettingsfield',
+        plugins: ['rallyfieldvalidationui'],
 
         fieldSubTpl: '<div id="{id}" class="settings-grid"></div>',
 
         width: 600,
         cls: 'column-settings',
-        invalidCls: 'rally-invalid',
-        msgTarget: 'under',
-        labelAlign: 'left',
 
         config: {
             /**

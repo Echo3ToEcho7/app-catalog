@@ -56,20 +56,3 @@
 .column-settings .settings-grid.rally-invalid-field {
     border: 1px solid #F00;
 }
-
-.card-fields.rally-invalid td > div {
-    position: absolute;
-    top: -12px;
-    left: -7px;
-    z-index: 10;
-}
-
-.card-fields.rally-invalid td > div > ul {
-    padding: 0 10px;
-    list-style-type: none;
-    background-color: red;
-    color: white;
-    font-size: 11px;
-    position: relative;
-    top: -5px;
-}
