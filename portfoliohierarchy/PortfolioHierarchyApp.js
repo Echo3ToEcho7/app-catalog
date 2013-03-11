@@ -56,6 +56,13 @@
 
             var tree = this.buildTreeForType(record);
             this.down('#bodyContainer').add(tree);
+
+            tree.on('initialload', function(){
+                if (Rally.BrowserTest) {
+                    Rally.BrowserTest.publishComponentReady(this);
+                }
+            }, this);
+
         },
 
         buildTreeForType: function(typeRecord){
