@@ -34,8 +34,9 @@
     color: #fff;
 }
 
-.cardboard .status-field.RevisionHistory {
+.cardboard .status-content > .status-field.RevisionHistory {
     line-height: 18px;
+    cursor: default;
 }
 
 .column-settings .settings-grid {
