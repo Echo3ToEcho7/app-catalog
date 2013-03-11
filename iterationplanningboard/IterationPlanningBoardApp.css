@@ -29,6 +29,11 @@
     margin-top: 4px;
 }
 
+/*Remove with NO_IE7_COMPAT toggle */
+.ext-ie7 .planning-board .artifact-type-chooser {
+    width: 190px;
+}
+
 .planning-board .type-checkbox label {
     position: relative;
     top: 1px;
