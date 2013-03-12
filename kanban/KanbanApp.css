@@ -23,12 +23,12 @@
 }
 
 /*Remove with NO_IE7_COMPAT toggle */
-.ext-ie7 .kanban .right .filterInfo {
+.ext-ie .kanban .right .filterInfo {
     width: 25px;
 }
 
 /*Remove with NO_IE7_COMPAT toggle */
-.ext-ie7 .kanban .right .artifact-type-chooser {
+.ext-ie .kanban .right .artifact-type-chooser {
     width: 265px;
 }
 

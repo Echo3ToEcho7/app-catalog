@@ -30,7 +30,7 @@
 }
 
 /*Remove with NO_IE7_COMPAT toggle */
-.ext-ie7 .planning-board .artifact-type-chooser {
+.ext-ie .planning-board .artifact-type-chooser {
     width: 190px;
 }
 
