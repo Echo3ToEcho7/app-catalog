@@ -34,8 +34,8 @@ describe 'Rally.apps.kanban.CardAgeTemplate', ->
     template = @createTemplate threshold: 2
     html = template.apply RevisionHistory:
       Revisions: [
-        Description: 'Original revision', CreationDate: @dateStringFromThePast 10
-        Description: 'FOO added', CreationDate: @dateStringFromThePast 5
+        {Description: 'FOO added', CreationDate: @dateStringFromThePast 5},
+        {Description: 'Original revision', CreationDate: @dateStringFromThePast 10}
       ]
     expect(html).toBe '<div class="age">5 days</div>'
 
@@ -43,8 +43,8 @@ describe 'Rally.apps.kanban.CardAgeTemplate', ->
     template = @createTemplate threshold: 2
     html = template.apply RevisionHistory:
       Revisions: [
-        Description: 'Original revision', CreationDate: @dateStringFromThePast 10
-        Description: 'FOO changed from something', CreationDate: @dateStringFromThePast 5
+        {Description: 'FOO changed from something', CreationDate: @dateStringFromThePast 5},
+        {Description: 'Original revision', CreationDate: @dateStringFromThePast 10}
       ]
     expect(html).toBe '<div class="age">5 days</div>'
 
