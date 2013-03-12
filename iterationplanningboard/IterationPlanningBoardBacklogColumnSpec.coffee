@@ -92,7 +92,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
     refreshStub = @stub(@column, 'refresh')
 
     @enterSearchText(webdriver.Key.RETURN).then =>
-      expect(refreshStub).toHaveBeenCalledOnce
+      expect(refreshStub).toHaveBeenCalledOnce()
       refreshConfig = refreshStub.getCall(0).args[0]
       expect(refreshConfig.storeConfig.search).toBe ""
 
@@ -134,7 +134,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
       @click(css: '.search-text input').sendKeys text
 
     assertSearch: (refreshStub, searchText) ->
-      expect(refreshStub).toHaveBeenCalledOnce
+      expect(refreshStub).toHaveBeenCalledOnce()
       refreshConfig = refreshStub.getCall(0).args[0]
 
       expect(refreshConfig.storeConfig.search).not.toBeNull()

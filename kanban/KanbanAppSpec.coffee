@@ -61,7 +61,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       editorOpenedStub = @stub(Rally.nav.Manager, 'create')
       addNewHelper = new Helpers.AddNewHelper '.kanban'
       addNewHelper.addWithDetails('foo').then =>
-        expect(editorOpenedStub).toHaveBeenCalledOnce
+        expect(editorOpenedStub).toHaveBeenCalledOnce()
         expect(editorOpenedStub.getCall(0).args[1].iteration).toBe 'u'
 
   it 'should set group by field to first column value', ->
@@ -69,7 +69,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       editorOpenedStub = @stub(Rally.nav.Manager, 'create')
       addNewHelper = new Helpers.AddNewHelper '.kanban'
       addNewHelper.addWithDetails('foo').then =>
-        expect(editorOpenedStub).toHaveBeenCalledOnce
+        expect(editorOpenedStub).toHaveBeenCalledOnce()
         expect(editorOpenedStub.getCall(0).args[1]['c_' + @app.getSetting('groupByField')]).toBe @app.cardboard.getColumns()[0].getValue()
 
   it 'should show correct fields on cards', ->
