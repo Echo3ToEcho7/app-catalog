@@ -8,12 +8,12 @@ describe 'Rally.apps.kanban.Card', ->
   it 'should not query for card age if setting is false', ->
     loadStub = @stub(Rally.domain.WsapiModel, 'load')
     @createCard showCardAge: false
-    sinon.assert.notCalled loadStub
+    expect(loadStub).not.toHaveBeenCalled
 
   it 'should query for card age if setting is true', ->
     loadStub = @stub(Rally.domain.WsapiModel, 'load')
     @createCard showCardAge: true
-    sinon.assert.calledOnce loadStub
+    expect(loadStub).toHaveBeenCalledOnce
     args = loadStub.getCall(0).args
     expect(args[0]).toBe @record.get('ObjectID')
     expect(args[1].fetch.join(',')).toBe 'RevisionHistory,Revisions,Description,CreationDate'
@@ -39,7 +39,7 @@ describe 'Rally.apps.kanban.Card', ->
     columnField = displayName: 'Foo'
     threshold = 5
     @createCard showCardAge: true, record: @record, columnField: columnField, cardAgeThreshold: threshold
-    sinon.assert.calledOnce addFieldStub
+    expect(addFieldStub).toHaveBeenCalledOnce
     field = addFieldStub.getCall(0).args[0]
     expect(field.name).toBe 'RevisionHistory'
     expect(field.isStatus).toBe true

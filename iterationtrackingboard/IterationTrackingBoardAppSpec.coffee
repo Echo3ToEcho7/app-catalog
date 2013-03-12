@@ -63,10 +63,10 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
       @app.onTimeboxScopeChange newScope
 
-      sinon.assert.calledOnce removeStub
+      expect(removeStub).toHaveBeenCalledOnce
       sinon.assert.calledWith removeStub, 'gridBoard'
 
-      sinon.assert.calledOnce addContentStub
+      expect(addContentStub).toHaveBeenCalledOnce
       sinon.assert.calledWith addContentStub, newScope
 
   it 'fires contentupdated event after board load', ->
@@ -78,7 +78,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       contentUpdatedHandlerStub.reset()
       @app.gridboard.fireEvent('load')
 
-      sinon.assert.calledOnce contentUpdatedHandlerStub
+      expect(contentUpdatedHandlerStub).toHaveBeenCalledOnce
 
   it 'should include PortfolioItem in columnConfig.additionalFetchFields', ->
     @createApp().then =>

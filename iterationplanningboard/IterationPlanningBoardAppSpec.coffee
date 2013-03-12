@@ -239,7 +239,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
     @createApp().then =>
 
-      sinon.assert.calledOnce addLocalFilterStub
+      expect(addLocalFilterStub).toHaveBeenCalledOnce
       expect(addLocalFilterStub.getCall(0).args[1]).toBe artifactsPref
 
   it 'should not apply local filter if artifacts type pref exists and it shows all types', ->
@@ -249,13 +249,13 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
     @createApp().then =>
 
-      sinon.assert.notCalled addLocalFilterStub
+      expect(addLocalFilterStub).not.toHaveBeenCalled
 
   it 'should not apply local filter if artifacts type pref does not exist', ->
     addLocalFilterStub = @stub(Rally.ui.cardboard.CardBoard.prototype, 'addLocalFilter')
     artifactsPrefStub = @stub(Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser.prototype, 'artifactsPref', undefined)
 
-    sinon.assert.notCalled addLocalFilterStub
+    expect(addLocalFilterStub).not.toHaveBeenCalled
 
   it 'does not show add new or manage iterations when user is not a project editor', ->
     @stub(Rally.auth.UserPermissions.prototype, 'isProjectEditor').returns false
@@ -329,7 +329,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
       addNewHelper = new Helpers.AddNewHelper '.planning-board'
       addNewHelper.addWithDetails('foo').then ->
-        sinon.assert.calledOnce editorOpenedStub
+        expect(editorOpenedStub).toHaveBeenCalledOnce
 
   it 'should display story ranked at the bottom of the column', ->
     storyRank = 1000
@@ -371,7 +371,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @app.on('contentupdated', contentUpdatedHandlerStub)
       @app.gridboard.fireEvent('load')
 
-      sinon.assert.calledOnce contentUpdatedHandlerStub
+      expect(contentUpdatedHandlerStub).toHaveBeenCalledOnce
 
   it 'should exclude filtered artifact types when filtering by custom search query on the backlog column', ->
     @createAppWithBacklogData().then =>
@@ -400,7 +400,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @filterByType('hierarchicalrequirement').then =>
         @filterByType('defect').then =>
           @filterByBacklogCustomSearchQuery('A').then =>
-            sinon.assert.calledOnce clearCardsSpy
+            expect(clearCardsSpy).toHaveBeenCalledOnce
             expect(backlogColumn.getCards(true).length).toBe 2
             expect(backlogColumn.getCards().length).toBe 0
 
