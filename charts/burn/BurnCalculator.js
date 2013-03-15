@@ -30,7 +30,29 @@
                 ];
             }
             else {
-                return [];
+                return [
+                    {
+                        "as": "Planned",
+                        "f": function(snapshot) {
+                            if(snapshot.PlanEstimate) {
+                                return snapshot.PlanEstimate;
+                            }
+
+                            return 0;
+                        }
+                    },
+                    {
+                        "as": "PlannedCompleted",
+                        "f": function(snapshot) {
+                            var ss = snapshot.ScheduleState;
+                            if(completedStateNames.indexOf(ss) > -1 && snapshot.PlanEstimate) {
+                                return snapshot.PlanEstimate;
+                            }
+
+                            return 0;
+                        }
+                    }
+                ]
             }
         },
 
@@ -54,17 +76,15 @@
             else {
                 return [
                     {
-                        "field": "PlanEstimate",
+                        "field": "Planned",
                         "as": "Planned",
                         "display": "line",
                         "f": "sum"
                     },
                     {
-                        "field": "PlanEstimate",
+                        "field": "PlannedCompleted",
                         "as": "Completed",
-                        "f": "filteredSum",
-                        "filterField": "ScheduleState",
-                        "filterValues": ["Accepted", "Released"],
+                        "f": "sum",
                         "display": "column"
                     }
                 ];

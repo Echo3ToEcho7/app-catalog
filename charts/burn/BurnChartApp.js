@@ -1,7 +1,7 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define("Rally.apps.chart.burn.BurnChartApp", {
+    Ext.define("Rally.apps.charts.burn.BurnChartApp", {
         extend: "Rally.apps.charts.PortfolioChartAppBase",
         cls: "portfolio-burnup-app",
         

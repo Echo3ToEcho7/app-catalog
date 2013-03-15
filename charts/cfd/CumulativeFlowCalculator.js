@@ -15,9 +15,17 @@
                         "as": state,
                         "f": function (snapshot) {
                             if (self.config.chartAggregationType === 'storycount') {
-                                return snapshot.ScheduleState === state ? 1 : 0;
+                                if(snapshot.ScheduleState) {
+                                    return snapshot.ScheduleState === state ? 1 : 0;
+                                }
+
+                                return 0;
                             } else {
-                                return snapshot.ScheduleState === state ? snapshot.PlanEstimate : 0;
+                                if(snapshot.PlanEstimate) {
+                                    return snapshot.ScheduleState === state ? snapshot.PlanEstimate : 0;
+                                }
+
+                                return 0;
                             }
 
                         }
