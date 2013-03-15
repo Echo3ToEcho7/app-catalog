@@ -179,7 +179,9 @@
             var cardConfig = {
                 xtype: 'rallyportfoliokanbancard',
                 editable: true,
-                showHeaderMenu: true
+                showHeaderMenu: true,
+                showSlimDesign: this.getContext() && this.getContext().isFeatureEnabled('ENABLE_SLIM_CARD_DESIGN'),
+                showIconsAndHighlightBorder: this.getContext() && this.getContext().isFeatureEnabled('ENABLE_SLIM_CARD_DESIGN')
             };
 
             var fields = this.getSetting('fields');
@@ -289,8 +291,8 @@
                 percentDoneName: 'PercentDoneByStoryCount',
                 listeners: {
                     beforeshow: function(tip) {
-
-                        var cardElement = Ext.get(tip.triggerElement).up('.rui-card');
+                        var classString = this.cardboard.getCardConfig().showSlimDesign ? '.rui-card-slim' : '.rui-card';
+                        var cardElement = Ext.get(tip.triggerElement).up(classString);
                         var card = Ext.getCmp(cardElement.id);
 
                         tip.updateContent(card.getRecord().data);

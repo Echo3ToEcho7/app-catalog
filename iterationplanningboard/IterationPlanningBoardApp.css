@@ -64,6 +64,12 @@ th.planning-column {
     margin-bottom: 7px;
 }
 
+.planning-column.current-timebox .rui-card-slim {
+    box-shadow: #C0C0C0 2px 2px;
+    -moz-box-shadow: #C0C0C0 2px 2px;
+    -webkit-box-shadow: #C0C0C0 2px 2px;
+}
+
 .progress-bar-background {
     background-color: #424242;
     padding: 6px 0;
