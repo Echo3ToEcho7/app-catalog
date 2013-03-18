@@ -144,6 +144,64 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     @createApp().then =>
       Assert.arrayContains @app.down('.rallycardboard').cardConfig.fields, 'Parent'
 
+  it 'should render a maximum of 3 columns', ->
+    @createApp(
+      iterationCount: 5
+    ).then =>
+      columns = @getColumns()
+      expect(columns.length).toEqual 4 #1 extra column for the backlog column
+
+  it 'should render columns ordered by end date', ->
+    iterationCount = 2
+    @createApp(
+      iterationCount: iterationCount
+    ).then =>
+      columns = @getColumns()
+      expect(columns[0].getValue()).toBeNull()
+      for i in [0...iterationCount]
+        expect(@iterationData[i]._ref).toEqual columns[i + 1].getValue()
+
+  it 'should not render iterations not within current project', ->
+    iterationCount = 1
+    iterationData = @createIterationData
+      iterationCount: iterationCount
+
+    now = new Date
+    iterationData.push
+      _ref: "/iteration/2"
+      _refObjectName: "Iteration 2"
+      Name: "Iteration 2"
+      ObjectID: 2,
+      Project:
+        _ref: "/project/12345"
+      StartDate: Rally.util.DateTime.toIsoString(Ext.Date.add(now, Ext.Date.DAY, 5))
+      EndDate: Rally.util.DateTime.toIsoString(Ext.Date.add(now, Ext.Date.DAY, 7))
+
+    @createApp(
+      iterationData: iterationData
+    ).then =>
+      columns = @getColumns()
+      expect(columns.length).toEqual iterationCount + 1 # backlog + 1 iteration
+      expect(columns[1].getValue()).toEqual(iterationData[0]._ref)
+
+  it 'should update the project of a card when dropping in a non-like iteration', ->
+    iterationCount = 1
+    iterationData = @createIterationData
+      iterationCount: iterationCount
+
+    userStory = @createUserStoryRecord
+      Project:
+        _ref: '/project/2'
+
+    @createApp(
+      iterationData: iterationData
+    ).then =>
+      iterationColumn = @getColumns()[1]
+      iterationColumn.fireEvent 'beforecarddroppedsave', iterationColumn,
+        getRecord: -> userStory
+
+      expect(Rally.util.Ref.getRelativeUri(userStory.get('Project'))).toEqual(Rally.util.Ref.getRelativeUri(@app.getContext().getProject()))
+
   it 'should hide only user stories when user story type checkbox is unchecked', ->
     userStoryRecord = @createUserStoryRecord Iteration: null
     @ajax.whenQuerying('userstory').respondWith([userStoryRecord.data])
