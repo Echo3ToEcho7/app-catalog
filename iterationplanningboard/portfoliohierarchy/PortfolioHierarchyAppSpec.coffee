@@ -29,7 +29,7 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
     @userStoryModel = Rally.mock.data.ModelFactory.getUserStoryModel()
 
     @ajax.whenQuerying('typedefinition').respondWith [
-      Rally.mock.data.types.PortfolioItemStrategy.getModelDefinition()
+      Rally.mock.data.ModelFactory.getModelDefinition('PortfolioItemStrategy')
     ]
     
   afterEach ->
