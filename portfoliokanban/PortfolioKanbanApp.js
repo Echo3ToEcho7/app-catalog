@@ -197,6 +197,8 @@
             columnConfig.additionalFetchFields.push('Discussion');
             cardConfig.fields.push('Discussion');
 
+            var cardboardCls = this.getContext() && this.getContext().isFeatureEnabled('ENABLE_SLIM_CARD_DESIGN') ? 'cardboard slim' : 'cardboard';
+
             cardboard = this.cardboard = Ext.widget('rallycardboard', {
                 types: [this.currentType.get('TypePath')],
                 context: this.getContext(),
@@ -205,6 +207,7 @@
                 columns: columns,
                 maxColumnsPerBoard: columns.length,
                 ddGroup: this.currentType.get('TypePath'),
+                cls: cardboardCls,
                 columnConfig: columnConfig,
                 cardConfig: cardConfig,
                 storeConfig: {
