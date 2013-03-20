@@ -36,8 +36,7 @@
                     label: "Portfolio Item",
                     config: {
                         type: "portfolioitem",
-                        cls: "pichooser",
-                        context: this.getContext()
+                        cls: "pichooser"
                     }
                 },
                 {
@@ -102,6 +101,14 @@
                 this.chartComponentConfig.updateAfterRender,
                 'updateAfterRender'
             );
+
+//            var self = this;
+//            var updateBeforeRender = this.chartComponentConfig.updateBeforeRender;
+//
+//            this.chartComponentConfig.updateBeforeRender = function() {
+//                self.fireEvent('updateBeforeRender');
+//                updateBeforeRender.apply(this);
+//            }
         },
 
         _setupDynamicHooksWithEvents: function(func, event) {
