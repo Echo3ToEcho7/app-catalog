@@ -18,14 +18,19 @@ describe 'Rally.apps.kanban.Card', ->
     expect(args[0]).toBe @record.get('ObjectID')
     expect(args[1].fetch.join(',')).toBe 'RevisionHistory,Revisions,Description,CreationDate'
 
-  it 'should requery for card age if setting is true when the card is re rendered', ->
+  it 'should query for card age with correct parameters', ->
     loadStub = @stub(Rally.domain.WsapiModel, 'load')
     @createCard showCardAge: true
-    @card.reRender()
-    sinon.assert.calledTwice loadStub
-    args = loadStub.getCall(1).args
+    sinon.assert.calledOnce loadStub
+    args = loadStub.getCall(0).args
     expect(args[0]).toBe @record.get('ObjectID')
     expect(args[1].fetch.join(',')).toBe 'RevisionHistory,Revisions,Description,CreationDate'
+
+  it 'should requery for card age if setting is true when the card is re rendered', ->
+    queryForAgeStub = @stub(Rally.apps.kanban.Card.prototype, '_queryForAge')
+    @createCard showCardAge: true
+    @card.reRender()
+    sinon.assert.calledTwice queryForAgeStub
 
   it 'should add the age field to the card', ->
     addFieldStub = @stub(Rally.apps.kanban.Card.prototype, 'addField')
