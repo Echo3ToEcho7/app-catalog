@@ -26,7 +26,8 @@
         },
 
         _queryForAge: function() {
-            if (this.showCardAge && !this.getRecord().get('RevisionHistory')) {
+            if (!this._queryingForRevisionHistory && this.showCardAge && !this.getRecord().get('RevisionHistory')) {
+                this._queryingForRevisionHistory = true;
                 this.getRecord().self.load(this.getRecord().get('ObjectID'), {
                     fetch: ['RevisionHistory', 'Revisions', 'Description', 'CreationDate'],
                     callback: this._onRevisionHistoryLoaded,
@@ -37,6 +38,7 @@
 
         _onRevisionHistoryLoaded: function(record, operation) {
             if (operation.success) {
+                delete this._queryingForRevisionHistory;
                 this.getRecord().set('RevisionHistory', record.get('RevisionHistory'));
                 this.addField({
                     name: 'RevisionHistory',
