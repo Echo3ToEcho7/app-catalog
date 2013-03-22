@@ -24,7 +24,7 @@
             var stores = this.callParent(arguments);
             return Ext.Array.filter(stores, function(store) {
                 var validFilters = store.filters.filterBy(function(filter) {
-                    return Ext.isDefined(store.model.getField(filter.property));
+                    return store.model.hasField(filter.property);
                 });
                 return validFilters.length === store.filters.length;
             });
