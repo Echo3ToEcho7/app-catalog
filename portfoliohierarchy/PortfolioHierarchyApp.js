@@ -92,7 +92,8 @@
                         context: {
                             project: undefined,
                             workspace: me.getContext().getDataContext().workspace
-                        }
+                        },
+                        fetch: this._getChildLevelFetchFields()
                     };
                 },
                 emptyText: '<p>No portfolio items of this type found.</p>' +
