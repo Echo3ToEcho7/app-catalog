@@ -36,7 +36,8 @@
                     label: "Portfolio Item",
                     config: {
                         type: "portfolioitem",
-                        cls: "pichooser"
+                        cls: "pichooser",
+                        context: this.getContext()
                     }
                 },
                 {
@@ -97,14 +98,6 @@
                 this.chartComponentConfig.updateAfterRender,
                 'updateAfterRender'
             );
-
-//            var self = this;
-//            var updateBeforeRender = this.chartComponentConfig.updateBeforeRender;
-//
-//            this.chartComponentConfig.updateBeforeRender = function() {
-//                self.fireEvent('updateBeforeRender');
-//                updateBeforeRender.apply(this);
-//            }
         },
 
         _setupDynamicHooksWithEvents: function(func, event) {
@@ -190,18 +183,22 @@
                 context: context,
                 type: portfolioItem._type,
                 success: function (model) {
-                    this._onModelRetrieved(model, portfolioItem.ObjectID);
+                    this._onModelRetrieved(model, savedPortfolioItem);
                 },
                 scope: this
             });
         },
 
-        _onModelRetrieved: function (model, portfolioItemOid) {
+        _onModelRetrieved: function (model, savedPortfolioItem) {
             if (model) {
                 model.find({
                     filters: {
                         property: "ObjectID",
-                        value: portfolioItemOid
+                        value: savedPortfolioItem.artifact.ObjectID
+                    },
+                    context: {
+                        workspace: this.getContext().getWorkspace()._ref,
+                        project: null
                     },
                     scope: this,
                     callback: this._onPortfolioItemRetrieved
