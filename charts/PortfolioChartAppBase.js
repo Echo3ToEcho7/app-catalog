@@ -64,10 +64,6 @@
 
         clientMetrics: [
             {
-                method: 'launch',
-                defaultUserAction: 'pichartapp - user loading chart'
-            },
-            {
                 beginEvent: 'updateBeforeRender',
                 endEvent: 'updateAfterRender',
                 defaultUserAction: 'pichartapp - elapsed chart load'
