@@ -30,6 +30,7 @@
 
         getSettingsFields: function () {
             var self = this;
+
             return [
                 {
                     type: "buttonchooser",
@@ -50,14 +51,19 @@
                         xtype: "store",
                         fields: ["name", "value"],
                         data: [
-                            {name: "Story Plan Estimate", value: "storypoints"},
-                            {name: "Story Count", value: "storycount"}
+                            {name: "Story Count", value: "storycount"},
+                            {name: "Story Plan Estimate", value: "storypoints"}
                         ]
                     },
                     displayField: "name",
                     valueField: "value",
-                    onLoad: function () {
-                        this.setValue(self.getSetting("chartAggregationType") || "storycount");
+                    listeners: {
+                        load: function() {
+                            this.setValue(self.getSetting("chartAggregationType") || "storycount");
+                        },
+                        select: function() {
+                            this.setValue(this.value);
+                        }
                     }
                 }
             ];
