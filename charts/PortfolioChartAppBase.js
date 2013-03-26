@@ -259,7 +259,7 @@
 
         _setDynamicConfigValues: function (portfolioItem) {
             this._updateChartConfigDateFormat();
-            this.chartComponentConfig.chartConfig.title.text = this._buildChartTitle(portfolioItem);
+            this.chartComponentConfig.chartConfig.title = this._buildChartTitle(portfolioItem);
 
             this.chartComponentConfig.calculatorConfig.chartAggregationType = this._getAggregationType();
             this.chartComponentConfig.chartConfig.yAxis[0].title.text = this._getYAxisTitle();
@@ -322,10 +322,26 @@
         },
 
         _buildChartTitle: function (portfolioItem) {
+            var widthPerCharacter = 10,
+                totalCharacters = Math.floor(this.getWidth() / widthPerCharacter);
+
+            var title = "Portfolio Item Chart",
+                align = "center";
+
             if (portfolioItem) {
-                return portfolioItem.FormattedID + ": " + portfolioItem.Name;
-            } else {
-                return "Portfolio Item Chart";
+                var fullTitle = portfolioItem.FormattedID + ": " + portfolioItem.Name;
+
+                if(totalCharacters < fullTitle.length) {
+                    title = fullTitle.substring(0, totalCharacters) + "...";
+                    align = "left";
+                } else {
+                    title = fullTitle;
+                }
+            }
+
+            return {
+                text: title,
+                align: align
             }
         },
 
