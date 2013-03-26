@@ -263,12 +263,18 @@
 
             this.chartComponentConfig.calculatorConfig.chartAggregationType = this._getAggregationType();
             this.chartComponentConfig.chartConfig.yAxis[0].title.text = this._getYAxisTitle();
+            this.chartComponentConfig.chartConfig.yAxis[0].labels = {
+                x: -5,
+                y: 4
+            };
         },
 
         _updateChartConfigDateFormat: function () {
             var rallyDateFormat = this._parseRallyDateFormatToHighchartsDateFormat();
 
             this.chartComponentConfig.chartConfig.xAxis.labels = {
+                x: 0,
+                y: 20,
                 formatter: function () {
                     return Highcharts.dateFormat(rallyDateFormat, new Date(this.value).getTime());
                 }
