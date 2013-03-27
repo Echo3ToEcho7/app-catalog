@@ -28,7 +28,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
 
     createAppWaitForGridAndClickOnCell: (row, col, settings = {}) ->
       @createAppAndWaitForGrid().then =>
-        @ajax.whenQuerying('defect').respondWith(Rally.mock.data.ModelFactory.getMockData('Defect')[0])
+        @ajax.whenQuerying('defect').respondWith(Rally.mock.ModelObjectMother.getData('Defect')[0])
         @clickCellInMatrixGrid(col, row)
         once
           condition: =>
@@ -83,8 +83,15 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
       @getDefectTableHeaderText().indexOf(txt) > -1
 
   beforeEach ->
-    @ajax.whenQuerying('release').respondWith(Rally.mock.data.ModelFactory.getMockData('Release'))
-    @ajax.whenQuerying('defect').respondWith(Rally.mock.data.ModelFactory.getMockData('Defect'))
+    @ajax.whenQuerying('release').respondWith [{
+      ReleaseStartDate: "2010-07-11T00:00:00.000Z",
+      ReleaseDate: "2010-07-15T23:59:59.000Z"
+    }, {
+      ReleaseStartDate: "2010-07-04T00:00:00.000Z",
+      ReleaseDate: "2010-07-08T23:59:59.000Z"
+    }
+    ]
+    @ajax.whenQuerying('defect').respondWithCount 1
     @states = @getMockDefectDataForAttribute('State')
     @priorities = @getMockPriorityDataWithBlankValuesConvertedToNone()
     @statesLength = @states.length
@@ -181,7 +188,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
 
     it 'loads the defect grid when you click on a matrix grid cell with a non-zero value', ->
       @createAppAndWaitForGrid().then =>
-        @ajax.whenQuerying('defect').respondWith(Rally.mock.data.ModelFactory.getMockData('Defect')[0])
+        @ajax.whenQuerying('defect').respondWith(Rally.mock.ModelObjectMother.getData('Defect')[0])
         @clickCellInMatrixGrid(@row, @col)
         once
           condition: =>
@@ -214,7 +221,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
     it 'loads new data in the defect table when clicking a different cell in the upper table', ->
       @createAppWaitForGridAndClickOnCell(@row - 1, @col - 1).then =>
         originalRowCount = @app.defectGrid.getStore().getCount()
-        @ajax.whenQuerying('defect').respondWith(Rally.mock.data.ModelFactory.getMockData('Defect'))
+        @ajax.whenQuerying('defect').respondWith(Rally.mock.ModelObjectMother.getData('Defect'))
         @clickCellInMatrixGrid(@col, @row)
         once
           condition: =>

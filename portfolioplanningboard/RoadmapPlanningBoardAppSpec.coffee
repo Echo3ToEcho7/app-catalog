@@ -22,7 +22,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
 
     @ajax.whenQuerying('preference').respondWith()
     @ajax.whenQuerying('portfolioitem/feature').respondWith [
-      {ObjectID: 1, Name: 'test', FormattedID: 'F1'}
+      {Name: 'test', FormattedID: 'F1', PlannedEndDate: null}
     ]
     @ajax.whenQuerying('typedefinition').respondWith [
       Rally.mock.data.ModelFactory.getModelDefinition('PortfolioItemFeature')
