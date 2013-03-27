@@ -342,7 +342,7 @@
             return {
                 text: title,
                 align: align
-            }
+            };
         },
 
         _getAggregationType: function () {
