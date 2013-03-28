@@ -34,7 +34,7 @@
 
         getHeaderTplData: function() {
             return {
-                columnTitle: this.getDisplayValue() || this.getValue(),
+                columnTitle: this.getColumnHeader().getHeaderValue() || this.getValue(),
                 formattedStartDate: this._getFormattedDate(this.startDate),
                 formattedEndDate: this._getFormattedDate(this.endDate),
                 progressBarHtml: this._getProgressBarHtml()

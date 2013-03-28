@@ -20,8 +20,7 @@
         },
 
         config: {
-            value: null,
-            displayValue: 'Backlog'
+            value: null
         },
 
         drawHeader: function() {
@@ -30,13 +29,11 @@
             this.getColumnHeader().add(
                 {
                     xtype: 'container',
-                    layout: 'hbox',
                     cls: 'search',
                     items: [
                         {
                             xtype: 'rallytextfield',
                             cls: 'search-text',
-                            flex: 1,
                             itemId: 'searchText',
                             enableKeyEvents: true,
                             emptyText: 'Search',
@@ -44,11 +41,6 @@
                                 specialkey: this._onSearchTextSpecialKey,
                                 scope: this
                             }
-                        },
-                        {
-                            itemId: 'spacer',
-                            xtype: 'component',
-                            width: 6
                         },
                         {
                             xtype: 'component',

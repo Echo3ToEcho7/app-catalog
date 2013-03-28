@@ -113,10 +113,16 @@ th.planning-column {
 
 .planning-column.backlog .search {
     margin: 5px 30px 0 30px;
+    padding-right: 21px;
 }
 
 .planning-column.backlog .search > div {
     overflow-x: hidden;
+}
+
+.planning-column.backlog .search .search-text {
+    float: left;
+    width: 100%;
 }
 
 .planning-column.backlog .search-button {
@@ -124,8 +130,10 @@ th.planning-column {
     width: 15px;
     height: 15px;
     background-size: 15px 15px;
-    margin-top: 4px;
+    background-repeat: no-repeat;
     cursor: pointer;
+    float: right;
+    margin: 4px -21px 0 6px;
 }
 
 .planning-board .no-timebox .columns tr td.blank-slate-column {

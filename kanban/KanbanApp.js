@@ -144,7 +144,9 @@
                     xtype: 'kanbancolumn',
                     wipLimit: values.wip,
                     value: column,
-                    displayValue: columnName,
+                    columnHeaderConfig: {
+                        headerTpl: columnName
+                    },
                     policyCmpConfig: {
                         xtype: 'rallykanbanpolicy',
                         policies: this.getSetting(columnName + 'Policy'),

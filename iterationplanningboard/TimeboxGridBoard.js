@@ -103,12 +103,20 @@
             var columns = [{
                 xtype: 'iterationplanningboardappbacklogcolumn',
                 flex: this._hasTimeboxes() ? 1 : 1/3,
-                cardLimit: Ext.isIE ? 25 : 100
+                cardLimit: Ext.isIE ? 25 : 100,
+                columnHeaderConfig: {
+                    headerTpl: 'Backlog'
+                }
             }];
 
             Ext.Array.each(timeboxes, function(timeboxRecords) {
                 columns.push({
-                    timeboxRecords: timeboxRecords
+                    timeboxRecords: timeboxRecords,
+                    columnHeaderConfig: {
+                        record: timeboxRecords[0],
+                        fieldToDisplay: 'Name',
+                        editable: false
+                    }
                 });
             }, this);
 

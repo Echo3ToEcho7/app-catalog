@@ -59,7 +59,11 @@
         constructor: function(config) {
             this.mergeConfig(config);
             this.config.value = Rally.util.Ref.getRelativeUri(this._getTimeboxRecord());
-            this.config.displayValue = this._getTimeboxRecord().get('Name');
+            this.config.columnHeaderConfig = {
+                record: this._getTimeboxRecord(),
+                fieldToDisplay: 'Name',
+                editable: false
+            };
             this.config.moreItemsConfig = {
                 token: Rally.nav.Manager.getDetailHash(this._getTimeboxRecord(), {scope: '', subPage: 'scheduled'})
             };
@@ -70,6 +74,10 @@
         initComponent: function() {
             this.callParent(arguments);
             this.on('beforecarddroppedsave', this._onBeforeCardDrop, this);
+            this.on('addcard', this._drawProgressBar, this);
+            this.on('load', this._drawProgressBar, this);
+            this.on('removecard', this._drawProgressBar, this);
+            this.on('cardupdated', this._drawProgressBar, this);
 
             this.on('afterrender', function() {
                 this._addPlanningClasses();
@@ -100,9 +108,26 @@
             });
         },
 
-        getHeaderTpl: function() {
+        drawHeader: function() {
+            this.callParent(arguments);
+            this._drawProgressBar();
+        },
+
+        _drawProgressBar: function() {
+
+            if(this.progressBar) {
+                this.progressBar.update(this.getIterationPlanningBoardHeaderTpl().apply(this.getIterationPlanningBoardHeaderTplData()));
+            } else {
+                this.progressBar = this.getColumnHeader().add({
+                    xtype: 'container',
+                    html: this.getIterationPlanningBoardHeaderTpl().apply(this.getIterationPlanningBoardHeaderTplData())
+                });
+            }
+
+        },
+
+        getIterationPlanningBoardHeaderTpl: function() {
             this.headerTpl = this.headerTpl || Ext.create('Ext.XTemplate',
-                '<div class="ellipsis columnTitle" title="{columnTitle}">{columnTitle}</div>',
                 '<div class="timeboxDates">{formattedStartDate} - {formattedEndDate}</div>',
                 '{progressBarHtml}'
             );
@@ -110,9 +135,8 @@
             return this.headerTpl;
         },
 
-        getHeaderTplData: function() {
+        getIterationPlanningBoardHeaderTplData: function() {
             return {
-                columnTitle: this.getDisplayValue() || this.getValue(),
                 formattedStartDate: this._getFormattedDate(this.startDateField),
                 formattedEndDate: this._getFormattedDate(this.endDateField),
                 progressBarHtml: this._getProgressBarHtml()

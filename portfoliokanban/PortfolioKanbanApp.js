@@ -173,7 +173,8 @@
                 xtype: 'rallykanbancolumn',
                 cardLimit: 50,
                 drawFooter: Ext.emptyFn,
-                enablePolicies: true
+                enablePolicies: true,
+                enableWipLimit: true
             };
 
             var cardConfig = {
@@ -262,7 +263,9 @@
 
             var columns = [
                 {
-                    displayValue: 'No Entry',
+                    columnHeaderConfig: {
+                        headerTpl: 'No Entry'
+                    },
                     value: null,
                     policyCmpConfig: {
                         xtype: 'rallyportfoliokanbanpolicy',
@@ -274,8 +277,13 @@
             Ext.Array.each(states, function(state) {
                 columns.push({
                     value: state.get('_ref'),
-                    displayValue: state.get('Name'),
                     wipLimit: state.get('WIPLimit'),
+                    enableWipLimit: true,
+                    columnHeaderConfig: {
+                        record: state,
+                        fieldToDisplay: 'Name',
+                        editable: false
+                    },
                     policyCmpConfig: {
                         xtype: 'rallyportfoliokanbanpolicy',
                         stateRecord: state,
