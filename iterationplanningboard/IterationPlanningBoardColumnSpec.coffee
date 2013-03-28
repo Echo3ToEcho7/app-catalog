@@ -17,7 +17,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
     @createColumn
       name: iterationName
 
-    expect(@column.getColumnHeaderCell().down('.columnTitle').getHTML()).toEqual(iterationName)
+    expect(@column.getColumnHeaderCell().down('.columnTitle').dom.textContent).toEqual(iterationName)
 
   it 'should render the current iteration column', ->
     iterationName = 'talking bout my iteration'
@@ -232,6 +232,55 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
     }
     expect(@getProgressBarLabel().getHTML()).toEqual '10 of 13.2'
 
+  it 'should refresh progress bar when addcard event is fired by column', ->
+
+    @createColumn # Total: 13.2000000001
+      iterationCount: 10
+      plannedVelocity: 1.32
+
+    progressBarUpdateSpy = @stub(@column.progressBar, 'update')
+
+    @column.fireEvent 'addcard'
+
+    expect(progressBarUpdateSpy.callCount).toBe(1)
+
+  it 'should refresh progress bar when load event is fired by column', ->
+
+    @createColumn # Total: 13.2000000001
+      iterationCount: 10
+      plannedVelocity: 1.32
+
+    progressBarUpdateSpy = @stub(@column.progressBar, 'update')
+
+    @column.fireEvent 'load'
+
+    expect(progressBarUpdateSpy.callCount).toBe(1)
+
+
+  it 'should refresh progress bar when removecard event is fired by column', ->
+
+    @createColumn # Total: 13.2000000001
+      iterationCount: 10
+      plannedVelocity: 1.32
+
+    progressBarUpdateSpy = @stub(@column.progressBar, 'update')
+
+    @column.fireEvent 'removecard'
+
+    expect(progressBarUpdateSpy.callCount).toBe(1)
+
+  it 'should refresh progress bar when cardupdated event is fired by column', ->
+
+    @createColumn # Total: 13.2000000001
+      iterationCount: 10
+      plannedVelocity: 1.32
+
+    progressBarUpdateSpy = @stub(@column.progressBar, 'update')
+
+    @column.fireEvent 'cardupdated'
+
+    expect(progressBarUpdateSpy.callCount).toBe(1)
+
   helpers
     createColumn: (options) ->
       Model = Rally.mock.data.ModelFactory.getIterationModel()
@@ -254,6 +303,11 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
         contentCell: Ext.get 'testDiv'
         attribute: 'Iteration'
         timeboxRecords: timeboxRecords,
+        columnHeaderConfig: {
+            record: timeboxRecords[0],
+            fieldToDisplay: 'Name',
+            editable: true
+        },
         context: Ext.create('Rally.app.Context',
           initialValues:
             featureToggles: Rally.alm.FeatureToggle
@@ -268,3 +322,16 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
     getProgressBar: -> @column.getColumnHeaderCell().down('.progress-bar')
 
     getProgressBarBackgroundContainer: -> @column.getColumnHeaderCell().down('.progress-bar-background')
+
+
+
+columnHeaderConfig: {
+                        record: timeboxRecords[0],
+                        fieldToDisplay: 'Name',
+                        editable: false
+                    }
+
+
+  columnHeaderConfig: {
+                         headerTpl: 'Backlog'
+                     }

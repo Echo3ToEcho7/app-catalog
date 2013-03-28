@@ -251,7 +251,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     @ajax.whenQuerying('defect').respondWith([defectRecord.data])
 
     @createApp().then =>
-
       expect(@getVisibleCards('defect').length).toBe 1
       expect(@getVisibleCards('hierarchicalrequirement').length).toBe 1
 
@@ -468,6 +467,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
     @createApp(plannedVelocity: 10).then =>
 
+      debugger
       expect(@getProgressBarHtml(1)).toBe '4 of 10'
 
       @filterByType('defect').then =>
