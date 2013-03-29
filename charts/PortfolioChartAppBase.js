@@ -357,12 +357,12 @@
 
         _getChartStartDate: function (portfolioItem) {
             var date = portfolioItem.ActualStartDate || portfolioItem.ActualEndDate || new Date();
-            return date.toISOString();
+            return Ext.Date.format(date, 'c');
         },
 
         _getChartEndDate: function (portfolioItem) {
             var date = portfolioItem.ActualEndDate || new Date();
-            return date.toISOString();
+            return Ext.Date.format(date, 'c');
         },
 
         _getTimeZone: function () {
