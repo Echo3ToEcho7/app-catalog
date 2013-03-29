@@ -15,8 +15,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
           project:globalContext.getProject()
           workspace:globalContext.getWorkspace()
           user:globalContext.getUser()
-          subscription:globalContext.getSubscription(),
-          featureToggles:Rally.alm.FeatureToggle
+          subscription:globalContext.getSubscription()
 
       options =
         context: context,
@@ -26,15 +25,14 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
       @app = Ext.create('Rally.apps.portfoliokanban.PortfolioKanbanApp', options)
 
+      @stub(@app.getContext(), 'isFeatureEnabled').withArgs('ENABLE_SLIM_CARD_DESIGN').returns true
+
       @waitForComponentReady @app
 
     _getTextsForElements: (cssQuery) ->
       Ext.Array.map(@app.getEl().query(cssQuery), (el) -> el.innerHTML).join('__')
 
   beforeEach ->
-
-    @toggleStub = @stub(Rally.alm.FeatureToggle, "isEnabled")
-
     @ajax.whenQuerying('typedefinition').respondWith([
       {
         '_ref':'/typedefinition/1'
@@ -180,8 +178,8 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp().then (app) =>
 
       expect(@_getTextsForElements('.field-content')).toContain feature.Name
-      expect(@_getTextsForElements('.card-header-left')).toContain feature.FormattedID
-      expect(@_getTextsForElements('.card-owner-name')).toContain feature.Owner._refObjectName
+      expect(@_getTextsForElements('.id')).toContain feature.FormattedID
+      expect(app.getEl().query('.Owner .rui-field-value')[0].title).toContain feature.Owner._refObjectName
 
   it 'creates loading mask with unique id', ->
     @_createApp().then (app) =>

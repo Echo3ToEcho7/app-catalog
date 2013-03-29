@@ -10,6 +10,8 @@ Ext.require [
 describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
   helpers
+    cardSelector: '.rui-card-slim'
+
     createApp: (options = {}) ->
       @iterationData = options.iterationData || Helpers.IterationDataCreatorHelper.createIterationData(options)
 
@@ -65,12 +67,12 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
     getVisibleCards: (type) ->
       additionalClass = if type? then ".#{type}" else ''
-      cards = Ext.query ".rui-card#{additionalClass}"
+      cards = Ext.query "#{@cardSelector}#{additionalClass}"
 
       card for card in cards when Ext.fly(card).isVisible()
 
     getVisibleCardNames: ->
-      Ext.query '.rui-card .rui-card-content .field-content.Name'
+      Ext.query "#{@cardSelector} .rui-card-content .field-content.Name"
 
     filterByType: (type, expectedVisibleCards = 0) ->
       @click(css: ".#{type}-type-checkbox input").then =>
@@ -92,7 +94,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
     # could not get actionsequence mouseMove to work in FF
     simulateMouseEnterFormattedID: () ->
-      Rally.test.fireEvent(Ext.query('.rui-card .id')[0], 'mouseenter')
+      Rally.test.fireEvent(Ext.query("#{@cardSelector} .id")[0], 'mouseenter')
       once(
         condition: => Ext.query('.description-popover .description').length is 1
         description: 'description popover to show'
@@ -100,7 +102,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
     # could not get actionsequence mouseMove to work in FF
     simulateMouseLeaveFormattedID: () ->
-      Rally.test.fireEvent(Ext.query('.rui-card .id')[0], 'mouseleave')
+      Rally.test.fireEvent(Ext.query("#{@cardSelector} .id")[0], 'mouseleave')
       once(
         condition: => Ext.query('.description-popover').length is 0
         description: 'description popover to hide'
@@ -122,7 +124,8 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       expect(iterationJson._ref).toEqual column.getValue()
 
   beforeEach ->
-    @stub(Rally.alm.FeatureToggle, 'isEnabled').withArgs("SCROLLING_ON_CARDBOARD").returns true
+    @stub(Rally.alm.FeatureToggle, 'isEnabled').withArgs("SCROLLING_ON_CARDBOARD").returns(true)
+      .withArgs('ENABLE_SLIM_CARD_DESIGN').returns(true)
 
     @ajax.whenQuerying('userstory').respondWith()
     @ajax.whenQuerying('defect').respondWith()
@@ -484,7 +487,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       Description: 'foo bunny'
     @ajax.whenQuerying('userstory').respondWith([userStoryRecord.data])
     @createApp().then =>
-      cardFormattedID = Ext.query('.rui-card .id')[0]
+      cardFormattedID = Ext.query("#{@cardSelector} .id")[0]
 
       @simulateMouseEnterFormattedID().then =>
         expect(Ext.get(Ext.query('.description-popover .description')[0]).dom.innerHTML).toBe userStoryRecord.get('Description')

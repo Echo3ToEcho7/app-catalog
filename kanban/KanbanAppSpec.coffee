@@ -19,6 +19,8 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         renderTo: 'testDiv'
       )
 
+      @stub(@app.getContext(), 'isFeatureEnabled').withArgs('ENABLE_SLIM_CARD_DESIGN').returns true
+
       @waitForComponentReady @app
 
   beforeEach ->

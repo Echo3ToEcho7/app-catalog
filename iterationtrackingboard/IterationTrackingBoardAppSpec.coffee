@@ -27,10 +27,11 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
             timebox: @iterationRecord
             project:
               _ref: @projectRef
-            featureToggles: Rally.alm.FeatureToggle
         ),
         renderTo: 'testDiv'
       , config))
+
+      @stub(@app.getContext(), 'isFeatureEnabled').withArgs('ENABLE_SLIM_CARD_DESIGN').returns true
 
       @waitForComponentReady(@app)
 
@@ -44,8 +45,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     @ajax.whenQuerying('defect').respondWith()
     @ajax.whenQuerying('defectsuite').respondWith()
     @ajax.whenQuerying('testset').respondWith()
-
-    @toggleStub = @stub(Rally.alm.FeatureToggle, "isEnabled").returns false
 
     @tooltipHelper = new Helpers.TooltipHelper this
 
