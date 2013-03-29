@@ -21,17 +21,29 @@
             this.add(this.detailView);
 
             this.subscribe(this, Rally.Message.objectFocus, function(record){
+
+                controllerClass = Rally.ui.detail.controller.DetailController.getControllerClass(record);
+                if(!controllerClass){
+                    return;
+                }
+
+                if (record.get('ObjectID') == (this.detailView.getRecord() && this.detailView.getRecord().get('ObjectID'))) {
+                    return;
+                }
+
                 this.showFocusFlair(record);
                 this.loadRecord(record);
             }, this);
+
             this.subscribe(this, Rally.Message.objectUpdate, function(record) {
                 if (record.get('ObjectID') == (this.detailView.getRecord() && this.detailView.getRecord().get('ObjectID'))) {
                     this.loadRecord(record);
                 }
             }, this);
+
             this.subscribe(this, Rally.Message.objectDestroy, function(record) {
                 if (record.get('ObjectID') == (this.detailView.getRecord() && this.detailView.getRecord().get('ObjectID'))) {
-                    this.detailView.switchToDeleteView(record);
+                    this.detailView.switchToDeleteView();
                 }
             }, this);
         },
@@ -53,7 +65,7 @@
         showFocusFlair: function(record){
             Rally.ui.notify.Notifier.showStatus({
                 message: "Focused on " + record.get('FormattedID') + ': ' + record.get("_refObjectName"),
-                timeout: 5000
+                duration: 5000
             });
         }
     });
