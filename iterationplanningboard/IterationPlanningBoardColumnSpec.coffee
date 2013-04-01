@@ -23,7 +23,8 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
     iterationName = 'talking bout my iteration'
     @createColumn
       name: iterationName
-      currentTimebox: true
+      endDate: Rally.util.DateTime.add(new Date(), 'day', 1)
+      startDate: Rally.util.DateTime.add(new Date(), 'day', -1)
 
     expect(@column.getColumnHeaderCell().hasCls('current-timebox')).toBe true
     expect(@column.getContentCell().hasCls('current-timebox')).toBe true
@@ -253,7 +254,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
         contentCell: Ext.get 'testDiv'
         attribute: 'Iteration'
         timeboxRecords: timeboxRecords,
-        currentTimebox: options.currentTimebox || false,
         context: Ext.create('Rally.app.Context',
           initialValues:
             featureToggles: Rally.alm.FeatureToggle

@@ -3,6 +3,7 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
   'Rally.alm.FeatureToggle',
+  'Rally.util.Array',
   'Rally.util.DateTime'
 ]
 
@@ -10,7 +11,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
   helpers
     createApp: (options = {}) ->
-      @iterationData = options.iterationData || @createIterationData(options)
+      @iterationData = options.iterationData || Helpers.IterationDataCreatorHelper.createIterationData(options)
 
       @ajax.whenQuerying('iteration').respondWith(@iterationData)
 
@@ -27,29 +28,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       , options.appConfig))
 
       @waitForComponentReady @app
-
-    createIterationData: (options = {}) ->
-      iterationData = []
-      now = new Date
-      startDate = -1
-      iterationCount = options.iterationCount || 5
-      likeCount = options.likeCount || 1
-      for i in [1..iterationCount]
-        for j in [1..likeCount]
-          oid = ((i - 1) * likeCount) + j
-          iterationData.push
-            _ref: "/iteration/#{oid}"
-            _refObjectName: "Iteration #{i}"
-            Name: "Iteration #{i}"
-            ObjectID: oid,
-            Project:
-              _ref: "/project/#{j}"
-            StartDate: Rally.util.DateTime.toIsoString(Ext.Date.add(now, Ext.Date.DAY, startDate))
-            EndDate: Rally.util.DateTime.toIsoString(Ext.Date.add(now, Ext.Date.DAY, startDate + 2))
-            PlannedVelocity: options.plannedVelocity
-
-        startDate += 3
-      iterationData
 
     createAppWithBacklogData: ->
       userStoryRecord = @createUserStoryRecord
@@ -131,7 +109,21 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     getColumns: ->
       @app.gridboard.getGridOrBoard().getColumns()
 
+    getTimeboxColumns: ->
+      @getColumns()[1..] # exclude backlog column
+
+    assertThreeTimeboxColumnsShown: (firstIterationIndex = 0) ->
+      timeboxColumns = @getTimeboxColumns()
+      expect(timeboxColumns.length).toBe 3
+      for i in [0...timeboxColumns.length]
+        @assertColumnIsFor @iterationData[i + firstIterationIndex], timeboxColumns[i]
+
+    assertColumnIsFor: (iterationJson, column) ->
+      expect(iterationJson._ref).toEqual column.getValue()
+
   beforeEach ->
+    @stub(Rally.alm.FeatureToggle, 'isEnabled').withArgs("SCROLLING_ON_CARDBOARD").returns true
+
     @ajax.whenQuerying('userstory').respondWith()
     @ajax.whenQuerying('defect').respondWith()
     @ajax.whenQuerying('preference').respondWith({})
@@ -161,9 +153,55 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       for i in [0...iterationCount]
         expect(@iterationData[i]._ref).toEqual columns[i + 1].getValue()
 
+  it 'should render the current and two future iterations', ->
+    now = new Date
+    @createApp(
+      iterationCount: 5
+      startingAt: Ext.Date.add(now, Ext.Date.DAY, -3)
+    ).then =>
+      timeboxColumns = @getTimeboxColumns()
+      expect(timeboxColumns[0].timeboxRecords[0].get('StartDate')).toBeLessThan now
+      expect(timeboxColumns[0].timeboxRecords[0].get('EndDate')).toBeGreaterThan now
+
+      expect(timeboxColumns[1].timeboxRecords[0].get('StartDate')).toBeGreaterThan now
+      expect(timeboxColumns[2].timeboxRecords[0].get('StartDate')).toBeGreaterThan now
+
+  it 'should render the three iteration closest to now when there are no future iterations', ->
+    now = new Date
+    @createApp(
+      iterationCount: 5
+      startingAt: Ext.Date.add(now, Ext.Date.DAY, -100)
+    ).then =>
+      @assertThreeTimeboxColumnsShown 2
+
+  it 'should render all iterations when there are only three iterations', ->
+    now = new Date
+    @createApp(
+      iterationCount: 3
+      iterationLength: 2
+      startingAt: Ext.Date.add(now, Ext.Date.DAY, -3)
+    ).then =>
+      @assertThreeTimeboxColumnsShown()
+
+  it 'should render all past iterations when there are only three iterations', ->
+    now = new Date
+    @createApp(
+      iterationCount: 3
+      startingAt: Ext.Date.add(now, Ext.Date.DAY, -100)
+    ).then =>
+      @assertThreeTimeboxColumnsShown()
+
+  it 'should render all future iterations when there are only three iterations', ->
+    now = new Date
+    @createApp(
+      iterationCount: 3
+      startingAt: Ext.Date.add(now, Ext.Date.DAY, 100)
+    ).then =>
+      @assertThreeTimeboxColumnsShown()
+
   it 'should not render iterations not within current project', ->
     iterationCount = 1
-    iterationData = @createIterationData
+    iterationData = Helpers.IterationDataCreatorHelper.createIterationData
       iterationCount: iterationCount
 
     now = new Date
@@ -186,7 +224,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
   it 'should update the project of a card when dropping in a non-like iteration', ->
     iterationCount = 1
-    iterationData = @createIterationData
+    iterationData = Helpers.IterationDataCreatorHelper.createIterationData
       iterationCount: iterationCount
 
     userStory = @createUserStoryRecord
@@ -291,7 +329,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     likeCount = 3
     @createApp(likeCount: likeCount).then =>
 
-      for column in @getColumns()[1..] # exclude backlog column
+      for column in @getTimeboxColumns()
         timeboxRecords = column.getTimeboxRecords()
         expect(timeboxRecords.length).toEqual likeCount
         for timeboxRecord in timeboxRecords[1..]
@@ -450,3 +488,21 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
       @simulateMouseEnterFormattedID().then =>
         expect(Ext.get(Ext.query('.description-popover .description')[0]).dom.innerHTML).toBe userStoryRecord.get('Description')
+
+  it 'should be able to scroll backwards', ->
+    @createApp(
+      iterationCount: 4
+      iterationLength: 2
+      startingAt: Ext.Date.add(new Date, Ext.Date.DAY, -3)
+    ).then =>
+      @click(className: 'scroll-backwards').then =>
+        @assertColumnIsFor @iterationData[0], @getTimeboxColumns()[0]
+
+  it 'should be able to scroll forwards', ->
+    @createApp(
+      iterationCount: 4
+      iterationLength: 2
+      startingAt: new Date
+    ).then =>
+      @click(className: 'scroll-forwards').then =>
+        @assertColumnIsFor Rally.util.Array.last(@iterationData), Rally.util.Array.last(@getTimeboxColumns())
