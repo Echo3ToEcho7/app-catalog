@@ -282,13 +282,13 @@
         },
 
         _parseRallyDateFormatToHighchartsDateFormat: function () {
-            var rallyDateFormat = this._getWorkspaceConfiguredDateFormat(),
-                i, length;
+            var dateFormat = this._getUserConfiguredDateFormat() || this._getWorkspaceConfiguredDateFormat();
 
-            for (i = 0, length = this.dateFormatters.length; i < length; i++) {
-                rallyDateFormat = rallyDateFormat.replace(this.dateFormatters[i].key, this.dateFormatters[i].value);
+            for (var i = 0; i < this.dateFormatters.length; i++) {
+                dateFormat = dateFormat.replace(this.dateFormatters[i].key, this.dateFormatters[i].value);
             }
-            return rallyDateFormat;
+            
+            return dateFormat;
         },
 
         _calculateDateRange: function (portfolioItem) {
@@ -315,6 +315,10 @@
             var days = Math.floor((endDateObj - startDateObj) / 86400000); // Converting ms to days
 
             return Math.floor(days / ticks); // number of dates that will fit on the xAxis
+        },
+
+        _getUserConfiguredDateFormat: function() {
+            return this.getContext().getUser().UserProfile.DateFormat;
         },
 
         _getWorkspaceConfiguredDateFormat: function () {
