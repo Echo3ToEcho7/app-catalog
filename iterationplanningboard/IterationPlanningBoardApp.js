@@ -13,7 +13,8 @@
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardNotification',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
-            'Rally.ui.gridboard.plugin.GridBoardManageIterations'
+            'Rally.ui.gridboard.plugin.GridBoardManageIterations',
+            'Rally.ui.cardboard.plugin.Scrollable'
         ],
         cls: 'planning-board',
 
@@ -53,12 +54,24 @@
                         load: function() {
                             var artifactsPref = this.gridboard.artifactTypeChooserPlugin.artifactsPref;
                             var allowedArtifacts = this.gridboard.getHeader().getRight().query('checkboxfield');
-                            if(!Ext.isEmpty(artifactsPref) && artifactsPref.length !== allowedArtifacts.length){
+                            if (!Ext.isEmpty(artifactsPref) && artifactsPref.length !== allowedArtifacts.length) {
                                 this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref);
                             }
                         },
                         scope: this
-                    }
+                    },
+                    plugins: this.getContext().isFeatureEnabled('SCROLLING_ON_CARDBOARD') ? [
+                        {
+                            ptype: 'rallyscrollablecardboard',
+                            backwardsButtonConfig: {
+                                elTooltip: 'Previous Iteration'
+                            },
+                            columnRecordsProperty: 'timeboxRecords',
+                            forwardsButtonConfig: {
+                                elTooltip: 'Next Iteration'
+                            }
+                        }
+                    ] : []
                 },
                 listeners: {
                     load: this._onLoad,

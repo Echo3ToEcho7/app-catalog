@@ -45,16 +45,12 @@
              * @cfg {Rally.domain.WsapiModel[]}
              * The timebox records (Iteration or Release) for this column
              */
-            timeboxRecords: [],
-
-            /**
-             * @cfg {Boolean}
-             * Used to determine if this column represents the current timebox (iteration/release)
-             */
-            currentTimebox: false
+            timeboxRecords: []
         },
 
         cls: 'column',
+
+        currentTimeboxCls: 'current-timebox',
 
         requires: [
             'Ext.XTemplate'
@@ -64,6 +60,9 @@
             this.mergeConfig(config);
             this.config.value = Rally.util.Ref.getRelativeUri(this._getTimeboxRecord());
             this.config.displayValue = this._getTimeboxRecord().get('Name');
+            this.config.moreItemsConfig = {
+                token: Rally.nav.Manager.getDetailHash(this._getTimeboxRecord(), {scope: '', subPage: 'scheduled'})
+            };
 
             this.callParent([this.config]);
         },
@@ -73,13 +72,7 @@
             this.on('beforecarddroppedsave', this._onBeforeCardDrop, this);
 
             this.on('afterrender', function() {
-                var cls = 'planning-column';
-                if (this.currentTimebox) {
-                    cls += ' current-timebox';
-
-                }
-                this.getContentCell().addCls(cls);
-                this.getColumnHeaderCell().addCls(cls);
+                this._addPlanningClasses();
             }, this, {single: true});
         },
 
@@ -182,6 +175,21 @@
                 }
             }, this);
             return sum;
+        },
+
+        _isCurrentTimebox: function(){
+            var now = new Date();
+            return this._getTimeboxRecord().get('StartDate') <= now && this._getTimeboxRecord().get('EndDate') >= now;
+        },
+
+        _addPlanningClasses: function() {
+            var cls = 'planning-column';
+            if (this._isCurrentTimebox()) {
+                cls += ' ' + this.currentTimeboxCls;
+
+            }
+            this.getContentCell().addCls(cls);
+            this.getColumnHeaderCell().addCls(cls);
         }
     });
 })();

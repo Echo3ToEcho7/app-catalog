@@ -12,13 +12,20 @@
         extend: 'Rally.ui.gridboard.GridBoard',
         alias: 'widget.iterationplanningboardapptimeboxgridboard',
         requires: [
+            'Rally.util.Array',
             'Rally.util.Ui',
             'Rally.data.ModelFactory',
             'Rally.ui.gridboard.TimeboxBlankSlate',
+            'Rally.apps.iterationplanningboard.TimeboxCardBoard',
             'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn',
             'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn'
         ],
         mixins: ['Rally.Messageable'],
+
+        /**
+         * @cfg {Number}
+         */
+        numColumns: 3,
 
         initComponent: function() {
             this.on('toggle', function(toggleState, gridOrBoard) {
@@ -50,40 +57,58 @@
         },
 
         _getBoardConfig: function() {
+            var initiallyVisibleTimeboxes = this._getInitiallyVisibleTimeboxes();
+            var columns = this._getColumnConfigs(initiallyVisibleTimeboxes);
             return Ext.merge(this.callParent(arguments), {
+                xtype: 'iterationplanningboardapptimeboxcardboard',
                 attribute: this.timeboxType,
-                columns: this._getColumnConfigs(),
+                columns: columns,
                 columnConfig: {
-                    additionalFetchFields: ['PortfolioItem']
+                    xtype: 'iterationplanningboardappplanningcolumn',
+                    additionalFetchFields: ['PortfolioItem'],
+                    storeConfig : {
+                        fetch: ['Parent', 'Requirement']
+                    }
                 },
                 cardConfig: {
                     editable: true,
                     showHeaderMenu: true,
                     fields: ['Parent', 'Tasks', 'Defects', 'Discussion']
-                }
+                },
+                scrollableColumnRecords: this.timeboxes
             });
         },
 
-        _getColumnConfigs: function() {
-            var fieldsNeededToValidateCardBelongsInColumn = ['Parent', 'Requirement'],
-                columns = [{
-                    xtype: 'iterationplanningboardappbacklogcolumn',
-                    flex: this._hasTimeboxes() ? 1 : 1/3,
-                    cardLimit: Ext.isIE ? 25 : 100,
-                    storeConfig : {
-                        fetch: fieldsNeededToValidateCardBelongsInColumn
-                    }
-                }];
+        _getInitiallyVisibleTimeboxes: function(){
+            if(this.timeboxes.length <= this.numColumns){
+                return this.timeboxes;
+            }
 
-            Ext.Array.each(this.timeboxes, function(timeboxRecords, index) {
-                var detailToken = Rally.nav.Manager.getDetailHash(timeboxRecords[0], {scope: '', subPage: 'scheduled'});
+            var previousTimeboxes = [];
+            var futureAndCurrentTimeboxes = [];
+            Ext.Array.each(this.timeboxes, function(timeboxRecords){
+                if(timeboxRecords[0].get('EndDate') >= new Date()){
+                    futureAndCurrentTimeboxes.push(timeboxRecords);
+                }else{
+                    previousTimeboxes.push(timeboxRecords);
+                }
+            });
+            futureAndCurrentTimeboxes = Rally.util.Array.firstElementsOf(futureAndCurrentTimeboxes, this.numColumns);
 
+            var possiblyVisibleTimeboxes = previousTimeboxes.concat(futureAndCurrentTimeboxes);
+            return Rally.util.Array.lastElementsOf(possiblyVisibleTimeboxes, this.numColumns);
+        },
+
+        _getColumnConfigs: function(timeboxes) {
+            var columns = [{
+                xtype: 'iterationplanningboardappbacklogcolumn',
+                flex: this._hasTimeboxes() ? 1 : 1/3,
+                cardLimit: Ext.isIE ? 25 : 100
+            }];
+
+            Ext.Array.each(timeboxes, function(timeboxRecords) {
                 columns.push({
-                    xtype: 'iterationplanningboardappplanningcolumn',
-                    currentTimebox: index === 0,
-                    timeboxRecords: timeboxRecords,
-                    storeConfig : {fetch: fieldsNeededToValidateCardBelongsInColumn},
-                    moreItemsConfig: {token: detailToken}
+                    timeboxRecords: timeboxRecords
                 });
             }, this);
 
@@ -98,13 +123,6 @@
             Ext.create('Rally.data.WsapiDataStore', {
                 model: model,
                 fetch: ['Name', 'StartDate', 'EndDate', 'Project', 'PlannedVelocity'],
-                filters: [
-                    {
-                        property: 'EndDate',
-                        operator: '>=',
-                        value: 'Today'
-                    }
-                ],
                 autoLoad: true,
                 listeners: {
                     load: this._onTimeboxesLoad,
@@ -148,13 +166,12 @@
                 return likeTimeboxes1[0].get('EndDate') - likeTimeboxes2[0].get('EndDate');
             });
 
-            var projectsSortedLikeTimeboxes = Ext.Array.filter(sortedLikeTimeboxes, function(likeTimeboxes) {
+            this.timeboxes = Ext.Array.filter(sortedLikeTimeboxes, function(likeTimeboxes) {
                 return Ext.Array.some(likeTimeboxes, function(timebox) {
                     return Rally.util.Ref.getRelativeUri(timebox.get('Project')) === Rally.util.Ref.getRelativeUri(this.getContext().getProject());
                 }, this);
             }, this);
 
-            this.timeboxes = Ext.Array.slice(projectsSortedLikeTimeboxes, 0, 3);
             this.setLoading(false);
             this._addGridOrBoard('board');
         },
