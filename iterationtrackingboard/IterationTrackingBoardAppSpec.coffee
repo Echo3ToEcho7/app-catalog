@@ -18,7 +18,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         {Name:'Iteration 2', _ref:'/iteration/2', StartDate:Rally.util.DateTime.toIsoString(nextDay), EndDate:Rally.util.DateTime.toIsoString(dayAfter)}
       ]
 
-      @IterationModel = Rally.mock.data.ModelFactory.getIterationModel()
+      @IterationModel = Rally.test.mock.data.ModelFactory.getIterationModel()
       @iterationRecord = new @IterationModel @iterationData[0]
       
       @app = Ext.create('Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', Ext.apply(

@@ -25,7 +25,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
       {Name: 'test', FormattedID: 'F1', PlannedEndDate: null}
     ]
     @ajax.whenQuerying('typedefinition').respondWith [
-      Rally.mock.data.ModelFactory.getModelDefinition('PortfolioItemFeature')
+      Rally.test.mock.data.ModelFactory.getModelDefinition('PortfolioItemFeature')
     ]
 
   afterEach ->

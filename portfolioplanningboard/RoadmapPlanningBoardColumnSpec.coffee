@@ -62,7 +62,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardColumn', ->
       contentCell: Ext.get 'testDiv'
     }
 
-    record = Ext.create Rally.mock.data.ModelFactory.getUserStoryModel(), {
+    record = Ext.create Rally.test.mock.data.ModelFactory.getUserStoryModel(), {
       Name: 'test'
     }
     card = {
@@ -83,7 +83,7 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardColumn', ->
       columnHeaderConfig: {
         headerTpl: 'foo'
       },
-      models: [Rally.mock.data.ModelFactory.getPortfolioItemFeatureModel()]
+      models: [Rally.test.mock.data.ModelFactory.getPortfolioItemFeatureModel()]
       renderTo: 'testDiv'
       headerCell: Ext.get 'testDiv'
       contentCell: Ext.get 'testDiv'
@@ -109,11 +109,11 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardColumn', ->
       types: 'portfolioitem/feature'
     }
     
-    record = Ext.create Rally.mock.data.ModelFactory.getPortfolioItemFeatureModel(), {
+    record = Ext.create Rally.test.mock.data.ModelFactory.getPortfolioItemFeatureModel(), {
       PlannedEndDate: new Date(+startDate + 1)
     }
     
-    record2 = Ext.create Rally.mock.data.ModelFactory.getPortfolioItemFeatureModel(), {
+    record2 = Ext.create Rally.test.mock.data.ModelFactory.getPortfolioItemFeatureModel(), {
       PlannedEndDate: new Date(+startDate - 1)
     }
     

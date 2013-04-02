@@ -53,7 +53,7 @@ describe 'Rally.apps.kanban.Card', ->
 
   helpers
     createRecord: (options) ->
-      StoryModel = Rally.mock.data.ModelFactory.getUserStoryModel()
+      StoryModel = Rally.test.mock.data.ModelFactory.getUserStoryModel()
       @record = new StoryModel Ext.apply(
         ObjectID: 1
         Name: 'Foo'

@@ -283,7 +283,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
 
   helpers
     createColumn: (options) ->
-      Model = Rally.mock.data.ModelFactory.getIterationModel()
+      Model = Rally.test.mock.data.ModelFactory.getIterationModel()
       timeboxRecords = []
 
       for i in [1 .. options.iterationCount ? 1]
@@ -314,7 +314,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
         )
 
     createUserStoryRecord: (options) ->
-      Model = Rally.mock.data.ModelFactory.getUserStoryModel()
+      Model = Rally.test.mock.data.ModelFactory.getUserStoryModel()
       new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 1000)}, options))
 
     getProgressBarLabel: -> @column.getColumnHeaderCell().down('.progress-bar-label')
@@ -322,16 +322,3 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
     getProgressBar: -> @column.getColumnHeaderCell().down('.progress-bar')
 
     getProgressBarBackgroundContainer: -> @column.getColumnHeaderCell().down('.progress-bar-background')
-
-
-
-columnHeaderConfig: {
-                        record: timeboxRecords[0],
-                        fieldToDisplay: 'Name',
-                        editable: false
-                    }
-
-
-  columnHeaderConfig: {
-                         headerTpl: 'Backlog'
-                     }

@@ -2,7 +2,7 @@ Ext = window.Ext4 || window.Ext
 
 Ext.require [
   'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp'
-  'Rally.mock.data.ModelFactory'
+  'Rally.test.mock.data.ModelFactory'
 ]
 
 describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
@@ -28,7 +28,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
 
     createAppWaitForGridAndClickOnCell: (row, col, settings = {}) ->
       @createAppAndWaitForGrid().then =>
-        @ajax.whenQuerying('defect').respondWith(Rally.mock.ModelObjectMother.getData('Defect')[0])
+        @ajax.whenQuerying('defect').respondWith(Rally.test.mock.ModelObjectMother.getData('Defect')[0])
         @clickCellInMatrixGrid(col, row)
         once
           condition: =>
@@ -59,7 +59,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
         ''
 
     getMockDefectDataForAttribute: (attr) ->
-      Ext.Array.pluck(Ext.Array.filter(Rally.mock.data.ModelFactory.getModelDefinition('Defect').Attributes, (el) ->
+      Ext.Array.pluck(Ext.Array.filter(Rally.test.mock.data.ModelFactory.getModelDefinition('Defect').Attributes, (el) ->
         el.Name == attr
       )[0].AllowedValues, 'StringValue')
 
@@ -188,7 +188,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
 
     it 'loads the defect grid when you click on a matrix grid cell with a non-zero value', ->
       @createAppAndWaitForGrid().then =>
-        @ajax.whenQuerying('defect').respondWith(Rally.mock.ModelObjectMother.getData('Defect')[0])
+        @ajax.whenQuerying('defect').respondWith(Rally.test.mock.ModelObjectMother.getData('Defect')[0])
         @clickCellInMatrixGrid(@row, @col)
         once
           condition: =>
@@ -221,7 +221,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
     it 'loads new data in the defect table when clicking a different cell in the upper table', ->
       @createAppWaitForGridAndClickOnCell(@row - 1, @col - 1).then =>
         originalRowCount = @app.defectGrid.getStore().getCount()
-        @ajax.whenQuerying('defect').respondWith(Rally.mock.ModelObjectMother.getData('Defect'))
+        @ajax.whenQuerying('defect').respondWith(Rally.test.mock.ModelObjectMother.getData('Defect'))
         @clickCellInMatrixGrid(@col, @row)
         once
           condition: =>

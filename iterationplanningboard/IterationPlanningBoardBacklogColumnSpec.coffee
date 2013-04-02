@@ -2,8 +2,8 @@ Ext = window.Ext4 || window.Ext
 
 describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn', ->
   beforeEach ->
-    @storyModel = Rally.mock.data.ModelFactory.getUserStoryModel()
-    @defectModel = Rally.mock.data.ModelFactory.getDefectModel()
+    @storyModel = Rally.test.mock.data.ModelFactory.getUserStoryModel()
+    @defectModel = Rally.test.mock.data.ModelFactory.getDefectModel()
     @ajax.whenQuerying('HierarchicalRequirement').respondWith()
 
   afterEach ->
@@ -98,7 +98,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
 
   helpers
     createColumn: (options={}) ->
-      Rally.mock.env.Global.setupEnvironment
+      Rally.test.mock.env.Global.setupEnvironment
         subscription:
           StoryHierarchyEnabled: options.subscriptionStoryHierarchyEnabled ? true
 
@@ -118,11 +118,11 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
       )
 
     createStoryRecord: (data) ->
-      Model = Rally.mock.data.ModelFactory.getUserStoryModel()
+      Model = Rally.test.mock.data.ModelFactory.getUserStoryModel()
       new Model(data)
 
     createDefectRecord: (data) ->
-      Model = Rally.mock.data.ModelFactory.getDefectModel()
+      Model = Rally.test.mock.data.ModelFactory.getDefectModel()
       new Model(data)
 
     shouldHaveFilterByNullIteration: (filter) ->

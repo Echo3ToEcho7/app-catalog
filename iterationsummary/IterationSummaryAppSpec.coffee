@@ -680,9 +680,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       results = {}
       switch options.types[0]
         when 'Iteration'
-          results.Iteration = Rally.mock.data.ModelFactory.getModel('Iteration')
+          results.Iteration = Rally.test.mock.data.ModelFactory.getModel('Iteration')
         when 'UserStory'
-          results.UserStory = Rally.mock.data.ModelFactory.getModel('UserStory')
+          results.UserStory = Rally.test.mock.data.ModelFactory.getModel('UserStory')
 
       options.success.call(options.scope, results)
     )
@@ -931,7 +931,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       messageBus = Rally.environment.getMessageBus()
       for type in ['Defect', 'HierarchicalRequirement', 'DefectSuite', 'TestSet', 'TestCase']
-        messageBus.publish(Rally.Message.objectUpdate, Rally.mock.ModelObjectMother.getRecord(type))
+        messageBus.publish(Rally.Message.objectUpdate, Rally.test.mock.ModelObjectMother.getRecord(type))
 
       expect(addContentStub.callCount).toBe 5
 
@@ -939,7 +939,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
     @_createApp({}).then (app) =>
       addContentSpy = @spy(app, 'addContent')
 
-      Rally.environment.getMessageBus().publish(Rally.Message.objectUpdate, Rally.mock.ModelObjectMother.getRecord('Release'))
+      Rally.environment.getMessageBus().publish(Rally.Message.objectUpdate, Rally.test.mock.ModelObjectMother.getRecord('Release'))
 
       expect(addContentSpy.callCount).toBe 0
 
@@ -957,7 +957,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       messageBus = Rally.environment.getMessageBus()
       messageBus.subscribe(Rally.BrowserTest.getComponentReadyMessageName(app), componentReadyListenter)
-      messageBus.publish(Rally.Message.objectUpdate, Rally.mock.ModelObjectMother.getRecord('HierarchicalRequirement'))
+      messageBus.publish(Rally.Message.objectUpdate, Rally.test.mock.ModelObjectMother.getRecord('HierarchicalRequirement'))
       @waitForCallback(componentReadyListenter).then =>
 
         expect(httpGetSpy.callCount).toBe 1

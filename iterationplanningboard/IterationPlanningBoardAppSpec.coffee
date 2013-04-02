@@ -56,12 +56,12 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @app.cardboard
 
     createUserStoryRecord: (options = {}) ->
-      Model = Rally.mock.data.ModelFactory.getUserStoryModel()
+      Model = Rally.test.mock.data.ModelFactory.getUserStoryModel()
       options._type = 'hierarchicalrequirement'
       new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 10000)}, options))
 
     createDefectRecord: (options = {}) ->
-      Model = Rally.mock.data.ModelFactory.getDefectModel()
+      Model = Rally.test.mock.data.ModelFactory.getDefectModel()
       options._type = 'defect'
       new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 10000)}, options))
 
@@ -312,7 +312,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       expect(@app.down('#header').down 'rallyaddnew').not.toBeNull()
 
   it 'should allow managing iterations when user is a project editor and is hs sub', ->
-    Rally.mock.env.Global.setupEnvironment
+    Rally.test.mock.env.Global.setupEnvironment
       subscription:
         SubscriptionType: 'HS_1'
 
@@ -467,7 +467,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
     @createApp(plannedVelocity: 10).then =>
 
-      debugger
       expect(@getProgressBarHtml(1)).toBe '4 of 10'
 
       @filterByType('defect').then =>
