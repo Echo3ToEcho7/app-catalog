@@ -65,6 +65,16 @@
                             this.setValue(this.value);
                         }
                     }
+                },
+                {
+                    xtype: "rallydatefield",
+                    fieldLabel: "Start Date (optional)",
+                    name: "startDate"
+                },
+                {
+                    xtype: "rallydatefield",
+                    fieldLabel: "End Date (optional)",
+                    name: "endDate"
                 }
             ];
         },
@@ -360,12 +370,18 @@
         },
 
         _getChartStartDate: function (portfolioItem) {
-            var date = portfolioItem.ActualStartDate || portfolioItem.ActualEndDate || new Date();
+            var startDateSetting = this.getSetting('startDate');
+            var startDate = startDateSetting ? new Date(startDateSetting) : undefined;
+
+            var date = startDate || portfolioItem.ActualStartDate || portfolioItem.ActualEndDate || new Date();
             return Ext.Date.format(date, 'Y-m-d\\TH:i:s.u\\Z');
         },
 
         _getChartEndDate: function (portfolioItem) {
-            var date = portfolioItem.ActualEndDate || new Date();
+            var endDateSetting = this.getSetting('endDate');
+            var endDate = endDateSetting ? new Date(endDateSetting) : undefined;
+
+            var date = endDate || portfolioItem.ActualEndDate || new Date();
             return Ext.Date.format(date, 'Y-m-d\\TH:i:s.u\\Z');
         },
 
