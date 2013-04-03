@@ -77,16 +77,22 @@
         },
 
         _onSearchClicked: function() {
-            this._refreshColumn(this.getColumnHeader().down('#searchText').getValue());
+            this._refreshColumn();
         },
 
         _onSearchTextSpecialKey: function(searchTextField, e) {
             if (e.getKey() == e.ENTER) {
-                this._refreshColumn(this.getColumnHeader().down('#searchText').getValue());
+                this._refreshColumn();
             }
         },
 
-        _refreshColumn: function(searchValue) {
+        _refreshColumn: function() {
+            if (this.searching) {
+                return;
+            }
+
+            this.searching = true;
+            var searchValue = this.getColumnHeader().down('#searchText').getValue();
             this.setMaskTarget(this.getContentCell());
             this.showMask();
             this._deactivatedCards = [];
@@ -94,6 +100,7 @@
             this.on('load', function() {
                 this.fireEvent('filter', this);
                 this.hideMask();
+                this.searching = false;
             }, this, {single: true});
 
             this.refresh({
