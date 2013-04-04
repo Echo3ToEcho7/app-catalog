@@ -1,7 +1,8 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-  'Rally.ui.report.StandardReport'
+  'Rally.ui.report.StandardReport',
+  'Rally.apps.kanban.KanbanApp'
 ]
 
 describe 'Rally.apps.kanban.KanbanApp', ->
@@ -190,3 +191,14 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       @createApp(query: query).then =>
         filterInfo = @app.down('rallyfilterinfo')
         expect(filterInfo.getQuery()).toBe query
+
+  it 'should show plan estimate when plan estimate field is enabled', ->
+    @ajax.whenQuerying('userstory').respondWithCount(1)
+    @createApp(cardFields: "Name,Discussion,Tasks,Defects,PlanEstimate").then =>
+      expect(@app.getEl().down('.PlanEstimate')).not.toBeNull()
+
+  it 'should not show plan estimate when plan estimate field is disabled', ->
+    @ajax.whenQuerying('userstory').respondWithCount(1)
+    @createApp(cardFields: "Name,Discussion,Tasks,Defects").then =>
+      expect(@app.getEl().down('.PlanEstimate')).toBeNull()
+
