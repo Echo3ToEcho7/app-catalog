@@ -51,7 +51,7 @@
         addContent: function(scope) {
             if (!Ext.isDefined(this.getTzOffset())) {
                 Rally.environment.getIoProvider().httpGet({
-                    url: Rally.environment.getServer().getWsapiUrl() + '/iteration.js?includeSchema=true&pagesize=1',
+                    url: Rally.environment.getServer().getWsapiUrl() + '/iteration.js?includeSchema=true&pagesize=1&fetch=Name',
                     success: function(results) {
                         if (results.Schema.properties.EndDate.format.tzOffset !== undefined) {
                             this._tzOffset = results.Schema.properties.EndDate.format.tzOffset / 60;
@@ -205,49 +205,51 @@
             }
         },
 
-        _checkIfModelExists: function(modelName, callback, scope) {
-            Rally.data.ModelFactory.getModel({
-                type: modelName,
-                success: function(model) {
-                    if (model) {
-                        callback.call(scope);
-                    }
-                },
-                scope: scope
-            });
-        },
-
         _getStatusRowData: function() {
             this.results = {};
             var queryObjects = {
-                hierarchicalrequirement: 'Defects,ClosedDate,State,TestCases,LastVerdict,PlanEstimate,AcceptedDate,ScheduleState',
-                defect: 'TestCases,LastVerdict,PlanEstimate,AcceptedDate,ScheduleState'
+                hierarchicalrequirement: 'Defects:summary[State],TestCases:summary[LastVerdict],PlanEstimate,AcceptedDate,ScheduleState',
+                defect: 'TestCases:summary[LastVerdict],PlanEstimate,AcceptedDate,ScheduleState'
             };
 
             if (!this._isHsOrTeamEdition()) {
                 Ext.apply(queryObjects, {
-                    defectsuite: 'Defects,ClosedDate,State,PlanEstimate,AcceptedDate,ScheduleState',
-                    testset: 'TestCases,LastVerdict,PlanEstimate,AcceptedDate,ScheduleState'
+                    defectsuite: 'Defects:summary[State],PlanEstimate,AcceptedDate,ScheduleState',
+                    testset: 'TestCases:summary[LastVerdict],PlanEstimate,AcceptedDate,ScheduleState'
                 });
             }
 
             this._outstandingQueries = Ext.Object.getSize(queryObjects);
-            Ext.Object.each(queryObjects, function(key, value) {
-                this._checkIfModelExists(key, function() {
-                    Ext.create('Rally.data.WsapiDataStore', {
-                        model: key,
-                        fetch: value,
-                        context: this.getContext().getDataContext(),
-                        filters: [this.getContext().getTimeboxScope().getQueryFilter()],
-                        limit: Infinity,
-                        autoLoad: true,
-                        listeners: {
-                            load: this._aggregateQueryResults,
-                            scope: this
+
+            Rally.data.ModelFactory.getModels({
+                types: Ext.Object.getKeys(queryObjects),
+                success: function(models) {
+                    Ext.Object.each(queryObjects, function(key, value) {
+                        if (models[key]) {
+                            Ext.create('Rally.data.WsapiDataStore', {
+                                model: models[key],
+                                fetch: value,
+                                context: this.getContext().getDataContext(),
+                                filters: [this.getContext().getTimeboxScope().getQueryFilter()],
+                                limit: Infinity,
+                                autoLoad: true,
+                                listeners: {
+                                    load: this._aggregateQueryResults,
+                                    scope: this
+                                }
+                            });
+                        } else {
+                            --this._outstandingQueries;
                         }
-                    });
-                }, this);
-            }, this);
+                    }, this);
+                    if (this._outstandingQueries === 0) {
+                        if (Rally.BrowserTest) {
+                            Rally.BrowserTest.publishComponentReady(this);
+                        }
+                    }
+                },
+                scope: this
+            });
         },
 
         _getPostAcceptedState: function() {
@@ -375,29 +377,31 @@
             return config;
         },
 
-        _getActiveDefects: function(items) {
-            var totalDefects = 0;
-            Ext.each(items, function(item) {
-                Ext.each(item.get('Defects'), function(defect) {
-                    if (defect.State !== 'Closed') {
-                        totalDefects++;
+        _getActiveDefectCount: function(items) {
+            var activeDefectsCount = 0;
+            items = items || [];
+            Ext.Array.forEach(items, function(item) {
+                var defectSummary = item.get('Summary').Defects;
+                Ext.Object.each(defectSummary.State, function(state, count) {
+                    if (state !== 'Closed') {
+                        activeDefectsCount += count;
                     }
                 });
             });
-
-            return totalDefects;
+            return activeDefectsCount;
         },
 
         _getDefectsConfigObject: function() {
-            var totalDefects = 0;
+            var totalDefectCount = this._getActiveDefectCount(this.results.userstory);
+
+            if (this.results.defectsuite) {
+                totalDefectCount += this._getActiveDefectCount(this.results.defectsuite);
+            }
+
             var config = {};
 
-            totalDefects += this._getActiveDefects(this.results.userstory);
-            if (this.results.defectsuite) {
-                totalDefects += this._getActiveDefects(this.results.defectsuite);
-            }
-            if (totalDefects > 0 && this.timeOrientation !== "future") {
-                config.title = totalDefects + " Active Defects";
+            if (totalDefectCount > 0 && this.timeOrientation !== "future") {
+                config.title = totalDefectCount + " Active Defect" + (totalDefectCount !== 1 ? "s" : "");
                 config.subtitle = "";
                 config.learnMore = "defects";
 
@@ -409,33 +413,32 @@
                     config.message = this.self.CURRENT_WITH_DEFECTS;
                 }
             }
-
             return config;
         },
 
         _getPassingTestCases: function(items) {
             var testCounts = {passingTests: 0, totalTests: 0};
+            items = items || [];
 
-            Ext.each(items, function(item) {
-                Ext.each(item.get('TestCases'), function(testCase) {
-                    if (testCase.LastVerdict === 'Pass') {
-                        testCounts.passingTests++;
+            Ext.Array.forEach(items, function(item) {
+                var testCaseSummary = item.get('Summary').TestCases;
+                Ext.Object.each(testCaseSummary.LastVerdict, function(verdict, count) {
+                    if (verdict === 'Pass') {
+                        testCounts.passingTests += count;
                     }
-                    testCounts.totalTests++;
+                    testCounts.totalTests += count;
                 });
             });
-
             return testCounts;
         },
 
         _getTestsConfigObject: function() {
             var config = {};
-            var tmpTestCnt = {};
             var testCounts = {passingTests: 0, totalTests: 0};
             var testTypes = ["userstory", "defect", "testset"];
 
-            Ext.each(testTypes, function(testType) {
-                tmpTestCnt = this._getPassingTestCases(this.results[testType]);
+            Ext.Array.forEach(testTypes, function(testType) {
+                var tmpTestCnt = this._getPassingTestCases(this.results[testType]);
                 testCounts.totalTests += tmpTestCnt.totalTests;
                 testCounts.passingTests += tmpTestCnt.passingTests;
             }, this);
@@ -469,15 +472,19 @@
                     }
                 }
             }
-
             return config;
         },
 
         _displayStatusRows: function() {
+            this.down('#stats').suspendLayouts();
             this._displayStatusRow(this._getAcceptanceConfigObject());
             this._displayStatusRow(this._getDefectsConfigObject());
             if (!this._isHsOrTeamEdition()) {
                 this._displayStatusRow(this._getTestsConfigObject());
+            }
+            this.down('#stats').resumeLayouts(true);
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
             }
         },
 
