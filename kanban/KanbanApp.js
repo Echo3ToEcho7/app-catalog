@@ -140,6 +140,18 @@
             var columns = [];
             Ext.Object.each(columnSetting, function(column, values) {
                 var columnName = column || 'None';
+                var policyPrefKey = this.getSetting('groupByField') + columnName + 'Policy';
+                //Early versions of the board did not correctly scope policy prefs
+                //resulting in bleed across groupByField changes
+                var policy = this.getSetting(policyPrefKey) || this.getSetting(columnName + 'Policy');
+
+                var prefConfig = {
+                    appID: this.getAppId(),
+                    project: this.getContext().getProject(),
+                    settings: {}
+                };
+                prefConfig.settings[policyPrefKey] = policy;
+
                 var columnConfig = {
                     xtype: 'kanbancolumn',
                     wipLimit: values.wip,
@@ -149,11 +161,8 @@
                     },
                     policyCmpConfig: {
                         xtype: 'rallykanbanpolicy',
-                        policies: this.getSetting(columnName + 'Policy'),
-                        prefConfig: {
-                            appID: this.getAppId(),
-                            project: this.getContext().getProject()
-                        },
+                        policies: policy,
+                        prefConfig: prefConfig,
                         title: 'Exit Agreement'
                     }
                 };
