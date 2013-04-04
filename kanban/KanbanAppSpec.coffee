@@ -2,7 +2,9 @@ Ext = window.Ext4 || window.Ext
 
 Ext.require [
   'Rally.ui.report.StandardReport',
-  'Rally.apps.kanban.KanbanApp'
+  'Rally.apps.kanban.KanbanApp',
+  'Rally.util.Array',
+  'Rally.util.Element'
 ]
 
 describe 'Rally.apps.kanban.KanbanApp', ->
@@ -201,22 +203,47 @@ describe 'Rally.apps.kanban.KanbanApp', ->
     @createApp(settings).then =>
       @assertPolicyCmpConfig(settingsKey, policy)
 
+  it 'should be able to scroll forwards', ->
+    @createApp({},
+      renderTo: @createSmallContainer()
+    ).then =>
+      indexOfLastVisibleColumn = Ext.Array.indexOf(@app.down('rallycardboard').getColumns(), Rally.util.Array.last @app.down('rallycardboard').getVisibleColumns())
+      columnToShow = @app.down('rallycardboard').getColumns()[indexOfLastVisibleColumn + 1]
+      expect(columnToShow.hidden).toBe true
+      @click(className: 'scroll-forwards').then =>
+        expect(columnToShow.hidden).toBe false
+
+  it 'should be able to scroll backwards', ->
+    @createApp({},
+      renderTo: @createSmallContainer()
+    ).then =>
+      columnToShow = @app.down('rallycardboard').getColumns()[0]
+      expect(columnToShow.hidden).toBe false
+      @click(className: 'scroll-forwards').then =>
+        expect(columnToShow.hidden).toBe true
+        @click(className: 'scroll-backwards').then =>
+          expect(columnToShow.hidden).toBe false
+
   helpers
-    createApp: (settings = {}) ->
-      @app = Ext.create('Rally.apps.kanban.KanbanApp',
+    createApp: (settings = {}, options = {}) ->
+      @app = Ext.create 'Rally.apps.kanban.KanbanApp',
         context: Ext.create('Rally.app.Context',
           initialValues:
             project:
-              _ref: @projectRef,
+              _ref: @projectRef
               Name: 'Project 1'
-        ),
-        settings: settings,
-        renderTo: 'testDiv'
-      )
+        )
+        settings: settings
+        renderTo: options.renderTo || 'testDiv'
 
       @stub(@app.getContext(), 'isFeatureEnabled').withArgs('ENABLE_SLIM_CARD_DESIGN').returns true
 
       @waitForComponentReady @app
+
+    createSmallContainer: ->
+      Ext.get('testDiv').createChild
+        style:
+          width: '500px'
 
     assertPolicyCmpConfig: (settingsKey, policy) ->
       column = @app.down('rallycardboard').getColumns()[0]
