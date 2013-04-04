@@ -114,7 +114,6 @@
         },
 
         _drawProgressBar: function() {
-
             if(this.progressBar) {
                 this.progressBar.update(this.getIterationPlanningBoardHeaderTpl().apply(this.getIterationPlanningBoardHeaderTplData()));
             } else {
@@ -123,7 +122,6 @@
                     html: this.getIterationPlanningBoardHeaderTpl().apply(this.getIterationPlanningBoardHeaderTplData())
                 });
             }
-
         },
 
         getIterationPlanningBoardHeaderTpl: function() {
@@ -141,6 +139,10 @@
                 formattedEndDate: this._getFormattedDate(this.endDateField),
                 progressBarHtml: this._getProgressBarHtml()
             };
+        },
+
+        getProgressBar: function() {
+            return this.getColumnHeaderCell().down('.progress-bar-background');
         },
 
         _getFormattedDate: function(fieldName) {

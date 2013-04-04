@@ -12,6 +12,7 @@
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.cardboard.KanbanPolicy',
             'Rally.ui.cardboard.CardBoard',
+            'Rally.ui.cardboard.plugin.Scrollable',
             'Rally.ui.report.StandardReport',
             'Rally.ui.tooltip.FilterInfo'
         ],
@@ -179,6 +180,22 @@
         _getCardboardConfig: function() {
             return {
                 xtype: 'rallycardboard',
+                plugins: [
+                    {ptype: 'rallycardboardprinting', pluginId: 'print'},
+                    {
+                        ptype: 'rallyscrollablecardboard',
+                        containerEl: this.getEl(),
+                        getFirstScrollableColumn: function(){
+                            return this.cmp.getVisibleColumns()[0];
+                        },
+                        getLastScrollableColumn: function(){
+                            return Rally.util.Array.last(this.cmp.getVisibleColumns());
+                        },
+                        getScrollableColumns: function(){
+                            return this.cmp.getColumns();
+                        }
+                    }
+                ],
                 types: this._getDefaultTypes(),
                 attribute: this.getSetting('groupByField'),
                 margin: '10px',

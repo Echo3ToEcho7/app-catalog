@@ -10,11 +10,12 @@
         requires: [
             'Rally.data.ModelFactory',
             'Rally.apps.iterationplanningboard.TimeboxGridBoard',
+            'Rally.apps.iterationplanningboard.TimeboxScrollable',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardNotification',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardManageIterations',
-            'Rally.ui.cardboard.plugin.Scrollable'
+            'Rally.util.Array'
         ],
         cls: 'planning-board',
 
@@ -62,13 +63,19 @@
                     },
                     plugins: this.getContext().isFeatureEnabled('SCROLLING_ON_CARDBOARD') ? [
                         {
-                            ptype: 'rallyscrollablecardboard',
+                            ptype: 'rallytimeboxscrollablecardboard',
                             backwardsButtonConfig: {
                                 elTooltip: 'Previous Iteration'
                             },
                             columnRecordsProperty: 'timeboxRecords',
                             forwardsButtonConfig: {
                                 elTooltip: 'Next Iteration'
+                            },
+                            getFirstScrollableColumn: function(){
+                                return this.cmp.getColumns()[1];
+                            },
+                            getLastScrollableColumn: function(){
+                                return Rally.util.Array.last(this.cmp.getColumns());
                             }
                         }
                     ] : []
