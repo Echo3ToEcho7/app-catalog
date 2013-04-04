@@ -7,23 +7,6 @@ Ext.require [
 
 describe 'Rally.apps.kanban.KanbanApp', ->
 
-  helpers
-    createApp: (settings = {}) ->
-      @app = Ext.create('Rally.apps.kanban.KanbanApp',
-        context: Ext.create('Rally.app.Context',
-          initialValues:
-            project:
-              _ref: @projectRef,
-              Name: 'Project 1'
-        ),
-        settings: settings,
-        renderTo: 'testDiv'
-      )
-
-      @stub(@app.getContext(), 'isFeatureEnabled').withArgs('ENABLE_SLIM_CARD_DESIGN').returns true
-
-      @waitForComponentReady @app
-
   beforeEach ->
     @ajax.whenQuerying('userstory').respondWith()
     @ajax.whenQuerying('defect').respondWith()
@@ -178,20 +161,20 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(filterInfo.getProjectName()).toBe 'Following Global Project Setting'
 
   it 'should show filter info when scoped to a specific project', ->
-      projectScopeUp = true
-      projectScopeDown = false
-      @createApp(project: @projectRef, projectScopeUp: projectScopeUp, projectScopeDown: projectScopeDown).then =>
-        filterInfo = @app.down('rallyfilterinfo')
-        expect(filterInfo.getProjectName()).toBe @app.getContext().getProject().Name
-        expect(filterInfo.getScopeUp()).toBe projectScopeUp
-        expect(filterInfo.getScopeDown()).toBe projectScopeDown
+    projectScopeUp = true
+    projectScopeDown = false
+    @createApp(project: @projectRef, projectScopeUp: projectScopeUp, projectScopeDown: projectScopeDown).then =>
+      filterInfo = @app.down('rallyfilterinfo')
+      expect(filterInfo.getProjectName()).toBe @app.getContext().getProject().Name
+      expect(filterInfo.getScopeUp()).toBe projectScopeUp
+      expect(filterInfo.getScopeDown()).toBe projectScopeDown
 
   it 'should show filter info when a query is set', ->
-      query = '(Name contains Foo)'
-      @createApp(query: query).then =>
-        filterInfo = @app.down('rallyfilterinfo')
-        expect(filterInfo.getQuery()).toBe query
-
+    query = '(Name contains Foo)'
+    @createApp(query: query).then =>
+      filterInfo = @app.down('rallyfilterinfo')
+      expect(filterInfo.getQuery()).toBe query
+      
   it 'should show plan estimate when plan estimate field is enabled', ->
     @ajax.whenQuerying('userstory').respondWithCount(1)
     @createApp(cardFields: "Name,Discussion,Tasks,Defects,PlanEstimate").then =>
@@ -202,3 +185,42 @@ describe 'Rally.apps.kanban.KanbanApp', ->
     @createApp(cardFields: "Name,Discussion,Tasks,Defects").then =>
       expect(@app.getEl().down('.PlanEstimate')).toBeNull()
 
+  it 'should specify the correct policy preference setting key', ->
+    policy = 'Foo'
+    settingsKey = 'ScheduleStateDefinedPolicy'
+    settings = {}
+    settings[settingsKey] = policy
+    @createApp(settings).then =>
+      @assertPolicyCmpConfig(settingsKey, policy)
+
+  it 'should load legacy non field scoped policy setting', ->
+    policy = 'Foo'
+    settingsKey = 'ScheduleStateDefinedPolicy'
+    settings = {}
+    settings['DefinedPolicy'] = policy
+    @createApp(settings).then =>
+      @assertPolicyCmpConfig(settingsKey, policy)
+
+  helpers
+    createApp: (settings = {}) ->
+      @app = Ext.create('Rally.apps.kanban.KanbanApp',
+        context: Ext.create('Rally.app.Context',
+          initialValues:
+            project:
+              _ref: @projectRef,
+              Name: 'Project 1'
+        ),
+        settings: settings,
+        renderTo: 'testDiv'
+      )
+
+      @stub(@app.getContext(), 'isFeatureEnabled').withArgs('ENABLE_SLIM_CARD_DESIGN').returns true
+
+      @waitForComponentReady @app
+
+    assertPolicyCmpConfig: (settingsKey, policy) ->
+      column = @app.down('rallycardboard').getColumns()[0]
+      prefConfigSettings = column.policyCmpConfig.prefConfig.settings
+      expect(Ext.Object.getKeys(prefConfigSettings)[0]).toBe settingsKey
+      expect(prefConfigSettings[settingsKey]).toBe policy
+      expect(column.policyCmpConfig.policies).toBe policy
