@@ -17,7 +17,8 @@
             'Rally.ui.cardboard.Card',
             'Rally.data.QueryFilter',
             'Rally.ui.notify.Notifier',
-            'Rally.util.Help'
+            'Rally.util.Help',
+            'Rally.util.Test'
         ],
         layout: 'auto',
         appName: 'Portfolio Kanban',

@@ -10,7 +10,8 @@
         
         requires: [
             'Rally.ui.tree.UserStoryTree',
-            'Rally.util.Help'
+            'Rally.util.Help',
+            'Rally.util.Test'
         ],
 
         layout: 'auto',

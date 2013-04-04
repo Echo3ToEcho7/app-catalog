@@ -6,7 +6,8 @@
         settingsScope: "workspace",
         
         requires: [
-            'Rally.ui.combobox.ComboBox'
+            'Rally.ui.combobox.ComboBox',
+            'Rally.util.Test'
         ],
 
         scheduleStates: ["Defined", "In-Progress", "Completed", "Accepted"],
