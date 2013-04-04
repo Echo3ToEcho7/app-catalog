@@ -73,7 +73,7 @@
                 cardConfig: {
                     editable: true,
                     showHeaderMenu: true,
-                    fields: ['Parent', 'Tasks', 'Defects', 'Discussion']
+                    fields: ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
                 },
                 scrollableColumnRecords: this.timeboxes
             });

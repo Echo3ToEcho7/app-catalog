@@ -45,7 +45,7 @@
                         additionalFetchFields: ['PortfolioItem']
                     },
                     cardConfig: {
-                        fields: ['Parent', 'Tasks', 'Defects', 'Discussion']
+                        fields: ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
                     }
                 },
                 listeners: {
