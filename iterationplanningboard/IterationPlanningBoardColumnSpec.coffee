@@ -287,7 +287,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       timeboxRecords = []
 
       for i in [1 .. options.iterationCount ? 1]
-        timeboxRecords.push new Model {
+        timeboxRecords.push new Model(
           _ref: "/iteration/#{i}"
           _refObjectName: options.name || 'my iteration'
           ObjectID: i
@@ -295,19 +295,19 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
           StartDate: options.startDate || new Date()
           EndDate: options.endDate || new Date()
           PlannedVelocity: options.plannedVelocity
-        }
+        )
       @column = Ext.create 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn',
         types: ['HierarchicalRequirement']
         renderTo: 'testDiv'
         headerCell: Ext.get 'testDiv'
         contentCell: Ext.get 'testDiv'
         attribute: 'Iteration'
-        timeboxRecords: timeboxRecords,
-        columnHeaderConfig: {
-            record: timeboxRecords[0],
-            fieldToDisplay: 'Name',
-            editable: true
-        },
+        timeboxRecords: timeboxRecords
+        columnHeaderConfig:
+          record: timeboxRecords[0]
+          fieldToDisplay: 'Name'
+          editable: true
+        ,
         context: Ext.create('Rally.app.Context',
           initialValues:
             featureToggles: Rally.alm.FeatureToggle
