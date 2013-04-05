@@ -1,0 +1,813 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+<title>Enhanced Velocity Chart</title>
+
+<meta name="Name" content="Mashup: Enhanced Velocity Chart"/>
+<meta name="Version" content="2010.2"/>
+<meta name="Vendor" content="Rally Software"/>
+
+<link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
+<link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
+
+<script type="text/javascript">
+    var MASHUP_TYPE = 'Release';
+    var SETTINGS_COOKIE_NAME = 'mu_enhanced_velocity_settings';
+</script>
+
+<script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
+<script type="text/javascript" src="/slm/js/slm.js"></script>
+<script type="text/javascript" src="/slm/js/help.js"></script>
+<script type="text/javascript" src="/apps/1.33/lib/ejsc/EJSChart.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.13/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.13/js/utilities.js"></script>
+
+<script type="text/javascript" description="run compileJS.sh and then insert the resultant out file here...">
+dojo.require("dojo.date.stamp");
+
+var rs = {};
+
+rs.subscribe = function(/* String */eventStr, /* String | FxPtr */eventHandler) {
+    try {
+        dojo.subscribe(eventStr, null, eventHandler);
+    }
+    catch(e) {
+    }
+};
+
+rs.publish = function(/* String */eventStr) {
+    try {
+        dojo.publish(eventStr, arguments);
+    }
+    catch(e) {
+    }
+};
+
+rs.dateToISOString = function(date) {
+    return dojo.date.stamp.toISOString(date, {milliseconds: true, zulu: true});
+};
+var SERIES_1_TITLE = "Series 1";
+var TREND_LINE_TITLE = "Trend Line";
+var SERIES_2_TITLE = "Series 2";
+var SERIES_3_TITLE = "Series 3";
+
+function EVC_Chart(node_id) {
+    this.ejsChart = null;
+
+    this.init = function() {
+        if (this.ejsChart) {
+            this.ejsChart.remove();
+        }
+
+        this.ejsChart = new EJSC.Chart(node_id, {
+            show_legend: false,
+            show_title: false,
+            show_titlebar: false,
+            title: "",
+            allow_zoom: false,
+            axis_bottom: {
+                caption: "Iterations",
+                stagger_ticks: true,
+                grid: { show: false },
+                size: 40
+            },
+            axis_left:{
+                min_extreme:0.0,
+                caption: "Plan Estimates"
+            }
+        });
+
+        this.ejsChart.onShowHint = function(point, series, chart, hint, hoverOrSelect) {
+            /*	  console.log('point:');console.log(point);
+             console.log('series is:');console.log(series);
+             console.log('chart is:');console.log(chart);
+             console.log('hint is:');console.log(hint);
+             console.log('hoverOrSelect:');console.log(hoverOrSelect);
+             */
+            if (series.title.indexOf(TREND_LINE_TITLE) > -1) {
+                return 'Accepted During the Iteration Trend';
+            }
+
+            var ig = prevISet.getIterationGroup(point.x - 1);
+            var total = ig.getTotalPoints();
+            var pct = 0;
+            if (total > 0) {
+                pct = (point.y / total) * 100;
+            }
+
+            var label = prevISet.planEstimateLabel;
+
+            //	  console.log("hint: series.title = "+series.title+", iteration # "+ (point.x - 1) + ", totalPoints = "+total+", y = "+point.y+", pct = "+pct);
+
+            if (series.title.indexOf(SERIES_1_TITLE) > -1) {
+                return 'Accepted During the Iteration: ' + Math.round(point.y * 100) / 100 + ' ' + label + ' (' + pct.toFixed(0) + '%)';
+            } else if (series.title.indexOf(SERIES_2_TITLE) > -1) {
+                return 'Accepted After the Iteration: ' + Math.round(point.y * 100) / 100 + ' ' + label + ' (' + pct.toFixed(0) + '%)';
+            } else if (series.title.indexOf(SERIES_3_TITLE) > -1) {
+                return 'Not Yet Accepted: ' + Math.round(point.y * 100) / 100 + ' ' + label + ' (' + pct.toFixed(0) + '%)';
+            } else {
+                throw "Unrecognized series: " + series.title;
+            }
+        };
+
+    };
+
+    /**
+     * sbData ->
+     * {
+     *  num_1_series: [[], ...],
+     *  num_2_series: [[], ...],
+     *  num_3_series: [[], ...]
+     * }
+     */
+    this.drawStackedBarSeries = function(sbData, includeTrendLine) {
+        //console.log(sbData);
+
+        var sbSeries = this.ejsChart.addSeries(
+                new EJSC.StackedBarSeries(
+                        {
+                            autosort: false,
+                            title: "Estimates vs Accepted",
+                            intervalOffset: 0.7,
+                            groupedBars: false
+                        }
+                ));
+
+        // Sum Accepted Plan estimates -- #1
+        var num1Series = new EJSC.BarSeries(
+                new EJSC.ArrayDataHandler(sbData.num_1_series),
+                {
+                    autosort: false,
+                    groupedBars: false
+                }
+        );
+        num1Series.title = SERIES_1_TITLE;
+        num1Series.color = "#3A874F";
+        num1Series.lineWidth = 1;
+        num1Series.opacity = 100;
+        sbSeries.addSeries(num1Series);
+
+        if (includeTrendLine) {
+            var tlSeries = new EJSC.TrendSeries(num1Series, "linear");
+            tlSeries.title = TREND_LINE_TITLE;
+            tlSeries.lineWidth = 1;
+            tlSeries.color = "#3A874F";
+            tlSeries.opacity = 100;
+            this.ejsChart.addSeries(tlSeries);
+        }
+
+        // Sum Accepted Stories -- #2
+        var num2Series = new EJSC.BarSeries(new EJSC.ArrayDataHandler(sbData.num_2_series), {autosort: false, groupedBars:false});
+        num2Series.title = SERIES_2_TITLE;
+        num2Series.color = "#B2E3B6";
+        num2Series.lineWidth = 1;
+        num2Series.opacity = 100;
+        sbSeries.addSeries(num2Series);
+
+        // Sum All Stories -- #3
+        var num3Series = new EJSC.BarSeries(new EJSC.ArrayDataHandler(sbData.num_3_series), {autosort: false, groupedBars:false});
+        num3Series.title = SERIES_3_TITLE;
+        num3Series.color = "#AAAAAA";
+        num3Series.lineWidth = 1;
+        num3Series.opacity = 1;
+        sbSeries.addSeries(num3Series);
+
+    };
+
+    this.drawAverages = function(/* Object */ data, /* DomNode | String */ node) {
+        // note: haven't found anything in EJSChart about adding text to the chart display so I'll either have to
+        // add this text around the outside of the chart or in a floating div over the chart
+
+        node = dojo.byId(node);
+
+        //	var contents = "<table><tr><th class='left'>Averages</th><th>Value</th></tr>";//<th>Iterations</th></tr>";
+
+        var contents = "<table>";
+
+        for (var i in data) {
+            if (data.hasOwnProperty(i)) {
+                var row = "<tr><td class='name'>" + data[i].label + ":</td><td>" +
+                        data[i].avg.toFixed(2) + " " + prevISet.planEstimateLabel + "</td></tr>";//<td>"+data[i].iterations.join(", ")+"</td></tr>";
+                contents += row;
+            }
+        }
+
+        contents += "</table>";
+
+        node.innerHTML = contents;
+    };
+}
+var prevISet = null;
+
+var _chart = null;
+
+var _TODAY = null;
+
+var batchToolkit = null;
+
+function onLoaded() {
+    if (!prevISet.isReady) {
+        //console.log("Previous Iteration set is not ready.");
+        return;
+    } else {
+        //console.log("Previous Iterations ready.");
+    }
+
+    //console.log("All loaded, ready to draw");
+    _chart.init();
+
+    var data = prevISet.getData();
+    _chart.drawStackedBarSeries(data.bars, prevISet.size() > 1);
+    _chart.drawAverages(data.avgs, "divAverages");
+}
+
+function onError(evt, msg) {
+    var eStr = "Exception: " + msg;
+    //console.log(eStr);
+    //alert(eStr);
+
+    dojo.byId("divChart").innerHTML = "<strong>Error loading Chart: " + msg + "</strong>";
+}
+
+function onStart() {
+    batchToolkit = new RALLY.Mashup.BatchToolkit('__WORKSPACE_OID__', '__PROJECT_OID__', '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
+    _TODAY = rs.dateToISOString(new Date());
+
+    rs.subscribe("exception", "onError");
+
+    prevISet = new ProjectIterationSet();
+    rs.subscribe(ProjectIterationSet.loadedEvent, onLoaded);
+    prevISet.load();
+
+    _chart = new EVC_Chart("divChart");
+}
+
+dojo.addOnLoad(onStart);
+var _afterState = null;
+
+function Iteration_Reference(iObj) {
+    this.id = iObj.ObjectID;
+    this.name = iObj.Name;
+    this.project = iObj.Project._refObjectName;
+
+    this.cfd = null;
+
+    this.getCFDQuery = function() {
+        var query;
+        var pagesize = 1;
+
+        if (_afterState === null || _afterState === "Accepted") {
+            query = "(( IterationObjectID = " + this.id + " ) AND (CardState = Accepted))";
+        } else {
+            query = "(( IterationObjectID = " + this.id + " ) AND ((CardState = Accepted) OR (CardState = \"" + _afterState + "\")))";
+            pagesize = 2;
+        }
+
+        var cfd_query = {
+            key: "cfd_" + this.id,
+            type: "iterationcumulativeflowdata",
+            query: query,
+            fetch: "CardState,CardEstimateTotal,IterationObjectID",
+            order: "CreationDate desc",
+            pagesize: pagesize
+        };
+
+        return cfd_query;
+    };
+
+    this.addCFDs = function(cfds) {
+        tmpIterationID = 0;
+
+        for (var i = 0; i < cfds.length; i++) {
+            var cfd = cfds[i];
+
+            if (cfd.CardState === "Accepted" || cfd.CardState === _afterState) {
+
+                // If no custom state data for the last day of the iteration, the query returns two
+                // accepted state results for the same iteration.  This ensures we only grab the first result.
+                if (cfd.IterationObjectID === tmpIterationID && cfd.CardState === "Accepted") {
+                    return;
+                }
+
+                if (this.cfd === null) {
+                    this.cfd = cfd;
+                } else {
+                    var curr_date = new Date(this.cfd.CreationDate);
+                    var test_date = new Date(cfd.CreationDate);
+                    if (test_date > curr_date) {
+                        this.cfd = cfd;
+                    } else {
+                        if (cfd.CardEstimateTotal !== null) {
+                            this.cfd.CardEstimateTotal += cfd.CardEstimateTotal;
+                        }
+                    }
+                }
+                if (cfd.CardState === "Accepted") {
+                    tmpIterationID = cfd.IterationObjectID;
+                }
+            }
+        }
+    };
+}
+
+// ================================================================================
+
+function IterationGroup(name, projectName) {
+    this.name = name;
+    this.viewedProject = projectName;
+
+    this.iterations = [];
+
+    this.isReady = false;
+
+    this.sumAcceptedStories = 0;
+    this.sumAllStories = 0;
+
+    this.totalPoints = -1;
+
+    this.getName = function() {
+        return this.name;
+    };
+
+    this.addIteration = function(iObj) {
+        if (iObj.Name !== this.name) {
+            throw "This iteration object doesn't belong in this iteration group.";
+        }
+
+        var i = new Iteration_Reference(iObj);
+        //console.log(i);
+        this.iterations.push(i);
+    };
+
+    this.getByOID = function(oid) {
+        for (var i = 0; i < this.iterations.length; i++) {
+            if (Number(this.iterations[i].id) === Number(oid)) {
+                return this.iterations[i];
+            }
+        }
+        throw "failed to find iteration by object id: " + oid;
+    };
+
+    this.getPlannedItemQuery = function(name, type) {
+        var q = {
+            key: name,
+            type: type,
+            query: "( Iteration.Name = \"" + this.name + "\" )",
+            fetch: "PlanEstimate,ScheduleState"
+        };
+        return q;
+    };
+
+    this.addPlannedItem = function(items) {
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            if (item.PlanEstimate === null) {
+                continue;
+            }
+
+            if (item.ScheduleState === 'Accepted' || item.ScheduleState === _afterState) {
+                this.sumAcceptedStories += item.PlanEstimate;
+            }
+            this.sumAllStories += item.PlanEstimate;
+        }
+    };
+
+    this.load = function (loadDone) {
+        //console.log(this.name+" loading...");
+
+        // lookup cfd and hr for each iteration in this
+        var queries = [];
+        for (var i = 0; i < this.iterations.length; i++) {
+            var it_ref = this.iterations[i];
+            queries.push(it_ref.getCFDQuery());
+        }
+        queries.push(this.getPlannedItemQuery("hr", "hierarchicalrequirement"));
+        queries.push(this.getPlannedItemQuery("defect", "defect"));
+        queries.push(this.getPlannedItemQuery("defectsuite", "defectsuite"));
+
+        batchToolkit.find(queries, dojo.hitch(this, function(resultsMap) {
+            this.parseDataItems(resultsMap);
+
+            loadDone();
+        }));
+    };
+
+    this.parseDataItems = function(itemsMap) {
+        if (!itemsMap) {
+            throw "Unable to parse null result set from server.";
+        }
+
+        for (var r in itemsMap) {
+
+            if (itemsMap.hasOwnProperty(r)) {
+                var item = itemsMap[r];
+                if (r === "hr" || r === "defect" || r === "defectsuite") {
+                    this.addPlannedItem(item);
+                } else { // CFD results
+                    var oid = r.slice(4);
+                    try {
+                        var it = this.getByOID(oid);
+                        it.addCFDs(item);
+                    } catch(e) {
+                        //console.log(e);
+                        continue;
+                    }
+                }
+            }
+        }
+
+        //console.log(this.name+" loaded.");
+        this.isReady = true;
+    };
+
+    this.getTotalPoints = function() {
+        if (this.totalPoints > -1) return this.totalPoints;
+
+        var num1 = this.getSumAcceptedPlanEstimates();
+        var num2 = this.getSumAcceptedStories();
+        var num3 = this.getSumAllStories();
+
+        num3 = num3 - num2;
+        num2 = num2 - num1;
+
+        this.totalPoints = num1 + (num2 < 0 ? 0 : num2) + (num3 < 0 ? 0 : num3);
+
+        return this.totalPoints;
+    };
+
+    this.getSumAcceptedStories = function() {
+        return this.sumAcceptedStories;
+    };
+    this.getSumAllStories = function() {
+        return this.sumAllStories;
+    };
+    this.getSumAcceptedPlanEstimates = function() {
+        var total = 0;
+        for (var i = 0; i < this.iterations.length; i++) {
+            var p = this.iterations[i];
+            if (p.cfd) {
+                total += p.cfd.CardEstimateTotal;
+            }
+        }
+        return total;
+    };
+
+    this.toString = function() {
+        return "Name = " + this.name + ", num refs = " + this.iterations.length;
+    };
+}
+
+// ================================================================================
+
+function ProjectIterationSet() {
+    this.iterations = [];
+    this.iteration_name_lookup = {};
+
+    this.project = null;
+
+    this.isLoaded = false;
+    this.isReady = false;
+
+    this.totalPoints = 0;
+    this.planEstimateLabel = null;
+
+    var MAX_ITERATIONS = 10;
+    var AVG_LENGTH = 3;
+
+    this.load = function () {
+        var user_query = {
+            key: "defaultProject",
+            type: "user/userprofile/defaultProject",
+            fetch:"Name"
+        };
+        var prev_query = {
+            key: "prev_iterations",
+            type: "iteration",
+            order: "EndDate desc",
+            fetch: "EndDate,StartDate,State,ObjectID,Name,Project",
+            query: "( EndDate <= " + _TODAY + " )"
+        };
+        var planEstUnit_query = {
+            key: 'planEstUnit',
+            type: 'WorkspaceConfiguration',
+            fetch:'IterationEstimateUnitName'
+        };
+        var scheduleStates = {
+            key: 'scheduleStates',
+            type: 'Hierarchical Requirement',
+            attribute: 'Schedule State'
+        };
+
+        batchToolkit.find([prev_query,planEstUnit_query,scheduleStates],
+                dojo.hitch(this, this.handleLoad));
+    };
+    this.handleLoad = function(results) {
+        this.planEstimateLabel = results.planEstUnit[0].IterationEstimateUnitName;
+        _afterState = results.scheduleStates[results.scheduleStates.length - 1];
+
+        try {
+            this.parseProjectIterations(results.prev_iterations);
+        } catch(e) {
+            this.postException(e);
+        }
+
+        for (var i = 0; i < this.iterations.length; i++) {
+            var projIteration = this.iterations[i];
+            //console.log(projIteration);
+            try {
+                projIteration.load(dojo.hitch(this, this.ready));
+            } catch(e) {
+                this.postException(e);
+            }
+        }
+    };
+
+    this.parseProjectIterations = function(i_obj_array) {
+        if (i_obj_array === null) {
+            throw "Null Previous Iterations array to parse.  can't continue.";
+        }
+
+        this.isLoaded = true;
+
+        if (i_obj_array.length < 1) {
+            throw("No previous iterations for project.");
+        }
+
+        for (var i = 0; i < i_obj_array.length; i++) {
+            var itr = i_obj_array[i];
+            var p = this.iteration_name_lookup[itr.Name];
+
+            // have we already found this iteration?  if not, add it
+            if (typeof p === "undefined") {
+                // first check if this new iteration would put us over our limit
+                if (this.iterations.length >= MAX_ITERATIONS) {
+                    break;
+                }
+
+                p = new IterationGroup(itr.Name, this.project);
+                p.addIteration(itr);
+
+                this.iterations.push(p);
+                this.iteration_name_lookup[itr.Name] = p;
+            } else { // if so, add the project reference
+                p.addIteration(itr);
+            }
+        }
+    };
+
+    this.ready = function() {
+        for (var i = 0; i < this.iterations.length; i++) {
+            var it = this.iterations[i];
+            if (!it.isReady) {
+                //console.log(it.name+" is not ready.");
+                return;
+            }
+        }
+        if (this.isReady) {
+            return;
+        }
+
+        this.isReady = true;
+        rs.publish(ProjectIterationSet.loadedEvent);
+    };
+
+    this.postException = function(msg) {
+        rs.publish("exception", msg);
+    };
+
+    /**
+     * Returns data in the format:
+     * {
+     *  bars:{
+     *  num_1_series: [[<name>,<value>], ...],
+     *  num_2_series: [[<name>,<value>], ...],
+     *  num_3_series: [[<name>,<value>], ...],
+     *  },
+     *  avgs: {
+     *  avg_last: {avg: <avg>, iterations: [<iteration>, ...]},
+     *  avg_best: {avg: <avg>, iterations: [<iteration>, ...]},
+     *  avg_worst: {avg: <avg>, iterations: [<iteration>, ...]}
+     *  }
+     * }
+     */
+    this.getData = function() {
+        if (!this.isLoaded) {
+            throw "Can't get data for project iteration set that's not loaded.";
+        }
+
+        if (this.iterations.length < 1) {
+            throw "No Iterations for this project.";
+        }
+
+        if (!this.isReady) {
+            throw "Iterations are not done loading... Please wait for ProjectSet \"ready\" announcement.";
+        }
+
+        function sortNumericAsc(a, b) {
+            return (a[0] - b[0]);
+        }
+
+        var sbData = {};
+        var bars = {};
+        var num_1_series = [];
+        var num_2_series = [];
+        var num_3_series = [];
+
+        var avgs = {};
+        var len = this.iterations.length < AVG_LENGTH ? this.iterations.length : AVG_LENGTH;
+        var avg_last = { label: "Average accepted for last 3 iterations", avg: 0, iterations: [] };
+        var avg_best = { label: "Average accepted for best 3 iterations", avg: 0, iterations: [], _to_calc: [],
+            test: function(arr, val, i_name, len) {
+                arr.sort(sortNumericAsc);
+                if (arr.length < len) {
+                    arr.push([val, i_name]);
+                    return true;
+                }
+
+                for (var i = 0; i < arr.length; i++) {
+                    if (val > arr[i][0]) {
+                        arr[i] = [val, i_name];
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        };
+        var avg_worst = { label: "Average accepted for worst 3 iterations", avg: 0, iterations: [], _to_calc: [],
+            test: function(arr, val, i_name, len) {
+                arr.sort(sortNumericAsc);
+                arr.reverse();
+                if (arr.length < len) {
+                    arr.push([val, i_name]);
+                    return true;
+                }
+
+                for (var i = 0; i < arr.length; i++) {
+                    if (val < arr[i][0]) {
+                        arr[i] = [val, i_name];
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        };
+
+        this.iterations.reverse();
+        for (var i = 0; i < this.iterations.length; i++) {
+            var it = this.iterations[i];
+            var num1 = it.getSumAcceptedPlanEstimates();
+
+            if (i > this.iterations.length - len - 1) {
+                avg_last.avg += num1;
+                avg_last.iterations.push(it.name);
+            }
+
+            avg_best.test(avg_best._to_calc, num1, it.name, len);
+            avg_worst.test(avg_worst._to_calc, num1, it.name, len);
+
+
+            var num2 = it.getSumAcceptedStories();
+            var num3 = it.getSumAllStories();
+            //console.log("  "+it.name);
+            //console.log("      #1. "+num1+" -- Sum of Accepted Plan Estimates from last day of iteration CFD ");
+            //console.log("      #2. "+num2+" -- Sum of plan estimates of all accepted stories");
+            //console.log("      #3. "+num3+" -- Sum of plan estimates of all stories");
+
+            var adjusted_num2 = num2 - num1;
+            if (adjusted_num2 < 0) {
+                //console.log("Edge case: series 2 data smaller than series 1.  Setting to 0 for graph continuity.");
+                adjusted_num2 = 0;
+            }
+
+            var adjusted_num3 = num3 - num2;
+            if (adjusted_num3 < 0) {
+                //console.log("Edge case: series 3 data smaller than series 2 (unadjusted).  Setting to 0 for graph continuity.");
+                adjusted_num3 = 0;
+            }
+
+            num_1_series.push([it.getName(), num1]);
+            num_2_series.push([it.getName(), adjusted_num2.toFixed(2)]);
+            num_3_series.push([it.getName(), adjusted_num3.toFixed(2)]);
+        }
+
+        if (len > 0) {
+            // last n iterations average
+            avg_last.avg = avg_last.avg / len;
+            avgs.avg_last = avg_last;
+
+            // best n iterations average
+            for (var i = 0; i < avg_best._to_calc.length; i++) {
+                avg_best.avg += avg_best._to_calc[i][0];
+                avg_best.iterations.push(avg_best._to_calc[i][1]);
+            }
+
+            avg_best.avg = avg_best.avg / len;
+            avgs.avg_best = avg_best;
+
+            // worst n iterations average
+            for (var i = 0; i < avg_worst._to_calc.length; i++) {
+                avg_worst.avg += avg_worst._to_calc[i][0];
+                avg_worst.iterations.push(avg_worst._to_calc[i][1]);
+            }
+            avg_worst.avg = avg_worst.avg / len;
+            avgs.avg_worst = avg_worst;
+        }
+
+        bars.num_1_series = num_1_series;
+        bars.num_2_series = num_2_series;
+        bars.num_3_series = num_3_series;
+
+        sbData.bars = bars;
+        sbData.avgs = avgs;
+
+        return sbData;
+    };
+
+    this.getIterationGroup = function(/* Number */ iterationIdx) {
+        return this.iterations[iterationIdx];
+    };
+
+    this.size = function() {
+        return this.iterations.length;
+    };
+}
+
+ProjectIterationSet.loadedEvent = "project_iterations_loaded";
+</script>
+
+<script type="text/javascript" description="load require dojo elements">
+    dojo.require("dojo.io.script");
+</script>
+<script type="text/javascript" description="initialize the help icon">
+    var util = RALLY.Mashup.Utilities;
+    dojo.addOnLoad(function() {
+        util.showHelpIcon(168);
+        util.showPrintButton();
+    });
+</script>
+
+<style type="text/css">
+    body {
+        background: #fff;
+    }
+
+    .lbl {
+        text-align: left;
+        font-size: 14px;
+    }
+
+    #divAverages table {
+        border-collapse: collapse;
+    }
+
+    #divAverages td {
+        text-align: center;
+    }
+
+    #divAverages td.name {
+        text-align: right;
+        font-weight: bold;
+        padding-right: 15px;
+    }
+</style>
+
+</head>
+<body>
+<div style="float:right" id="help"></div>
+<div style="float:left" id="title" class="titlebar">
+    Enhanced Velocity Chart <span id="spnProject"></span>
+</div>
+<table>
+    <tr>
+        <td style="text-align: left; width: 99%;">
+        <td style="text-align: right; width: 1%;">
+            <img id="do" onmouseover="util.showcbButton();" onmouseout="hidecbMenu('buttons',event);"
+                 style="vertical-align: middle;" src="/slm/images/menu_actions.gif"/>
+
+            <div style="position:relative;top:5px" align="left">
+                <div id="buttons" class="do-menu" style="left:0px;"
+                     onmouseover="document.body.style.cursor='pointer';"
+                     onmouseout="document.body.style.cursor='default';hidecbMenu('buttons',event);">
+                    <a id="print" onclick="util.printPage()">Print...</a>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div style="clear:both"></div>
+
+<div style="padding: 5px;margin: 0px auto; background-color: #fff;width: 90%;">
+    <div id="divAverages" style="margin-bottom: 20px;"></div>
+    <div id="divChart" style="width:100%; height: 300px;">
+        <div>
+            <img alt="Progress" src="/slm/images/icon_spinner.gif"/>
+            <em>loading chart...</em>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

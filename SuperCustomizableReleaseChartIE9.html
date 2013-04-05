@@ -1,41 +1,26 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+
 <!-- Copyright (c) 2002-2010  Rally Software Development Corp. All rights reserved. -->
+<html>
 <head>
-<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
-<title>Release Dashboard</title>
-<meta name="Name" content="Mashup: Release Dashboard"/>
-<meta name="Version" content="2010.05.28"/>
+<title>Super Customizable Release Chart</title>
+<meta name="Name" content="Mashup: Super Customizable Release Chart"/>
+<meta name="Version" content="2010.2"/>
 <meta name="Vendor" content="Rally Software"/>
 <link rel="stylesheet" type="text/css" href="/slm/css/rally/core.css" charset="utf-8"/>
 <link rel="stylesheet" type="text/css" href="/slm/css/slm.css" charset="utf-8"/>
-<link rel="stylesheet" type="text/css" href="/slm/js-lib/dojo/1.3.1/dijit/themes/nihilo/nihilo.css">
-
-<script type="text/javascript" description="CSS Selection">
-    var fileref = document.createElement("link");
-    fileref.setAttribute("rel", "stylesheet");
-    fileref.setAttribute("type", "text/css");
-    if ('__MODE__' == 'widget') {
-        fileref.setAttribute("href", "/slm/mashup/1.15/css/widget.css");
-    } else {
-        fileref.setAttribute("href", "/slm/mashup/1.15/css/mashup.css");
-    }
-    document.getElementsByTagName("head")[0].appendChild(fileref);
-</script>
-
 <script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
-<script type="text/javascript">
-    dojo.require('dijit.TitlePane');
-</script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript" src="/slm/js/help.js"></script>
 <script type="text/javascript" src="/slm/js/slm.js"></script>
-<script type="text/javascript" src="/slm/js-lib/ejsc/2.0.1/EJSChart.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.15/js/utilities.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.15/js/dropdown.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.15/js/batch-toolkit.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.16/js/pie.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.15/js/legend.js"></script>
-
+<script type="text/javascript" src="/apps/1.33/lib/ejsc/EJSChart.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/utilities.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/dropdown.js"></script>
+<script type="text/javascript">
+    var MASHUP_TYPE = RALLY.Mashup.RELEASE;
+    var SETTINGS_COOKIE_NAME = 'mu_super_customizable_release_settings';
+</script>
 
 <script type="text/javascript">
 /*
@@ -348,7 +333,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
         } else {
             am = "(" + an + ' AND ( CardState = "' + ao + '" ))'
         }
-        ap = {key:"FlowData",type:al,fetch:"CreationDate,CardEstimateTotal,TaskEstimateTotal,CardToDoTotal",query:am,order:"CreationDate",project:null};
+        ap = {key:"FlowData",type:al,fetch:"CreationDate,CardEstimateTotal,TaskEstimateTotal,CardToDoTotal",query:am,order:"CreationDate,ObjectID",project:null};
         ak(ap);
         return ap
     }
@@ -1032,7 +1017,7 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
         var ao = U();
         var am = [];
         var al = "((( " + an + " = " + h + ") AND (" + ao + " = " + f + ')) AND (Name = "' + E + '"))';
-        am[0] = {key:"timeboxOids",type:V,fetch:"ObjectID,Name,project," + an + "," + ao,query:al,order:ao + " desc"};
+        am[0] = {key:"timeboxOids",type:V,fetch:"ObjectID,Name,project," + an + "," + ao,query:al,order:ao + " desc,ObjectID"};
         ak(am[0]);
         am[1] = {key:"estimateUnit",type:"WorkspaceConfiguration",fetch:"TaskUnitName,IterationEstimateUnitName,ReleaseEstimateUnitName"};
         ak(am[1]);
@@ -1056,767 +1041,809 @@ RALLY.Mashup.SuperCustomizableChart = function(g, r, E, h, f, V, B, e, s, ah, P)
 };
 /*
  Copyright (c) 2002-2010  Rally Software Development Corp. All rights reserved.
- DashboardUtilities.js
- */
-function convertMillisecondsToDays(a) {
-    return a / 86400000
-}
-function convertDateStringToDateObject(b) {
-    b = b.split("T")[0].split("-");
-    var a = new Date();
-    a.setFullYear(b[0], b[1] - 1, b[2]);
-    return a
-}
-function calcWorkDays(b, f) {
-    var e = convertMillisecondsToDays(f - b);
-    var a = 0;
-    var d = b.getDay();
-    var c = f.getDay();
-    if ((d > 0) && (d < 6)) {
-        a += 6 - d;
-        e -= 6 - d
-    }
-    if (c == 6) {
-        a += 5;
-        e -= 5
-    } else {
-        a += c;
-        e -= c
-    }
-    a += Math.floor(e / 7) * 5;
-    return a
-}
-function calculateHealth(b, o, f, a) {
-    var h = ["Good","At Risk","Critical","Not Started","Completed"];
-    var c = 0;
-    var q = convertDateStringToDateObject(b.slice(0, 10));
-    var p = convertDateStringToDateObject(o.slice(0, 10));
-    var g = new Date();
-    if (q > g) {
-        return h[3]
-    } else {
-        if (g > p) {
-            return h[4]
-        }
-    }
-    var m = 0;
-    var l = 0;
-    for (var n = 0; n < f.length; n++) {
-        if (f[n] === "Accepted") {
-            m += Math.round(a[n])
-        }
-        if ((n >= 1) && (f[n - 1] === "Accepted")) {
-            m += Math.round(a[n])
-        }
-        l += Math.round(a[n])
-    }
-    var r = Math.round((m / l) * 100);
-    var j = calcWorkDays(q, p);
-    var e = calcWorkDays(q, g) - 1;
-    var s = calcWorkDays(g, p);
-    var k = Math.round((e / j) * 100);
-    var d = Math.round((r / k) * 100);
-    if (d >= 70 && d < 90) {
-        c = 1
-    } else {
-        if (d < 70) {
-            c = 2
-        }
-    }
-    return[h[c],s,j,r]
-}
-function removeEmptyValues(a) {
-    var b = [];
-    for (var c = 0; c < a.length; c++) {
-        if (a[c]) {
-            b.push(a[c])
-        }
-    }
-    return b
-}
-;
-/*
- Copyright (c) 2002-2010  Rally Software Development Corp. All rights reserved.
- Dashboard.js
  */
 dojo.addOnLoad(initPage);
+google.load("visualization", "1", {packages:["table"]});
 
-var BATCH_TOOLKIT, DROPDOWN, DASHBOARD;
-var legendPane = null;
+var COLORS = {
+    'red' : '#E92D34',
+    'orange' : '#F39731',
+    'yellow' : '#F4CA13',
+    'green' : '#6AB17D',
+    'blue' : '#5E70DE',
+    'indigo' : "#4B0082",
+    'violet' : "#EE82EE",
+    'light_green' : '#B2E3B6',
+    'gray' : '#BBBBBB'
+};
+var DEFINED_STATE = 'Defined';
+var INPROGRESS_STATE = 'In-Progress';
+var COMPLETED_STATE = 'Completed';
+var ACCEPTED_STATE = 'Accepted';
 
-function checkForScopeUp(scopeUp) {
-    var warningDiv = document.getElementById('warning');
-    if (scopeUp === '__PROJECT_' + 'SCOPING_UP__' || typeof scopeUp === 'undefined') {
-        warningDiv.style.visibility = 'hidden';
-        return;
+var CHARTCOLORS = {
+    DEFINED_STATE : "orange",
+    INPROGRESS_STATE : "blue",
+    COMPLETED_STATE : "light_green",
+    ACCEPTED_STATE : "green",
+    'BurndownIdeal' : "gray",
+    'BurnupIdeal' : "gray"
+};
+
+var BATCH_TOOLKIT, DROPDOWN, BURNDOWN_CHART;
+var NUM_SETTINGS = 31;
+var SETTINGS_COOKIE_DEFAULT =
+        't~f~f~f~f~f~t~f~f~t~t~t~t~f~f~f~f~orange~blue~light_green~green~f~f~red~f~f~indigo~f~gray~f~gray';
+var NUM_CHART_TYPES = 5;
+var theChart;
+var dSeries, iSeries, cSeries, aSeries, bSeries, fSeries, theStack;
+
+Array.init = function (template_array, initial) {
+    var a = [], i;
+    for (i = 0; i < template_array.length; i += 1) {
+        a[i] = [template_array[i][0], initial, template_array[i][2]];
+    }
+    return a;
+};
+
+function addArray(first, second) {
+    var i;
+    var sum = [];
+    for (i = 0; i < first.length; i += 1) {
+        sum.push([first[i][0], first[i][1] + second[i][1], first[i][2]]);
+    }
+    return sum;
+}
+
+function getControlPanelElement(name) {
+    return document.getElementById(name);
+}
+
+function getState(element) {
+    if (element.checked) {
+        return "~t";
     } else {
-        if (scopeUp === 'true') {
-            warningDiv.style.visibility = 'visible';
-            warningDiv.innerHTML = 'You have scope up ' +
-                    '(show items from parent projects) turned on, ' +
-                    'which produces unexpected results.  Click the ' +
-                    'help icon for more information.';
-        } else {
-            warningDiv.style.visibility = 'hidden';
+        return "~f";
+    }
+}
+
+function getValue(element) {
+    return "~" + element.value;
+}
+
+function buildConfig() {
+    var config = {};
+    var beforeState = getBeforeState(SCHEDULE_STATES);
+    var afterState = getAfterState(SCHEDULE_STATES);
+
+    if (getControlPanelElement('input0').checked) {
+        config.ChartType = 'stacked-bar';
+    } else if (getControlPanelElement('input1').checked) {
+        config.ChartType = 'grouped-bar';
+    } else if (getControlPanelElement('input2').checked) {
+        config.ChartType = 'line';
+    } else if (getControlPanelElement('input3').checked) {
+        config.ChartType = 'area';
+    } else {
+        config.ChartType = 'burndown';
+    }
+
+    if (getControlPanelElement('rbStory').checked) {
+        config.Units = 'story';
+    } else if (getControlPanelElement('rbTask').checked) {
+        config.Units = 'task';
+    } else if (getControlPanelElement('rbToDo').checked) {
+        config.Units = 'todo';
+    }
+
+    config.BeforeStateName = beforeState;
+    config.AfterStateName = afterState;
+
+    config[DEFINED_STATE + 'Visible'] = getControlPanelElement('cbDefined').checked;
+    config['InProgressVisible'] = getControlPanelElement('cbIn-Progress').checked;
+    config[COMPLETED_STATE + 'Visible'] = getControlPanelElement('cbCompleted').checked;
+    config[ACCEPTED_STATE + 'Visible'] = getControlPanelElement('cbAccepted').checked;
+
+    config[DEFINED_STATE + 'Color'] =
+            COLORS[getControlPanelElement('selDefined').value];
+    config['InProgressColor'] =
+            COLORS[getControlPanelElement('selIn-Progress').value];
+    config[COMPLETED_STATE + 'Color'] =
+            COLORS[getControlPanelElement('selCompleted').value];
+    config[ACCEPTED_STATE + 'Color'] =
+            COLORS[getControlPanelElement('selAccepted').value];
+
+    config[DEFINED_STATE + 'Trend'] = getControlPanelElement('cbDefinedTrend').checked;
+    config['InProgressTrend'] = getControlPanelElement('cbIn-ProgressTrend').checked;
+    config[COMPLETED_STATE + 'Trend'] = getControlPanelElement('cbCompletedTrend').checked;
+    config[ACCEPTED_STATE + 'Trend'] = getControlPanelElement('cbAcceptedTrend').checked;
+
+    if (beforeState !== null) {
+        config.BeforeVisible = getControlPanelElement('cb' + beforeState).checked;
+        config.BeforeColor =
+                COLORS[getControlPanelElement('sel' + beforeState).value];
+        config.BeforeTrend = getControlPanelElement('cb' + beforeState + 'Trend').checked;
+    }
+
+    if (afterState !== null) {
+        config.AfterVisible = getControlPanelElement('cb' + afterState).checked;
+        config.AfterColor =
+                COLORS[getControlPanelElement('sel' + afterState).value];
+        config.AfterTrend = getControlPanelElement('cb' + afterState + 'Trend').checked;
+    }
+
+    config.BurndownIdealVisible = getControlPanelElement('cbBurndownIdeal').checked;
+    config.BurndownIdealColor =
+            COLORS[getControlPanelElement('selBurndownIdeal').value];
+    config.BurnupIdealVisible = getControlPanelElement('cbBurnupIdeal').checked;
+    config.BurnupIdealColor =
+            COLORS[getControlPanelElement('selBurnupIdeal').value];
+
+    config.TableVisible = getControlPanelElement('cbTable').checked;
+
+    if (config.ChartType === 'burndown') {
+        config.RightAxisLabelVisible = true;
+    }
+
+    return config;
+}
+
+function getControlStates() {
+    var initialVal = getControlPanelElement('input0').checked ? 't' : 'f';
+    var beforeState = getBeforeState(SCHEDULE_STATES);
+    var afterState = getAfterState(SCHEDULE_STATES);
+    var cookieVal = initialVal +
+            getState(getControlPanelElement('input1')) +
+            getState(getControlPanelElement('input2')) +
+            getState(getControlPanelElement('input3')) +
+            getState(getControlPanelElement('input4')) +
+            getState(getControlPanelElement('cbTable')) +
+            getState(getControlPanelElement('rbStory')) +
+            getState(getControlPanelElement('rbTask')) +
+            getState(getControlPanelElement('rbToDo')) +
+            getState(getControlPanelElement('cbDefined')) +
+            getState(getControlPanelElement('cbIn-Progress')) +
+            getState(getControlPanelElement('cbCompleted')) +
+            getState(getControlPanelElement('cbAccepted')) +
+            getState(getControlPanelElement('cbDefinedTrend')) +
+            getState(getControlPanelElement('cbIn-ProgressTrend')) +
+            getState(getControlPanelElement('cbCompletedTrend')) +
+            getState(getControlPanelElement('cbAcceptedTrend')) +
+            getValue(getControlPanelElement('selDefined')) +
+            getValue(getControlPanelElement('selIn-Progress')) +
+            getValue(getControlPanelElement('selCompleted')) +
+            getValue(getControlPanelElement('selAccepted'));
+    if (beforeState !== null) {
+        cookieVal = cookieVal + getState(getControlPanelElement('cb' + beforeState));
+        cookieVal = cookieVal + getState(getControlPanelElement('cb' + beforeState + 'Trend'));
+        cookieVal = cookieVal + getValue(getControlPanelElement('sel' + beforeState));
+    } else {
+        cookieVal = cookieVal + '~f~f~gray';
+    }
+    if (afterState !== null) {
+        cookieVal = cookieVal + getState(getControlPanelElement('cb' + afterState));
+        cookieVal = cookieVal + getState(getControlPanelElement('cb' + afterState + 'Trend'));
+        cookieVal = cookieVal + getValue(getControlPanelElement('sel' + afterState));
+    } else {
+        cookieVal = cookieVal + '~f~f~gray';
+    }
+
+    cookieVal = cookieVal + getState(getControlPanelElement('cbBurndownIdeal'));
+    cookieVal = cookieVal + getValue(getControlPanelElement('selBurndownIdeal'));
+    cookieVal = cookieVal + getState(getControlPanelElement('cbBurnupIdeal'));
+    cookieVal = cookieVal + getValue(getControlPanelElement('selBurnupIdeal'));
+    return cookieVal;
+}
+
+function updateColor(name, colorIndex) {
+    CHARTCOLORS[colorIndex] = getControlPanelElement('sel' + name).value;
+    getControlPanelElement('sq' + name).style.background =
+            COLORS[CHARTCOLORS[colorIndex]];
+}
+
+function updateColors() {
+    var beforeState = getBeforeState(SCHEDULE_STATES);
+    var afterState = getAfterState(SCHEDULE_STATES);
+    updateColor('Accepted', ACCEPTED_STATE);
+    updateColor('Completed', COMPLETED_STATE);
+    updateColor('In-Progress', INPROGRESS_STATE);
+    updateColor('Defined', DEFINED_STATE);
+    updateColor('BurndownIdeal', 'BurndownIdeal');
+    updateColor('BurnupIdeal', 'BurnupIdeal');
+    if (beforeState !== null) {
+        updateColor(beforeState, beforeState);
+    }
+    if (afterState !== null) {
+        updateColor(afterState, afterState);
+    }
+}
+
+function updateUnitRadioButtons() {
+    if (getControlPanelElement('input4').checked) {
+        getControlPanelElement('rbStory').disabled = true;
+        getControlPanelElement('rbTask').disabled = true;
+        getControlPanelElement('rbToDo').checked = true;
+        getControlPanelElement('rbToDo').disabled = true;
+    } else {
+        getControlPanelElement('rbStory').disabled = false;
+        getControlPanelElement('rbTask').disabled = false;
+        getControlPanelElement('rbToDo').disabled = false;
+    }
+}
+
+function onColorChange(e) {
+    RALLY.Mashup.Utilities.updateMashupCookie(SETTINGS_COOKIE_NAME, getControlStates(), 30);
+    updateColors();
+    RALLY.Mashup.Utilities.showWait('chart_div');
+    BURNDOWN_CHART.redisplay(buildConfig());
+}
+
+function onDatasetChange(e) {
+    RALLY.Mashup.Utilities.updateMashupCookie(SETTINGS_COOKIE_NAME, getControlStates(), 30);
+    updateTrendIdealChkBoxes();
+    RALLY.Mashup.Utilities.showWait('chart_div');
+    BURNDOWN_CHART.redisplay(buildConfig());
+}
+
+function addCheckBox(row, id) {
+    var cell = document.createElement("TD");
+    var checkBox = document.createElement("input");
+
+    checkBox.type = "checkbox";
+    checkBox.id = id;
+    if (document.addEventListener) { // For most browsers
+        checkBox.addEventListener('change', onDatasetChange, false);
+    } else if (document.attachEvent) { // For IE
+        checkBox.attachEvent('onclick', onDatasetChange);
+    }
+    cell.width = 25;
+    cell.appendChild(checkBox);
+    row.appendChild(cell);
+}
+
+function addLabel(row, labeltext) {
+    var label;
+    var cell = document.createElement("TD");
+    if (labeltext !== null && labeltext.length > 0) {
+        label = document.createElement("label");
+        label.appendChild(document.createTextNode(labeltext));
+        cell.appendChild(label);
+    }
+    row.appendChild(cell);
+}
+
+function addLegendSquare(row, id) {
+    var cell = document.createElement("TD");
+    cell.id = id;
+    cell.height = 5;
+    cell.width = 20;
+    cell.border = 1;
+    row.appendChild(cell);
+}
+
+function addSelectList(row, id) {
+    var option;
+    var cell = document.createElement("TD");
+    var selectList = document.createElement("select");
+    selectList.id = id;
+    if (document.addEventListener) { // For most browsers
+        selectList.addEventListener('change', onColorChange, false);
+    } else if (document.attachEvent) { // For IE
+        selectList.attachEvent('onchange', onColorChange);
+    }
+
+    for (var colorName in COLORS) {
+        if (COLORS.hasOwnProperty(colorName)) {
+            option = document.createElement('option');
+            option.text = colorName;
+            option.value = colorName;
+            //option.style.background=COLORS[colorName];
+            try {
+                selectList.add(option, null); // standards compliant; doesn't work in IE
+            }
+            catch(ex) {
+                selectList.add(option); // IE only
+            }
         }
     }
+    cell.appendChild(selectList);
+    row.appendChild(cell);
 }
 
-//TODO: Figure out a clever way to make a function that can return the value of a hangman 
-//  variable or a default if it has not been interpolated
-function getAvailableWidth() {
-    var browserWidth = document.body.clientWidth || window.innerWidth;
-    if ('__width__' !== '__w' + 'idth__') {
-        return '__width__';
-    } else {
-        return browserWidth;
+function addHeader(tablebody) {
+    var cell, label;
+    var row = document.createElement("TR");
+
+    cell = document.createElement("TH");
+    row.appendChild(cell);
+
+    cell = document.createElement("TH");
+    row.appendChild(cell);
+
+    cell = document.createElement("TH");
+    row.appendChild(cell);
+
+    cell = document.createElement("TH");
+    row.appendChild(cell);
+
+    cell = document.createElement("TH");
+    label = document.createElement("label");
+    label.appendChild(document.createTextNode("Trend"));
+
+    cell.appendChild(label);
+    row.appendChild(cell);
+
+    tablebody.appendChild(row);
+}
+
+function addDatasetControlPanel(results) {
+    var tablebody, table, row, cell, checkBox, selectList, option;
+
+    SCHEDULE_STATES = results.storyStates;
+
+    table = document.createElement("TABLE");
+    table.cellSpacing = 5;
+    tablebody = document.createElement("TBODY");
+
+    addHeader(tablebody);
+
+    for (var i = 0; i < SCHEDULE_STATES.length; i++) {
+        row = document.createElement("TR");
+        addCheckBox(row, "cb" + SCHEDULE_STATES[i]);
+        addLegendSquare(row, "sq" + SCHEDULE_STATES[i]);
+        addLabel(row, SCHEDULE_STATES[i]);
+        addSelectList(row, "sel" + SCHEDULE_STATES[i]);
+        addCheckBox(row, "cb" + SCHEDULE_STATES[i] + "Trend", null);
+        tablebody.appendChild(row);
+    }
+
+    table.appendChild(tablebody);
+    document.getElementById('datasetPanel').appendChild(table);
+
+    addIdealControlPanel();
+}
+
+function addIdealControlPanel() {
+    var tablebody, table, row, cell, label;
+    table = document.createElement("TABLE");
+    table.cellSpacing = 5;
+    tablebody = document.createElement("TBODY");
+
+    row = document.createElement("TR");
+    cell = document.createElement("TH");
+    label = document.createElement("label");
+    label.appendChild(document.createTextNode("Ideal Lines"));
+    cell.appendChild(label);
+    cell.colSpan = 3;
+    cell.align = "left";
+    row.appendChild(cell);
+    tablebody.appendChild(row);
+
+    row = document.createElement("TR");
+    addCheckBox(row, "cbBurndownIdeal");
+    addLegendSquare(row, "sqBurndownIdeal");
+    addLabel(row, "Burndown To Do");
+    addSelectList(row, "selBurndownIdeal");
+    tablebody.appendChild(row);
+
+    row = document.createElement("TR");
+    addCheckBox(row, "cbBurnupIdeal");
+    addLegendSquare(row, "sqBurnupIdeal");
+    addLabel(row, "Burn-up Accepted");
+    addSelectList(row, "selBurnupIdeal");
+    tablebody.appendChild(row);
+
+    table.appendChild(tablebody);
+    document.getElementById('idealPanel').appendChild(table);
+}
+
+function setControlStates(cookieVal) {
+    var stuff = cookieVal.split(/~/);
+    var beforeState = getBeforeState(SCHEDULE_STATES);
+    var afterState = getAfterState(SCHEDULE_STATES);
+    if (stuff.length != NUM_SETTINGS) {
+        stuff = SETTINGS_COOKIE_DEFAULT.split(/~/);
+    }
+
+    getControlPanelElement('input0').checked = (stuff[0] === 't') ? true : false;
+    getControlPanelElement('input1').checked = (stuff[1] === 't') ? true : false;
+    getControlPanelElement('input2').checked = (stuff[2] === 't') ? true : false;
+    getControlPanelElement('input3').checked = (stuff[3] === 't') ? true : false;
+    getControlPanelElement('input4').checked = (stuff[4] === 't') ? true : false;
+    getControlPanelElement('cbTable').checked = (stuff[5] === 't') ? true : false;
+    getControlPanelElement('rbStory').checked = (stuff[6] === 't') ? true : false;
+    getControlPanelElement('rbTask').checked = (stuff[7] === 't') ? true : false;
+    getControlPanelElement('rbToDo').checked = (stuff[8] === 't') ? true : false;
+    getControlPanelElement('cbDefined').checked = (stuff[9] === 't') ? true : false;
+    getControlPanelElement('cbIn-Progress').checked = (stuff[10] === 't') ? true : false;
+    getControlPanelElement('cbCompleted').checked = (stuff[11] === 't') ? true : false;
+    getControlPanelElement('cbAccepted').checked = (stuff[12] === 't') ? true : false;
+    getControlPanelElement('cbDefinedTrend').checked = (stuff[13] === 't') ? true : false;
+    getControlPanelElement('cbIn-ProgressTrend').checked = (stuff[14] === 't') ? true : false;
+    getControlPanelElement('cbCompletedTrend').checked = (stuff[15] === 't') ? true : false;
+    getControlPanelElement('cbAcceptedTrend').checked = (stuff[16] === 't') ? true : false;
+    getControlPanelElement('selDefined').value = stuff[17];
+    getControlPanelElement('sqDefined').style.background = COLORS[stuff[17]];
+    getControlPanelElement('selIn-Progress').value = stuff[18];
+    getControlPanelElement('sqIn-Progress').style.background = COLORS[stuff[18]];
+    getControlPanelElement('selCompleted').value = stuff[19];
+    getControlPanelElement('sqCompleted').style.background = COLORS[stuff[19]];
+    getControlPanelElement('selAccepted').value = stuff[20];
+    getControlPanelElement('sqAccepted').style.background = COLORS[stuff[20]];
+    if (beforeState !== null) {
+        getControlPanelElement('cb' + beforeState).checked = (stuff[21] === 't') ? true : false;
+        getControlPanelElement('cb' + beforeState + 'Trend').checked = (stuff[22] === 't') ? true : false;
+        getControlPanelElement('sel' + beforeState).value = stuff[23];
+        getControlPanelElement('sq' + beforeState).style.background = COLORS[stuff[23]];
+    }
+    if (afterState !== null) {
+        getControlPanelElement('cb' + afterState).checked = (stuff[24] === 't') ? true : false;
+        getControlPanelElement('cb' + afterState + 'Trend').checked = (stuff[25] === 't') ? true : false;
+        getControlPanelElement('sel' + afterState).value = stuff[26];
+        getControlPanelElement('sq' + afterState).style.background = COLORS[stuff[26]];
+    }
+    getControlPanelElement('cbBurndownIdeal').checked = (stuff[27] === 't') ? true : false;
+    getControlPanelElement('selBurndownIdeal').value = stuff[28];
+    getControlPanelElement('sqBurndownIdeal').style.background = COLORS[stuff[28]];
+
+    getControlPanelElement('cbBurnupIdeal').checked = (stuff[29] === 't') ? true : false;
+    getControlPanelElement('selBurnupIdeal').value = stuff[30];
+    getControlPanelElement('sqBurnupIdeal').style.background = COLORS[stuff[30]];
+
+    updateTrendIdealChkBoxes();
+}
+
+function updateTrendIdealChkBoxes() {
+    var beforeState = getBeforeState(SCHEDULE_STATES);
+    var afterState = getAfterState(SCHEDULE_STATES);
+    setRelatedCheckbox(getControlPanelElement('cbDefinedTrend'),
+            getControlPanelElement('cbDefined'));
+    setRelatedCheckbox(getControlPanelElement('cbIn-ProgressTrend'),
+            getControlPanelElement('cbIn-Progress'));
+    setRelatedCheckbox(getControlPanelElement('cbCompletedTrend'),
+            getControlPanelElement('cbCompleted'));
+    setRelatedCheckbox(getControlPanelElement('cbAcceptedTrend'),
+            getControlPanelElement('cbAccepted'));
+    if (beforeState !== null) {
+        setRelatedCheckbox(getControlPanelElement('cb' + beforeState + 'Trend'),
+                getControlPanelElement('cb' + beforeState));
+    }
+    if (afterState !== null) {
+        setRelatedCheckbox(getControlPanelElement('cb' + afterState + 'Trend'),
+                getControlPanelElement('cb' + afterState));
     }
 }
 
-function getWidgetOid() {
-    if ('__widgetOid__' !== '__widget' + 'Oid__') {
-        return '__widgetOid__';
+function setRelatedCheckbox(checkboxToSet, masterCheckbox) {
+    if (masterCheckbox.checked) {
+        checkboxToSet.disabled = false;
     } else {
-        return 'mashup';
+        checkboxToSet.disabled = true;
     }
 }
 
-function drawLegend(allowedValues, config) {
-    var titleString = '';
+function createChart() {
 
-    if (config.showScheduledWorkChart === true) {
-        titleString += '<div style="width: ' + config.chartWidth +
-                'px; float: left; text-align: center;">Scheduled Work</div>';
+    if (!RALLY.Mashup.Utilities.cookieExists(SETTINGS_COOKIE_NAME)) {
+        RALLY.Mashup.Utilities.updateMashupCookie(SETTINGS_COOKIE_NAME, SETTINGS_COOKIE_DEFAULT, 30);
     }
-    if (config.showTestCaseChart === true) {
-        titleString += '<div style="width: ' + config.chartWidth +
-                'px; float: left; text-align: center;">Test Cases</div>';
-    }
-    if (config.showDefectChart === true) {
-        titleString += '<div style="width: ' + config.chartWidth +
-                'px; float: left; text-align: center;">Defects</div>';
-    }
-    if (config.showBurndownChart === true) {
-        titleString += '<div style="width: ' + config.chartWidth +
-                'px; float: left; text-align: center;">Burndown</div>';
-    }
+    setControlStates(RALLY.Mashup.Utilities.readMashupCookie(SETTINGS_COOKIE_NAME));
 
-    if (legendPane === null) {
-        legendPane = new dijit.TitlePane({title:titleString, open:false}, dojo.byId("legendDiv"));
-    }
+    document.getElementById('table_div').style.visibility = "hidden";
+    RALLY.Mashup.Utilities.showWait('chart_div');
 
-    var legendConfig = {
-        width: config.chartWidth,
-        height: 100,
-        legendClass: 'dashboard-legend',
-        id: 'myLegend',
-        boxClass: 'dashboard-boxstyle',
-        labelClass: 'dashboard-labelstyle'
-    };
+    BURNDOWN_CHART = new RALLY.Mashup.SuperCustomizableChart(BATCH_TOOLKIT, DROPDOWN.getSelectedOids(),
+            DROPDOWN.getSelectedName(), DROPDOWN.getSelectedStart(), DROPDOWN.getSelectedEnd(),
+            MASHUP_TYPE, buildConfig(), 'chart_div', 'table_div', null);
 
-    if (config.showScheduledWorkChart === true) {
-        var labels1 = allowedValues.scheduleStates;
-        var colors1 = RALLY.Mashup.Pie.getColors(allowedValues.scheduleStates);
-        var legend1 = new RALLY.Mashup.Legend(legendConfig, colors1, labels1);
-        legend1.replace("placeholder1");
-    } else {
-        document.getElementById('placeholder1').style.display = 'none';
-    }
+    BURNDOWN_CHART.display();
 
-    if (config.showTestCaseChart === true) {
-        var labels2 = allowedValues.testVerdicts;
-        labels2.push("No Result");
-        var colors2 = RALLY.Mashup.Pie.getColors(allowedValues.testVerdicts);
-        var legend2 = new RALLY.Mashup.Legend(legendConfig, colors2, labels2);
-        legend2.replace("placeholder2");
-    } else {
-        document.getElementById('placeholder2').style.display = 'none';
-    }
-
-    if (config.showDefectChart === true) {
-        var labels3 = allowedValues.defectStates;
-        var colors3 = RALLY.Mashup.Pie.getColors(allowedValues.defectStates);
-        var legend3 = new RALLY.Mashup.Legend(legendConfig, colors3, labels3);
-        legend3.replace("placeholder3");
-    } else {
-        document.getElementById('placeholder3').style.display = 'none';
-    }
 }
 
-function showDashboard(results) {
-    var maxWidthForTwoColumns = 700;
-    var allowedValues = {};
-
-    allowedValues.scheduleStates = removeEmptyValues(results.scheduleState);
-    allowedValues.testVerdicts = removeEmptyValues(results.testResult);
-    allowedValues.defectStates = removeEmptyValues(results.defectState);
-
-    function dashboardCallback(states, values) {
-    }
-
-    function calcChartWidth(chartWidth, pixelBuffer, numCols) {
-        return (chartWidth - pixelBuffer) / numCols;
-    }
-
-    var config = {
-        showBurndownChart: true,
-        showTestCaseChart: true,
-        showDefectChart: true,
-        showScheduledWorkChart: true,
-        showTitle: true,
-        browserWidth: CHART_WIDTH * 0.90,
-        chartWidth: calcChartWidth(CHART_WIDTH * 0.9, 200, 4),
-        LeftAxisVisible: true,
-        RightAxisVisible: true,
-        BottomAxisVisible: true,
-        mashupType: MASHUP_TYPE,
-        timeboxType: TIMEBOX_TYPE,
-        specialVersion: SPECIAL_VERSION,
-        burndownUnits: BURNDOWN_UNITS,
-        allowedValues: allowedValues,
-        projectOidsInScope: PROJECT_OIDS_IN_SCOPE,
-        workspaceOid: WORKSPACE_OID
-    };
-
-    if (WIDGET_MODE) {
-        config.showTitle = false;
-        config.LeftAxisVisible = false;
-        config.RightAxisVisible = false;
-        config.BottomAxisVisible = false;
-        if (CHART_WIDTH < maxWidthForTwoColumns) {
-            config.showDefectChart = false;
-            config.showTestCaseChart = false;
-            config.showTitle = false;
-            config.chartWidth = calcChartWidth(CHART_WIDTH * 0.9, 150, 2);
-        }
-    }
-
-    if (MASHUP_TYPE === RALLY.Mashup.PROGRAM) {
-        config.programName = DROPDOWN.getSelectedName();
-        config.programStart = DROPDOWN.getSelectedStart();
-        config.programEnd = DROPDOWN.getSelectedEnd();
-        config.releaseOids = DROPDOWN.getSelectedOids();
-        config.dropdown = DROPDOWN;
-    } else if (MASHUP_TYPE === RALLY.Mashup.ITERATION || MASHUP_TYPE === RALLY.Mashup.RELEASE) {
-        config.projectOid = PROJECT_OID;
-        config.timeboxName = DROPDOWN.getSelectedName();
-        config.timeboxStart = DROPDOWN.getSelectedStart();
-        config.timeboxEnd = DROPDOWN.getSelectedEnd();
-        config.selectedOids = DROPDOWN.getSelectedOids();
-        config.levels = 1;
-    } else if (MASHUP_TYPE === RALLY.Mashup.CURRENT) {
-        config.projectOid = PROJECT_OID;
-        config.LeftAxisVisible = false;
-        config.RightAxisVisible = false;
-        config.BottomAxisVisible = false;
-        if (CHART_WIDTH < maxWidthForTwoColumns) {
-            config.chartWidth = calcChartWidth(CHART_WIDTH * 0.9, 150, 2);
-        } else {
-            config.chartWidth = calcChartWidth(CHART_WIDTH * 0.7, 200, 4);
-        }
-    }
-
-    if (typeof DASHBOARD === "undefined") {
-        if (MASHUP_TYPE === RALLY.Mashup.PROGRAM) {
-            RALLY.Mashup.Utilities.showHelpIcon('140');
-            DASHBOARD = new RALLY.Mashup.ProgramHealth(BATCH_TOOLKIT, dashboardCallback);
-        } else if (MASHUP_TYPE === RALLY.Mashup.RELEASE || MASHUP_TYPE === RALLY.Mashup.ITERATION) {
-            RALLY.Mashup.Utilities.showHelpIcon('163');
-            DASHBOARD = new RALLY.Mashup.TimeboxHealth(BATCH_TOOLKIT, dashboardCallback);
-        } else if (MASHUP_TYPE === RALLY.Mashup.CURRENT) {
-            DASHBOARD = new RALLY.Mashup.CurrentHealth(BATCH_TOOLKIT, dashboardCallback);
-        }
-    }
-
-    document.getElementById('legendDiv').style.display = 'block';
-    drawLegend(allowedValues, config);
-    document.getElementById('legendDiv').style.width = config.browserWidth - 30 + 'px';
-
-    DASHBOARD.display(config);
-}
-
-function runAllowedValuesQuery() {
-    var queryArray = [];
-
-    queryArray[0] = {
-        key: 'scheduleState',
+function runScheduleStateQuery() {
+    var queryObject = {
+        key: 'storyStates',
         type: 'Hierarchical Requirement',
-        attribute: 'Schedule State',
-        workspace: '/workspace/' + WORKSPACE_OID
+        attribute: 'Schedule State'
     };
-    queryArray[1] = {
-        key: 'testResult',
-        type: 'Test Case',
-        attribute: 'Last Verdict',
-        workspace: '/workspace/' + WORKSPACE_OID
-    };
-    queryArray[2] = {
-        key: 'defectState',
-        type: 'Defect',
-        attribute: 'State',
-        workspace: '/workspace/' + WORKSPACE_OID
-    };
-    try {
-        BATCH_TOOLKIT.findAll(queryArray, showDashboard);
-    } catch(err) {
-        console.error(err);
+    BATCH_TOOLKIT.findAll(queryObject, addDatasetControlPanel);
+}
+
+function addEventListeners() {
+    var i;
+    if (document.addEventListener) { // For most browsers
+        getControlPanelElement('cbTable').addEventListener('change', onDatasetChange, false);
+        getControlPanelElement('rbStory').addEventListener('change', onDatasetChange, false);
+        getControlPanelElement('rbTask').addEventListener('change', onDatasetChange, false);
+        getControlPanelElement('rbToDo').addEventListener('change', onDatasetChange, false);
+        for (i = 0; i < NUM_CHART_TYPES; i++) {
+            getControlPanelElement('input' + i).addEventListener('change', nowClear, false);
+            getControlPanelElement('span' + i).addEventListener('mouseup', nowCheck, false);
+        }
+        document.onmouseup = nowClear;
+    } else if (document.attachEvent) { // For IE
+        getControlPanelElement('cbTable').attachEvent('onclick', onDatasetChange);
+        getControlPanelElement('rbStory').attachEvent('onclick', onDatasetChange);
+        getControlPanelElement('rbTask').attachEvent('onclick', onDatasetChange);
+        getControlPanelElement('rbToDo').attachEvent('onclick', onDatasetChange);
+        for (i = 0; i < NUM_CHART_TYPES; i++) {
+            getControlPanelElement('input' + i).attachEvent('onclick', nowClear);
+            getControlPanelElement('span' + i).attachEvent('onclick', nowCheck);
+        }
+        document.attachEvent('onmouseup', nowClear);
+    }
+}
+
+function getTarget(e) {
+    e = e || window.event;
+    if (typeof e.target !== 'undefined') {
+        return e.target;
+    } else if (typeof e.srcElement !== 'undefined') {
+        return e.srcElement;
+    } else {
+        return null;
+    }
+}
+
+function nowClear(e) {
+    var t = getTarget(e);
+    if (t.nodeName.toLowerCase() === "span") {
+        for (var i = 0; i < NUM_CHART_TYPES; i++) {
+
+            if (getControlPanelElement('input' + i).checked) {
+                getControlPanelElement('span' + i).style.backgroundPosition = "0 -49px";
+            } else {
+                getControlPanelElement('span' + i).style.backgroundPosition = "0 -0";
+            }
+        }
+    }
+}
+
+function nowCheck(e) {
+    var t = getTarget(e);
+    for (var i = 0; i < NUM_CHART_TYPES; i++) {
+        if (t.id === "span" + i) {
+            getControlPanelElement('input' + i).checked = true;
+            getControlPanelElement('span' + i).style.backgroundPosition = "0 -49px";
+        } else {
+            getControlPanelElement('span' + i).style.backgroundPosition = "0 -0";
+        }
+    }
+    updateUnitRadioButtons();
+    onDatasetChange();
+}
+
+function initChartTypeButtons() {
+    for (var i = 0; i < NUM_CHART_TYPES; i++) {
+        if (getControlPanelElement('input' + i).checked) {
+            getControlPanelElement('span' + i).style.backgroundPosition = "0 -49px";
+        }
     }
 }
 
 function initPage() {
-    var widgetId = getWidgetOid();
-    var config = {};
+    BATCH_TOOLKIT = new RALLY.Mashup.BatchToolkit('__WORKSPACE_OID__', '__PROJECT_OID__',
+            '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
 
-    document.getElementById('legendDiv').style.display = 'none';
-    WIDGET_MODE = RALLY.Mashup.Utilities.getDisplayMode('__MODE__') === 'widget' || RALLY.Mashup.Utilities.getDisplayMode('__MODE__') === 'panel';
+    runScheduleStateQuery();
+    RALLY.Mashup.Utilities.showHelpIcon(165);
+    RALLY.Mashup.Utilities.showPrintButton();
+    initChartTypeButtons();
+    addEventListeners();
 
-    CHART_WIDTH = getAvailableWidth();
-
-    if (typeof(PROJECT_OID) !== "undefined") {
-        config.project = "/project/" + PROJECT_OID;
-    }
-    if (typeof(WORKSPACE_OID) !== "undefined") {
-        config.workspace = "/workspace/" + WORKSPACE_OID;
-    }
-    if (typeof(SCOPE_DOWN) !== "undefined") {
-        config.projectScopeDown = SCOPE_DOWN;
-    }
-    if (typeof(SCOPE_UP) !== "undefined") {
-        config.projectScopeUp = SCOPE_UP;
-    }
-
-    if (WIDGET_MODE) {
-        document.getElementById('warning').style.display = 'none';
-        document.getElementById('helpAndActions').style.display = 'none';
-        document.getElementById('title').style.display = 'none';
-    } else {
-        checkForScopeUp('__PROJECT_SCOPING_UP__');
-        RALLY.Mashup.Utilities.showPrintButton();
-    }
-
-    BATCH_TOOLKIT = new RALLY.Mashup.BatchToolkit(WORKSPACE_OID, PROJECT_OID,
-            SCOPE_UP, SCOPE_DOWN);
-
-    if (MASHUP_TYPE === RALLY.Mashup.CURRENT) {
-        runAllowedValuesQuery();
-
-    } else {
-        DROPDOWN = new RALLY.Mashup.Dropdown(BATCH_TOOLKIT, MASHUP_TYPE,
-                'timeboxList', 'timeboxLabel', 'mu_dashboard_' + MASHUP_TYPE.toLowerCase() +
-                        '_' + widgetId, config);
-        DROPDOWN.invoke(runAllowedValuesQuery);
-    }
-
+    DROPDOWN = new RALLY.Mashup.Dropdown(BATCH_TOOLKIT, MASHUP_TYPE, 'timeboxList', 'timeboxLabel',
+            'mu_super_customizable_' + MASHUP_TYPE.toLowerCase());
+    DROPDOWN.invoke(createChart);
 }
-/*
- Copyright (c) 2002-2010  Rally Software Development Corp. All rights reserved.
- timebox-health.js
- */
-var RALLY = RALLY || {};
-RALLY.Mashup = RALLY.Mashup || {};
-RALLY.Mashup.TimeboxHealth = function(e, d) {
-    var t = 40;
-    var y = {};
-    var f = this;
-    var x = {};
-
-    function v(A) {
-        var B = [];
-        var z = {Good:"check-icon.gif","At Risk":"caution-icon.gif",Critical:"error-icon.gif"};
-        if (A[0] === "Good" || A[0] === "At Risk" || A[0] === "Critical") {
-            B[0] = '&nbsp;<img border="0" align="Absmiddle" src="/slm/mashup/1.15/images/' + z[A[0]] + '" alt="' + A[0] + '"/>&nbsp;' + x.timeboxType + " Health is <b>" + A[0] + "</b>.";
-            B[1] = "&nbsp;With " + A[1] + " workdays remaining in a " + A[2] + "-workday " + x.timeboxType.toLowerCase() + ", " + A[3] + "% has been accepted."
-        } else {
-            B[0] = " - " + x.timeboxType + " is " + A;
-            B[1] = ""
-        }
-        return B
-    }
-
-    function c(z, A, G, E, B) {
-        var D,F,C;
-        D = document.createElement("DIV");
-        D.innerHTML = "";
-        D.style.marginLeft = G * t + "px";
-        D.innerHTML += "&nbsp;" + A;
-        D.id = "row" + E + "_header";
-        D.className = "dashboard-heading";
-        z.appendChild(D);
-        F = document.createElement("DIV");
-        F.id = "row" + E + "_health";
-        F.className = "dashboard-health";
-        F.style.marginLeft = G * t + "px";
-        z.appendChild(F)
-    }
-
-    function a(z, B, C) {
-        var A;
-        A = document.createElement("DIV");
-        A.innerHTML = "";
-        A.style.marginLeft = C * t + "px";
-        A.id = "row" + B + "_footer";
-        A.className = "dashboard-footer";
-        z.appendChild(A)
-    }
-
-    function w(J, C, A, I) {
-        var B,H,K,G;
-        var D = x.chartWidth;
-        var F = 0;
-        var z = document.createElement("DIV");
-        z.id = "pie_container_" + I;
-        z.className += "dashboard-rowContainer";
-        for (var E in x) {
-            if (E.match(/show\w+Chart/) !== null && x[E] === true) {
-                F += 1
-            }
-        }
-        c(z, C, A, I, F);
-        for (G = 0; G < F; G++) {
-            B = document.createElement("DIV");
-            B.className = "dashboard-chart";
-            B.id = "row" + I + "_div" + G;
-            B.style.width = D + "px";
-            B.style.height = D * 0.6 + "px";
-            if (G === 0) {
-                B.style.marginLeft = A * t + "px"
-            }
-            H = document.createElement("DIV");
-            H.id = "row" + I + "_div" + G + "_inner";
-            H.style.width = D * 0.9 + "px";
-            H.style.height = D * 0.55 + "px";
-            B.appendChild(H);
-            z.appendChild(B)
-        }
-        a(z, I, A);
-        J.appendChild(z)
-    }
-
-    function g() {
-        RALLY.Mashup.Utilities.hideWait("spinner")
-    }
-
-    function s() {
-        var z = 0;
-        for (var A in x) {
-            if (A.match(/show\w+Chart/) !== null && x[A] === true) {
-                z += 1
-            }
-        }
-        return z
-    }
-
-    function l(H, I, C, J, z, L) {
-        var A;
-
-        function E(M) {
-            var N;
-            for (N = 0; N < M.length; N++) {
-                if (M[N] > 0) {
-                    return true
-                }
-            }
-            return false
-        }
-
-        function B(M, O, Q, P) {
-            var R,N,S;
-            if (H === "ScheduledWork") {
-                S = E(P);
-                if (S) {
-                    R = calculateHealth(M, O, Q, P);
-                    if (R !== null && !isNaN(R[3])) {
-                        N = v(R);
-                        document.getElementById("row" + J + "_header").innerHTML += N[0];
-                        document.getElementById("row" + J + "_health").innerHTML = N[1]
-                    } else {
-                        if (R === "Completed" || R === "Not Started") {
-                            document.getElementById("row" + J + "_header").innerHTML += " - " + x.mashupType + " is " + R
-                        }
-                    }
-                } else {
-                    divNum = s();
-                    for (i = 0; i < divNum; i++) {
-                        document.getElementById("row" + J + "_div" + i).className = "dashboard-hide-chart"
-                    }
-                    document.getElementById("row" + J + "_health").innerHTML += "&nbsp;No Data"
-                }
-            }
-        }
-
-        var G = x.chartWidth * 0.9 - (z.Level);
-        var D = G * 0.5;
-        if (x.browserWidth < 600) {
-            D = G * 0.8
-        }
-        var F;
-        var K = {allowedValues:x.allowedValues,timeboxName:x.timeboxName,timeboxStart:x.timeboxStart,timeboxEnd:x.timeboxEnd,timeboxType:x.timeboxType,artifactType:H,artifactAttribute:I,chartDiv:C + "_inner",projectOid:z.ObjectID,workspaceOid:x.workspaceOid,pieWidth:G,pieHeight:D};
-        F = document.getElementById(C);
-        F.setAttribute("class", L);
-        F.setAttribute("className", L);
-        A = new RALLY.Mashup.Pie(e, K, B);
-        A.display()
-    }
-
-    function m(C, A) {
-        var B;
-        var z = {BurndownIdealVisible:true,LeftAxisLabelVisible:false,BottomAxisLabelVisible:false,RightAxisLabelVisible:false,ChartType:"burndown",Units:x.burndownUnits,LeftAxisVisible:x.LeftAxisVisible,RightAxisVisible:x.RightAxisVisible,BottomAxisVisible:x.BottomAxisVisible};
-        if (getBeforeState(x.allowedValues.scheduleStates) !== null) {
-            z.BeforeStateName = getBeforeState(x.allowedValues.scheduleStates);
-            z.BeforeVisible = true
-        }
-        if (getAfterState(x.allowedValues.scheduleStates) !== null) {
-            z.AfterStateName = getAfterState(allowedValues.scheduleStates);
-            z.AfterVisible = true
-        }
-        if (!x.specialVersion) {
-            z.CompletedVisible = false
-        }
-        B = new RALLY.Mashup.SuperCustomizableChart(e, null, x.timeboxName, x.timeboxStart, x.timeboxEnd, x.timeboxType, z, C + "_inner", null, A, g);
-        B.display()
-    }
-
-    function n(B, A, z) {
-        if (x.showBurndownChart) {
-            m("row" + A + "_div" + z, B.ObjectID)
-        }
-    }
-
-    function u(B, A) {
-        var z = 0;
-        if (x.showScheduledWorkChart) {
-            l("ScheduledWork", "ScheduleState", "row" + A + "_div" + z, A, B, "dashboard-FirstChart");
-            z += 1
-        }
-        if (x.showTestCaseChart) {
-            l("TestCase", "LastVerdict", "row" + A + "_div" + z, A, B, "dashboard-SecondChart");
-            z += 1
-        }
-        if (x.showDefectChart) {
-            l("Defect", "State", "row" + A + "_div" + z, A, B, "dashboard-ThirdChart");
-            z += 1
-        }
-        return z
-    }
-
-    function b() {
-        var z = document.getElementById("charts");
-        while (z.hasChildNodes()) {
-            z.removeChild(z.firstChild)
-        }
-    }
-
-    function o(A) {
-        var C,D,B,z;
-        b();
-        if (x.showTitle) {
-            document.getElementById("title").style.display = "";
-            k()
-        } else {
-            document.getElementById("title").style.display = "none"
-        }
-        C = document.getElementById("charts");
-        C.style.width = x.browserWidth - 50 + "px";
-        for (B = 0; B < A.length; B++) {
-            w(C, A[B].Name, A[B].Level, B)
-        }
-        for (B = 0; B < A.length; B++) {
-            z = u(A[B], B)
-        }
-        for (B = 0; B < A.length; B++) {
-            n(A[B], B, z)
-        }
-    }
-
-    function p(z) {
-        var B = x.projectOid;
-        var A = j(B, z);
-        o(A)
-    }
-
-    function j(B, D) {
-        var C = [];
-        var H;
-        var F = 0;
-        var z = x.levels;
-        if (x.levels === 0) {
-            H = 0
-        } else {
-            if (!x.specialVersion) {
-                H = 1
-            }
-        }
-        E(D.projects, B);
-        function A(K, J) {
-            return K._refObjectName >= J._refObjectName
-        }
-
-        function I(J) {
-            return J.substring(J.lastIndexOf("/") + 1, J.lastIndexOf("."))
-        }
-
-        function G(K, L) {
-            for (var J = 0; J < K.length; J++) {
-                if (K[J].ObjectID == L) {
-                    return K[J]
-                }
-            }
-            return null
-        }
-
-        function E(L, K, N) {
-            var M = G(L, K);
-            if (M === null || (typeof H !== "undefined" && N > H)) {
-                return
-            }
-            if (typeof N === "undefined") {
-                N = 0
-            }
-            if (M.State === "Open") {
-                C[F] = {};
-                C[F].Name = M._refObjectName;
-                C[F].ObjectID = M.ObjectID;
-                C[F++].Level = N
-            }
-            if (typeof M.Children !== "undefined" && M.Children.length > 0) {
-                for (var J = 0; J < M.Children.length; J++) {
-                    E(L, I(M.Children[J]._ref), N + 1)
-                }
-            }
-        }
-
-        return C
-    }
-
-    function r(z, A) {
-        var D = "";
-        var E = true;
-        for (var B = 0; B < z.length; B++) {
-            if (typeof z[B] !== "undefined") {
-                if (E) {
-                    D = C(z[B]);
-                    E = false
-                } else {
-                    D = "(" + D + " OR " + C(z[B]) + ")"
-                }
-            }
-        }
-        function C(F) {
-            return"(" + A + " = " + F + ")"
-        }
-
-        return D
-    }
-
-    function q() {
-        var B = x.projectOidsInScope.split(",");
-        var A = r(B, "ObjectID");
-        var C = {key:"projects",type:"project",query:A,fetch:"ObjectID,Name,State,Children",order:"Name"};
-        try {
-            e.findAll(C, p)
-        } catch(z) {
-            console.error(z)
-        }
-    }
-
-    function k() {
-        var A = document.getElementById("title");
-        var z;
-        if (x.burndownUnits === "story") {
-            z = "plan estimates"
-        } else {
-            z = "to do"
-        }
-        if (x.specialVersion) {
-            A.innerHTML = x.mashupType + " Dashboard (" + z + ")"
-        } else {
-            A.innerHTML = x.mashupType + " Dashboard"
-        }
-    }
-
-    function h(A) {
-        x = {workspaceOid:A.workspaceOid,projectOid:A.projectOid,timeboxType:x.timeboxType,levels:1,showBurndownChart:true,showTestCaseChart:true,showDefectChart:true,showScheduledWorkChart:true,showTitle:true,chartWidth:(x.browserWidth - 200) / 4};
-        for (var z in A) {
-            if (A.hasOwnProperty(z)) {
-                x[z] = A[z]
-            }
-        }
-    }
-
-    this.display = function(z) {
-        h(z);
-        q()
-    };
-    this.applyConfig = function(z) {
-        h(z)
-    };
-    this.parseProjectTree = function(A, z) {
-        return j(A, z)
-    };
-    return f
-};</script>
-
-<script type="text/javascript" description="User Settings">
-    var WORKSPACE_OID = '__WORKSPACE_OID__';
-
-    //  Top-level project to display
-    var PROJECT_OID = '__PROJECT_OID__';
-
-    // Comma-separated list of project OIDs, consisting of PROJECT_OID and all its children.
-    var PROJECT_OIDS_IN_SCOPE = '__PROJECT_OIDS_IN_SCOPE__';
-
-    var SCOPE_UP = '__PROJECT_SCOPING_UP__';
-    var SCOPE_DOWN = '__PROJECT_SCOPING_DOWN__';
 </script>
 
-<script type="text/javascript" description="mashup constants">
-    var MASHUP_TYPE = RALLY.Mashup.RELEASE;
-    var TIMEBOX_TYPE = RALLY.Mashup.RELEASE;
-    var SPECIAL_VERSION = false;
-    var BURNDOWN_UNITS = 'todo';
-    var CHART_WIDTH, WIDGET_MODE;
-</script>
+<style type="text/css">
+    body {
+        background: white;
+    }
 
+    .lbl {
+        text-align: left;
+        font-size: 14px;
+    }
+
+    .AxisCaption {
+        font-size: 12px;
+        font-style: normal;
+    }
+
+    .AxisTickLabel {
+        font-size: 10px;
+        font-style: normal;
+    }
+</style>
+<style type="text/css">
+    span.stackedbar {
+        width: 36px;
+        height: 49px;
+        padding: 0 5px 0 0;
+        background: url(/slm/mashup/1.21/images/stackedbar.gif) no-repeat;
+        display: block;
+        clear: left;
+        float: left;
+    }
+</style>
+<style type="text/css">
+    span.bar {
+        width: 36px;
+        height: 49px;
+        padding: 0 5px 0 0;
+        background: url(/slm/mashup/1.21/images/bar.gif) no-repeat;
+        display: block;
+        clear: left;
+        float: left;
+    }
+</style>
+<style type="text/css">
+    span.line {
+        width: 36px;
+        height: 49px;
+        padding: 0 5px 0 0;
+        background: url(/slm/mashup/1.21/images/line.gif) no-repeat;
+        display: block;
+        clear: left;
+        float: left;
+    }
+</style>
+<style type="text/css">
+    span.area {
+        width: 36px;
+        height: 49px;
+        padding: 0 5px 0 0;
+        background: url(/slm/mashup/1.21/images/area.gif) no-repeat;
+        display: block;
+        clear: left;
+        float: left;
+    }
+</style>
+<style type="text/css">
+    span.burndown {
+        width: 36px;
+        height: 49px;
+        padding: 0 5px 0 0;
+        background: url(/slm/mashup/1.21/images/burndown.gif) no-repeat;
+        display: block;
+        clear: left;
+        float: left;
+    }
+</style>
+<style type="text/css">
+    input.nodisplay {
+        display: none;
+    }
+</style>
 </head>
-<body class="nihilo">
-<div style="float:left" id="title" class="titlebar"></div>
-<div id="helpAndActions">
-    <div style="float:right" id="help"></div>
-    <table>
-        <tr>
-            <td style="text-align: left; width: 99%;"></td>
-            <td style="text-align: right; width: 1%;">
-                <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();"
-                     onmouseout="hidecbMenu('buttons',event);"
-                     style="vertical-align: middle;"
-                     src="/slm/images/menu_actions.gif"/>
-
-                <div style="position:relative;top:5px" align="left">
-                    <div id="buttons" class="do-menu" style="left:0px;"
-                         onmouseover="document.body.style.cursor='pointer';"
-                         onmouseout="document.body.style.cursor='default';hidecbMenu('buttons',event);">
-                        <a id="print" onclick="RALLY.Mashup.Utilities.printPage();">Print...</a>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </table>
-</div>
-<div style="clear:both"></div>
-<div id='warning' class="dashboard-warning"></div>
+<body>
+<div style="float:right" id="help"></div>
+<div style="float:left" id="title" class="titlebar">Super Customizable Release Chart</div>
 <table>
     <tr>
-        <td id="timeboxLabel" class="timeboxLabel">Timebox Name</td>
+        <td style="text-align: left; width: 99%;">
+        <td style="text-align: right; width: 1%;">
+            <img id="do" onmouseover="RALLY.Mashup.Utilities.showcbButton();" onmouseout="hidecbMenu('buttons',event);"
+                 style="vertical-align: middle;"
+                 src="/slm/images/menu_actions.gif"/>
+
+            <div style="position:relative;top:5px" align="left">
+                <div id="buttons" class="do-menu" style="left:0px;"
+                     onmouseover="document.body.style.cursor='pointer';"
+                     onmouseout="document.body.style.cursor='default';hidecbMenu('buttons',event);">
+                    <a id="print" onclick="RALLY.Mashup.Utilities.printPage()">Print...</a>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div style="clear:both"></div>
+
+<table>
+    <tr>
+        <td id="timeboxLabel" class="lbl">Release Name</td>
         <td><select id="timeboxList"></select></td>
     </tr>
 </table>
-<div id="spinner"></div>
-<div id="legendDiv" class="dijitTitlePaneTitle">
-    <div id="placeholder1" style="float:left"></div>
-    <div id="placeholder2" style="float:left"></div>
-    <div id="placeholder3" style="float:left"></div>
-    <div style="clear:both"></div>
-</div>
-<div id="charts" class="dashboard-frame"></div>
+
+<table cellspacing="10" border="1">
+    <tr>
+        <td valign="top">
+
+            <fieldset>
+                <legend>Chart Type</legend>
+                <table>
+                    <tr>
+                        <th width=80 align="left">Stacked Bar</th>
+                        <th width=80 align="left">Bar</th>
+                    </tr>
+                    <tr>
+                        <td width=80>
+                            <span id="span0" class="stackedbar"/>
+                            <input type="radio" class="nodisplay" id="input0" name="ctGroup" checked="checked">
+                        </td>
+                        <td width=80>
+                            <span id="span1" class="bar"/>
+                            <input type="radio" class="nodisplay" id="input1" name="ctGroup">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width=80 align="left">Line</th>
+                        <th width=80 align="left">Area</th>
+                        <th width=80 align="left">Burndown</th>
+                    </tr>
+                    <tr>
+                        <td width=80>
+                            <span id="span2" class="line"/>
+                            <input type="radio" class="nodisplay" id="input2" name="ctGroup">
+                        </td>
+                        <td width=80>
+                            <span id="span3" class="area"/>
+                            <input type="radio" class="nodisplay" id="input3" name="ctGroup">
+                        </td>
+                        <td width=80>
+                            <span id="span4" class="burndown"/>
+                            <input type="radio" class="nodisplay" id="input4" name="ctGroup">
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+
+            <fieldset>
+                <legend>Data Options</legend>
+
+                <div id="datasetPanel">
+                </div>
+
+                <p>
+                <hr>
+                <div id="idealPanel">
+                </div>
+                </p>
+
+                <p>
+                <hr>
+                Units
+                <input type="radio" name="unit_type_group" id="rbStory" value="story" checked="checked"/>
+                <label for="rbStory">Story</label>
+
+                <input type="radio" name="unit_type_group" id="rbTask" value="task"/>
+                <label for="rbTask">Task</label>
+
+                <input type="radio" name="unit_type_group" id="rbToDo" value="todo"/>
+                <label for="rbToDo">To Do</label>
+                </p>
+
+                <p>
+                <hr>
+                <input type="checkbox" name="cbTable" id="cbTable"/>
+                <label for="cbTable">Show Data Table</label>
+                <br/>
+                </p>
+
+            </fieldset>
+
+        </td>
+        <td>
+            <table>
+                <tr>
+                    <td class="lbl">
+                        <div id="info_msg"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="chart_div" style="width:600px; height:400px;"></div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<br/>
+
+<div id="table_div"></div>
 </body>
 </html>
