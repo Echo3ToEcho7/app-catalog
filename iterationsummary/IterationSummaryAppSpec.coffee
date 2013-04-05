@@ -762,7 +762,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       messageBus = Rally.environment.getMessageBus()
       for type in ['Defect', 'HierarchicalRequirement', 'DefectSuite', 'TestSet', 'TestCase']
-        messageBus.publish(Rally.Message.objectUpdate, Rally.test.mock.ModelObjectMother.getRecord(type))
+        messageBus.publish(Rally.Message.objectUpdate, @mom.getRecord(type))
 
       expect(addContentStub.callCount).toBe 5
 
@@ -770,7 +770,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
     @_createApp({}).then (app) =>
       addContentSpy = @spy(app, 'addContent')
 
-      Rally.environment.getMessageBus().publish(Rally.Message.objectUpdate, Rally.test.mock.ModelObjectMother.getRecord('Release'))
+      Rally.environment.getMessageBus().publish(Rally.Message.objectUpdate, @mom.getRecord('Release'))
 
       expect(addContentSpy).not.toHaveBeenCalled()
 
@@ -1603,7 +1603,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         expect(configTests.message).toBe app.self.CURRENT_TESTS_FAILING_MESSAGE
 
     it "displays success if no failing tests during past, current, past timeboxes", ->
-      
+
       @ajax.whenQuerying('userstory').respondWith([
         Summary:
           Defects:
