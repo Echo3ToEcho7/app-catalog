@@ -1,7 +1,7 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define("Rally.apps.charts.PortfolioChartAppBase", {
+    Ext.define("Rally.apps.charts.rpm.PortfolioChartAppBase", {
         extend: "Rally.app.App",
         settingsScope: "workspace",
         

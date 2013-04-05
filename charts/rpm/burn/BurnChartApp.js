@@ -1,40 +1,27 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define("Rally.apps.charts.cfd.CumulativeFlowChartApp", {
-        extend: "Rally.apps.charts.PortfolioChartAppBase",
-        cls: "portfolio-cfd-app",
+    Ext.define("Rally.apps.charts.rpm.burn.BurnChartApp", {
+        extend: "Rally.apps.charts.rpm.PortfolioChartAppBase",
+        cls: "portfolio-burnup-app",
         
         requires: [
             'Rally.ui.chart.Chart'
         ],
 
         help: {
-            cls: 'portfolio-cfd-help-container',
-            id: 274
+            cls:'piburnup-help-container',
+            id: 273
         },
 
         chartComponentConfig: {
             xtype: "rallychart",
 
-            updateBeforeRender: function () {
-                var calcConfig = this.calculatorConfig,
-                    chartColors = this.chartColors;
-
-                var scheduleStatesLength = calcConfig.scheduleStates.length,
-                    firstScheduleState = calcConfig.scheduleStates[0],
-                    lastScheduleState = calcConfig.scheduleStates[scheduleStatesLength - 1];
-
-                var firstColor = chartColors[0],
-                    lastColor = chartColors[chartColors.length - 1],
-                    firstCustomColor = '#B3B79A',
-                    secondCustomColor = '#5C9ACB';
-
-                if (firstScheduleState !== "Defined" && firstColor !== firstCustomColor) {
-                    chartColors.unshift(firstCustomColor);
-                }
-                if (lastScheduleState !== "Accepted" && lastColor !== secondCustomColor) {
-                    chartColors.push(secondCustomColor);
+            updateBeforeRender: function() {
+                var length = this.calculatorConfig.scheduleStates.length,
+                    state = this.calculatorConfig.scheduleStates[length - 1];
+                if(state !== "Accepted") {
+                    this.calculatorConfig.completedScheduleStateNames.push(state);
                 }
             },
 
@@ -53,7 +40,14 @@
                 }
             },
 
-            calculatorType: "Rally.apps.charts.cfd.CumulativeFlowCalculator",
+            calculatorType: "Rally.apps.charts.rpm.burn.BurnCalculator",
+            calculatorConfig: {
+                workDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                timeZone: "GMT",
+                completedScheduleStateNames: ["Accepted"]
+            },
+
+            chartColors: ['#000000'],
 
             chartConfig: {
                 chart: {
@@ -92,13 +86,19 @@
                         },
                         groupPadding: 0.01
                     },
-                    area: {
-                        stacking: 'normal',
-                        lineColor: '#666666',
-                        lineWidth: 2,
+                    line: {
+                        color: "#000"
+                    },
+                    column: {
+                        stacking: null,
+                        color: "#6AB17D",
+                        lineColor: "#666666",
+                        lineWidth: 1,
                         marker: {
-                            enabled: false
-                        }
+                            lineWidth: 1,
+                            lineColor: "#666666"
+                        },
+                        shadow: false
                     }
                 }
             }
