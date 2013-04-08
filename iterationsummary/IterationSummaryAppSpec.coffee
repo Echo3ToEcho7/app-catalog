@@ -5,32 +5,11 @@ Ext.require [
 ]
 
 describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
-
-  beforeEach ->
-    @ajax.whenQuerying('iteration').respondWith([{
-        _refObjectName:"Iteration 3", Name:"Iteration 3", ObjectID:3,
-        StartDate:"2010-07-11T00:00:00.000Z", EndDate:"2010-07-15T23:59:59.000Z"
-      }
-    ], {
-      schema:
-        properties:
-          EndDate:
-            format:
-              tzOffset:0
-    })
-    # @stubDefer()
-
-  afterEach ->
-    @container?.destroy()
-
   helpers
-    _createApp: (initialValues) ->
-      @container = Ext.create('Ext.Container', {
-        renderTo:'testDiv'
-      })
-
+    _getContext: (initialValues) ->
       globalContext = Rally.environment.getContext()
-      context = Ext.create('Rally.app.Context', {
+
+      Ext.create('Rally.app.Context', {
         initialValues:Ext.merge({
           project:globalContext.getProject()
           workspace:globalContext.getWorkspace()
@@ -39,20 +18,38 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }, initialValues)
       })
 
+    _createApp: (initialValues) ->
+      @container = Ext.create('Ext.Container', {
+        renderTo:'testDiv'
+      })
+
       app = Ext.create('Rally.apps.iterationsummary.IterationSummaryApp', {
-        context:context
+        context: @_getContext(initialValues)
       })
 
       @container.add(app)
       @waitForComponentReady(app)
 
     _stubApp: (config) ->
-      @stub(Rally.apps.iterationsummary.IterationSummaryApp.prototype, 'getScheduleStates')
-        .returns(config.scheduleStates || ["Defined", "In-Progress", "Completed", "Accepted"])
+      @stubPromiseFunction(Rally.apps.iterationsummary.IterationSummaryApp.prototype, 'getScheduleStates',
+        (config.scheduleStates || ["Defined", "In-Progress", "Completed", "Accepted"]))
       @stub(Rally.apps.iterationsummary.IterationSummaryApp.prototype, 'getStartDate').returns(config.startDate || new Date())
       @stub(Rally.apps.iterationsummary.IterationSummaryApp.prototype, 'getEndDate').returns(config.endDate || new Date())
-      @stub(Rally.apps.iterationsummary.IterationSummaryApp.prototype, 'getTzOffset').returns(config.tzOffset || 0)
+      @_stubIterationQuery(config.tzOffset || 0)
       @stub(Rally.util.Timebox, 'getToday').returns(config.today || new Date())
+
+    _stubIterationQuery: (tzOffset = 0) ->
+      @ajax.whenQuerying('iteration').respondWith([{
+          _refObjectName:"Iteration 3", Name:"Iteration 3", ObjectID:3,
+          StartDate:"2010-07-11T00:00:00.000Z", EndDate:"2010-07-15T23:59:59.000Z"
+        }
+      ], {
+        schema:
+          properties:
+            EndDate:
+              format:
+                tzOffset: tzOffset * 60
+      })
 
     _prepareNoneAcceptedData: ->
       @ajax.whenQuerying('userstory').respondWith([{
@@ -675,6 +672,13 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }
       ])
 
+  beforeEach ->
+    @_stubIterationQuery()
+    # @stubDefer()
+
+  afterEach ->
+    @container?.destroy()
+
   it "does not call wsapidatastore if models are unavailable", ->
     @stub(Rally.data.ModelFactory, 'getModels', (options) ->
       results = {}
@@ -683,247 +687,74 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
           results.Iteration = Rally.test.mock.data.ModelFactory.getModel('Iteration')
         when 'UserStory'
           results.UserStory = Rally.test.mock.data.ModelFactory.getModel('UserStory')
+        when 'AllowedAttributeValue'
+          results.AllowedAttributeValue = Rally.test.mock.data.ModelFactory.getModel('AllowedAttributeValue')
 
       options.success.call(options.scope, results)
     )
-    aggregateQueryResultsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_aggregateQueryResults')
+    displayStatusRowsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_displayStatusRows')
 
     @_createApp({}).then (app) =>
 
-      expect(aggregateQueryResultsSpy.callCount).toBe 0
+      expect(displayStatusRowsSpy).not.toHaveBeenCalled()
 
   it "calls wsapidatastore if models are available", ->
-    aggregateQueryResultsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_aggregateQueryResults')
+    displayStatusRowsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_displayStatusRows')
 
     @_createApp({}).then (app) =>
 
-      @waitForCallback(aggregateQueryResultsSpy, 4)
-
-  it "calculates # of days for past timebox", ->
-    @_stubApp({
-      startDate:new Date(2011, 4, 22),
-      endDate:new Date(2011, 4, 27, 23, 59, 59),
-      tzOffset:10
-    })
-    @_createApp({
-      workspace:{
-        WorkspaceConfiguration:{
-          WorkDays:['monday', 'tuesday', 'thursday', 'friday'].join(',')
-        }
-      }
-    }).then (app) =>
-
-      expect(app.timeboxLength).toBe 4
-      expect(app.daysRemaining).toBe 0
-
-  it "calculates # of days for future timebox", ->
-
-    @_stubApp({
-      startDate:new Date(2021, 5, 1),
-      endDate:new Date(2021, 5, 7, 23, 59, 59),
-      tzOffset:-5
-    })
-
-    @_createApp({
-      workspace:{
-        WorkspaceConfiguration:{
-          WorkDays:['sunday', 'monday', 'tuesday', 'thursday', 'friday'].join(',')
-        }
-      }
-    }).then (app) =>
-
-      expect(app.timeboxLength).toBe 5
-      expect(app.daysRemaining).toBe 0
-
-  it "calculates # of days for current timebox", ->
-
-    @_stubApp({
-      startDate:new Date(2011, 5, 10),
-      endDate:new Date(2011, 5, 17, 23, 59, 59),
-      tzOffset:-5,
-      today:new Date(2011, 5, 11, 22)
-    })
-
-    @_createApp({
-      workspace:{
-        WorkspaceConfiguration:{
-          WorkDays:['sunday', 'monday', 'tuesday', 'wednesday',
-            'thursday', 'friday', 'saturday'].join(',')
-        }
-      }
-    }).then (app) =>
-
-      expect(app.timeboxLength).toBe 8
-      expect(app.daysRemaining).toBe 7
-
-  it "calculates # of days remaining when start date is today", ->
-
-    @_stubApp({
-      startDate:new Date(2011, 5, 10),
-      endDate:new Date(2011, 5, 17, 23, 59, 59),
-      tzOffset:-5,
-      today:new Date(2011, 5, 10, 22)
-    })
-
-    @_createApp({
-      workspace:{
-        WorkspaceConfiguration:{
-          WorkDays:['sunday', 'monday', 'tuesday', 'wednesday',
-            'thursday', 'friday', 'saturday'].join(',')
-        }
-      }
-    }).then (app) =>
-
-      expect(app.timeboxLength).toBe 8
-      expect(app.daysRemaining).toBe 8
-
-  it "calculates # of days remaining when end date is today", ->
-
-    @_stubApp({
-      startDate:new Date(2011, 5, 10),
-      endDate:new Date(2011, 5, 17, 23, 59, 59),
-      tzOffset:-5,
-      today:new Date(2011, 5, 17, 17, 59)
-    })
-
-    @_createApp({
-      workspace:{
-        WorkspaceConfiguration:{
-          WorkDays:['sunday', 'monday', 'tuesday', 'wednesday',
-            'thursday', 'friday', 'saturday'].join(',')
-        }
-      }
-    }).then (app) =>
-
-      expect(app.timeboxLength).toBe 8
-      expect(app.daysRemaining).toBe 1
-
-  it "+10 timezone offset", ->
-
-    @_stubApp({
-      startDate:new Date(2011, 5, 15),
-      endDate:new Date(2011, 5, 20, 23, 59, 59),
-      tzOffset:10,
-      today:new Date(2011, 5, 18, 9, 25)
-    })
-
-    @_createApp({
-      workspace:{
-        WorkspaceConfiguration:{
-          WorkDays:['sunday', 'monday', 'tuesday', 'wednesday',
-            'thursday', 'friday', 'saturday'].join(',')
-        }
-      }
-    }).then (app) =>
-
-      expect(app.timeboxLength).toBe 6
-      expect(app.daysRemaining).toBe 3
-
-  it "-12 timezone offset", ->
-
-    @_stubApp({
-      startDate:new Date(2011, 5, 15),
-      endDate:new Date(2011, 5, 20, 23, 59, 59),
-      tzOffset:-12,
-      today:new Date(2011, 5, 17, 5, 25)
-    })
-
-    @_createApp({
-      workspace:{
-        WorkspaceConfiguration:{
-          WorkDays:['sunday', 'monday', 'tuesday', 'wednesday',
-            'thursday', 'friday', 'saturday'].join(',')
-        }
-      }
-    }).then (app) =>
-
-      expect(app.timeboxLength).toBe 6
-      expect(app.daysRemaining).toBe 4
-
-  it "-12 timezone offset end of day", ->
-
-    @_stubApp({
-      startDate:new Date(2011, 5, 15),
-      endDate:new Date(2011, 5, 20, 23, 59, 59),
-      tzOffset:-12,
-      today:new Date(2011, 5, 17, 23, 59, 59, 999)
-    })
-
-    @_createApp({
-      workspace:{
-        WorkspaceConfiguration:{
-          WorkDays:['sunday', 'monday', 'tuesday', 'wednesday',
-            'thursday', 'friday', 'saturday'].join(',')
-        }
-      }
-    }).then (app) =>
-
-      expect(app.timeboxLength).toBe 6
-      expect(app.daysRemaining).toBe 4
+      @waitForCallback(displayStatusRowsSpy)
 
   it "getPostAcceptedState with no before or after state", ->
-
-    @_stubApp({
-      scheduleStates:["Defined", "In-Progress", "Completed", "Accepted"]
-    })
-
+    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Defined", "In-Progress", "Completed", "Accepted"]
     @_createApp({}).then (app) =>
-
-      expect(app._getPostAcceptedState()).toBeNull()
+      app._getPostAcceptedState().always (postAcceptedState) ->
+        expect(postAcceptedState).toBeNull()
 
   it "getPostAcceptedState with only a before state", ->
-
-    @_stubApp({
-      scheduleStates:["Idea", "Defined", "In-Progress", "Completed", "Accepted"]
-    })
-
+    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Idea", "Defined", "In-Progress", "Completed", "Accepted"]
     @_createApp({}).then (app) =>
-
-      expect(app._getPostAcceptedState()).toBeNull()
+      app._getPostAcceptedState().always (postAcceptedState) ->
+        expect(postAcceptedState).toBeNull()
 
   it "getPostAcceptedState with only an after state", ->
-
-    @_stubApp({
-      scheduleStates:["Defined", "In-Progress", "Completed", "Accepted", "Released"]
-    })
-
+    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Defined", "In-Progress", "Completed", "Accepted", "Released"]
     @_createApp({}).then (app) =>
-
-      expect(app._getPostAcceptedState()).toBe "Released"
+      app._getPostAcceptedState().always (postAcceptedState) ->
+        expect(postAcceptedState).toBe "Released"
 
   it "getPostAcceptedState with a before and after state", ->
-
-    @_stubApp({
-      scheduleStates:["Idea", "Defined", "In-Progress", "Completed", "Accepted", "Really Really Done"]
-    })
-
+    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Idea", "Defined", "In-Progress", "Completed", "Accepted", "Really Really Done"]
     @_createApp({}).then (app) =>
-
-      expect(app._getPostAcceptedState()).toBe "Really Really Done"
+      app._getPostAcceptedState().always (postAcceptedState) ->
+        expect(postAcceptedState).toBe "Really Really Done"
 
   it "does not aggregate testset and defectsuite data for HS subscriptions", ->
 
     @_prepareFiveDefectsData()
 
-    @_stubApp(
-      startDate:new Date(2011, 4, 6)
-      endDate:new Date(2011, 4, 20, 23, 59, 59)
-      today:new Date(2011, 5, 16)
-    )
+    # @_stubApp(
+    #   startDate:new Date(2011, 4, 6)
+    #   endDate:new Date(2011, 4, 20, 23, 59, 59)
+    #   today:new Date(2011, 5, 16)
+    # )
 
     @stub(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_isHsOrTeamEdition').returns true
     testsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getTestsConfigObject')
     defectSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getDefectsConfigObject')
 
-    @_createApp({}).then (app) =>
+    app = Ext.create('Rally.apps.iterationsummary.IterationSummaryApp',
+      context: @_getContext()
+    )
+    @waitForComponentReady(app).then ->
 
-      configDefects = defectSpy.getCall(0).returnValue
+      configDefects = defectSpy.firstCall.returnValue
       # only the 2 defects from user story - should exclude the 3 from defect suite
       expect(configDefects.title).toBe "2 Active Defects"
       expect(configDefects.status).toBe "error"
       expect(configDefects.message).toBe app.self.PAST_WITH_DEFECTS
 
-      expect(testsSpy.called).toBeFalsy()
+      expect(testsSpy).not.toHaveBeenCalled()
 
   it "refreshes app on objectUpdate of artifacts", ->
     @_createApp({}).then (app) =>
@@ -941,33 +772,27 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       Rally.environment.getMessageBus().publish(Rally.Message.objectUpdate, Rally.test.mock.ModelObjectMother.getRecord('Release'))
 
-      expect(addContentSpy.callCount).toBe 0
+      expect(addContentSpy).not.toHaveBeenCalled()
 
-  it "only gets tzOffset and scheduleStates once", ->
+  it "only calculates timebox info once", ->
     httpGetSpy = @spy(Rally.env.IoProvider.prototype, 'httpGet')
     @_createApp({}).then (app) =>
+      expect(httpGetSpy).toHaveBeenCalledOnce()
 
-      addContentSpy = @spy(app, 'addContent')
-      componentReadyListenter = @stub()
+      app.calculateTimeboxInfo().then ->
+        expect(httpGetSpy).toHaveBeenCalledOnce()
 
-      expect(httpGetSpy.callCount).toBe 1
+  it "only gets scheduleStates once", ->
+    scheduleStates = ['Defined', 'In-Progress', 'Completed']
+    ajaxRequest = @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith scheduleStates
+    @_createApp({}).then (app) =>
+      expect(scheduleStates).toEqual scheduleStates
+      expect(ajaxRequest).toHaveBeenCalledOnce()
 
-      modelsSpy = @spy(Rally.data.ModelFactory, 'getModels')
-      modelSpy = @spy(Rally.data.ModelFactory, 'getModel')
-
-      messageBus = Rally.environment.getMessageBus()
-      messageBus.subscribe(Rally.BrowserTest.getComponentReadyMessageName(app), componentReadyListenter)
-      messageBus.publish(Rally.Message.objectUpdate, Rally.test.mock.ModelObjectMother.getRecord('HierarchicalRequirement'))
-      @waitForCallback(componentReadyListenter).then =>
-
-        expect(httpGetSpy.callCount).toBe 1
-        expect(addContentSpy.callCount).toBe 1
-
-        # 8 because there are four artifact types getting loaded, and each
-        # one calls getModel twice, if more than 8, then the getModel call
-        # to get schedule states happened again, meaning the test failed
-        expect(modelsSpy).toHaveBeenCalledOnce()
-        expect(modelSpy).not.toHaveBeenCalled()
+      ajaxRequest = @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ['Defined', 'In-Progress', 'Accepted']
+      app.getScheduleStates().then (scheduleStates2) ->
+        expect(scheduleStates).toEqual scheduleStates
+        expect(ajaxRequest).not.toHaveBeenCalled()
 
   it "rounds estimates to two decimal places", ->
     @ajax.whenQuerying('defectsuite').respondWith()
@@ -1051,9 +876,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       expect(summedPlanEstimate.toString().length).toBeGreaterThan 5
 
-      configAcceptance = acceptanceSpy.getCall(0).returnValue
-      expectedSubtitle = Ext.String.format("(0 of {0} Points)", Math.round(summedPlanEstimate * 100) / 100)
-      expect(configAcceptance.subtitle).toBe expectedSubtitle
+      acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
+        expectedSubtitle = Ext.String.format("(0 of {0} Points)", Math.round(summedPlanEstimate * 100) / 100)
+        expect(configAcceptance.subtitle).toBe expectedSubtitle
 
   describe 'status row', ->
 
@@ -1072,20 +897,20 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configAcceptance = acceptanceSpy.getCall(0).returnValue
-        expect(!!configAcceptance.title).toBeFalsy()
-        expect(!!configAcceptance.status).toBeFalsy()
-        expect(!!configAcceptance.message).toBeFalsy()
+        acceptanceSpy.firstCall.returnValue.then (configAcceptance) ->
+          expect(!!configAcceptance.title).toBeFalsy()
+          expect(!!configAcceptance.status).toBeFalsy()
+          expect(!!configAcceptance.message).toBeFalsy()
 
-        configDefects = defectSpy.getCall(0).returnValue
-        expect(!!configDefects.title).toBeFalsy()
-        expect(!!configDefects.status).toBeFalsy()
-        expect(!!configDefects.message).toBeFalsy()
+          configDefects = defectSpy.firstCall.returnValue
+          expect(!!configDefects.title).toBeFalsy()
+          expect(!!configDefects.status).toBeFalsy()
+          expect(!!configDefects.message).toBeFalsy()
 
-        configTests = testSpy.getCall(0).returnValue
-        expect(!!configTests.title).toBeFalsy()
-        expect(!!configTests.status).toBeFalsy()
-        expect(!!configTests.message).toBeFalsy()
+          configTests = testSpy.firstCall.returnValue
+          expect(!!configTests.title).toBeFalsy()
+          expect(!!configTests.status).toBeFalsy()
+          expect(!!configTests.message).toBeFalsy()
 
     it "displays no alarming acceptance stats when timebox has just started", ->
 
@@ -1101,11 +926,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configAcceptance = acceptanceSpy.getCall(0).returnValue
-        expect(configAcceptance.title).toBe "0% Accepted"
-        expect(configAcceptance.subtitle).toBe "(0 of 27 Points)"
-        expect(configAcceptance.status).toBe "pending"
-        expect(configAcceptance.message).toBe app.self.CURRENT_WITH_NO_ACCEPTED_WORK
+        acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
+          expect(configAcceptance.title).toBe "0% Accepted"
+          expect(configAcceptance.subtitle).toBe "(0 of 27 Points)"
+          expect(configAcceptance.status).toBe "pending"
+          expect(configAcceptance.message).toBe app.self.CURRENT_WITH_NO_ACCEPTED_WORK
 
     it "does not display defect stats when no active defects for current timebox", ->
 
@@ -1121,7 +946,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configDefects = defectSpy.getCall(0).returnValue
+        configDefects = defectSpy.firstCall.returnValue
         expect(!!configDefects.title).toBeFalsy()
         expect(!!configDefects.status).toBeFalsy()
         expect(!!configDefects.message).toBeFalsy()
@@ -1140,7 +965,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configDefects = defectSpy.getCall(0).returnValue
+        configDefects = defectSpy.firstCall.returnValue
         expect(configDefects.title).toBe "5 Active Defects"
         expect(configDefects.status).toBe "warn"
         expect(configDefects.message).toBe app.self.CURRENT_WITH_DEFECTS
@@ -1159,11 +984,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configAcceptance = acceptanceSpy.getCall(0).returnValue
-        expect(configAcceptance.title).toBe "0% Accepted"
-        expect(configAcceptance.subtitle).toBe "(0 of 27 Points)"
-        expect(configAcceptance.status).toBe "warn"
-        expect(configAcceptance.message).toBe app.self.CURRENT_WITH_SOME_UNACCEPTED_WORK
+        acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
+          expect(configAcceptance.title).toBe "0% Accepted"
+          expect(configAcceptance.subtitle).toBe "(0 of 27 Points)"
+          expect(configAcceptance.status).toBe "warn"
+          expect(configAcceptance.message).toBe app.self.CURRENT_WITH_SOME_UNACCEPTED_WORK
 
     it "displays acceptance pending 5 days into a long timebox", ->
 
@@ -1179,11 +1004,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configAcceptance = acceptanceSpy.getCall(0).returnValue
-        expect(configAcceptance.title).toBe "48% Accepted"
-        expect(configAcceptance.subtitle).toBe "(13 of 27 Points)"
-        expect(configAcceptance.status).toBe "pending"
-        expect(configAcceptance.message).toBe app.self.CURRENT_WITH_SOME_UNACCEPTED_WORK
+        acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
+          expect(configAcceptance.title).toBe "48% Accepted"
+          expect(configAcceptance.subtitle).toBe "(13 of 27 Points)"
+          expect(configAcceptance.status).toBe "pending"
+          expect(configAcceptance.message).toBe app.self.CURRENT_WITH_SOME_UNACCEPTED_WORK
 
     it "displays acceptance pending halfway through a short timebox", ->
 
@@ -1199,11 +1024,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configAcceptance = acceptanceSpy.getCall(0).returnValue
-        expect(configAcceptance.title).toBe "48% Accepted"
-        expect(configAcceptance.subtitle).toBe "(13 of 27 Points)"
-        expect(configAcceptance.status).toBe "pending"
-        expect(configAcceptance.message).toBe app.self.CURRENT_WITH_SOME_UNACCEPTED_WORK
+        acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
+          expect(configAcceptance.title).toBe "48% Accepted"
+          expect(configAcceptance.subtitle).toBe "(13 of 27 Points)"
+          expect(configAcceptance.status).toBe "pending"
+          expect(configAcceptance.message).toBe app.self.CURRENT_WITH_SOME_UNACCEPTED_WORK
 
     it "displays acceptance error when all work not accepted from past timebox", ->
 
@@ -1219,11 +1044,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configAcceptance = acceptanceSpy.getCall(0).returnValue
-        expect(configAcceptance.title).toBe "48% Accepted"
-        expect(configAcceptance.subtitle).toBe "(13 of 27 Points)"
-        expect(configAcceptance.status).toBe "error"
-        expect(configAcceptance.message).toBe app.self.PAST_WITH_SOME_UNACCEPTED_WORK
+        acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
+          expect(configAcceptance.title).toBe "48% Accepted"
+          expect(configAcceptance.subtitle).toBe "(13 of 27 Points)"
+          expect(configAcceptance.status).toBe "error"
+          expect(configAcceptance.message).toBe app.self.PAST_WITH_SOME_UNACCEPTED_WORK
 
     it "displays defect error when active defects remain from past timebox", ->
 
@@ -1239,7 +1064,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configDefects = defectSpy.getCall(0).returnValue
+        configDefects = defectSpy.firstCall.returnValue
         expect(configDefects.title).toBe "5 Active Defects"
         expect(configDefects.status).toBe "error"
         expect(configDefects.message).toBe app.self.PAST_WITH_DEFECTS
@@ -1258,7 +1083,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configDefects = defectSpy.getCall(0).returnValue
+        configDefects = defectSpy.firstCall.returnValue
         expect(!!configDefects.title).toBeFalsy()
         expect(!!configDefects.status).toBeFalsy()
         expect(!!configDefects.message).toBeFalsy()
@@ -1276,11 +1101,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configAcceptance = acceptanceSpy.getCall(0).returnValue
-        expect(configAcceptance.title).toBe "100% Accepted"
-        expect(configAcceptance.subtitle).toBe "(27 of 27 Points)"
-        expect(configAcceptance.status).toBe "success"
-        expect(configAcceptance.message).toBe ""
+        acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
+          expect(configAcceptance.title).toBe "100% Accepted"
+          expect(configAcceptance.subtitle).toBe "(27 of 27 Points)"
+          expect(configAcceptance.status).toBe "success"
+          expect(configAcceptance.message).toBe ""
 
     it "displays positive acceptance stats when all work accepted or released for past timebox", ->
 
@@ -1454,11 +1279,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configAcceptance = acceptanceSpy.getCall(0).returnValue
-        expect(configAcceptance.title).toBe "100% Accepted"
-        expect(configAcceptance.subtitle).toBe "(27 of 27 Points)"
-        expect(configAcceptance.status).toBe "success"
-        expect(configAcceptance.message).toBe ""
+        acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
+          expect(configAcceptance.title).toBe "100% Accepted"
+          expect(configAcceptance.subtitle).toBe "(27 of 27 Points)"
+          expect(configAcceptance.status).toBe "success"
+          expect(configAcceptance.message).toBe ""
 
     it "displays success acceptance stats with work items without estimates but all accepted", ->
 
@@ -1612,11 +1437,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configAcceptance = acceptanceSpy.getCall(0).returnValue
-        expect(configAcceptance.title).toBe "100% Accepted"
-        expect(configAcceptance.subtitle).toBe "(18 of 18 Points)"
-        expect(configAcceptance.status).toBe "pending"
-        expect(configAcceptance.message).toBe "3 work items have no estimate."
+        acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
+          expect(configAcceptance.title).toBe "100% Accepted"
+          expect(configAcceptance.subtitle).toBe "(18 of 18 Points)"
+          expect(configAcceptance.status).toBe "pending"
+          expect(configAcceptance.message).toBe "3 work items have no estimate."
 
     it "displays gently scolding for past timebox with work accepted late", ->
 
@@ -1632,11 +1457,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configAcceptance = acceptanceSpy.getCall(0).returnValue
-        expect(configAcceptance.title).toBe "100% Accepted"
-        expect(configAcceptance.subtitle).toBe "(27 of 27 Points)"
-        expect(configAcceptance.status).toBe "success"
-        expect(configAcceptance.message).toBe app.self.PAST_WITH_ACCEPTED_WORK_AFTER_END_DATE
+        acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
+          expect(configAcceptance.title).toBe "100% Accepted"
+          expect(configAcceptance.subtitle).toBe "(27 of 27 Points)"
+          expect(configAcceptance.status).toBe "success"
+          expect(configAcceptance.message).toBe app.self.PAST_WITH_ACCEPTED_WORK_AFTER_END_DATE
 
     it "does not display stats when there are no tests", ->
 
@@ -1684,7 +1509,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configTests = testsSpy.getCall(0).returnValue
+        configTests = testsSpy.firstCall.returnValue
         expect(!!configTests.title).toBeFalsy()
         expect(!!configTests.status).toBeFalsy()
         expect(!!configTests.message).toBeFalsy()
@@ -1703,7 +1528,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configTests = testsSpy.getCall(0).returnValue
+        configTests = testsSpy.firstCall.returnValue
         expect(configTests.title).toBe "33% Tests Passing"
         expect(configTests.subtitle).toBe "(3 of 9)"
         expect(configTests.status).toBe "pending"
@@ -1751,7 +1576,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configTests = testsSpy.getCall(0).returnValue
+        configTests = testsSpy.firstCall.returnValue
         expect(configTests.title).toBe "0% Tests Passing"
         expect(configTests.subtitle).toBe "(0 of 9)"
         expect(configTests.status).toBe "warn"
@@ -1771,7 +1596,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configTests = testsSpy.getCall(0).returnValue
+        configTests = testsSpy.firstCall.returnValue
         expect(configTests.title).toBe "33% Tests Passing"
         expect(configTests.subtitle).toBe "(3 of 9)"
         expect(configTests.status).toBe "pending"
@@ -1819,7 +1644,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configTests = testsSpy.getCall(0).returnValue
+        configTests = testsSpy.firstCall.returnValue
         expect(configTests.title).toBe "100% Tests Passing"
         expect(configTests.subtitle).toBe "(9 of 9)"
         expect(configTests.status).toBe "success"
@@ -1839,7 +1664,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       @_createApp({}).then (app) =>
 
-        configTests = testsSpy.getCall(0).returnValue
+        configTests = testsSpy.firstCall.returnValue
         expect(configTests.title).toBe "33% Tests Passing"
         expect(configTests.subtitle).toBe "(3 of 9)"
         expect(configTests.status).toBe "error"
