@@ -14,7 +14,8 @@
             'Rally.data.ModelFactory',
             'Rally.nav.Manager',
             'Rally.data.WsapiDataStore',
-            'Rally.util.Timebox'
+            'Rally.util.Timebox',
+            'Deft.Deferred'
         ],
         appName: 'Iteration Summary',
         cls: 'iteration-summary-app',
@@ -48,37 +49,6 @@
             this.subscribe(this, Rally.Message.objectUpdate, this._refreshApp, this);
         },
 
-        addContent: function(scope) {
-            if (!Ext.isDefined(this.getTzOffset())) {
-                Rally.environment.getIoProvider().httpGet({
-                    url: Rally.environment.getServer().getWsapiUrl() + '/iteration.js?includeSchema=true&pagesize=1&fetch=Name',
-                    success: function(results) {
-                        if (results.Schema.properties.EndDate.format.tzOffset !== undefined) {
-                            this._tzOffset = results.Schema.properties.EndDate.format.tzOffset / 60;
-                        } else {
-                            this._tzOffset = 0;
-                        }
-                        this._asyncStepComplete();
-                    },
-                    scope: this
-                });
-            }
-
-            if (!Ext.isDefined(this.getScheduleStates())) {
-                Rally.data.ModelFactory.getModel({
-                    type: 'UserStory',
-                    context: this.getContext().getDataContext(),
-                    success: function(model) {
-                        this._scheduleStates = Ext.Array.pluck(model.getField('ScheduleState').allowedValues, 'StringValue');
-                        this._asyncStepComplete();
-                    },
-                    scope: this
-                });
-            }
-
-            this._asyncStepComplete();
-        },
-
         _refreshApp: function(record) {
             var types = ['defect', 'hierarchicalrequirement', 'testset', 'defectsuite', 'testcase'];
 
@@ -89,12 +59,6 @@
 
         onScopeChange: function(scope) {
             this._buildFromIteration();
-        },
-
-        _asyncStepComplete: function() {
-            if (this.getScheduleStates() && Ext.isDefined(this.getTzOffset())) {
-                this._buildFromIteration();
-            }
         },
 
         _isHsOrTeamEdition: function() {
@@ -113,64 +77,108 @@
             return this.getIteration().get('EndDate');
         },
 
-        getTzOffset: function() {
-            return this._tzOffset;
+        calculateTimeboxInfo: function() {
+            var deferred = Ext.create('Deft.Deferred');
+
+            if (!Ext.isDefined(this._tzOffset)) {
+                Rally.environment.getIoProvider().httpGet({
+                    url: Rally.environment.getServer().getWsapiUrl() + '/iteration.js?includeSchema=true&pagesize=1&fetch=Name',
+                    success: function(results) {
+                        if (results.Schema.properties.EndDate.format.tzOffset !== undefined) {
+                            this._tzOffset = results.Schema.properties.EndDate.format.tzOffset / 60;
+                        } else {
+                            this._tzOffset = 0;
+                        }
+                        this._setTimeBoxInfo(this._tzOffset);
+                        deferred.resolve();
+                    },
+                    scope: this
+                });
+            } else {
+                deferred.resolve(this._tzOffset);
+            }
+            return deferred.promise;
         },
 
         getScheduleStates: function() {
-            return this._scheduleStates;
+            var deferred = Ext.create('Deft.Deferred');
+
+            if (!Ext.isDefined(this._scheduleStates)) {
+                Rally.data.ModelFactory.getModel({
+                    type: 'UserStory',
+                    context: this.getContext().getDataContext(),
+                    success: function(model) {
+                        model.getField('ScheduleState').getAllowedValueStore().load({
+                            callback: function(records, operation, success) {
+                                this._scheduleStates = Ext.Array.map(records, function(record) {
+                                    return record.get('StringValue');
+                                });
+                                deferred.resolve(this._scheduleStates);
+                            },
+                            scope: this
+                        });
+                    },
+                    scope: this
+                });
+            } else {
+                deferred.resolve(this._scheduleStates);
+            }
+            return deferred.promise;
         },
 
-        _buildFromIteration: function() {
+        addContent: function(scope) {
             var iteration = this.getIteration();
 
-            this._calculateTimeInfo();
-
-            if (this.down('#dataContainer')) {
-                this.down('#dataContainer').destroy();
-            }
-
-            this.add({
-                xtype: 'container',
-                itemId: 'dataContainer',
-                cls: 'message',
-                defaults: {
-                    xtype: 'component'
-                },
-                items: [
-                    {
-                        html: this._buildDaysRemainingMessage()
-                    },
-                    {
-                        cls: 'dates',
-                        html: Rally.util.DateTime.formatWithDefault(this.getStartDate(), this.getContext()) + ' - ' +
-                                Rally.util.DateTime.formatWithDefault(this.getEndDate(), this.getContext())
-                    },
-                    {
-                        cls: 'state',
-                        html: iteration.get('State')
-                    },
-                    {
-                        xtype: 'container',
-                        itemId: 'stats'
-                    },
-                    {
-                        xtype: 'container',
-                        cls: 'edit',
-                        renderTpl: new Ext.XTemplate('<a class="editLink" href="#">Edit iteration...</a>'),
-                        renderSelectors: { editLink: '.editLink' },
-                        listeners: {
-                            editLink: {
-                                click: this._onEditLinkClick,
-                                stopEvent: true,
-                                scope: this
-                            }
-                        }
+            return this.calculateTimeboxInfo().then({
+                success: function() {
+                    if (this.down('#dataContainer')) {
+                        this.down('#dataContainer').destroy();
                     }
-                ]
-            });
 
-            this._getStatusRowData();
+                    this.add({
+                        xtype: 'container',
+                        itemId: 'dataContainer',
+                        cls: 'message',
+                        defaults: {
+                            xtype: 'component'
+                        },
+                        items: [
+                            {
+                                html: this._buildDaysRemainingMessage()
+                            },
+                            {
+                                cls: 'dates',
+                                html: Rally.util.DateTime.formatWithDefault(this.getStartDate(), this.getContext()) + ' - ' +
+                                        Rally.util.DateTime.formatWithDefault(this.getEndDate(), this.getContext())
+                            },
+                            {
+                                cls: 'state',
+                                html: iteration.get('State')
+                            },
+                            {
+                                xtype: 'container',
+                                itemId: 'stats'
+                            },
+                            {
+                                xtype: 'container',
+                                cls: 'edit',
+                                renderTpl: new Ext.XTemplate('<a class="editLink" href="#">Edit iteration...</a>'),
+                                renderSelectors: { editLink: '.editLink' },
+                                listeners: {
+                                    editLink: {
+                                        click: this._onEditLinkClick,
+                                        stopEvent: true,
+                                        scope: this
+                                    }
+                                }
+                            }
+                        ]
+                    });
+
+                    this._getStatusRowData();
+                },
+                scope: this
+            });
         },
 
         _onEditLinkClick: function() {
@@ -180,29 +188,24 @@
         _buildDaysRemainingMessage: function() {
             var message = '';
 
-            if (this.daysRemaining > 0) {
-                var remainingText = this.daysRemaining === 1 ? ' Day Remaining' : ' Days Remaining';
-                message = '<span class="daysRemaining">' + this.daysRemaining + remainingText + '</span> in a ';
+            if (this.timeBoxInfo.daysRemaining > 0) {
+                var remainingText = this.timeBoxInfo.daysRemaining === 1 ? ' Day Remaining' : ' Days Remaining';
+                message = '<span class="daysRemaining">' + this.timeBoxInfo.daysRemaining + remainingText + '</span> in a ';
             }
 
-            message += this.timeboxLength + ' day Iteration';
+            message += this.timeBoxInfo.timeboxLength + ' day Iteration';
             return message;
         },
 
-        _calculateTimeInfo: function() {
+        _setTimeBoxInfo: function(tzOffset) {
             var timeboxCounts = Rally.util.Timebox.getCounts(this.getStartDate(), this.getEndDate(),
-                    this.getContext().getWorkspace().WorkspaceConfiguration.WorkDays, this.getTzOffset());
+                                this.getContext().getWorkspace().WorkspaceConfiguration.WorkDays, tzOffset);
 
-            this.timeOrientation = Rally.util.Timebox.getOrientation(this.getStartDate(), this.getEndDate(), this.getTzOffset());
-            this.timeboxLength = timeboxCounts.workdays;
-            this.daysRemaining = timeboxCounts.remaining;
-        },
-
-        _aggregateQueryResults: function(store, data) {
-            this.results[store.model.prettyTypeName] = data;
-            if (--this._outstandingQueries === 0) {
-                this._displayStatusRows();
-            }
+            this.timeBoxInfo = {
+                timeOrientation: Rally.util.Timebox.getOrientation(this.getStartDate(), this.getEndDate(), tzOffset),
+                timeboxLength: timeboxCounts.workdays,
+                daysRemaining: timeboxCounts.remaining
+            };
         },
 
         _getStatusRowData: function() {
@@ -219,13 +222,14 @@
                 });
             }
 
-            this._outstandingQueries = Ext.Object.getSize(queryObjects);
-
             Rally.data.ModelFactory.getModels({
                 types: Ext.Object.getKeys(queryObjects),
                 success: function(models) {
+                    var loadPromises = [];
+
                     Ext.Object.each(queryObjects, function(key, value) {
                         if (models[key]) {
+                            var loadDeferred = Ext.create('Deft.Deferred');
                             Ext.create('Rally.data.WsapiDataStore', {
                                 model: models[key],
                                 fetch: value,
@@ -234,18 +238,28 @@
                                 limit: Infinity,
                                 autoLoad: true,
                                 listeners: {
-                                    load: this._aggregateQueryResults,
+                                    load: function(store, data) {
+                                        this.results[store.model.prettyTypeName] = data;
+                                        loadDeferred.resolve();
+                                    },
                                     scope: this
                                 }
                             });
-                        } else {
-                            --this._outstandingQueries;
+                            loadPromises.push(loadDeferred.promise);
                         }
                     }, this);
-                    if (this._outstandingQueries === 0) {
+
+                    if (loadPromises.length === 0) {
                         if (Rally.BrowserTest) {
                             Rally.BrowserTest.publishComponentReady(this);
                         }
+                    } else {
+                        Deft.Promise.all(loadPromises).then({
+                            success: function() {
+                                this._displayStatusRows();
+                            },
+                            scope: this
+                        });
                     }
                 },
                 scope: this
@@ -253,18 +267,22 @@
         },
 
         _getPostAcceptedState: function() {
-            if (this.getScheduleStates().length <= 4) {
-                return null;
-            } else if (this.getScheduleStates().length === 5) {
-                return this.getScheduleStates()[0] === this.self.DEFINED_STATE ? this.getScheduleStates()[4] : null;
-            } else {
-                return this.getScheduleStates()[5];
-            }
+            return this.getScheduleStates().then({
+                success: function(states) {
+                    if (states.length <= 4) {
+                        return null;
+                    } else if (states.length === 5) {
+                        return states[0] === this.self.DEFINED_STATE ? states[4] : null;
+                    }
+                    return states[5];
+                },
+                scope: this
+            });
         },
 
         //only show statuses if we are 1/2 through the timebox or 5 days into a timebox
         _showStatuses: function() {
-            return ((this.timeboxLength - this.daysRemaining) >= 5 || (this.timeboxLength - this.daysRemaining) > this.daysRemaining);
+            return ((this.timeBoxInfo.timeboxLength - this.timeBoxInfo.daysRemaining) >= 5 || (this.timeBoxInfo.timeboxLength - this.timeBoxInfo.daysRemaining) > this.timeBoxInfo.daysRemaining);
         },
 
         _aggregateAcceptance: function(items, postAcceptedState) {
@@ -298,83 +316,87 @@
         },
 
         _getAcceptanceConfigObject: function() {
-            var postAcceptedState = this._getPostAcceptedState();
-            var totalPlanEstimate = 0;
-            var totalAcceptedPoints = 0;
-            var totalItems = 0;
-            var totalAcceptedItems = 0;
-            var acceptedLate = false;
-            var workNotEstimated = 0;
+            return this._getPostAcceptedState().then({
+                success: function(postAcceptedState) {
+                    var totalPlanEstimate = 0;
+                    var totalAcceptedPoints = 0;
+                    var totalItems = 0;
+                    var totalAcceptedItems = 0;
+                    var acceptedLate = false;
+                    var workNotEstimated = 0;
 
-            Ext.Object.each(this.results, function(key, item) {
-                var itemAcceptanceData = this._aggregateAcceptance(item, postAcceptedState);
-                totalPlanEstimate += itemAcceptanceData.totalPlanEstimate;
-                totalAcceptedPoints += itemAcceptanceData.totalAcceptedPoints;
-                totalItems += itemAcceptanceData.totalItems;
-                totalAcceptedItems += itemAcceptanceData.totalAcceptedItems;
-                if (!acceptedLate) {
-                    acceptedLate = itemAcceptanceData.acceptedLate;
-                }
-                workNotEstimated += itemAcceptanceData.workNotEstimated;
-            }, this);
+                    Ext.Object.each(this.results, function(key, item) {
+                        var itemAcceptanceData = this._aggregateAcceptance(item, postAcceptedState);
+                        totalPlanEstimate += itemAcceptanceData.totalPlanEstimate;
+                        totalAcceptedPoints += itemAcceptanceData.totalAcceptedPoints;
+                        totalItems += itemAcceptanceData.totalItems;
+                        totalAcceptedItems += itemAcceptanceData.totalAcceptedItems;
+                        if (!acceptedLate) {
+                            acceptedLate = itemAcceptanceData.acceptedLate;
+                        }
+                        workNotEstimated += itemAcceptanceData.workNotEstimated;
+                    }, this);
 
-            //Calculate the acceptance percentage.
-            // ||1 - Handle NaN resulting from divide by 0
-            var percentAccepted = Math.floor((totalAcceptedPoints / (totalPlanEstimate || 1)) * 100);
-            var config = {};
+                    //Calculate the acceptance percentage.
+                    // ||1 - Handle NaN resulting from divide by 0
+                    var percentAccepted = Math.floor((totalAcceptedPoints / (totalPlanEstimate || 1)) * 100);
+                    var config = {};
 
-            if (this.timeOrientation !== "future") {
+                    if (this.timeBoxInfo.timeOrientation !== "future") {
 
-                // days remaining   : percent accepted      : status
-                // ----------------------------------------------
-                // 0                : 100                   : success
-                // 0                : <100                  : error
-                // beyond half      : 0                     : warn
-                // beyond half      : >0                    : pending
+                        // days remaining   : percent accepted      : status
+                        // ----------------------------------------------
+                        // 0                : 100                   : success
+                        // 0                : <100                  : error
+                        // beyond half      : 0                     : warn
+                        // beyond half      : >0                    : pending
 
-                config.title = percentAccepted + "% Accepted";
-                config.subtitle = "(" + Ext.util.Format.round(totalAcceptedPoints, 2) + " of " + Ext.util.Format.round(totalPlanEstimate, 2) + " " +
-                        this.getContext().getWorkspace().WorkspaceConfiguration.IterationEstimateUnitName + ")";
-                config.message = "";
-                if (this.daysRemaining === 0) {
-                    if (percentAccepted < 100) {
-                        config.status = "error";
-                        config.message = this.self.PAST_WITH_SOME_UNACCEPTED_WORK;
-                        config.learnMore = "stories";
-                    } else if (acceptedLate) {
-                        config.message = this.self.PAST_WITH_ACCEPTED_WORK_AFTER_END_DATE;
-                        config.status = "success";
-                        config.learnMore = "stories";
-                    } else {
-                        config.status = "success";
-                    }
-                } else if (this._showStatuses()) {
-                    if (percentAccepted === 0) {
-                        config.status = "warn";
-                    } else if (percentAccepted === 100) {
-                        if (workNotEstimated === 0) {
-                            config.status = "success";
+                        config.title = percentAccepted + "% Accepted";
+                        config.subtitle = "(" + Ext.util.Format.round(totalAcceptedPoints, 2) + " of " + Ext.util.Format.round(totalPlanEstimate, 2) + " " +
+                                this.getContext().getWorkspace().WorkspaceConfiguration.IterationEstimateUnitName + ")";
+                        config.message = "";
+                        if (this.timeBoxInfo.daysRemaining === 0) {
+                            if (percentAccepted < 100) {
+                                config.status = "error";
+                                config.message = this.self.PAST_WITH_SOME_UNACCEPTED_WORK;
+                                config.learnMore = "stories";
+                            } else if (acceptedLate) {
+                                config.message = this.self.PAST_WITH_ACCEPTED_WORK_AFTER_END_DATE;
+                                config.status = "success";
+                                config.learnMore = "stories";
+                            } else {
+                                config.status = "success";
+                            }
+                        } else if (this._showStatuses()) {
+                            if (percentAccepted === 0) {
+                                config.status = "warn";
+                            } else if (percentAccepted === 100) {
+                                if (workNotEstimated === 0) {
+                                    config.status = "success";
+                                } else {
+                                    config.status = "pending";
+                                    config.message = workNotEstimated + this.self.WORK_NOT_ESTIMATED;
+                                }
+                            } else {
+                                config.status = "pending";
+                            }
+                            if (percentAccepted < 100) {
+                                config.message = this.self.CURRENT_WITH_SOME_UNACCEPTED_WORK;
+                                config.learnMore = "stories";
+                            }
                         } else {
                             config.status = "pending";
-                            config.message = workNotEstimated + this.self.WORK_NOT_ESTIMATED;
+                            if (percentAccepted === 0) {
+                                config.message = this.self.CURRENT_WITH_NO_ACCEPTED_WORK;
+                                config.learnMore = "stories";
+                            }
                         }
-                    } else {
-                        config.status = "pending";
                     }
-                    if (percentAccepted < 100) {
-                        config.message = this.self.CURRENT_WITH_SOME_UNACCEPTED_WORK;
-                        config.learnMore = "stories";
-                    }
-                } else {
-                    config.status = "pending";
-                    if (percentAccepted === 0) {
-                        config.message = this.self.CURRENT_WITH_NO_ACCEPTED_WORK;
-                        config.learnMore = "stories";
-                    }
-                }
-            }
 
-            return config;
+                    return config;
+                },
+                scope: this
+            });
         },
 
         _getActiveDefectCount: function(items) {
@@ -400,15 +422,15 @@
 
             var config = {};
 
-            if (totalDefectCount > 0 && this.timeOrientation !== "future") {
+            if (totalDefectCount > 0 && this.timeBoxInfo.timeOrientation !== "future") {
                 config.title = totalDefectCount + " Active Defect" + (totalDefectCount !== 1 ? "s" : "");
                 config.subtitle = "";
                 config.learnMore = "defects";
 
-                if (this.timeOrientation === "past") {
+                if (this.timeBoxInfo.timeOrientation === "past") {
                     config.status = "error";
                     config.message = this.self.PAST_WITH_DEFECTS;
-                } else if (this.timeOrientation === "current") {
+                } else if (this.timeBoxInfo.timeOrientation === "current") {
                     config.status = "warn";
                     config.message = this.self.CURRENT_WITH_DEFECTS;
                 }
@@ -443,7 +465,7 @@
                 testCounts.passingTests += tmpTestCnt.passingTests;
             }, this);
 
-            if (testCounts.totalTests !== 0 && this.timeOrientation !== "future") {
+            if (testCounts.totalTests !== 0 && this.timeBoxInfo.timeOrientation !== "future") {
 
                 // days remaining   : number passing        : status
                 // -------------------------------------------------
@@ -463,7 +485,7 @@
                 } else {
                     config.message = this.self.CURRENT_TESTS_FAILING_MESSAGE;
                     config.learnMore = "tests";
-                    if (this.timeOrientation === "past") {
+                    if (this.timeBoxInfo.timeOrientation === "past") {
                         config.status = "error";
                     } else if (this._showStatuses()) {
                         config.status = testCounts.passingTests === 0 ? 'warn' : 'pending';
@@ -476,16 +498,21 @@
         },
 
         _displayStatusRows: function() {
-            this.down('#stats').suspendLayouts();
-            this._displayStatusRow(this._getAcceptanceConfigObject());
-            this._displayStatusRow(this._getDefectsConfigObject());
-            if (!this._isHsOrTeamEdition()) {
-                this._displayStatusRow(this._getTestsConfigObject());
-            }
-            this.down('#stats').resumeLayouts(true);
-            if (Rally.BrowserTest) {
-                Rally.BrowserTest.publishComponentReady(this);
-            }
+            return this._getAcceptanceConfigObject().then({
+                success: function(acceptanceConfigObject) {
+                    this.down('#stats').suspendLayouts();
+                    this._displayStatusRow(acceptanceConfigObject);
+                    this._displayStatusRow(this._getDefectsConfigObject());
+                    if (!this._isHsOrTeamEdition()) {
+                        this._displayStatusRow(this._getTestsConfigObject());
+                    }
+                    this.down('#stats').resumeLayouts(true);
+                    if (Rally.BrowserTest) {
+                        Rally.BrowserTest.publishComponentReady(this);
+                    }
+                },
+                scope: this
+            });
         },
 
         _displayStatusRow: function(rowConfig) {
