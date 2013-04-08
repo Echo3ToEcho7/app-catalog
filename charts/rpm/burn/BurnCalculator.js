@@ -1,7 +1,7 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define("Rally.apps.charts.burn.BurnCalculator", {
+    Ext.define("Rally.apps.charts.rpm.burn.BurnCalculator", {
         extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
 
         getDerivedFieldsOnInput: function () {

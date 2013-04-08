@@ -1,7 +1,7 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define("Rally.apps.charts.cfd.CumulativeFlowCalculator", {
+    Ext.define("Rally.apps.charts.rpm.cfd.CumulativeFlowCalculator", {
         extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
 
         getDerivedFieldsOnInput: function () {
