@@ -17,7 +17,7 @@ describe 'Rally.apps.kanban.Settings', ->
 
   helpers
     renderFieldInForm: (fieldConfig) ->
-      @form = Ext.create 'Ext.form.Panel',
+      @formPanel = Ext.create 'Ext.form.Panel',
         items: [
           fieldConfig
         ]
@@ -25,7 +25,7 @@ describe 'Rally.apps.kanban.Settings', ->
 
     assertFieldCannotBeEmpty: (fieldConfig, errMsg) ->
       @renderFieldInForm fieldConfig
-      field = @form.form.getFields().get(0)
-      expect(@form.form.isValid()).toBe false
+      field = @formPanel.getForm().getFields().get(0)
+      expect(@formPanel.getForm().isValid()).toBe false
       expect(field.getErrors().length).toBe 1
       expect(field.getErrors()[0]).toBe errMsg
