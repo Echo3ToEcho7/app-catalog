@@ -104,7 +104,7 @@
                     xtype: 'rallyfieldpicker',
                     handlesEvents: {
                         typeselected: function(type, context) {
-                            this.refreshWithNewModelType(type, context);
+                            this.refreshWithNewModelTypes([type], context);
                         }
                     },
                     alwaysExpanded: true,
