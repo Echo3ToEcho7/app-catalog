@@ -58,7 +58,7 @@
         },
 
         onScopeChange: function(scope) {
-            this._buildFromIteration();
+            this.addContent();
         },
 
         _isHsOrTeamEdition: function() {
