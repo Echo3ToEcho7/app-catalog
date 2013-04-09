@@ -1,8 +1,23 @@
+.burndown-app .chartControls {
+    margin: 15px;
+}
+
+.burndown-app .chartControls label,
+.burndown-app .chartControls .rui-triggerfield {
+    display: inline-block;
+}
+
+.burndown-app .chartControls label {
+    font-size: 1.2em;
+    margin: 3px 8px;
+}
+
 .portfolio-cfd-app,
-.portfolio-burnup-app {
-    background-color: transparent;
+.portfolio-burnup-app,
+.burndown-app {
     margin: 10px;
     padding-right: 20px;
+    background-color: transparent;
 }
 
 .portfolio-cfd-app .rally-help-icon,
