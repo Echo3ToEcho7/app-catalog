@@ -33,6 +33,14 @@
             value: undefined
         },
 
+        onDestroy: function() {
+            if (this._grid) {
+                this._grid.destroy();
+                delete this._grid;
+            }
+            this.callParent(arguments);
+        },
+
         onRender: function() {
             this.callParent(arguments);
 
