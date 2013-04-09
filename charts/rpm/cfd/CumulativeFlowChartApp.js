@@ -38,7 +38,8 @@
                 }
             },
 
-            noDataMessage: "There could be no stories available or started for this portfolio item, missing plan estimate values, or work on this portfolio item has not yet been started.",
+            queryErrorMessage: "No data to display.<br /><br />Most likely, stories are either not yet available or started for this portfolio item.",
+            aggregationErrorMessage: "No data to display.<br /><br />Check the data type setting for displaying data based on count versus plan estimate.",
 
             storeType: 'Rally.data.lookback.SnapshotStore',
             storeConfig: {
