@@ -7,7 +7,8 @@
         
         requires: [
             'Rally.ui.combobox.ComboBox',
-            'Rally.util.Test'
+            'Rally.util.Test',
+            'Deft.Deferred'
         ],
 
         scheduleStates: ["Defined", "In-Progress", "Completed", "Accepted"],
@@ -80,13 +81,11 @@
             ];
         },
 
-        clientMetrics: [
-            {
-                beginEvent: 'updateBeforeRender',
-                endEvent: 'updateAfterRender',
-                defaultUserAction: 'pichartapp - elapsed chart load'
-            }
-        ],
+        clientMetrics: {
+            beginEvent: 'updateBeforeRender',
+            endEvent: 'updateAfterRender',
+            defaultUserAction: 'pichartapp - elapsed chart load'
+        },
 
         launch: function () {
             this._setupEvents();
@@ -240,32 +239,52 @@
         },
 
         _onUserStoryModelRetrieved: function (model, portfolioItemRecord) {
-            this._updateChartComponentConfig(model, portfolioItemRecord.data);
-            this.add(this.chartComponentConfig);
-
-            Rally.environment.getMessageBus().publish(Rally.Message.piChartAppReady);
+            this._updateChartComponentConfig(model, portfolioItemRecord.data).then({
+                success: function(chartComponentConfig) {
+                    this.add(chartComponentConfig);
+                    Rally.environment.getMessageBus().publish(Rally.Message.piChartAppReady);
+                },
+                scope: this
+            });
         },
 
         _updateChartComponentConfig: function (model, portfolioItem) {
-            this._setScheduleStateFieldValues(model);
-            this._setDynamicConfigValues(portfolioItem);
-            this._calculateDateRange(portfolioItem);
-            this._updateQueryConfig(portfolioItem);
+            var deferred = Ext.create('Deft.Deferred');
+
+            this._getScheduleStateValues(model).then({
+                success: function(scheduleStateValues) {
+                    this.chartComponentConfig.calculatorConfig.scheduleStates = scheduleStateValues;
+
+                    this._setDynamicConfigValues(portfolioItem);
+                    this._calculateDateRange(portfolioItem);
+                    this._updateQueryConfig(portfolioItem);
+
+                    deferred.resolve(this.chartComponentConfig);
+                },
+                scope: this
+            });
+
+            return deferred.promise;
         },
 
-        _setScheduleStateFieldValues: function (model) {
+        _getScheduleStateValues: function (model) {
+            var deferred = Ext.create('Deft.Deferred');
+
             if (model) {
-                var allowedScheduleStates = model.getField('ScheduleState').allowedValues;
-                var i, length, scheduleStateValues = [];
-
-                for (i = 0, length = allowedScheduleStates.length; i < length; i++) {
-                    scheduleStateValues.push(allowedScheduleStates[i].StringValue);
-                }
-
-                this.chartComponentConfig.calculatorConfig.scheduleStates = scheduleStateValues;
+                model.getField('ScheduleState').getAllowedValueStore().load({
+                    callback: function(records, operation, success) {
+                        var scheduleStateValues = Ext.Array.map(records, function(record) {
+                            return record.get('StringValue');
+                        });
+                        deferred.resolve(scheduleStateValues);
+                    },
+                    scope: this
+                });
             } else {
-                this.chartComponentConfig.calculatorConfig.scheduleStates = this.scheduleStates;
+                deferred.resolve(this.scheduleStates);
             }
+
+            return deferred.promise;
         },
 
         _setDynamicConfigValues: function (portfolioItem) {
