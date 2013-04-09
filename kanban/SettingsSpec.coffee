@@ -10,6 +10,13 @@ describe 'Rally.apps.kanban.Settings', ->
 
     @assertFieldCannotBeEmpty columnSettingsConfig, 'At least one column must be shown.'
 
+  it 'should destroy grid for kanbancolumnsettingsfield when settings are destroyed', ->
+    columnSettingsConfig = Ext.Array.filter(Rally.apps.kanban.Settings.getFields(), (field) -> field.xtype == 'kanbancolumnsettingsfield')[0]
+    @renderFieldInForm columnSettingsConfig
+    @formPanel.close()
+
+    expect(@formPanel.getForm().getFields().get(0)._grid).toBeUndefined()
+
   it 'should require at least one card field', ->
     cardSettingsConfig = Ext.Array.filter(Rally.apps.kanban.Settings.getFields(), (field) -> field.xtype == 'rallyfieldpicker')[0]
 
