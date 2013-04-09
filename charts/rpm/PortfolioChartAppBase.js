@@ -290,9 +290,11 @@
         _setDynamicConfigValues: function (portfolioItem) {
             this._updateChartConfigDateFormat();
             this.chartComponentConfig.chartConfig.title = this._buildChartTitle(portfolioItem);
+            this.chartComponentConfig.chartConfig.subtitle = this._buildChartSubtitle(portfolioItem);
 
             this.chartComponentConfig.calculatorConfig.chartAggregationType = this._getAggregationType();
             this.chartComponentConfig.chartConfig.yAxis[0].title.text = this._getYAxisTitle();
+
             this.chartComponentConfig.chartConfig.yAxis[0].labels = {
                 x: -5,
                 y: 4
@@ -300,13 +302,13 @@
         },
 
         _updateChartConfigDateFormat: function () {
-            var rallyDateFormat = this._parseRallyDateFormatToHighchartsDateFormat();
+            var self = this;
 
             this.chartComponentConfig.chartConfig.xAxis.labels = {
                 x: 0,
                 y: 20,
                 formatter: function () {
-                    return Highcharts.dateFormat(rallyDateFormat, new Date(this.value).getTime());
+                    return self._formatDate(new Date(this.value));
                 }
             };
         },
@@ -319,6 +321,14 @@
             }
             
             return dateFormat;
+        },
+
+        _formatDate: function(date) {
+            if (!this.dateFormat) {
+                this.dateFormat = this._parseRallyDateFormatToHighchartsDateFormat();
+            }
+
+            return Highcharts.dateFormat(this.dateFormat, date.getTime());
         },
 
         _calculateDateRange: function (portfolioItem) {
@@ -357,25 +367,66 @@
 
         _buildChartTitle: function (portfolioItem) {
             var widthPerCharacter = 10,
-                totalCharacters = Math.floor(this.getWidth() / widthPerCharacter);
-
-            var title = "Portfolio Item Chart",
+                totalCharacters = Math.floor(this.getWidth() / widthPerCharacter),
+                title = "Portfolio Item Chart",
                 align = "center";
 
             if (portfolioItem) {
-                var fullTitle = portfolioItem.FormattedID + ": " + portfolioItem.Name;
+                title = portfolioItem.FormattedID + ": " + portfolioItem.Name;
+            }
 
-                if(totalCharacters < fullTitle.length) {
-                    title = fullTitle.substring(0, totalCharacters) + "...";
-                    align = "left";
-                } else {
-                    title = fullTitle;
-                }
+            if (totalCharacters < title.length) {
+                title = title.substring(0, totalCharacters) + "...";
+                align = "left";
             }
 
             return {
                 text: title,
-                align: align
+                align: align,
+                margin: 30
+            };
+        },
+
+        _buildChartSubtitle: function (portfolioItem) {
+            var widthPerCharacter = 6,
+                totalCharacters = Math.floor(this.getWidth() / widthPerCharacter),
+                plannedStartDate = "",
+                plannedEndDate = "";
+
+            var template = Ext.create("Ext.XTemplate",
+                '<tpl if="plannedStartDate">' +
+                    '<span>Planned Start Date: {plannedStartDate}</span>' +
+                    '<tpl if="plannedEndDate">' +
+                        '<tpl if="tooBig">' +
+                            '<br />' +
+                        '<tpl else>' +
+                            '&nbsp;&nbsp;&nbsp;' +
+                        '</tpl>' +
+                    '</tpl>' +
+                '</tpl>' +
+                '<tpl if="plannedEndDate">' +
+                    '<span>Planned End Date: {plannedEndDate}</span>' +
+                '</tpl>'
+            );
+
+            if(portfolioItem && portfolioItem.PlannedStartDate) {
+                plannedStartDate = this._formatDate(portfolioItem.PlannedStartDate);
+            }
+
+            if(portfolioItem && portfolioItem.PlannedEndDate) {
+                plannedEndDate = this._formatDate(portfolioItem.PlannedEndDate);
+            }
+
+            var formattedTitle = template.apply({
+                plannedStartDate: plannedStartDate,
+                plannedEndDate: plannedEndDate,
+                tooBig: totalCharacters < plannedStartDate.length + plannedEndDate.length + 60
+            });
+
+            return {
+                text: formattedTitle,
+                useHTML: true,
+                align: "center"
             };
         },
 
