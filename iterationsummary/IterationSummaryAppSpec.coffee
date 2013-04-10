@@ -786,12 +786,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
     scheduleStates = ['Defined', 'In-Progress', 'Completed']
     ajaxRequest = @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith scheduleStates
     @_createApp({}).then (app) =>
-      expect(scheduleStates).toEqual scheduleStates
       expect(ajaxRequest).toHaveBeenCalledOnce()
 
       ajaxRequest = @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ['Defined', 'In-Progress', 'Accepted']
       app.getScheduleStates().then (scheduleStates2) ->
-        expect(scheduleStates).toEqual scheduleStates
+        expect(scheduleStates2).toEqual scheduleStates
         expect(ajaxRequest).not.toHaveBeenCalled()
 
   it "rounds estimates to two decimal places", ->
