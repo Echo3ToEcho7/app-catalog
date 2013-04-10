@@ -66,7 +66,8 @@
                     tickmarkPlacement: "on",
                     tickInterval: 5,
                     title: {
-                        text: "Days"
+                        text: "Days",
+                        margin: 10
                     }
                 },
                 yAxis: [
