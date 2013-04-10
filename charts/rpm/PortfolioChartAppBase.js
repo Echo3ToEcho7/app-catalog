@@ -395,7 +395,7 @@
 
             var template = Ext.create("Ext.XTemplate",
                 '<tpl if="plannedStartDate">' +
-                    '<span>Planned Start Date: {plannedStartDate}</span>' +
+                    '<span>Planned Start: {plannedStartDate}</span>' +
                     '<tpl if="plannedEndDate">' +
                         '<tpl if="tooBig">' +
                             '<br />' +
@@ -405,7 +405,7 @@
                     '</tpl>' +
                 '</tpl>' +
                 '<tpl if="plannedEndDate">' +
-                    '<span>Planned End Date: {plannedEndDate}</span>' +
+                    '<span>Planned End: {plannedEndDate}</span>' +
                 '</tpl>'
             );
 
