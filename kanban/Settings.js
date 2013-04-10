@@ -58,19 +58,9 @@
                     cls: 'card-fields',
                     modelTypes: ['userstory', 'defect'],
                     fieldBlackList: ['DefectStatus', 'TaskStatus'],
-                    alwaysExpanded: true,
-                    maintainScrollPosition: true,
-                    pickerAlign: 'tl-bl',
+                    alwaysSelectedValues: ['FormattedID', 'Name', 'Owner'],
                     width: 300,
                     margin: '10px 0 255px 0',
-                    pickerCfg: {
-                        style: {
-                            border: '1px solid #DDD',
-                            'border-top': 'none'
-                        },
-                        height: 248,
-                        shadow: false
-                    },
                     storeConfig: {
                         autoLoad: false
                     },

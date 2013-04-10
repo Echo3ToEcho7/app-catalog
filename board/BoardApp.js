@@ -107,19 +107,8 @@
                             this.refreshWithNewModelTypes([type], context);
                         }
                     },
-                    alwaysExpanded: true,
-                    maintainScrollPosition: true,
-                    pickerAlign: 'tl-bl',
                     width: 300,
                     margin: '0 0 255 0',
-                    pickerCfg: {
-                        style: {
-                            border: '1px solid #DDD',
-                            'border-top': 'none'
-                        },
-                        height: 248,
-                        shadow: false
-                    },
                     storeConfig: {
                         autoLoad: false
                     }
