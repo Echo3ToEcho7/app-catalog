@@ -73,7 +73,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         wip: 1
       'In-Progress':
         wip: 2
-    
+
     @createApp({columns: Ext.JSON.encode(columnSettings), groupByField: 'ScheduleState'}).then =>
 
       columns = @app.down('rallycardboard').getColumns()
@@ -176,14 +176,14 @@ describe 'Rally.apps.kanban.KanbanApp', ->
     @createApp(query: query).then =>
       filterInfo = @app.down('rallyfilterinfo')
       expect(filterInfo.getQuery()).toBe query
-      
+
   it 'should show plan estimate when plan estimate field is enabled', ->
-    @ajax.whenQuerying('userstory').respondWithCount(1)
+    @ajax.whenQuerying('userstory').respondWithCount(1, createImmediateSubObjects: true)
     @createApp(cardFields: "Name,Discussion,Tasks,Defects,PlanEstimate").then =>
       expect(@app.getEl().down('.PlanEstimate')).not.toBeNull()
 
   it 'should not show plan estimate when plan estimate field is disabled', ->
-    @ajax.whenQuerying('userstory').respondWithCount(1)
+    @ajax.whenQuerying('userstory').respondWithCount(1, createImmediateSubObjects: true)
     @createApp(cardFields: "Name,Discussion,Tasks,Defects").then =>
       expect(@app.getEl().down('.PlanEstimate')).toBeNull()
 
