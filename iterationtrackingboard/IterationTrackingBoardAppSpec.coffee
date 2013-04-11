@@ -45,6 +45,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     @ajax.whenQuerying('defect').respondWith()
     @ajax.whenQuerying('defectsuite').respondWith()
     @ajax.whenQuerying('testset').respondWith()
+    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(["Defined", "In-Progress", "Completed", "Accepted"]);
 
     @tooltipHelper = new Helpers.TooltipHelper this
 
