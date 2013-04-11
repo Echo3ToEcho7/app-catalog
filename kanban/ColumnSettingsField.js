@@ -197,6 +197,8 @@
             }, this);
 
             this._store.loadRawData(data);
+
+            this.fireEvent('ready');
         }
     });
 })();

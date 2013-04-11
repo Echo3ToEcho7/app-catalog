@@ -41,6 +41,7 @@
                 },
                 {
                     name: 'columns',
+                    readyEvent: 'ready',
                     fieldLabel: '',
                     margin: '5px 0 0 80px',
                     xtype: 'kanbancolumnsettingsfield',
@@ -52,6 +53,7 @@
                 },
                 {
                     name: 'cardFields',
+                    readyEvent: 'ready',
                     fieldLabel: 'Card Fields',
                     xtype: 'rallyfieldpicker',
                     plugins: ['rallyfieldvalidationui'],
