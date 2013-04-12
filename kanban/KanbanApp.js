@@ -5,6 +5,7 @@
         extend: 'Rally.app.App',
         requires: [
             'Rally.apps.kanban.Settings',
+            'Rally.apps.kanban.Card',
             'Rally.apps.kanban.Column',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
@@ -211,10 +212,13 @@
                     enablePolicies: true
                 },
                 cardConfig: {
+                    xtype: 'kanbancard',
                     editable: true,
                     showHeaderMenu: true,
                     fields: this.getSetting('cardFields').split(','),
-                    showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1
+                    columnField: this.groupByField,
+                    showCardAge: this.getSetting('showCardAge'),
+                    cardAgeThreshold: this.getSetting('cardAgeThreshold')
                 },
                 loadMask: false,
                 storeConfig: {
