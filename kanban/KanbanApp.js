@@ -8,6 +8,7 @@
             'Rally.apps.kanban.Column',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
+            'Rally.ui.gridboard.plugin.GridBoardTagFilter',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.cardboard.KanbanPolicy',
             'Rally.ui.cardboard.CardBoard',
@@ -107,7 +108,8 @@
                         ptype: 'rallygridboardartifacttypechooser',
                         artifactTypePreferenceKey: 'kanbanapp.rallygridboardartifacttypechooser',
                         additionalTypesConfig: [this._getAgreementsTypeConfig()]
-                    }
+                    },
+                    'rallygridboardtagfilter'
                 ],
                 context: this.getContext(),
                 modelNames: this._getDefaultTypes(),
