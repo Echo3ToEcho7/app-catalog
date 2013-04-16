@@ -49,7 +49,13 @@
                         fieldselected: function(field) {
                             this.refreshWithNewField(field);
                         }
-                    }
+                    },
+                    listeners: {
+                        ready: function() {
+                            this.fireEvent('columnsettingsready');
+                        }
+                    },
+                    bubbleEvents: 'columnsettingsready'
                 },
                 {
                     name: 'cardFields',
@@ -79,8 +85,8 @@
                         }
                     },
                     handlesEvents: {
-                        fieldselected: function() {
-                            if(this.picker) {
+                        columnsettingsready: function() {
+                            if (this.picker) {
                                 this.alignPicker();
                             }
                         }
