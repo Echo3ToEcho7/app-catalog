@@ -63,7 +63,7 @@
                     },
                     displayField: "name",
                     valueField: "value"
-                },
+                }
 //                {
 //                    xtype: "hierarchychooser",
 //                    label: "Chart Scope",
