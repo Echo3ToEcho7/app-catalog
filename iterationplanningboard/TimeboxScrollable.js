@@ -11,11 +11,11 @@
         requires:['Rally.util.Array'],
 
         _isBackwardsButtonHidden: function(){
-            return this.cmp.scrollableColumnRecords[0] === this.getFirstScrollableColumn().timeboxRecords;
+            return this.cmp.scrollableColumnRecords[0] === this.getFirstVisibleScrollableColumn().timeboxRecords;
         },
 
         _isForwardsButtonHidden: function(){
-            return Rally.util.Array.last(this.cmp.scrollableColumnRecords) === this.getLastScrollableColumn().timeboxRecords;
+            return Rally.util.Array.last(this.cmp.scrollableColumnRecords) === this.getLastVisibleScrollableColumn().timeboxRecords;
         },
 
         _scroll: function(forwards){

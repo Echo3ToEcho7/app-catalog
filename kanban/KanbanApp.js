@@ -186,10 +186,10 @@
                     {
                         ptype: 'rallyscrollablecardboard',
                         containerEl: this.getEl(),
-                        getFirstScrollableColumn: function(){
+                        getFirstVisibleScrollableColumn: function(){
                             return this.cmp.getVisibleColumns()[0];
                         },
-                        getLastScrollableColumn: function(){
+                        getLastVisibleScrollableColumn: function(){
                             return Rally.util.Array.last(this.cmp.getVisibleColumns());
                         },
                         getScrollableColumns: function(){

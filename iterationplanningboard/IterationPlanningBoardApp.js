@@ -71,11 +71,14 @@
                             forwardsButtonConfig: {
                                 elTooltip: 'Next Iteration'
                             },
-                            getFirstScrollableColumn: function(){
-                                return this.cmp.getColumns()[1];
+                            getFirstVisibleScrollableColumn: function(){
+                                return this.getScrollableColumns()[0];
                             },
-                            getLastScrollableColumn: function(){
-                                return Rally.util.Array.last(this.cmp.getColumns());
+                            getLastVisibleScrollableColumn: function(){
+                                return Rally.util.Array.last(this.getScrollableColumns());
+                            },
+                            getScrollableColumns: function(){
+                                return Ext.Array.slice(this.cmp.getColumns(), 1, this.cmp.getColumns().length);
                             }
                         }
                     ] : []
