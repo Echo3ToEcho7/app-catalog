@@ -31,7 +31,7 @@
             var columnEls = this.cmp.createColumnElements(forwards ? 'after' : 'before', insertNextToColumn);
             this.cmp.renderColumn(column, columnEls.th, columnEls.td);
 
-            this._afterScroll();
+            this._afterScroll(forwards);
         },
 
         _onNewlyAddedColumnReady: function(){
