@@ -4,6 +4,14 @@
     Ext.define('Rally.apps.board.BoardApp', {
         extend: 'Rally.app.App',
         layout: 'fit',
+        requires: [
+            'Rally.ui.combobox.FieldComboBox',
+            'Rally.ui.cardboard.CardBoard',
+            'Rally.ui.combobox.ComboBox',
+            'Rally.ui.picker.FieldPicker',
+            'Rally.ui.TextField',
+            'Rally.ui.NumberField'
+        ],
 
         config: {
             defaultSettings: {
@@ -69,13 +77,20 @@
                             this.fireEvent('typeselected', records[0].get('TypePath'), this.store.context);
                         },
                         ready: function(combo) {
-                            combo.store.filterBy(function(record) {
-                                return Ext.Array.some(record.get('Attributes'), function(attribute) {
-                                    return attribute.ElementName === 'FormattedID';
-                                });
+                            Rally.data.ModelFactory.getModels({
+                                types: Ext.Array.map(combo.store.getRange(), function(record) {
+                                    return record.get('TypePath');
+                                }),
+                                success: function(models) {
+
+                                    combo.store.filterBy(function(record) {
+                                        return models[record.get('TypePath')].hasField('FormattedID');
+                                    });
+                                    this.fireEvent('typeselected', combo.getRecord().get('TypePath'), this.store.context);
+                                },
+                                scope: this
                             });
-                            //combo.store.sort('DisplayName');
-                            this.fireEvent('typeselected', combo.getRecord().get('TypePath'), this.store.context);
+
                         }
                     },
                     bubbleEvents: ['typeselected']
@@ -92,8 +107,8 @@
                     listeners: {
                         ready: function(combo) {
                             combo.store.filterBy(function(record) {
-                                var attr = record.get('fieldDefinition').attributeDefinition;
-                                return attr && !attr.ReadOnly && attr.AllowedValues.length; 
+                                var field = record.get('fieldDefinition');
+                                return field && !field.readOnly && field.hasAllowedValues();
                             });
                         }
                     }
@@ -127,20 +142,20 @@
                 }
             ];
         },
-        
+
         _getQueryFilters: function() {
             var settingsQuery = this.getSetting('query') && Rally.data.QueryFilter.fromQueryString(this.getSetting('query'));
             var timeboxQuery = this.getContext().getTimeboxScope() && this.getContext().getTimeboxScope().getQueryFilter();
-            
-            return (settingsQuery && timeboxQuery) ? settingsQuery.and(timeboxQuery) : (settingsQuery || timeboxQuery);
+
+            return (settingsQuery && timeboxQuery) ? settingsQuery.and(timeboxQuery) : (settingsQuery || timeboxQuery || []);
         },
-        
+
         onTimeboxScopeChange: function() {
             this.callParent(arguments);
             this.down('rallycardboard').refresh({
                 storeConfig: {
                     filters: this._getQueryFilters()
-                }    
+                }
             });
         },
 
