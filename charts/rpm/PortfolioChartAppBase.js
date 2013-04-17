@@ -308,7 +308,8 @@
                 x: 0,
                 y: 20,
                 formatter: function () {
-                    return self._formatDate(new Date(this.value));
+                    var dateArray = self._dateStringToObject(this.value);
+                    return self._formatDate(new Date(dateArray.year, dateArray.month, dateArray.day));
                 }
             };
         },
@@ -331,6 +332,17 @@
             return Highcharts.dateFormat(this.dateFormat, date.getTime());
         },
 
+        _dateStringToObject: function(dateStr) {
+            var strippedDate = dateStr.slice(0, dateStr.indexOf('T'));
+            var dateArray = strippedDate.split('-');
+            dateArray[1] = (parseInt(dateArray[1], 10) - 1).toString();
+            return {
+                year: dateArray[0],
+                month: dateArray[1],
+                day: dateArray[2]
+            };
+        },
+
         _calculateDateRange: function (portfolioItem) {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
             calcConfig.startDate = calcConfig.startDate || this._getChartStartDate(portfolioItem);
@@ -345,16 +357,19 @@
         },
 
         _configureChartTicks: function (startDate, endDate) {
-            var tickWidth = 125, // in pixels
-                width = this.getWidth(), // app width
-                ticks = Math.floor(width / tickWidth);
+            var pixelTickWidth = 125,
+                appWidth = this.getWidth(),
+                ticks = Math.floor(appWidth / pixelTickWidth);
 
-            var startDateObj = new Date(startDate),
-                endDateObj = new Date(endDate);
+            var startDateArr = this._dateStringToObject(startDate),
+                endDateArr = this._dateStringToObject(endDate);
 
-            var days = Math.floor((endDateObj - startDateObj) / 86400000); // Converting ms to days
+            var startDateObj = new Date(startDateArr.year, startDateArr.month, startDateArr.day),
+                endDateObj = new Date(endDateArr.year, endDateArr.month, endDateArr.day);
 
-            return Math.floor(days / ticks); // number of dates that will fit on the xAxis
+            var days = Math.floor((endDateObj.getTime() - startDateObj.getTime()) / 86400000);
+
+            return Math.floor(days / ticks);
         },
 
         _getUserConfiguredDateFormat: function() {
