@@ -15,11 +15,11 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
 
   it 'should render forward button into header of last column', ->
     @createBoard().then =>
-      @assertButtonIsInColumnHeader @plugin.forwardsButton, @plugin.getLastScrollableColumn()
+      @assertButtonIsInColumnHeader @plugin.forwardsButton, @plugin.getLastVisibleScrollableColumn()
 
   it 'should render backwards button into header of first column', ->
     @createBoard().then =>
-      @assertButtonIsInColumnHeader @plugin.backwardsButton, @plugin.getFirstScrollableColumn()
+      @assertButtonIsInColumnHeader @plugin.backwardsButton, @plugin.getFirstVisibleScrollableColumn()
 
   it 'should create visible forward button when there are forward columns', ->
     @createBoard(
@@ -48,12 +48,12 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
   it 'should scroll forward when the forward button is clicked', ->
     @createBoard().then =>
       @scrollForwards().then =>
-        expect(@plugin.getLastScrollableColumn().timeboxRecords).toBe (Rally.util.Array.last @bucketedIterationRecords)
+        expect(@plugin.getLastVisibleScrollableColumn().timeboxRecords).toBe (Rally.util.Array.last @bucketedIterationRecords)
 
   it 'should scroll backwards when the back button is clicked', ->
     @createBoard().then =>
       @scrollBackwards().then =>
-        expect(@plugin.getFirstScrollableColumn().timeboxRecords).toBe @bucketedIterationRecords[0]
+        expect(@plugin.getFirstVisibleScrollableColumn().timeboxRecords).toBe @bucketedIterationRecords[0]
 
   it 'should contain same number of columns after scrolling forwards', ->
     @createBoard().then =>
@@ -67,13 +67,13 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
 
   it 'should destroy column removed when scrolling forwards', ->
     @createBoard().then =>
-      columnToRemove = @plugin.getFirstScrollableColumn()
+      columnToRemove = @plugin.getFirstVisibleScrollableColumn()
       @scrollForwards().then =>
         expect(columnToRemove.isDestroyed).toBe true
 
   it 'should destroy column removed when scrolling backwards', ->
     @createBoard().then =>
-      columnToRemove = @plugin.getLastScrollableColumn()
+      columnToRemove = @plugin.getLastVisibleScrollableColumn()
       @scrollBackwards().then =>
         expect(columnToRemove.isDestroyed).toBe true
 
@@ -100,26 +100,26 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
   it 'should render newly visible column in right-most column when scrolling forwards', ->
     @createBoard().then =>
       @scrollForwards().then =>
-        expect(@plugin.getLastScrollableColumn().getColumnHeaderCell().dom).toBe (Rally.util.Array.last @getColumnHeaderCells())
-        expect(@plugin.getLastScrollableColumn().getContentCell().dom).toBe (Rally.util.Array.last @getColumnContentCells())
+        expect(@plugin.getLastVisibleScrollableColumn().getColumnHeaderCell().dom).toBe (Rally.util.Array.last @getColumnHeaderCells())
+        expect(@plugin.getLastVisibleScrollableColumn().getContentCell().dom).toBe (Rally.util.Array.last @getColumnContentCells())
 
   it 'should render newly visible column in left-most column when scrolling backwards', ->
     @createBoard().then =>
       @scrollBackwards().then =>
-        expect(@plugin.getFirstScrollableColumn().getColumnHeaderCell().dom).toBe @getColumnHeaderCells()[0]
-        expect(@plugin.getFirstScrollableColumn().getContentCell().dom).toBe @getColumnContentCells()[0]
+        expect(@plugin.getFirstVisibleScrollableColumn().getColumnHeaderCell().dom).toBe @getColumnHeaderCells()[0]
+        expect(@plugin.getFirstVisibleScrollableColumn().getContentCell().dom).toBe @getColumnContentCells()[0]
 
   it 'should re-render scroll buttons after scrolling forwards', ->
     @createBoard().then =>
       @scrollForwards().then =>
-        @assertButtonIsInColumnHeader @plugin.forwardsButton, @plugin.getLastScrollableColumn()
-        @assertButtonIsInColumnHeader @plugin.backwardsButton, @plugin.getFirstScrollableColumn()
+        @assertButtonIsInColumnHeader @plugin.forwardsButton, @plugin.getLastVisibleScrollableColumn()
+        @assertButtonIsInColumnHeader @plugin.backwardsButton, @plugin.getFirstVisibleScrollableColumn()
 
   it 'should re-render scroll buttons after scrolling backwards', ->
     @createBoard().then =>
       @scrollBackwards().then =>
-        @assertButtonIsInColumnHeader @plugin.forwardsButton, @plugin.getLastScrollableColumn()
-        @assertButtonIsInColumnHeader @plugin.backwardsButton, @plugin.getFirstScrollableColumn()
+        @assertButtonIsInColumnHeader @plugin.forwardsButton, @plugin.getLastVisibleScrollableColumn()
+        @assertButtonIsInColumnHeader @plugin.backwardsButton, @plugin.getFirstVisibleScrollableColumn()
 
   it 'should destroy old scroll buttons after scrolling forwards', ->
     @createBoard().then =>
@@ -145,23 +145,23 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
 
   it 'should size forwards button to column header when there is no progress bar', ->
     @createBoard().then =>
-      expect(@plugin.forwardsButton.getHeight()).toBe @plugin.getLastScrollableColumn().getColumnHeaderCell().getHeight(Ext.isGecko || Ext.isIE)
+      expect(@plugin.forwardsButton.getHeight()).toBe @plugin.getLastVisibleScrollableColumn().getColumnHeaderCell().getHeight(Ext.isGecko || Ext.isIE)
 
   it 'should size backwards button to column header when there is no progress bar', ->
     @createBoard().then =>
-      expect(@plugin.backwardsButton.getHeight()).toBe @plugin.getFirstScrollableColumn().getColumnHeaderCell().getHeight(Ext.isGecko || Ext.isIE)
+      expect(@plugin.backwardsButton.getHeight()).toBe @plugin.getFirstVisibleScrollableColumn().getColumnHeaderCell().getHeight(Ext.isGecko || Ext.isIE)
 
   it 'should size forwards button to column header minus progress bar when there is a progress bar', ->
     @createBoard(
       plannedVelocity: 10
     ).then =>
-      expect(@plugin.forwardsButton.getHeight()).toBe @plugin.getLastScrollableColumn().getProgressBar().getTop() - @plugin.getLastScrollableColumn().getColumnHeader().getEl().getTop()
+      expect(@plugin.forwardsButton.getHeight()).toBe @plugin.getLastVisibleScrollableColumn().getProgressBar().getTop() - @plugin.getLastVisibleScrollableColumn().getColumnHeader().getEl().getTop()
 
   it 'should size backwards button to column header minus progress bar when there is a progress bar', ->
     @createBoard(
       plannedVelocity: 10
     ).then =>
-      expect(@plugin.backwardsButton.getHeight()).toBe  @plugin.getLastScrollableColumn().getProgressBar().getTop() - @plugin.getFirstScrollableColumn().getColumnHeader().getEl().getTop()
+      expect(@plugin.backwardsButton.getHeight()).toBe  @plugin.getLastVisibleScrollableColumn().getProgressBar().getTop() - @plugin.getFirstVisibleScrollableColumn().getColumnHeader().getEl().getTop()
 
   helpers
     createBoard: (options = {}) ->
@@ -181,10 +181,12 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
         plugins: [
           ptype: 'rallytimeboxscrollablecardboard'
           pluginId: 'scrollablePlugin'
-          getFirstScrollableColumn: ->
+          getFirstVisibleScrollableColumn: ->
             @cmp.getColumns()[0]
-          getLastScrollableColumn: ->
+          getLastVisibleScrollableColumn: ->
             Rally.util.Array.last @cmp.getColumns()
+          getScrollableColumns: ->
+            @cmp.getColumns()
         ]
         renderTo: 'testDiv'
         scrollableColumnRecords: @bucketedIterationRecords
