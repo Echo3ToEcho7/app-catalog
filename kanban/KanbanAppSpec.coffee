@@ -224,6 +224,15 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         @click(className: 'scroll-backwards').then =>
           expect(columnToShow.hidden).toBe false
 
+  it 'should show warning message when workspace DnD ranking disabled', ->
+    @createApp({},
+      DragDropRankingEnabled: false
+      renderTo: @createSmallContainer()
+    ).then =>
+      notification = @app.down('.rallynotification')
+      @waitForVisible(notification.getEl().dom).then =>
+        expect(@app.down('.rallynotification').message).toEqual 'Drag and drop re-ranking is disabled for Manual Rank Workspaces.'
+
   helpers
     createApp: (settings = {}, options = {}) ->
       @app = Ext.create 'Rally.apps.kanban.KanbanApp',
@@ -232,6 +241,9 @@ describe 'Rally.apps.kanban.KanbanApp', ->
             project:
               _ref: @projectRef
               Name: 'Project 1'
+            workspace:
+              WorkspaceConfiguration:
+                DragDropRankingEnabled: if Ext.isDefined(options.DragDropRankingEnabled) then options.DragDropRankingEnabled else true
         )
         settings: settings
         renderTo: options.renderTo || 'testDiv'
