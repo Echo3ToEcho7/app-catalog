@@ -136,6 +136,8 @@
                 scopeDown: this.getSetting('projectScopeDown'),
                 query: this.getSetting('query')
             });
+
+            this._showDnDRankWarning();
         },
 
         _getColumnConfig: function(columnSetting) {
@@ -418,6 +420,28 @@
                 handler: this._onShowAgreementsClicked,
                 scope: this
             };
+        },
+
+        /**
+         * @private
+         * Show a warning flair if the workspace is manually ranked
+         */
+        _showDnDRankWarning: function(){
+            if(!this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled){
+
+                var notification = Ext.create('Rally.ui.notify.Notification', {
+                    message: "Drag and drop re-ranking is disabled for Manual Rank Workspaces.",
+                    duration: 5000,
+                    width: 400
+                });
+
+                this.down('.rallyleftright').add({
+                    xtype: 'container',
+                    cls: 'kanban-app-notification-container',
+                    items: [notification]
+                });
+            }
+
         }
     });
 })();

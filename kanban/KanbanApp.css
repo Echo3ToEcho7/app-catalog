@@ -22,6 +22,16 @@
     margin-right: 5px;
 }
 
+.kanban .kanban-app-notification-container {
+    position: absolute;
+    width: 100%;
+}
+
+.kanban .kanban-app-notification-container .rui-notification {
+    float: none;
+    margin: 0 auto;
+}
+
 /*Remove with NO_IE7_COMPAT toggle */
 .ext-ie .kanban .right .filterInfo {
     width: 25px;
