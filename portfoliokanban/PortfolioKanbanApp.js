@@ -207,7 +207,6 @@
                 itemId: 'cardboard',
                 attribute: 'State',
                 columns: columns,
-                maxColumnsPerBoard: columns.length,
                 ddGroup: this.currentType.get('TypePath'),
                 cls: cardboardCls,
                 columnConfig: columnConfig,
