@@ -61,7 +61,7 @@
                                 property: 'Name'
                             }
                         ],
-                        fetch: ['DisplayName', 'ElementName', 'TypePath', 'Attributes'],
+                        fetch: ['DisplayName', 'ElementName', 'TypePath'],
                         filters: [
                             {
                                 property: 'Creatable',
