@@ -18,6 +18,12 @@
         extend: 'Ext.form.field.Base',
         alias: 'widget.kanbancolumnsettingsfield',
         plugins: ['rallyfieldvalidationui'],
+        requires: [
+            'Rally.ui.combobox.ComboBox',
+            'Rally.ui.TextField',
+            'Rally.ui.combobox.FieldValueComboBox',
+            'Rally.ui.plugin.FieldValidationUi'
+        ],
 
         fieldSubTpl: '<div id="{id}" class="settings-grid"></div>',
 
@@ -171,36 +177,37 @@
         },
 
         refreshWithNewField: function(field) {
-            var data = [];
-            Ext.Array.each(field.allowedValues, function(allowedValue) {
+            field.getAllowedValueStore().load({
+                callback: function(records, operation, success) {
+                    var data = Ext.Array.map(records, this._recordToGridRow, this);
+                    this._store.loadRawData(data);
+                    this.fireEvent('ready');
+                },
+                scope: this
+            });
+        },
 
-                var columnName = allowedValue.StringValue;
-                var pref = this._store.getCount() === 0 ? this._getColumnValue(columnName) : null;
+        _recordToGridRow: function(allowedValue) {
+            var columnName = allowedValue.get('StringValue');
+            var pref = this._store.getCount() === 0 ? this._getColumnValue(columnName) : null;
 
-                var column = {
-                    column: columnName,
-                    shown: false,
-                    wip: '',
-                    scheduleStateMapping: ''
-                };
+            var column = {
+                column: columnName,
+                shown: false,
+                wip: '',
+                scheduleStateMapping: ''
+            };
 
-                if (pref) {
-                    Ext.apply(column, {
-                        shown: true,
-                        wip: pref.wip,
-                        scheduleStateMapping: pref.scheduleStateMapping
-                    });
-                }
+            if (pref) {
+                Ext.apply(column, {
+                    shown: true,
+                    wip: pref.wip,
+                    scheduleStateMapping: pref.scheduleStateMapping
+                });
+            }
 
-                data.push(column);
+            return column;
 
-            }, this);
-
-            this._store.loadRawData(data);
-
-            this.fireEvent('ready');
         }
     });
 })();
-
-
