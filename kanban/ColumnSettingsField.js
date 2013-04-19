@@ -160,7 +160,7 @@
 
         getErrors: function() {
             var errors = [];
-            if (!Ext.Object.getSize(this._buildSettingValue())) {
+            if (this._storeLoaded && !Ext.Object.getSize(this._buildSettingValue())) {
                 errors.push('At least one column must be shown.');
             }
             return errors;
@@ -177,11 +177,13 @@
         },
 
         refreshWithNewField: function(field) {
+            delete this._storeLoaded;
             field.getAllowedValueStore().load({
                 callback: function(records, operation, success) {
                     var data = Ext.Array.map(records, this._recordToGridRow, this);
                     this._store.loadRawData(data);
                     this.fireEvent('ready');
+                    this._storeLoaded = true;
                 },
                 scope: this
             });
