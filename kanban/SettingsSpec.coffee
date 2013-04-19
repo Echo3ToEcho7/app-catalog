@@ -5,11 +5,6 @@ Ext.require [
 ]
 
 describe 'Rally.apps.kanban.Settings', ->
-  it 'should require at least one column', ->
-    columnSettingsConfig = Ext.Array.filter(Rally.apps.kanban.Settings.getFields(), (field) -> field.xtype == 'kanbancolumnsettingsfield')[0]
-
-    @assertFieldCannotBeEmpty columnSettingsConfig, 'At least one column must be shown.'
-
   it 'should destroy grid for kanbancolumnsettingsfield when settings are destroyed', ->
     columnSettingsConfig = Ext.Array.filter(Rally.apps.kanban.Settings.getFields(), (field) -> field.xtype == 'kanbancolumnsettingsfield')[0]
     @renderFieldInForm columnSettingsConfig
