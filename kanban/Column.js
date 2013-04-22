@@ -21,13 +21,26 @@
         },
 
         getStores: function(models) {
+            function isValid(store, filter) {
+                if(Ext.isString(filter.property)) {
+                    return filter.property.split('.').length > 1 || store.model.hasField(filter.property);
+                } else {
+                    return isValid(store, filter.property) && isValid(store, filter.value);
+                }
+            }
+
             var stores = this.callParent(arguments);
-            return Ext.Array.filter(stores, function(store) {
+            var validStores = Ext.Array.filter(stores, function(store) {
                 var validFilters = store.filters.filterBy(function(filter) {
-                    return store.model.hasField(filter.property);
+                    return isValid(store, filter);
                 });
                 return validFilters.length === store.filters.length;
             });
+
+            if (!validStores.length) {
+                this.fireEvent('invalidfilter', this);
+            }
+            return validStores;
         }
     });
 })();

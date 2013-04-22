@@ -168,6 +168,12 @@
                         policies: policy,
                         prefConfig: prefConfig,
                         title: 'Exit Agreement'
+                    },
+                    listeners: {
+                        invalidfilter: {
+                            fn: this._onInvalidFilter,
+                            scope: this
+                        }
                     }
                 };
                 columns.push(columnConfig);
@@ -180,6 +186,12 @@
             return columns;
         },
 
+        _onInvalidFilter: function() {
+            Rally.ui.notify.Notifier.showError({
+                message: 'Invalid query: ' + this.getSetting('query')
+            });
+        },
+
         _getCardboardConfig: function() {
             return {
                 xtype: 'rallycardboard',
@@ -188,13 +200,13 @@
                     {
                         ptype: 'rallyscrollablecardboard',
                         containerEl: this.getEl(),
-                        getFirstVisibleScrollableColumn: function(){
+                        getFirstVisibleScrollableColumn: function() {
                             return this.cmp.getVisibleColumns()[0];
                         },
-                        getLastVisibleScrollableColumn: function(){
+                        getLastVisibleScrollableColumn: function() {
                             return Rally.util.Array.last(this.cmp.getVisibleColumns());
                         },
-                        getScrollableColumns: function(){
+                        getScrollableColumns: function() {
                             return this.cmp.getColumns();
                         }
                     }
@@ -426,8 +438,8 @@
          * @private
          * Show a warning flair if the workspace is manually ranked
          */
-        _showDnDRankWarning: function(){
-            if(!this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled){
+        _showDnDRankWarning: function() {
+            if (!this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
 
                 var notification = Ext.create('Rally.ui.notify.Notification', {
                     message: "Drag and drop re-ranking is disabled for Manual Rank Workspaces.",
