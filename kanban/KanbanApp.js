@@ -431,15 +431,10 @@
 
                 var notification = Ext.create('Rally.ui.notify.Notification', {
                     message: "Drag and drop re-ranking is disabled for Manual Rank Workspaces.",
-                    duration: 5000,
-                    width: 400
+                    duration: 5000
                 });
 
-                this.down('.rallyleftright').add({
-                    xtype: 'container',
-                    cls: 'kanban-app-notification-container',
-                    items: [notification]
-                });
+                this.down('.rallyleftright').add(notification);
             }
 
         }
