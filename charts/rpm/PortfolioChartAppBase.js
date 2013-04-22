@@ -184,8 +184,8 @@
         _savedPortfolioItemValid: function (savedPi) {
             return savedPi &&
                 savedPi.context &&
-                savedPi.context.workspace &&
-                savedPi.context.project &&
+                (savedPi.context.workspace ||
+                savedPi.context.project) &&
                 savedPi.artifact &&
                 savedPi.artifact._type &&
                 savedPi.artifact.ObjectID;
