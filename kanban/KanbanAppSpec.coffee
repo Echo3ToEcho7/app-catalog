@@ -4,7 +4,8 @@ Ext.require [
   'Rally.ui.report.StandardReport',
   'Rally.apps.kanban.KanbanApp',
   'Rally.util.Array',
-  'Rally.util.Element'
+  'Rally.util.Element',
+  'Rally.ui.notify.Notifier'
 ]
 
 describe 'Rally.apps.kanban.KanbanApp', ->
@@ -232,6 +233,14 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       notification = @app.down('.rallynotification')
       @waitForVisible(notification.getEl().dom).then =>
         expect(@app.down('.rallynotification').message).toEqual 'Drag and drop re-ranking is disabled for Manual Rank Workspaces.'
+
+  it 'should show a warning message when an invalid filter was specified', ->
+    notificationStub = @stub(Rally.ui.notify.Notifier, 'showError')
+    @createApp(query: '(Foo = Bar)').then =>
+      expect(notificationStub).toHaveBeenCalled()
+      args = notificationStub.getCall(0).args[0]
+      expect(args.message).toBe 'Invalid query: (Foo = Bar)'
+
 
   helpers
     createApp: (settings = {}, options = {}) ->
