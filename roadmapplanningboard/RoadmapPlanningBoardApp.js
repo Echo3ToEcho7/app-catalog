@@ -40,7 +40,7 @@
             Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
                 defaultToLowest: true,
                 success: function(typeDefRecord){
-                    this.piTypeName = typeDefRecord.get('TypePath');
+                    this.piTypePath = typeDefRecord.get('TypePath');
                     this.loadTimeframes();
                 },
                 scope: this
@@ -106,7 +106,7 @@
             var columns = this._getColumns(store);
 
             var cardboard = Ext.create('Rally.ui.cardboard.CardBoard', {
-                types: this.piTypeName,
+                types: this.piTypePath,
                 columns: columns,
                 columnConfig: {
                     xtype: 'roadmapplanningboardcolumn',

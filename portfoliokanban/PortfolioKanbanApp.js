@@ -349,7 +349,7 @@
         _buildFilterInfo: function() {
             return Ext.create('Rally.ui.tooltip.FilterInfo', {
                 projectName: this.getSetting('project') && this.getContext().get('project').Name || 'Following Global Project Setting',
-                typeName: this.currentType.get('Name'),
+                typePath: this.currentType.get('Name'),
                 scopeUp: this.getSetting('projectScopeUp'),
                 scopeDown: this.getSetting('projectScopeDown'),
                 query: this.getSetting('query')

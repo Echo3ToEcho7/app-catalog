@@ -52,7 +52,7 @@
 
         addTreeForType: function(record){
 
-            this.typeName = record.get('Name');
+            this.typePath = record.get('Name');
             this._drawHeader();
 
             var tree = this.buildTreeForType(record);
@@ -114,7 +114,7 @@
         _buildFilterInfo: function(){
             return Ext.create('Rally.ui.tooltip.FilterInfo', {
                 projectName: this.getSetting('project') && this.getContext().get('project').Name || 'Following Global Project Setting',
-                typeName: this.typeName,
+                typePath: this.typePath,
                 scopeUp: this.getSetting('projectScopeUp'),
                 scopeDown: this.getSetting('projectScopeDown'),
                 query: this.getSetting('query')
