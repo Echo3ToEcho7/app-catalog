@@ -6,6 +6,11 @@
      */
     Ext.define('Rally.apps.kanban.CardAgeSettingsField', {
         extend: 'Ext.form.FieldContainer',
+        requires: [
+            'Rally.ui.CheckboxField',
+            'Rally.ui.TextField',
+            'Rally.ui.plugin.FieldValidationUi'
+        ],
         alias: 'widget.kanbancardagesettingsfield',
 
         mixins: {
@@ -40,12 +45,17 @@
                 },
                 {
                     xtype: 'rallytextfield',
+                    plugins: ['rallyfieldvalidationui'],
                     name: 'cardAgeThreshold',
                     width: 20,
                     margin: '0 5px',
                     maskRe: /[0-9]/,
                     submitValue: false,
-                    value: this.getValue().cardAgeThreshold
+                    value: this.getValue().cardAgeThreshold,
+                    getErrors: function() {
+                        this.allowBlank = !this.ownerCt.down('rallycheckboxfield').getValue();
+                        return Rally.ui.TextField.prototype.getErrors.apply(this, arguments);
+                    }
                 },
                 {
                     xtype: 'component',

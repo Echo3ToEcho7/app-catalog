@@ -163,6 +163,7 @@
                     columnHeaderConfig: {
                         headerTpl: columnName
                     },
+                    cardLimit: 100,
                     policyCmpConfig: {
                         xtype: 'rallykanbanpolicy',
                         policies: policy,

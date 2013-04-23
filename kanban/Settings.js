@@ -62,7 +62,6 @@
                     readyEvent: 'ready',
                     fieldLabel: 'Card Fields',
                     xtype: 'rallyfieldpicker',
-                    plugins: ['rallyfieldvalidationui'],
                     cls: 'card-fields',
                     modelTypes: ['userstory', 'defect'],
                     fieldBlackList: ['DefectStatus', 'TaskStatus'],
@@ -71,13 +70,6 @@
                     margin: '10px 0 255px 0',
                     storeConfig: {
                         autoLoad: false
-                    },
-                    getErrors: function() {
-                        var errors = [];
-                        if (!this.getValue().length) {
-                            errors.push('At least one field must be selected.');
-                        }
-                        return errors;
                     },
                     listeners: {
                         selectionchange: function(picker) {
@@ -108,7 +100,14 @@
                 {
                     name: 'pageSize',
                     xtype: 'rallynumberfield',
-                    fieldLabel: 'Page Size'
+                    plugins: ['rallyfieldvalidationui'],
+                    fieldLabel: 'Page Size',
+                    allowDecimals: false,
+                    minValue: 1,
+                    maxValue: 100,
+                    allowBlank: false,
+                    validateOnChange: false,
+                    validateOnBlur: false
                 },
                 {
                     type: 'query'
