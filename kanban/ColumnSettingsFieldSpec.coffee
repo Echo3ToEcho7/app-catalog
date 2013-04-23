@@ -33,6 +33,14 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       expect(@field.getErrors().length).toBe 1
       expect(@field.getErrors()[0]).toBe 'At least one column must be shown.'
 
+  it 'should destroy grid when destroyed', ->
+    @_createKanbanSettingsField(
+      renderTo: 'testDiv'
+    )
+    gridDestroySpy = @spy(@field._grid, 'destroy')
+    @field.destroy()
+    expect(gridDestroySpy).toHaveBeenCalledOnce()
+
   helpers
     _createKanbanSettingsField: (config) ->
       @readyCallback = @stub()
