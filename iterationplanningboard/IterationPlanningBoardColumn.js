@@ -57,12 +57,14 @@
         ],
 
         constructor: function(config) {
-            this.config.columnHeaderConfig = {
-                record: this._getTimeboxRecord(),
-                fieldToDisplay: 'Name',
-                editable: false
-            };
             this.mergeConfig(config);
+            this.config = Ext.merge({
+                columnHeaderConfig: {
+                    record: this._getTimeboxRecord(),
+                    fieldToDisplay: 'Name',
+                    editable: false
+                }
+            }, this.config);
             this.config.value = Rally.util.Ref.getRelativeUri(this._getTimeboxRecord());
             this.config.moreItemsConfig = {
                 token: Rally.nav.Manager.getDetailHash(this._getTimeboxRecord(), {scope: '', subPage: 'scheduled'})
