@@ -35,7 +35,7 @@
         },
 
         _onNewlyAddedColumnReady: function(){
-            this.cmp.locallyFilter();
+            this.cmp.applyLocalFilters();
         },
 
         _sizeButtonToColumnHeader: function(button, column){
