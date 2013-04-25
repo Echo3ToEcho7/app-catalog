@@ -281,6 +281,37 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
 
     expect(progressBarUpdateSpy.callCount).toBe(1)
 
+  it 'should add columnHeaderConfig to the column', ->
+    Model = Rally.test.mock.data.ModelFactory.getIterationModel()
+    timeboxRecords = []
+
+    for i in [1 .. 4 ? 1]
+      timeboxRecords.push new Model(
+        _ref: "/iteration/#{i}"
+        _refObjectName: 'my iteration'
+        ObjectID: i
+        Name: 'my iteration'
+        StartDate: new Date()
+        EndDate: new Date()
+        PlannedVelocity: 0
+      )
+    @column = Ext.create 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn',
+      types: ['HierarchicalRequirement']
+      renderTo: 'testDiv'
+      headerCell: Ext.get 'testDiv'
+      contentCell: Ext.get 'testDiv'
+      attribute: 'Iteration'
+      timeboxRecords: timeboxRecords
+      ,
+      context: Ext.create('Rally.app.Context',
+        initialValues:
+          featureToggles: Rally.alm.FeatureToggle
+      )
+
+    expect(@column.config.columnHeaderConfig).toBeDefined()
+    expect(@column.config.columnHeaderConfig.record).toBeDefined()
+    expect(@column.config.columnHeaderConfig.fieldToDisplay).toBeDefined()
+
   helpers
     createColumn: (options) ->
       Model = Rally.test.mock.data.ModelFactory.getIterationModel()
