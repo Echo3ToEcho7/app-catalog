@@ -26,6 +26,9 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
       @waitForComponentReady(@app)
 
   beforeEach ->
+
+    Rally.environment.getContext().context.subscription.Modules = ['Rally Portfolio Manager']
+
     @userStoryModel = Rally.test.mock.data.ModelFactory.getUserStoryModel()
 
     @ajax.whenQuerying('typedefinition').respondWith [
