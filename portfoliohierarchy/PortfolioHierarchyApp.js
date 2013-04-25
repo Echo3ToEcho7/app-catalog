@@ -49,6 +49,9 @@
                     html: '<div class="rpm-turned-off" style="padding: 50px; text-align: center;">You do not have RPM enabled for your subscription</div>'
                 });
 
+                if (Rally.BrowserTest) {
+                    Rally.BrowserTest.publishComponentReady(this);
+                }
             }
 
         },
