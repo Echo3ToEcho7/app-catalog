@@ -188,3 +188,11 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createApp().then (app) =>
 
       expect(app.getMaskId()).toBe('btid-portfolio-kanban-board-load-mask-' + app.id)
+
+  it 'should display an error message if you do not have RPM turned on ', ->
+    Rally.environment.getContext().context.subscription.Modules = []
+    loadSpy = @spy Rally.data.util.PortfolioItemHelper, 'loadTypeOrDefault'
+
+    @_createApp().then =>
+      expect(loadSpy.callCount).toBe 0
+      expect(@app.down('#bodyContainer').getEl().dom.innerHTML).toContain 'You do not have RPM enabled for your subscription'
