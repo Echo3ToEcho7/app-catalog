@@ -133,13 +133,13 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
 
   it 'should filter newly added column after scrolling forwards', ->
     @createBoard().then =>
-      filterSpy = @spy @cardboard, 'locallyFilter'
+      filterSpy = @spy @cardboard, 'applyLocalFilters'
       @scrollForwards().then =>
         expect(filterSpy.callCount).toBe 1
 
   it 'should filter newly added column after scrolling backwards', ->
     @createBoard().then =>
-      filterSpy = @spy @cardboard, 'locallyFilter'
+      filterSpy = @spy @cardboard, 'applyLocalFilters'
       @scrollBackwards().then =>
         expect(filterSpy.callCount).toBe 1
 
