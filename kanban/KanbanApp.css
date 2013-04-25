@@ -40,18 +40,6 @@
     width: 265px;
 }
 
-.kanban .column-container .card-column.over-capacity, .kanban .column-container .card-column.over-capacity.dnd-over {
-    background-color: #d67972;
-}
-
-.kanban .column-container th.card-column.over-capacity {
-    background-color: #b81c10;
-}
-
-.kanban th.card-column.over-capacity .column-header {
-    color: #fff;
-}
-
 .cardboard .status-content > .status-field.RevisionHistory {
     line-height: 18px;
     cursor: default;
