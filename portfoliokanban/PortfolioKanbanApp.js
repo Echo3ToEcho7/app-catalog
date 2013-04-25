@@ -53,19 +53,27 @@
 
         afterRender: function() {
             this.callParent(arguments);
-            Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
-                typeRef: this.getSetting('type'),
-                defaultToLowest: true,
-                context: this.getContext().getDataContext(),
-                success: function(record) {
-                    this.currentType = record;
 
-                    this._drawHeader();
-                    this._loadCardboard();
-                },
-                scope: this
-            });
+            if(Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
 
+               Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
+                    typeRef: this.getSetting('type'),
+                    defaultToLowest: true,
+                    context: this.getContext().getDataContext(),
+                    success: function(record) {
+                        this.currentType = record;
+
+                        this._drawHeader();
+                        this._loadCardboard();
+                    },
+                    scope: this
+                });
+            } else {
+                this.down('#bodyContainer').add({
+                    xtype: 'container',
+                    html: '<div class="rpm-turned-off" style="padding: 50px; text-align: center;">You do not have RPM enabled for your subscription</div>'
+                });
+            }
         },
 
         _drawHeader: function() {
