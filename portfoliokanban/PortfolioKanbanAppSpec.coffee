@@ -33,6 +33,9 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       Ext.Array.map(@app.getEl().query(cssQuery), (el) -> el.innerHTML).join('__')
 
   beforeEach ->
+
+    Rally.environment.getContext().context.subscription.Modules = ['Rally Portfolio Manager']
+
     @ajax.whenQuerying('typedefinition').respondWith([
       {
         '_ref':'/typedefinition/1'
