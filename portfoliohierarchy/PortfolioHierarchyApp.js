@@ -35,13 +35,22 @@
 
         launch: function() {
 
-            Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
-                typeRef: this.getSetting('type'),
-                context: this.getContext().getDataContext(),
-                defaultToLowest: false,
-                success: this.addTreeForType,
-                scope: this
-            });
+            if(Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
+                Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
+                    typeRef: this.getSetting('type'),
+                    context: this.getContext().getDataContext(),
+                    defaultToLowest: false,
+                    success: this.addTreeForType,
+                    scope: this
+                });
+            } else {
+                this.down('#bodyContainer').add({
+                    xtype: 'container',
+                    html: '<div class="rpm-turned-off" style="padding: 50px; text-align: center;">You do not have RPM enabled for your subscription</div>'
+                });
+
+            }
+
         },
 
         _drawHeader: function(){
