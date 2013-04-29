@@ -559,7 +559,51 @@
             return baked;
         }
         
-        
+        function prepareQuery(releaseName, releaseStart, releaseEnd){
+
+            var encodedName = encodeURIComponent(releaseName.replace(/\\/g,'\\\\').replace(/"/g,'\\"'));
+
+            var iterationsQuery =
+            { key  : 'iterations',
+                type : 'iterations',
+                fetch: 'Name,StartDate,EndDate',
+                query: '( ( EndDate > "' + releaseStart + '" ) AND ( StartDate < "' + releaseEnd + '") )',
+                order: 'EndDate'
+            };
+
+            var level1Stories =
+            { key  : 'level1',
+                type : 'hierarchicalrequirement',
+                fetch: 'FormattedID,Name,ObjectID,Iteration,StartDate,EndDate,' +
+                        'PlanEstimate,TaskEstimateTotal,TaskRemainingTotal,' +
+                        'ScheduleState,Blocked,Parent',
+                query: '( Release.Name contains "' + encodedName + '" )',
+                order: 'Rank'
+            };
+
+            var level2Stories =
+            { key: 'level2',
+                placeholder: '${level1.parent?fetch=Name,FormattedID,Parent}'
+            };
+
+            var level3Stories =
+            { key: 'level3',
+                placeholder: '${level2.parent?fetch=Name,FormattedID,Parent}'
+            };
+
+            var level4Stories =
+            { key: 'level4',
+                placeholder: '${level3.parent?fetch=Name,FormattedID,Parent}'
+            };
+
+            var level5Stories =
+            { key: 'level5',
+                placeholder: '${level4.parent?fetch=Name,FormattedID,Parent}'
+            };
+
+            return [iterationsQuery, level1Stories, level2Stories, level3Stories,
+                level4Stories, level5Stories];
+        }
         
         //-----------------------------------------------------------------------------------
         
@@ -700,47 +744,7 @@
             var releaseName = releaseDropdown.getSelectedName();
             var releaseStart = releaseDropdown.getSelectedStart();
             var releaseEnd = releaseDropdown.getSelectedEnd();
-        
-            var iterationsQuery =
-            { key  : 'iterations',
-                type : 'iterations',
-                fetch: 'Name,StartDate,EndDate',
-                query: '( ( EndDate > "' + releaseStart + '" ) AND ( StartDate < "' + releaseEnd + '") )',
-                order: 'EndDate'
-            };
-        
-            var level1Stories =
-            { key  : 'level1',
-                type : 'hierarchicalrequirement',
-                fetch: 'FormattedID,Name,ObjectID,Iteration,StartDate,EndDate,' +
-                        'PlanEstimate,TaskEstimateTotal,TaskRemainingTotal,' +
-                        'ScheduleState,Blocked,Parent',
-                query: '( Release.Name contains "' + releaseName + '" )',
-                order: 'Rank'
-            };
-        
-            var level2Stories =
-            { key: 'level2',
-                placeholder: '${level1.parent?fetch=Name,FormattedID,Parent}'
-            };
-        
-            var level3Stories =
-            { key: 'level3',
-                placeholder: '${level2.parent?fetch=Name,FormattedID,Parent}'
-            };
-        
-            var level4Stories =
-            { key: 'level4',
-                placeholder: '${level3.parent?fetch=Name,FormattedID,Parent}'
-            };
-        
-            var level5Stories =
-            { key: 'level5',
-                placeholder: '${level4.parent?fetch=Name,FormattedID,Parent}'
-            };
-        
-            var queryArray = [iterationsQuery, level1Stories, level2Stories, level3Stories,
-                level4Stories, level5Stories];
+            var queryArray = prepareQuery(releaseName, releaseStart, releaseEnd);
         
             rallyDataSource.findAll(queryArray, showEpicFamilyProgress);
         }
