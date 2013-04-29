@@ -23,7 +23,8 @@
                     'Name',
                     'StateChangedDate',
                     'Blocked',
-                    'Ready'
+                    'Ready',
+                    'DisplayColor'
                 ];
             }
 
