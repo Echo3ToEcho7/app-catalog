@@ -29,7 +29,7 @@ function initTaskboard() {
     RALLY.toolkit.HTML.createMaskLayer();
 
     var statusDiv = null;
-    var setStatus = function(msg) {
+    var setStatus = function (msg) {
         if (!statusDiv) {
             statusDiv = Dom.get('status');
         }
@@ -43,7 +43,7 @@ function initTaskboard() {
         }
 
         statusDiv.innerHTML = msg || '';
-    }
+    };
 
     var insideRally = RALLY.toolkit.insideRally();
     var showActuals = false;
@@ -58,29 +58,29 @@ function initTaskboard() {
         var paging = "&pagesize=100";
 
         return {
-            "currentProject"   : "/iteration:current/project",
-            "#storyType"        : "/typedefinition?query=(Name = \"Hierarchical Requirement\")",
+            "currentProject":"/iteration:current/project",
+            "#storyType":"/typedefinition?query=(Name = \"Hierarchical Requirement\")",
 
-            "taskUnit"          : "${iteration/workspace/workspaceConfiguration/taskUnitName}",
-            "storyStates"       : "${#storyType/attributes[name=schedule state]/allowedvalues/stringvalue}",
+            "taskUnit":"${iteration/workspace/workspaceConfiguration/taskUnitName}",
+            "storyStates":"${#storyType/attributes[name=schedule state]/allowedvalues/stringvalue}",
 
-            "iteration"         : "/iteration:current?fetch=name,objectid&order=StartDate",
-            "iterations"        : "/iterations?fetch=name,objectid&order=StartDate,Name&project=${currentProject}&projectScopeUp=false&projectScopeDown=false" + paging,
+            "iteration":"/iteration:current?fetch=name,objectid&order=StartDate",
+            "iterations":"/iterations?fetch=name,objectid&order=StartDate,Name&project=${currentProject}&projectScopeUp=false&projectScopeDown=false" + paging,
 
-            "users"             : "/users?fetch=displayname,loginname,emailaddress,objectid" + paging,
+            "users":"/users?fetch=displayname,loginname,emailaddress,objectid" + paging,
 
-            "tasks"             : "/tasks?fetch=taskindex,name,objectid,formattedid,owner,blocked,estimate,todo,actuals,state,workproduct&query=(Iteration = ${iteration})" + scoping + paging,
+            "tasks":"/tasks?fetch=taskindex,name,objectid,formattedid,owner,blocked,estimate,todo,actuals,state,workproduct&query=(Iteration = ${iteration})" + scoping + paging,
 
-            "stories"           : "/hierarchicalrequirement?fetch=rank,blocked,formattedid,name,objectid,owner,project,schedulestate,taskestimatetotal,taskremainingtotal,taskactualtotal,tasks&order=Rank&query=(Iteration = ${iteration})" + scoping + paging,
-            "defects"           : "/defect?fetch=rank,blocked,formattedid,name,objectid,owner,project,schedulestate,taskestimatetotal,taskremainingtotal,taskactualtotal&order=Rank&query=(Iteration = ${iteration})" + scoping + paging,
-            "defectsuite"       : "/defectsuite?fetch=rank,blocked,formattedid,name,objectid,owner,project,schedulestate,taskestimatetotal,taskremainingtotal,taskactualtotal&order=Rank&query=(Iteration = ${iteration})" + scoping + paging,
-            "testsets"          : "/testset?fetch=rank,blocked,formattedid,name,objectid,owner,project,schedulestate,taskestimatetotal,taskremainingtotal,taskactualtotal&query=(Iteration = ${iteration})" + scoping + paging
+            "stories":"/hierarchicalrequirement?fetch=rank,blocked,formattedid,name,objectid,owner,project,schedulestate,taskestimatetotal,taskremainingtotal,taskactualtotal,tasks&order=Rank&query=(Iteration = ${iteration})" + scoping + paging,
+            "defects":"/defect?fetch=rank,blocked,formattedid,name,objectid,owner,project,schedulestate,taskestimatetotal,taskremainingtotal,taskactualtotal&order=Rank&query=(Iteration = ${iteration})" + scoping + paging,
+            "defectsuite":"/defectsuite?fetch=rank,blocked,formattedid,name,objectid,owner,project,schedulestate,taskestimatetotal,taskremainingtotal,taskactualtotal&order=Rank&query=(Iteration = ${iteration})" + scoping + paging,
+            "testsets":"/testset?fetch=rank,blocked,formattedid,name,objectid,owner,project,schedulestate,taskestimatetotal,taskremainingtotal,taskactualtotal&query=(Iteration = ${iteration})" + scoping + paging
         };
     }
 
     var query = getQuery();
 
-    var renderTimeCell = function(label, value, c) {
+    var renderTimeCell = function (label, value, c) {
         var v = (Lang.isValue(value)) ? value : '-';
         return '<div class="' + c + '"><div>' + label + '</div><span>' + v + '</span></div>';
     };
@@ -93,7 +93,7 @@ function initTaskboard() {
         projScopeUpControl.checked = projectScopeUp;
         projScopeDownControl.checked = projectScopeDown;
 
-        var updateAfterScopeChange = function(e) {
+        var updateAfterScopeChange = function (e) {
             var src = Event.getTarget(e);
             if (src.id == 'proj_scope_up_control') {
                 projectScopeUp = src.checked;
@@ -114,8 +114,8 @@ function initTaskboard() {
     var viewConfig = {
 
         // configure columns
-        columnAttribute: "State",
-        columnValuesAccessor: function(model, modelSchema) {
+        columnAttribute:"State",
+        columnValuesAccessor:function (model, modelSchema) {
             var stateOptions = modelSchema.Task.State.options;
             var stateNames = [];
             for (var i = 0, length = stateOptions.length; i < length; i++) {
@@ -123,19 +123,19 @@ function initTaskboard() {
             }
             return stateNames;
         },
-        columnHeaderRenderer: function(container, value) {
+        columnHeaderRenderer:function (container, value) {
             container.innerHTML = value;
         },
 
         // configure rows
-        rowAttribute: "WorkProduct",
-        rowKeyAccessor: function(workProduct) {
+        rowAttribute:"WorkProduct",
+        rowKeyAccessor:function (workProduct) {
             return workProduct.ObjectID;
         },
-        rowValuesAccessor: function(model, modelSchema) {
+        rowValuesAccessor:function (model, modelSchema) {
             return model.items[0].workProducts;
         },
-        rowHeaderRenderer: function(container, value, modelSchema) {
+        rowHeaderRenderer:function (container, value, modelSchema) {
             var state,
                     html = [],
                     schema = modelSchema.WorkProduct,
@@ -166,9 +166,9 @@ function initTaskboard() {
             html.push('<div class="' + divClass.join(' ') + '" id="' + divId + '">');
 
             state = new RALLY.toolkit.renderer.StateRenderer({
-                schema: schema.State,
-                state: value.ScheduleState,
-                blocked: value.Blocked
+                schema:schema.State,
+                state:value.ScheduleState,
+                blocked:value.Blocked
             });
             html.push('<div class="state">' + state.display(false, value.ScheduleState == 'Accepted') + '</div>');
 
@@ -189,21 +189,21 @@ function initTaskboard() {
         },
 
         // configure cells
-        cellSortFunction: function(a, b) {
+        cellSortFunction:function (a, b) {
             return a - b;
         },
 
         // configure items
-        itemRankAccessor: function(item) {
+        itemRankAccessor:function (item) {
             return item.TaskIndex
         },
-        itemKeyAccessor: function(item) {
+        itemKeyAccessor:function (item) {
             return item.ObjectID
         },
-        itemsAccessor: function(model) {
+        itemsAccessor:function (model) {
             return model.items[0].tasks;
         },
-        itemRenderer: function(container, item, modelSchema) {
+        itemRenderer:function (container, item, modelSchema) {
             var html = [],
                     owner,
                     taskClass = ['rally-task'],
@@ -281,32 +281,32 @@ function initTaskboard() {
             container.innerHTML = html.join('');
 
             Event.purgeElement(editIconId);
-            Event.addListener(editIconId, 'click', function(e) {
+            Event.addListener(editIconId, 'click', function (e) {
                 gridController.showEditor(item, schema);
             });
             Event.purgeElement(deleteIconId);
-            Event.addListener(deleteIconId, 'click', function(e) {
+            Event.addListener(deleteIconId, 'click', function (e) {
                 gridController.deleteItem(item);
             });
         },
 
         // configure drag event
-        dragDropCallback: function(item, value) {
+        dragDropCallback:function (item, value) {
 
             setStatus('Saving changes...');
 
             var cell = this.getRenderedItem(item);
             if (cell) {
-                var anim = new YAHOO.util.ColorAnim(cell, { backgroundColor: { from: '#F5F4CD', to: '#fff' } });
+                var anim = new YAHOO.util.ColorAnim(cell, { backgroundColor:{ from:'#F5F4CD', to:'#fff' } });
                 anim.animate();
             }
-            gridController.saveChanges(item, { 'State': value }, 'taskboard', function() {
+            gridController.saveChanges(item, { 'State':value }, 'taskboard', function () {
                 setStatus();
             });
         }
     };
 
-    RALLY.toolkit.Controller = function(query, viewConfig) {
+    RALLY.toolkit.Controller = function (query, viewConfig) {
         this.query = query;
         this.schemaConfig = {};
         this.viewConfig = viewConfig;
@@ -316,14 +316,14 @@ function initTaskboard() {
     };
 
     RALLY.toolkit.Controller.prototype = {
-        acceptedCookieKey:  'taskboard-hide-accepted',
-        ownerCookieKey:     'taskboard-filter-by-owner',
-        iterationCookieKey: 'taskboard-filter-by-iteration',
+        acceptedCookieKey:'taskboard-hide-accepted',
+        ownerCookieKey:'taskboard-filter-by-owner',
+        iterationCookieKey:'taskboard-filter-by-iteration',
         projectOidCookieKey:'taskboard-current-project',
-        noOwnerLabel:       'No Owner',
-        allOwnersLabel:     'All Team Members',
+        noOwnerLabel:'No Owner',
+        allOwnersLabel:'All Team Members',
 
-        getIterationByOid: function(objectID) {
+        getIterationByOid:function (objectID) {
             for (var i = 0; i < this.iterations.length; i++) {
                 if (this.iterations[i].ObjectID == objectID) {
                     return this.iterations[i];
@@ -333,7 +333,7 @@ function initTaskboard() {
             return null;
         },
 
-        display: function(iterationOid) {
+        display:function (iterationOid) {
             var len, iterations, selectedIteration,
                     html = [],
                     that = this,
@@ -359,10 +359,10 @@ function initTaskboard() {
 
             if (this.dataSource) {
                 var queryWithParams = {
-                    adHocQuery: query,
-                    cpoid: currentProjectOid
+                    adHocQuery:query,
+                    cpoid:currentProjectOid
                 };
-                this.dataSource.get(function(model) {
+                this.dataSource.get(function (model) {
                     var i;
 
                     that.hideAcceptedControl = Dom.get('hide_accepted_control');
@@ -377,7 +377,7 @@ function initTaskboard() {
 
                     if (model.errors.length > 0) {
                         html.push('<ul>');
-                        for (i = 0,len = model.errors.length; i < len; i++) {
+                        for (i = 0, len = model.errors.length; i < len; i++) {
                             html.push('<li>' + model.errors[i].message + '</li>');
                         }
                         html.push('</ul>');
@@ -400,7 +400,7 @@ function initTaskboard() {
                     iterations = model.items[0].iterations;
                     that.iterations = model.items[0].iterations;
                     RALLY.toolkit.HTML.clearSelect(that.iterationSelect);
-                    for (i = 0,len = iterations.length; i < len; i++) {
+                    for (i = 0, len = iterations.length; i < len; i++) {
                         that.iterationSelect.options[that.iterationSelect.options.length] = new Option(iterations[i].Name, iterations[i].ObjectID);
                         if (iterations[i].ObjectID == selectedIteration || iterations[i].Name == model.items[0].iteration.Name) {
                             RALLY.toolkit.Cookie.add(that.iterationCookieKey, iterations[i].ObjectID);
@@ -436,42 +436,62 @@ function initTaskboard() {
             }
         },
 
-        showEditor: function(item, schema) {
+        showEditor:function (item, schema) {
+            var self = this;
+            var project = item.WorkProduct.Project;
 
-            var editorConfig = {
-                props: (showActuals) ? ['Estimate', 'ToDo', 'Actuals', 'Owner', 'State'] : ['Estimate', 'ToDo', 'Owner', 'State'],
-                propertyKeyAccessors: {
-                    Owner: function(prop) {
-                        return prop != null ? prop.LoginName : null;
-                    }
-                },
-                propertyValueAccessors: {
-                    Owner: function(prop) {
-                        return prop != null ? prop._refObjectName : null;
-                    }
-                },
-                titleAccessor: function(obj) {
-                    return obj.FormattedID + '<br/>' + obj.Name;
-                },
-                onErrorCallback: function() {
-                    gridController.display();
-                },
-                onSaveCallback: function(changes) {
-                    gridController.saveChanges(item, changes, 'editor');
-                }
-            };
-            this.editor.display(item, schema, editorConfig);
+            var teamMembers = [];
+            teamMembers.push(schema.Owner.options[0]);
 
+            var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
+            YAHOO.util.Connect.asyncRequest('GET', baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName&EmailAddress&LoginName",
+                    {
+                        success:function (callback) {
+                            var results = JSON.parse(callback.responseText).QueryResult.Results
+                            for (i = 0; i < results.length; ++i) {
+                                var label = results[i].DisplayName || results[i].EmailAddress.split('@')[0];
+                                teamMembers.push({Label:label, Value:results[i].EmailAddress});
+                            }
+                            schema.Owner.options = teamMembers;
+                            var editorConfig = {
+                                props:(showActuals) ? ['Estimate', 'ToDo', 'Actuals', 'Owner', 'State'] : ['Estimate', 'ToDo', 'Owner', 'State'],
+                                propertyKeyAccessors:{
+                                    Owner:function (prop) {
+                                        return prop != null ? prop.LoginName : null;
+                                    }
+                                },
+                                propertyValueAccessors:{
+                                    Owner:function (prop) {
+                                        return prop != null ? prop._refObjectName : null;
+                                    }
+                                },
+                                titleAccessor:function (obj) {
+                                    return obj.FormattedID + '<br/>' + obj.Name;
+                                },
+                                onErrorCallback:function () {
+                                    gridController.display();
+                                },
+                                onSaveCallback:function (changes) {
+                                    gridController.saveChanges(item, changes, 'editor');
+                                }
+                            };
+                            self.editor.display(item, schema, editorConfig);
+                        },
+                        failure:function (o) {
+                            console.log(o);
+                        }
+                    }
+                    , null);
         },
 
-        getParentRow: function(el) {
+        getParentRow:function (el) {
             while (el && el.tagName && el.tagName.toUpperCase() != 'TR') {
                 el = el.parentNode;
             }
             return el;
         },
 
-        toggleAccepted: function() {
+        toggleAccepted:function () {
             var i, len, row,
                     hideAcceptedControl = this.hideAcceptedControl || Dom.get('hide_accepted_control'),
                     userSelect = this.userSelect || Dom.get('filter_user_control'),
@@ -480,7 +500,7 @@ function initTaskboard() {
 
             RALLY.toolkit.Cookie.add(this.acceptedCookieKey, hideAccepted);
 
-            for (i = 0,len = workProds.length; i < len; i++) {
+            for (i = 0, len = workProds.length; i < len; i++) {
                 row = this.getParentRow(workProds[i]);
 
                 if (hideAccepted) {
@@ -499,7 +519,7 @@ function initTaskboard() {
             }
         },
 
-        refreshUserSelect: function() {
+        refreshUserSelect:function () {
             this.userSelect = this.userSelect || Dom.get('filter_user_control');
 
             var selectedOwner = 0, selectedIndex = -1, options,
@@ -515,12 +535,12 @@ function initTaskboard() {
             // clear out current options
             RALLY.toolkit.HTML.clearSelect(this.userSelect);
 
-            users.sort(function(a, b) {
+            users.sort(function (a, b) {
                 return (a.toLowerCase() < b.toLowerCase()) ? -1 : 1;
             });
 
             options = defaultUsers.concat(users);
-            for (i = 0,len = options.length; i < len; i++) {
+            for (i = 0, len = options.length; i < len; i++) {
                 this.userSelect.options[this.userSelect.options.length] = new Option(options[i], options[i]);
                 if (selectedOwner == options[i]) {
                     selectedIndex = i;
@@ -543,7 +563,7 @@ function initTaskboard() {
             this.filterByOwner();
         },
 
-        saveChanges: function(item, changes, source, successCallback) {
+        saveChanges:function (item, changes, source, successCallback) {
             var that = this, i, len, html = [], error, isConcurrencyError;
 
             if (!Lang.isValue(source)) {
@@ -561,7 +581,7 @@ function initTaskboard() {
             }
 
             if (this.dataSource) {
-                this.dataSource.update(item, changes, function(model) {
+                this.dataSource.update(item, changes, function (model) {
                     if (model.OperationResult.Errors.length == 0) {
                         that.refreshItem(item);
                         that.editor.close();
@@ -572,7 +592,7 @@ function initTaskboard() {
                     } else {
 
                         html.push('<ul>');
-                        for (i = 0,len = model.OperationResult.Errors.length; i < len; i++) {
+                        for (i = 0, len = model.OperationResult.Errors.length; i < len; i++) {
                             error = model.OperationResult.Errors[i];
                             if (error.toLowerCase().indexOf('concurrency conflict') != -1 || error.toLowerCase().indexOf('could not read') != -1) {
                                 isConcurrencyError = true;
@@ -595,7 +615,7 @@ function initTaskboard() {
             }
         },
 
-        parseSaveErrorsIntoReadableString: function(error) {
+        parseSaveErrorsIntoReadableString:function (error) {
             var matches, tmp;
 
             // what type of error did we get back?
@@ -626,25 +646,25 @@ function initTaskboard() {
             return error;
         },
 
-        deleteItem: function(task) {
+        deleteItem:function (task) {
             var that = this;
 
             if (task) {
-                this.dataSource.remove(task, function(model) {
+                this.dataSource.remove(task, function (model) {
 
                     if (model.OperationResult.Errors.length == 0) {
                         that.view.removeItem(task);
 
                         if (RALLY.toolkit.insideRally() && parent && parent.RALLY) {
                             parent.RALLY.util.showDeleteFlair({
-                                oid: task.ObjectID,
-                                record: task,
-                                recordName : task.FormattedID + ': ' + task.Name,
-                                restorable : true
+                                oid:task.ObjectID,
+                                record:task,
+                                recordName:task.FormattedID + ': ' + task.Name,
+                                restorable:true
 
                             });
                         }
-                        that.dataSource.refreshWorkProduct(task.WorkProduct, function(newWorkProduct) {
+                        that.dataSource.refreshWorkProduct(task.WorkProduct, function (newWorkProduct) {
 
                             that.view.refreshRowHeader(newWorkProduct);
                             that.refreshUserSelect();
@@ -660,12 +680,12 @@ function initTaskboard() {
             }
         },
 
-        refreshItem: function(item) {
+        refreshItem:function (item) {
             var that = this;
 
             if (item) {
 
-                this.dataSource.refreshTask(item, function(model) {
+                this.dataSource.refreshTask(item, function (model) {
                     that.view.refreshItem(model.items[0].tasks[0]);
                     that.refreshUserSelect();
                     that.view.refreshRowHeader(model.items[0].workProducts[0]);
@@ -674,10 +694,10 @@ function initTaskboard() {
 
         },
 
-        getOwnersOnTaskboard: function() {
+        getOwnersOnTaskboard:function () {
             var i, len, div, ownerMap = {}, owners = [], items = this.view.findItems();
 
-            for (i = 0,len = items.length; i < len; i++) {
+            for (i = 0, len = items.length; i < len; i++) {
                 div = Dom.getElementsByClassName('owner', 'div', items[i])[0];
                 if (div && div.innerHTML != this.noOwnerLabel && !Dom.hasClass(div, 'deleted-owner')) {
                     ownerMap[div.innerHTML] = 1;
@@ -691,9 +711,9 @@ function initTaskboard() {
             return owners;
         },
 
-        numItemsVisible: function() {
+        numItemsVisible:function () {
             var i, len, items, num = 0;
-            var comparator = function(el) {
+            var comparator = function (el) {
                 try {
                     return Dom.hasClass(el, 'rally-task') || Dom.hasClass(el, 'rally-workprod');
                 } catch (e) {
@@ -702,7 +722,7 @@ function initTaskboard() {
             };
 
             items = this.view.findItems(comparator);
-            for (i = 0,len = items.length; i < len; i++) {
+            for (i = 0, len = items.length; i < len; i++) {
                 if (!(Dom.hasClass(items[i], 'hidden') || Dom.hasClass(this.getParentRow(items[i]), 'accepted') || Dom.hasClass(this.getParentRow(items[i]), 'hidden'))) {
                     num++;
                 }
@@ -710,15 +730,15 @@ function initTaskboard() {
             return num;
         },
 
-        filterByOwner: function() {
+        filterByOwner:function () {
             var i, len, that = this, shown = 0, shownAccepted = 0, itemMap = {}, rows = [], items, item,
                     sel = this.userSelect || Dom.get('filter_user_control'),
                     selected = sel.options[sel.selectedIndex];
 
             RALLY.toolkit.Cookie.add(this.ownerCookieKey, selected.innerHTML);
 
-            var buildComparator = function(owner) {
-                return function(item) {
+            var buildComparator = function (owner) {
+                return function (item) {
                     try {
                         return owner.innerHTML == that.allOwnersLabel || YAHOO.util.Dom.getElementsByClassName('owner', 'div', item)[0].innerHTML == owner.innerHTML;
                     } catch (e) {
@@ -726,13 +746,13 @@ function initTaskboard() {
                     return false;
                 };
             };
-            var isTask = function(o) {
+            var isTask = function (o) {
                 return Dom.hasClass(o, 'rally-task');
             };
-            var isWorkProd = function(o) {
+            var isWorkProd = function (o) {
                 return Dom.hasClass(o, 'rally-workprod');
             };
-            var isParentVisible = function(el) {
+            var isParentVisible = function (el) {
                 for (var i = 0, len = rows.length; i < len; i++) {
                     if (rows[i] == el) {
                         return true;
@@ -741,7 +761,7 @@ function initTaskboard() {
             };
 
             items = this.view.findItems(buildComparator(selected));
-            for (i = 0,len = items.length; i < len; i++) {
+            for (i = 0, len = items.length; i < len; i++) {
                 item = items[i];
                 if (isTask(item)) {
                     itemMap[item.id] = 1;
@@ -752,7 +772,7 @@ function initTaskboard() {
             }
 
             items = this.view.findItems();
-            for (i = 0,len = items.length; i < len; i++) {
+            for (i = 0, len = items.length; i < len; i++) {
                 item = items[i];
 
                 if (isTask(item)) {
@@ -789,7 +809,7 @@ function initTaskboard() {
             }
         },
 
-        updateIteration: function() {
+        updateIteration:function () {
             var sel = this.iterationSelect,
                     selected = sel.options[sel.selectedIndex];
             RALLY.toolkit.Cookie.add(this.iterationCookieKey, selected.value);
@@ -797,7 +817,7 @@ function initTaskboard() {
         }
     };
 
-    var config = (query.adHocQuery) ? query : { adHocQuery: query };
+    var config = (query.adHocQuery) ? query : { adHocQuery:query };
     config.integrationInfo = {};
     config.integrationInfo.Name = "Mashup: Taskboard";
     config.integrationInfo.Version = "2009.5";
