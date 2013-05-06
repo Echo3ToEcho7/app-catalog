@@ -508,3 +508,21 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     ).then =>
       @click(className: 'scroll-forwards').then =>
         @assertColumnIsFor Rally.util.Array.last(@iterationData), Rally.util.Array.last(@getTimeboxColumns())
+
+  it 'should give all column headers the same height', ->
+    iterationData = Helpers.IterationDataCreatorHelper.createIterationData
+      iterationCount: 3
+      plannedVelocity: 20
+
+    iterationData[0] = Helpers.IterationDataCreatorHelper.createIterationData(iterationCount: 1)[0]
+
+    iterationData[1].Name = 'Iteration with really really really really really really really really really really really really really really really really really really really really really really really really long name'
+
+    @createApp(
+      iterationData: iterationData
+    ).then =>
+      @app.getEl().select('.column-header').each((el, compositeEl, index) ->
+        elHeight = el.getHeight()
+        expect(elHeight).toEqual(compositeEl.item(i).getHeight()) for i in [0...index].reverse()
+        return
+      )
