@@ -340,7 +340,7 @@
                     //Calculate the acceptance percentage.
                     // ||1 - Handle NaN resulting from divide by 0
                     var percentAccepted = Math.floor((totalAcceptedPoints / (totalPlanEstimate || 1)) * 100);
-                    var config = {};
+                    var config = { rowType: 'pointAcceptance'};
 
                     if (this.timeBoxInfo.timeOrientation !== "future") {
 
@@ -420,7 +420,7 @@
                 totalDefectCount += this._getActiveDefectCount(this.results.defectsuite);
             }
 
-            var config = {};
+            var config = { rowType: 'defects'};
 
             if (totalDefectCount > 0 && this.timeBoxInfo.timeOrientation !== "future") {
                 config.title = totalDefectCount + " Active Defect" + (totalDefectCount !== 1 ? "s" : "");
@@ -455,7 +455,7 @@
         },
 
         _getTestsConfigObject: function() {
-            var config = {};
+            var config = { rowType: 'testsPassing' };
             var testCounts = {passingTests: 0, totalTests: 0};
             var testTypes = ["userstory", "defect", "testset"];
 
@@ -519,7 +519,7 @@
             if (rowConfig.title) {
                 var items = [
                     {
-                        cls: 'header',
+                        cls: 'header ' + rowConfig.rowType || '',
                         html: rowConfig.title + '<span class="subtitle">' + rowConfig.subtitle + '</span>'
                     }
                 ];
