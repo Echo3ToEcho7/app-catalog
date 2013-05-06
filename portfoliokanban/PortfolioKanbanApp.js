@@ -194,7 +194,7 @@
                 showHeaderMenu: true,
                 showSlimDesign: this.getContext() && this.getContext().isFeatureEnabled('ENABLE_SLIM_CARD_DESIGN'),
                 showIconsAndHighlightBorder: this.getContext() && this.getContext().isFeatureEnabled('ENABLE_SLIM_CARD_DESIGN'),
-                showColorPopover: this.getContext() && this.getContext().isFeatureEnabled('ENABLE_SLIM_CARD_DESIGN') && this.getContext().isFeatureEnabled('WSAPI_1_43_LIVE')
+                showColorPopover: this.getContext() && this.getContext().isFeatureEnabled('ENABLE_SLIM_CARD_DESIGN')
             };
 
             var fields = this.getSetting('fields');
