@@ -27,7 +27,7 @@
 
             calculatorType: "Rally.apps.charts.burndown.BurnDownCalculator",
             calculatorConfig: {
-                workDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                workDays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
                 timeZone: "GMT",
                 completedScheduleStateNames: ["Accepted", "Released"]
             },
@@ -38,10 +38,13 @@
                 chart: {
                     zoomType: "xy"
                 },
+                title: {
+                    margin: 25
+                },
                 xAxis: {
                     categories: [],
                     tickmarkPlacement: "on",
-                    tickInterval: 5,
+                    tickInterval: 7,
                     title: {
                         text: "Days"
                     }
