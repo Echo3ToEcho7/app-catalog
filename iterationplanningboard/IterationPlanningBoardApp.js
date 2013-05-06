@@ -99,6 +99,13 @@
             if (Rally.BrowserTest) {
                 Rally.BrowserTest.publishComponentReady(this);
             }
+            this._alignProgressBars();
+        },
+
+        _alignProgressBars: function() {
+            var headerHeight = this.getEl().select('th.card-column').item(0).getHeight();
+            this.getEl().select('.column-header').setHeight(headerHeight - 1);
+            this.getEl().select('.progress-bar-background').setStyle({ position: 'absolute' });
         },
 
         _publishContentUpdated: function() {

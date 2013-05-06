@@ -73,6 +73,9 @@ th.planning-column {
 .progress-bar-background {
     background-color: #424242;
     padding: 6px 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .progress-bar-container {
