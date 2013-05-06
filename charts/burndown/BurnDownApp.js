@@ -6,7 +6,7 @@
         settingsScope: "workspace",
 
         requires: [
-            "Rally.apps.charts.burndown.Settings",
+            "Rally.apps.charts.burndown.BurnDownSettings",
             "Rally.ui.chart.Chart",
             "Rally.ui.combobox.IterationComboBox",
             "Rally.ui.combobox.ReleaseComboBox"
@@ -22,6 +22,8 @@
         launch: function() {
             this.callParent(arguments);
 
+            this._setupChartSettings();
+
             var context = this.getContext();
             if(context && context.getTimeboxScope()) {
                 var dashboard_type = context.getTimeboxScope().getType();
@@ -34,60 +36,23 @@
                     // not sure how this would ever get run...
                 }
             } else {
-                this._addTimeRangePicker();
+//                this._addTimeRangePicker();
             }
         },
 
+        _setupChartSettings: function() {
+            this.chartSettings = Ext.create("Rally.apps.charts.burndown.BurnDownSettings", {
+                app: this
+            });
+        },
+
         getSettingsFields: function() {
-            var context = this.getContext();
-            return Rally.apps.charts.burndown.Settings.getFields(this, context);
+            return this.chartSettings.getFields();
         },
 
         onTimeboxScopeChange: function(scope) {
             console.log('scope changed');
             this.callParent(arguments);
-        },
-
-        _addIterationPicker: function() {
-            this.down('#chartControls').add([
-                {
-                    xtype: 'label',
-                    text: 'Iteration: '
-                },
-                {
-                    xtype: 'rallyiterationcombobox',
-                    listeners: {
-                        change: this.onTimeboxScopeChange,
-                        scope: this
-                    }
-                }
-            ]);
-        },
-
-        _addReleasePicker: function() {
-            this.down('#chartControls').add([
-                {
-                    xtype: 'label',
-                    text: 'Release: '
-                },
-                {
-                    xtype: 'rallyreleasecombobox',
-                    listeners: {
-                        change: this.onTimeboxScopeChange,
-                        scope: this
-                    }
-                }
-            ]);
-        },
-
-        _addTimeRangePicker: function() {
-            var chartLevel = this.getSetting('chartLevel');
-
-            if(chartLevel === 'iteration') {
-                this._addIterationPicker();
-            } else if(chartLevel === 'release') {
-                this._addReleasePicker();
-            } else {}
         },
 
         items: [

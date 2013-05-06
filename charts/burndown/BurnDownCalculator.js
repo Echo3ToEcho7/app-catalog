@@ -40,13 +40,13 @@
                     "field": "RemainingPoints",
                     "as": "TASK TO DO",
                     "f": "sum",
-                    "display": "column"
+                    "display": "line"
                 },
                 {
                     "field": "AcceptedPoints",
                     "as": "ACCEPTED (POINTS)",
                     "f": "sum",
-                    "display": "column"
+                    "display": "line"
                 }
             ];
         }
