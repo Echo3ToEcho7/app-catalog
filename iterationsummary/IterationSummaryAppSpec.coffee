@@ -672,6 +672,19 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }
       ])
 
+    _prepareTestSetData: (testSetSummaryVerdicts) ->
+      @ajax.whenQuerying('userstory').respondWith()
+      @ajax.whenQuerying('defectsuite').respondWith()
+      @ajax.whenQuerying('defect').respondWith()
+
+      @ajax.whenQuerying('testset').respondWith([
+        {
+          Summary:
+            TestCases:
+              LastVerdict: testSetSummaryVerdicts
+        }
+      ])
+
   beforeEach ->
     @_stubIterationQuery()
     # @stubDefer()
@@ -755,6 +768,15 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       expect(configDefects.message).toBe app.self.PAST_WITH_DEFECTS
 
       expect(testsSpy).not.toHaveBeenCalled()
+
+  it "does aggregate testset data for UE or EE subscriptions", ->
+    testPassingSelector = '.x4-component.header.testsPassing'
+
+    @_prepareTestSetData(Pass: 2, Fail: 1, Inconclusive: 1)
+    @_createApp({}).then (app) =>
+      @waitForVisible(css: testPassingSelector).then =>
+        expect(Ext.DomQuery.selectNode(testPassingSelector).innerHTML).toContain "50% Tests Passing"
+
 
   it "refreshes app on objectUpdate of artifacts", ->
     @_createApp({}).then (app) =>
