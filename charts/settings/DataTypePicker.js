@@ -6,8 +6,7 @@
         alias: "widget.chartdatatypepicker",
 
         mixins: [
-            "Ext.form.field.Field",
-            "Rally.apps.charts.settings.SettingsChangeMixin"
+            "Ext.form.field.Field"
         ],
 
         config: {
