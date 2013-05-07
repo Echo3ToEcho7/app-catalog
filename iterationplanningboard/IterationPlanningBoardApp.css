@@ -65,9 +65,9 @@ th.planning-column {
 }
 
 .planning-column.current-timebox .rui-card-slim {
-    box-shadow: #C0C0C0 2px 2px;
-    -moz-box-shadow: #C0C0C0 2px 2px;
-    -webkit-box-shadow: #C0C0C0 2px 2px;
+    box-shadow: rgba(192, 192, 192, 0.5) 2px 2px;
+    -moz-box-shadow: rgba(192, 192, 192, 0.5) 2px 2px;
+    -webkit-box-shadow: rgba(192, 192, 192, 0.5) 2px 2px;
 }
 
 .progress-bar-background {
@@ -93,13 +93,13 @@ th.planning-column {
 }
 
 .cardboard .column-container .planning-column.current-timebox {
-    background-color: #c6c6c6;
     border-right: 2px solid #8f8f8f;
     border-top: 2px solid #8f8f8f;
     border-left: 2px solid #8f8f8f;
 }
 
 .cardboard .column-container td.planning-column.current-timebox {
+    background-color: #D6D6D6;
     border-top: 1px solid #8f8f8f;
 }
 
