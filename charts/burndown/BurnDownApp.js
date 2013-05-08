@@ -188,7 +188,7 @@
                     rotation: 0,
                     y: -7
                 }
-            }
+            };
         },
 
         _getPlotLine: function(categories, iteration, lastLine) {
