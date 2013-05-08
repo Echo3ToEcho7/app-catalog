@@ -6,7 +6,8 @@
         alias: "widget.chartdatatypepicker",
 
         mixins: [
-            "Ext.form.field.Field"
+            "Ext.form.field.Field",
+            "Rally.apps.charts.settings.SettingsChangeMixin"
         ],
 
         config: {
@@ -17,10 +18,10 @@
 
         initComponent: function () {
             this.callParent(arguments);
-            this.add(this._getRadioGroup());
+            this.add(this.getRadioGroup());
         },
 
-        _getRadioGroup: function () {
+        getRadioGroup: function () {
             return {
                 xtype: "radiogroup",
                 name: this.settingName,

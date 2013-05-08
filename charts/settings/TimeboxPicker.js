@@ -27,7 +27,7 @@
             if (dashboardType === "iteration" || dashboardType === "release") {
                 this.destroy();
             } else {
-                this.add(this._getRadioGroup());
+                this.add(this.getRadioGroup());
 
                 this._addReleasePicker();
                 this._addIterationPicker();
@@ -99,7 +99,7 @@
             }
         },
 
-        _getRadioGroup: function () {
+        getRadioGroup: function () {
             return {
                 xtype: "radiogroup",
                 name: this.settingName,

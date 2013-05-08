@@ -4,16 +4,21 @@
     Ext.define("Rally.apps.charts.rpm.PortfolioChartAppBase", {
         extend: "Rally.app.App",
         settingsScope: "workspace",
-        
+
         requires: [
+            'Rally.apps.charts.rpm.ChartSettings',
             'Rally.ui.combobox.ComboBox',
             'Rally.util.Test',
             'Deft.Deferred'
         ],
 
+        mixins: [
+            'Rally.apps.charts.DateMixin'
+        ],
+
         scheduleStates: ["Defined", "In-Progress", "Completed", "Accepted"],
 
-        PI_SETTING: "buttonchooser",
+        PI_SETTING: "portfolioItemPicker",
 
         items: [
             {
@@ -23,62 +28,8 @@
             }
         ],
 
-        dateFormatters: [
-            {key: "MMM", value: "%b"},
-            {key: "MM", value: "%m"},
-            {key: "dd", value: "%d"},
-            {key: "yyyy", value: "%Y"}
-        ],
-
         getSettingsFields: function () {
-            var self = this;
-
-            return [
-                {
-                    type: "buttonchooser",
-                    label: "Portfolio Item",
-                    config: {
-                        type: "portfolioitem",
-                        cls: "pichooser",
-                        context: this.getContext()
-                    }
-                },
-                {
-                    xtype: "rallycombobox",
-                    name: "chartAggregationType",
-                    fieldLabel: "Data Type",
-                    queryMode: "local",
-                    editable: false,
-                    store: {
-                        xtype: "store",
-                        fields: ["name", "value"],
-                        data: [
-                            {name: "Story Count", value: "storycount"},
-                            {name: "Story Plan Estimate", value: "storypoints"}
-                        ]
-                    },
-                    displayField: "name",
-                    valueField: "value",
-                    listeners: {
-                        load: function() {
-                            this.setValue(self.getSetting("chartAggregationType") || "storycount");
-                        },
-                        select: function() {
-                            this.setValue(this.value);
-                        }
-                    }
-                },
-                {
-                    xtype: "rallydatefield",
-                    fieldLabel: "Start Date (optional)",
-                    name: "startDate"
-                },
-                {
-                    xtype: "rallydatefield",
-                    fieldLabel: "End Date (optional)",
-                    name: "endDate"
-                }
-            ];
+            return this.chartSettings.getSettingsConfiguration();
         },
 
         clientMetrics: {
@@ -90,21 +41,22 @@
         launch: function () {
             this._setupEvents();
 
+            this._setupChartSettings();
+
             this._addHelpComponent();
             this._setDefaultConfigValues();
             this._setupUpdateBeforeRender();
 
-            var savedPortfolioItem = this._loadSavedPortfolioItem();
-            if (savedPortfolioItem) {
-                this._loadPortfolioItem(savedPortfolioItem);
-            }
-            else {
-                // this.owner is the panel this app belongs to
-                this.owner.showSettings();
-            }
+            this._loadSavedPortfolioItem();
         },
 
-        _setupUpdateBeforeRender: function() {
+        _setupChartSettings: function () {
+            this.chartSettings = Ext.create("Rally.apps.charts.rpm.ChartSettings", {
+                app: this
+            });
+        },
+
+        _setupUpdateBeforeRender: function () {
             this.chartComponentConfig.updateBeforeRender = this._setupDynamicHooksWithEvents(
                 this.chartComponentConfig.updateBeforeRender,
                 'updateBeforeRender'
@@ -116,10 +68,10 @@
             );
         },
 
-        _setupDynamicHooksWithEvents: function(func, event) {
+        _setupDynamicHooksWithEvents: function (func, event) {
             var self = this;
 
-            return function() {
+            return function () {
                 self.fireEvent(event);
                 if ('function' === typeof func) {
                     func.apply(this);
@@ -168,63 +120,67 @@
         },
 
         _loadSavedPortfolioItem: function () {
-            var piJson = this.getSetting(this.PI_SETTING);
-            if (!piJson) {
-                return false;
+            if (!this._validateSettingsChoices()) {
+                return this.owner.showSettings();
             }
 
-            var savedPi = Ext.JSON.decode(piJson);
-            if (!this._savedPortfolioItemValid(savedPi)) {
-                return false;
-            }
-
-            return savedPi;
-        },
-
-        _savedPortfolioItemValid: function (savedPi) {
-            return savedPi &&
-                savedPi.context &&
-                (savedPi.context.workspace ||
-                savedPi.context.project) &&
-                savedPi.artifact &&
-                savedPi.artifact._type &&
-                savedPi.artifact.ObjectID;
-        },
-
-        _loadPortfolioItem: function (savedPortfolioItem) {
-            var context = savedPortfolioItem.context;
-            var portfolioItem = savedPortfolioItem.artifact;
-
-            Rally.data.ModelFactory.getModel({
-                context: context,
-                type: portfolioItem._type,
-                success: function (model) {
-                    this._onModelRetrieved(model, savedPortfolioItem);
+            var portfolioItemRef = this.getSetting(this.PI_SETTING);
+            var store = Ext.create("Rally.data.WsapiDataStore", {
+                model: "Portfolio Item",
+                filters: [
+                    {
+                        property: "ObjectID",
+                        operator: "=",
+                        value: Rally.util.Ref.getOidFromRef(portfolioItemRef)
+                    }
+                ],
+                context: {
+                    workspace: this.getContext().getWorkspaceRef(),
+                    project: null
                 },
                 scope: this
             });
+
+            store.on('load', this._onPortfolioItemRetrieved, this);
+            store.load();
         },
 
-        _onModelRetrieved: function (model, savedPortfolioItem) {
-            if (model) {
-                model.find({
-                    filters: {
-                        property: "ObjectID",
-                        value: savedPortfolioItem.artifact.ObjectID
-                    },
-                    context: {
-                        workspace: this.getContext().getWorkspace()._ref,
-                        project: null
-                    },
-                    scope: this,
-                    callback: this._onPortfolioItemRetrieved
-                });
-            } else {
-                this._portfolioItemNotValid();
+        _validateSettingsChoices: function () {
+            var piRef = this.getSetting(this.PI_SETTING),
+                startDate = this._getSettingStartDate(),
+                endDate = this._getSettingEndDate(),
+                dataType = this.getSetting("chartAggregationType"),
+                invalid = function (value) {
+                    return !value || value === "undefined";
+                };
+
+            if (invalid(piRef) || invalid(startDate) || invalid(endDate) || invalid(dataType)) {
+                return false;
             }
+            return true;
         },
 
-        _onPortfolioItemRetrieved: function (portfolioItemRecord) {
+        _getSettingStartDate: function() {
+            return this.getSetting("startdate") || this.getSetting("startDate");
+        },
+
+        _getSettingEndDate: function() {
+            return this.getSetting("enddate") || this.getSetting("endDate");
+        },
+
+        _savedPortfolioItemValid: function (savedPi) {
+            return !!(savedPi && savedPi._type && savedPi.ObjectID && savedPi.Name);
+        },
+
+        _onPortfolioItemRetrieved: function (store) {
+            var storeData = store.getAt(0),
+                portfolioItemRecord = storeData.data;
+
+            if (!this._savedPortfolioItemValid(portfolioItemRecord)) {
+                this._portfolioItemNotValid();
+                return;
+            }
+
             if (portfolioItemRecord) {
                 Rally.data.ModelFactory.getModel({
                     type: 'UserStory',
@@ -239,8 +195,8 @@
         },
 
         _onUserStoryModelRetrieved: function (model, portfolioItemRecord) {
-            this._updateChartComponentConfig(model, portfolioItemRecord.data).then({
-                success: function(chartComponentConfig) {
+            this._updateChartComponentConfig(model, portfolioItemRecord).then({
+                success: function (chartComponentConfig) {
                     this.add(chartComponentConfig);
                     Rally.environment.getMessageBus().publish(Rally.Message.piChartAppReady);
                 },
@@ -252,7 +208,7 @@
             var deferred = Ext.create('Deft.Deferred');
 
             this._getScheduleStateValues(model).then({
-                success: function(scheduleStateValues) {
+                success: function (scheduleStateValues) {
                     this.chartComponentConfig.calculatorConfig.scheduleStates = scheduleStateValues;
 
                     this._setDynamicConfigValues(portfolioItem);
@@ -272,8 +228,8 @@
 
             if (model) {
                 model.getField('ScheduleState').getAllowedValueStore().load({
-                    callback: function(records, operation, success) {
-                        var scheduleStateValues = Ext.Array.map(records, function(record) {
+                    callback: function (records, operation, success) {
+                        var scheduleStateValues = Ext.Array.map(records, function (record) {
                             return record.get('StringValue');
                         });
                         deferred.resolve(scheduleStateValues);
@@ -308,8 +264,7 @@
                 x: 0,
                 y: 20,
                 formatter: function () {
-                    var dateArray = self._dateStringToObject(this.value);
-                    return self._formatDate(new Date(dateArray.year, dateArray.month, dateArray.day));
+                    return self._formatDate(self.dateStringToObject(this.value));
                 }
             };
         },
@@ -320,27 +275,16 @@
             for (var i = 0; i < this.dateFormatters.length; i++) {
                 dateFormat = dateFormat.replace(this.dateFormatters[i].key, this.dateFormatters[i].value);
             }
-            
+
             return dateFormat;
         },
 
-        _formatDate: function(date) {
+        _formatDate: function (date) {
             if (!this.dateFormat) {
                 this.dateFormat = this._parseRallyDateFormatToHighchartsDateFormat();
             }
 
             return Highcharts.dateFormat(this.dateFormat, date.getTime());
-        },
-
-        _dateStringToObject: function(dateStr) {
-            var strippedDate = dateStr.slice(0, dateStr.indexOf('T'));
-            var dateArray = strippedDate.split('-');
-            dateArray[1] = (parseInt(dateArray[1], 10) - 1).toString();
-            return {
-                year: dateArray[0],
-                month: dateArray[1],
-                day: dateArray[2]
-            };
         },
 
         _calculateDateRange: function (portfolioItem) {
@@ -361,18 +305,15 @@
                 appWidth = this.getWidth(),
                 ticks = Math.floor(appWidth / pixelTickWidth);
 
-            var startDateArr = this._dateStringToObject(startDate),
-                endDateArr = this._dateStringToObject(endDate);
-
-            var startDateObj = new Date(startDateArr.year, startDateArr.month, startDateArr.day),
-                endDateObj = new Date(endDateArr.year, endDateArr.month, endDateArr.day);
+            var startDateObj = this.dateStringToObject(startDate),
+                endDateObj = this.dateStringToObject(endDate);
 
             var days = Math.floor((endDateObj.getTime() - startDateObj.getTime()) / 86400000);
 
             return Math.floor(days / ticks);
         },
 
-        _getUserConfiguredDateFormat: function() {
+        _getUserConfiguredDateFormat: function () {
             return this.getContext().getUser().UserProfile.DateFormat;
         },
 
@@ -411,24 +352,24 @@
             var template = Ext.create("Ext.XTemplate",
                 '<tpl if="plannedStartDate">' +
                     '<span>Planned Start: {plannedStartDate}</span>' +
-                    '<tpl if="plannedEndDate">' +
-                        '<tpl if="tooBig">' +
-                            '<br />' +
-                        '<tpl else>' +
-                            '&nbsp;&nbsp;&nbsp;' +
-                        '</tpl>' +
+                    '    <tpl if="plannedEndDate">' +
+                    '        <tpl if="tooBig">' +
+                    '            <br />' +
+                    '        <tpl else>' +
+                    '            &nbsp;&nbsp;&nbsp;' +
+                    '        </tpl>' +
+                    '    </tpl>' +
                     '</tpl>' +
-                '</tpl>' +
-                '<tpl if="plannedEndDate">' +
-                    '<span>Planned End: {plannedEndDate}</span>' +
-                '</tpl>'
+                    '<tpl if="plannedEndDate">' +
+                    '    <span>Planned End: {plannedEndDate}</span>' +
+                    '</tpl>'
             );
 
-            if(portfolioItem && portfolioItem.PlannedStartDate) {
+            if (portfolioItem && portfolioItem.PlannedStartDate) {
                 plannedStartDate = this._formatDate(portfolioItem.PlannedStartDate);
             }
 
-            if(portfolioItem && portfolioItem.PlannedEndDate) {
+            if (portfolioItem && portfolioItem.PlannedEndDate) {
                 plannedEndDate = this._formatDate(portfolioItem.PlannedEndDate);
             }
 
@@ -446,7 +387,7 @@
         },
 
         _getAggregationType: function () {
-            return this.getSetting("chartAggregationType") || "storycount";
+            return this.getSetting("chartAggregationType");
         },
 
         _getYAxisTitle: function () {
@@ -456,19 +397,50 @@
         },
 
         _getChartStartDate: function (portfolioItem) {
-            var startDateSetting = this.getSetting('startDate');
-            var startDate = startDateSetting ? new Date(startDateSetting) : undefined;
+            var startDateSetting = this._getSettingStartDate().split(","),
+                settingValue = startDateSetting[0],
+                startDate;
 
-            var date = startDate || portfolioItem.ActualStartDate || portfolioItem.ActualEndDate || new Date();
-            return Ext.Date.format(date, 'Y-m-d\\TH:i:s.u\\Z');
+            if(startDateSetting[0] === "selecteddate") {
+                startDate = this.dateStringToObject(startDateSetting[1]);
+            } else {
+                startDate = this._dateFromSettingValue(portfolioItem, settingValue);
+            }
+
+            return this.dateToString(startDate);
         },
 
         _getChartEndDate: function (portfolioItem) {
-            var endDateSetting = this.getSetting('endDate');
-            var endDate = endDateSetting ? new Date(endDateSetting) : undefined;
+            var endDateSetting = this._getSettingEndDate().split(","),
+                settingValue = endDateSetting[0],
+                endDate;
 
-            var date = endDate || portfolioItem.ActualEndDate || new Date();
-            return Ext.Date.format(date, 'Y-m-d\\TH:i:s.u\\Z');
+            if (endDateSetting[0] === "selecteddate") {
+                endDate = this.dateStringToObject(endDateSetting[1]);
+            } else {
+                endDate = this._dateFromSettingValue(portfolioItem, settingValue);
+            }
+
+            return this.dateToString(endDate);
+        },
+
+        _dateFromSettingValue: function (portfolioItem, settingValue) {
+            var settingsMap = {
+                "plannedstartdate": "PlannedStartDate",
+                "plannedenddate": "PlannedEndDate",
+                "actualstartdate": "ActualStartDate",
+                "actualenddate": "ActualEndDate"
+            };
+
+            if (settingValue === "today") {
+                return new Date();
+            }
+
+            if (settingsMap.hasOwnProperty(settingValue)) {
+                return portfolioItem[settingsMap[settingValue]];
+            }
+
+            return new Date(settingValue);
         },
 
         _getTimeZone: function () {

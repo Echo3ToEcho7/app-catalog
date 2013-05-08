@@ -18,8 +18,12 @@
         },
 
         setRadioValue: function (cmp) {
+            this.setRadioToCustomValue(cmp, this.getSetting());
+        },
+
+        setRadioToCustomValue: function (cmp, customValue) {
             var value = {};
-            value[cmp.name] = this.getSetting();
+            value[cmp.name] = customValue;
             cmp.setValue(value);
         }
     });
