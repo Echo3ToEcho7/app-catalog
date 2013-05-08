@@ -31,6 +31,8 @@
             var columnEls = this.cmp.createColumnElements(forwards ? 'after' : 'before', insertNextToColumn);
             this.cmp.renderColumn(column, columnEls.th, columnEls.td);
 
+            this.cmp.fireEvent('scroll', this.cmp);
+
             this._afterScroll(forwards);
         },
 

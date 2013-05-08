@@ -59,6 +59,10 @@
                                 this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref);
                             }
                         },
+                        scroll: function() {
+                            this._unalignProgressBars();
+                            this._alignProgressBars();
+                        },
                         scope: this
                     },
                     plugins: this.getContext().isFeatureEnabled('SCROLLING_ON_CARDBOARD') ? [
@@ -100,6 +104,11 @@
                 Rally.BrowserTest.publishComponentReady(this);
             }
             this._alignProgressBars();
+        },
+
+        _unalignProgressBars: function() {
+            this.getEl().select('.column-header').setHeight('auto');
+            this.getEl().select('.progress-bar-background').setStyle({ position: 'static' });
         },
 
         _alignProgressBars: function() {
