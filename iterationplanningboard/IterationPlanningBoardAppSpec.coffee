@@ -523,6 +523,25 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     ).then =>
       @app.getEl().select('.column-header').each((el, compositeEl, index) ->
         elHeight = el.getHeight()
-        expect(elHeight).toEqual(compositeEl.item(i).getHeight()) for i in [0...index].reverse()
+        expect(elHeight).toEqual(compositeEl.item(i).getHeight()) for i in [0...index]
         return
       )
+
+  it 'should give all column headers the same height after scrolling', ->
+    iterationData = Helpers.IterationDataCreatorHelper.createIterationData
+      iterationCount: 4
+      plannedVelocity: 20
+
+    iterationData[0] = Helpers.IterationDataCreatorHelper.createIterationData(iterationCount: 1)[0]
+
+    iterationData[3].Name = 'Iteration with really really really really really really really really really really really really really really really really really really really really really really really really long name'
+
+    @createApp(
+      iterationData: iterationData
+    ).then =>
+      @click(className: 'scroll-forwards').then =>
+        @app.getEl().select('.column-header').each((el, compositeEl, index) ->
+          elHeight = el.getHeight()
+          expect(elHeight).toEqual(compositeEl.item(i).getHeight()) for i in [0...index]
+          return
+        )
