@@ -110,7 +110,10 @@
                     validateOnBlur: false
                 },
                 {
-                    type: 'query'
+                    type: 'query',
+                    config: {
+                        helpId: 194
+                    }
                 }
             ];
         }
