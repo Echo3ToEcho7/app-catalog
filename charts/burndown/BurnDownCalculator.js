@@ -13,8 +13,8 @@
                     "as": "RemainingPoints",
                     "f": function(snapshot) {
                         var ss = snapshot.ScheduleState;
-                        if(inProgressStates.indexOf(ss) > -1 && snapshot.TaskEstimateTotal) {
-                            return snapshot.TaskEstimateTotal;
+                        if(inProgressStates.indexOf(ss) > -1 && snapshot.PlanEstimate) {
+                            return snapshot.PlanEstimate;
                         }
 
                         return 0;
@@ -24,8 +24,8 @@
                     "as": "AcceptedPoints",
                     "f": function(snapshot) {
                         var ss = snapshot.ScheduleState;
-                        if (completedStates.indexOf(ss) > -1 && snapshot.TaskEstimateTotal) {
-                            return snapshot.TaskEstimateTotal;
+                        if (completedStates.indexOf(ss) > -1 && snapshot.PlanEstimate) {
+                            return snapshot.PlanEstimate;
                         }
 
                         return 0;
