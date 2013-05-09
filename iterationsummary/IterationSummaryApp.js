@@ -58,6 +58,7 @@
         },
 
         onScopeChange: function(scope) {
+            this.timeBoxInfo = this._calculateTimeBoxInfo(this._tzOffset);
             this.addContent();
         },
 
@@ -89,7 +90,7 @@
                         } else {
                             this._tzOffset = 0;
                         }
-                        this._setTimeBoxInfo(this._tzOffset);
+                        this.timeBoxInfo = this._calculateTimeBoxInfo(this._tzOffset);
                         deferred.resolve();
                     },
                     scope: this
@@ -197,11 +198,11 @@
             return message;
         },
 
-        _setTimeBoxInfo: function(tzOffset) {
+        _calculateTimeBoxInfo: function(tzOffset) {
             var timeboxCounts = Rally.util.Timebox.getCounts(this.getStartDate(), this.getEndDate(),
                                 this.getContext().getWorkspace().WorkspaceConfiguration.WorkDays, tzOffset);
 
-            this.timeBoxInfo = {
+            return {
                 timeOrientation: Rally.util.Timebox.getOrientation(this.getStartDate(), this.getEndDate(), tzOffset),
                 timeboxLength: timeboxCounts.workdays,
                 daysRemaining: timeboxCounts.remaining
