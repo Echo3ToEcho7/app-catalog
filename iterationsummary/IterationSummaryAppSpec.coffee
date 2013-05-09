@@ -6,7 +6,7 @@ Ext.require [
 
 describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
   helpers
-    _getContext: (initialValues) ->
+    getContext: (initialValues) ->
       globalContext = Rally.environment.getContext()
 
       Ext.create('Rally.app.Context', {
@@ -18,25 +18,30 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }, initialValues)
       })
 
-    _createApp: (initialValues) ->
+    createApp: (initialValues) ->
       @container = Ext.create('Ext.Container', {
         renderTo:'testDiv'
       })
 
       app = Ext.create('Rally.apps.iterationsummary.IterationSummaryApp', {
-        context: @_getContext(initialValues)
+        context: @getContext(initialValues)
       })
 
       @container.add(app)
       @waitForComponentReady(app)
 
-    _stubApp: (config) ->
+    stubApp: (config) ->
       @stubPromiseFunction(Rally.apps.iterationsummary.IterationSummaryApp.prototype, 'getScheduleStates',
         (config.scheduleStates || ["Defined", "In-Progress", "Completed", "Accepted"]))
       @stub(Rally.apps.iterationsummary.IterationSummaryApp.prototype, 'getStartDate').returns(config.startDate || new Date())
       @stub(Rally.apps.iterationsummary.IterationSummaryApp.prototype, 'getEndDate').returns(config.endDate || new Date())
       @_stubIterationQuery(config.tzOffset || 0)
       @stub(Rally.util.Timebox, 'getToday').returns(config.today || new Date())
+
+    stubTimeBoxInfo: (orientation) ->
+      timeOrientation: orientation
+      timeboxLength: 4
+      daysRemaining: 0
 
     _stubIterationQuery: (tzOffset = 0) ->
       @ajax.whenQuerying('iteration').respondWith([{
@@ -51,7 +56,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
                 tzOffset: tzOffset * 60
       })
 
-    _prepareNoneAcceptedData: ->
+    prepareNoneAcceptedData: ->
       @ajax.whenQuerying('userstory').respondWith([{
           PlanEstimate:1.0
           ScheduleState:"Backlog"
@@ -191,7 +196,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }
       ])
 
-    _prepareFiveDefectsData: ->
+    prepareFiveDefectsData: ->
       @ajax.whenQuerying('userstory').respondWith([
         {
           Summary:
@@ -261,7 +266,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }
       ])
 
-    _prepareNoActiveDefectsData: ->
+    prepareNoActiveDefectsData: ->
       @ajax.whenQuerying('userstory').respondWith([
         {
           PlanEstimate:1.0
@@ -331,7 +336,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }
       ])
 
-    _prepareSomeAcceptedData: ->
+    prepareSomeAcceptedData: ->
       @ajax.whenQuerying('userstory').respondWith([
         {
           PlanEstimate:1.0
@@ -472,7 +477,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }
       ])
 
-    _prepareAllAcceptedData: ->
+    prepareAllAcceptedData: ->
       @ajax.whenQuerying('userstory').respondWith([
         {
           PlanEstimate:1.0
@@ -632,7 +637,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }
       ])
 
-    _prepareSomeFailingTestsData: ->
+    prepareSomeFailingTestsData: ->
       @ajax.whenQuerying('userstory').respondWith([
         {
           Summary:
@@ -672,7 +677,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }
       ])
 
-    _prepareTestSetData: (testSetSummaryVerdicts) ->
+    prepareTestSetData: (testSetSummaryVerdicts) ->
       @ajax.whenQuerying('userstory').respondWith()
       @ajax.whenQuerying('defectsuite').respondWith()
       @ajax.whenQuerying('defect').respondWith()
@@ -687,7 +692,6 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
   beforeEach ->
     @_stubIterationQuery()
-    # @stubDefer()
 
   afterEach ->
     @container?.destroy()
@@ -707,57 +711,51 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
     )
     displayStatusRowsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_displayStatusRows')
 
-    @_createApp({}).then (app) =>
+    @createApp({}).then (app) =>
 
       expect(displayStatusRowsSpy).not.toHaveBeenCalled()
 
   it "calls wsapidatastore if models are available", ->
     displayStatusRowsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_displayStatusRows')
 
-    @_createApp({}).then (app) =>
+    @createApp({}).then (app) =>
 
       @waitForCallback(displayStatusRowsSpy)
 
   it "getPostAcceptedState with no before or after state", ->
     @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Defined", "In-Progress", "Completed", "Accepted"]
-    @_createApp({}).then (app) =>
+    @createApp({}).then (app) =>
       app._getPostAcceptedState().always (postAcceptedState) ->
         expect(postAcceptedState).toBeNull()
 
   it "getPostAcceptedState with only a before state", ->
     @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Idea", "Defined", "In-Progress", "Completed", "Accepted"]
-    @_createApp({}).then (app) =>
+    @createApp({}).then (app) =>
       app._getPostAcceptedState().always (postAcceptedState) ->
         expect(postAcceptedState).toBeNull()
 
   it "getPostAcceptedState with only an after state", ->
     @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Defined", "In-Progress", "Completed", "Accepted", "Released"]
-    @_createApp({}).then (app) =>
+    @createApp({}).then (app) =>
       app._getPostAcceptedState().always (postAcceptedState) ->
         expect(postAcceptedState).toBe "Released"
 
   it "getPostAcceptedState with a before and after state", ->
     @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ["Idea", "Defined", "In-Progress", "Completed", "Accepted", "Really Really Done"]
-    @_createApp({}).then (app) =>
+    @createApp({}).then (app) =>
       app._getPostAcceptedState().always (postAcceptedState) ->
         expect(postAcceptedState).toBe "Really Really Done"
 
   it "does not aggregate testset and defectsuite data for HS subscriptions", ->
 
-    @_prepareFiveDefectsData()
-
-    # @_stubApp(
-    #   startDate:new Date(2011, 4, 6)
-    #   endDate:new Date(2011, 4, 20, 23, 59, 59)
-    #   today:new Date(2011, 5, 16)
-    # )
+    @prepareFiveDefectsData()
 
     @stub(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_isHsOrTeamEdition').returns true
     testsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getTestsConfigObject')
     defectSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getDefectsConfigObject')
 
     app = Ext.create('Rally.apps.iterationsummary.IterationSummaryApp',
-      context: @_getContext()
+      context: @getContext()
     )
     @waitForComponentReady(app).then ->
 
@@ -770,16 +768,37 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       expect(testsSpy).not.toHaveBeenCalled()
 
   it "does aggregate testset data for UE or EE subscriptions", ->
-    testPassingSelector = '.x4-component.header.testsPassing'
+    @prepareTestSetData(Pass: 2, Fail: 1, Inconclusive: 1)
+    @createApp({}).then (app) =>
+      @waitForVisible(
+        css: '.x4-component.header.testsPassing'
+        text: "50% Tests Passing"
+      )
 
-    @_prepareTestSetData(Pass: 2, Fail: 1, Inconclusive: 1)
-    @_createApp({}).then (app) =>
-      @waitForVisible(css: testPassingSelector).then =>
-        expect(Ext.DomQuery.selectNode(testPassingSelector).innerHTML).toContain "50% Tests Passing"
+  it "sets timeBoxInfo every time iteraton scope is changed", ->
+    @prepareTestSetData(Pass: 2, Fail: 1, Inconclusive: 1)
+    timeBoxInfoStub = @stub(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_calculateTimeBoxInfo')
+    timeBoxInfoStub.returns(@stubTimeBoxInfo('past'))
+
+    @createApp({}).then (app) =>
+      @waitForVisible(
+        css: '.timeboxStatusRow'
+        text: "50% Tests Passing"
+      ).then =>
+        expect(timeBoxInfoStub.callCount).toBe 1
+
+        timeBoxInfoStub.returns(@stubTimeBoxInfo('future'))
+        app.onScopeChange()
+        @waitForComponentReady(app).then =>
+          @waitForNotVisible(
+            css: '.timeboxStatusRow'
+            text: "50% Tests Passing"
+          ).then =>
+            expect(timeBoxInfoStub.callCount).toBe 2
 
 
   it "refreshes app on objectUpdate of artifacts", ->
-    @_createApp({}).then (app) =>
+    @createApp({}).then (app) =>
       addContentStub = @stub(app, 'addContent')
 
       messageBus = Rally.environment.getMessageBus()
@@ -789,16 +808,16 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       expect(addContentStub.callCount).toBe 5
 
   it "does not refresh app on objectUpdate of non-artifacts", ->
-    @_createApp({}).then (app) =>
+    @createApp({}).then (app) =>
       addContentSpy = @spy(app, 'addContent')
 
       Rally.environment.getMessageBus().publish(Rally.Message.objectUpdate, @mom.getRecord('Release'))
 
       expect(addContentSpy).not.toHaveBeenCalled()
 
-  it "only calculates timebox info once", ->
+  it "only fetches iteration schema once", ->
     httpGetSpy = @spy(Rally.env.IoProvider.prototype, 'httpGet')
-    @_createApp({}).then (app) =>
+    @createApp({}).then (app) =>
       expect(httpGetSpy).toHaveBeenCalledOnce()
 
       app.calculateTimeboxInfo().then ->
@@ -807,7 +826,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
   it "only gets scheduleStates once", ->
     scheduleStates = ['Defined', 'In-Progress', 'Completed']
     ajaxRequest = @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith scheduleStates
-    @_createApp({}).then (app) =>
+    @createApp({}).then (app) =>
       expect(ajaxRequest).toHaveBeenCalledOnce()
 
       ajaxRequest = @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith ['Defined', 'In-Progress', 'Accepted']
@@ -880,7 +899,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       }
     ])
 
-    @_stubApp({
+    @stubApp({
       startDate:new Date(2011, 4, 13),
       endDate:new Date(2011, 4, 20, 23, 59, 59),
       today:new Date(2011, 4, 14)
@@ -888,7 +907,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
-    @_createApp({}).then (app) =>
+    @createApp({}).then (app) =>
 
       summedPlanEstimate = 0
       Ext.Array.forEach(app.results.userstory, (s) ->
@@ -905,9 +924,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays no stats for future timebox", ->
 
-      @_prepareNoneAcceptedData()
+      @prepareNoneAcceptedData()
 
-      @_stubApp({
+      @stubApp({
         startDate:new Date(2051, 5, 15),
         endDate:new Date(2051, 5, 16, 23, 59, 59)
       })
@@ -916,7 +935,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       defectSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getDefectsConfigObject')
       testSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getTestsConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         acceptanceSpy.firstCall.returnValue.then (configAcceptance) ->
           expect(!!configAcceptance.title).toBeFalsy()
@@ -935,9 +954,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays no alarming acceptance stats when timebox has just started", ->
 
-      @_prepareNoneAcceptedData()
+      @prepareNoneAcceptedData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 13)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 4, 14)
@@ -945,7 +964,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
           expect(configAcceptance.title).toBe "0% Accepted"
@@ -955,9 +974,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "does not display defect stats when no active defects for current timebox", ->
 
-      @_prepareNoActiveDefectsData()
+      @prepareNoActiveDefectsData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 13)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 4, 14)
@@ -965,7 +984,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       defectSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getDefectsConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         configDefects = defectSpy.firstCall.returnValue
         expect(!!configDefects.title).toBeFalsy()
@@ -974,9 +993,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays defect stats for current timebox", ->
 
-      @_prepareFiveDefectsData()
+      @prepareFiveDefectsData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 13)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 4, 14)
@@ -984,7 +1003,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       defectSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getDefectsConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         configDefects = defectSpy.firstCall.returnValue
         expect(configDefects.title).toBe "5 Active Defects"
@@ -993,9 +1012,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays acceptance warning 5 days into a long timebox", ->
 
-      @_prepareNoneAcceptedData()
+      @prepareNoneAcceptedData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 1)
         endDate:new Date(2011, 4, 28, 23, 59, 59)
         today:new Date(2011, 4, 20)
@@ -1003,7 +1022,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
           expect(configAcceptance.title).toBe "0% Accepted"
@@ -1013,9 +1032,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays acceptance pending 5 days into a long timebox", ->
 
-      @_prepareSomeAcceptedData()
+      @prepareSomeAcceptedData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 1)
         endDate:new Date(2011, 4, 28, 23, 59, 59)
         today:new Date(2011, 4, 20)
@@ -1023,7 +1042,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
           expect(configAcceptance.title).toBe "48% Accepted"
@@ -1033,9 +1052,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays acceptance pending halfway through a short timebox", ->
 
-      @_prepareSomeAcceptedData()
+      @prepareSomeAcceptedData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 2)
         endDate:new Date(2011, 4, 6, 23, 59, 59)
         today:new Date(2011, 4, 5)
@@ -1043,7 +1062,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
           expect(configAcceptance.title).toBe "48% Accepted"
@@ -1053,9 +1072,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays acceptance error when all work not accepted from past timebox", ->
 
-      @_prepareSomeAcceptedData()
+      @prepareSomeAcceptedData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 2)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 5, 5)
@@ -1063,7 +1082,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
           expect(configAcceptance.title).toBe "48% Accepted"
@@ -1073,9 +1092,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays defect error when active defects remain from past timebox", ->
 
-      @_prepareFiveDefectsData()
+      @prepareFiveDefectsData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 13)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 5, 14)
@@ -1083,7 +1102,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       defectSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getDefectsConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         configDefects = defectSpy.firstCall.returnValue
         expect(configDefects.title).toBe "5 Active Defects"
@@ -1092,9 +1111,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "does not display defect stats when no active defects for past timebox", ->
 
-      @_prepareNoActiveDefectsData()
+      @prepareNoActiveDefectsData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 13)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 5, 14)
@@ -1102,7 +1121,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       defectSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getDefectsConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         configDefects = defectSpy.firstCall.returnValue
         expect(!!configDefects.title).toBeFalsy()
@@ -1110,9 +1129,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         expect(!!configDefects.message).toBeFalsy()
 
     it "displays positive acceptance stats when all work accepted for past timebox", ->
-      @_prepareAllAcceptedData()
+      @prepareAllAcceptedData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 2)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 5, 5)
@@ -1120,7 +1139,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
           expect(configAcceptance.title).toBe "100% Accepted"
@@ -1289,7 +1308,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }
       ])
 
-      @_stubApp({
+      @stubApp({
         scheduleStates:["Defined", "In-Progress", "Completed", "Accepted", "Released"],
         startDate:new Date(2011, 4, 2),
         endDate:new Date(2011, 4, 20, 23, 59, 59),
@@ -1298,7 +1317,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
           expect(configAcceptance.title).toBe "100% Accepted"
@@ -1448,7 +1467,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
         }
       ])
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 2)
         endDate:new Date(2011, 4, 6, 23, 59, 59)
         today:new Date(2011, 4, 5)
@@ -1456,7 +1475,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
           expect(configAcceptance.title).toBe "100% Accepted"
@@ -1466,9 +1485,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays gently scolding for past timebox with work accepted late", ->
 
-      @_prepareAllAcceptedData()
+      @prepareAllAcceptedData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 3, 2)
         endDate:new Date(2011, 3, 20, 23, 59, 59)
         today:new Date(2011, 4, 20)
@@ -1476,7 +1495,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       acceptanceSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getAcceptanceConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         acceptanceSpy.firstCall.returnValue.always (configAcceptance) ->
           expect(configAcceptance.title).toBe "100% Accepted"
@@ -1520,7 +1539,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
               Fail: 0
       ])
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 2)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 5, 5)
@@ -1528,7 +1547,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       testsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getTestsConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         configTests = testsSpy.firstCall.returnValue
         expect(!!configTests.title).toBeFalsy()
@@ -1537,9 +1556,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays pending when less than halfway or 5 days", ->
 
-      @_prepareSomeFailingTestsData()
+      @prepareSomeFailingTestsData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 6)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 4, 8)
@@ -1547,7 +1566,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       testsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getTestsConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         configTests = testsSpy.firstCall.returnValue
         expect(configTests.title).toBe "33% Tests Passing"
@@ -1587,7 +1606,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
               Fail: 3
       ])
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 6)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 4, 16)
@@ -1595,7 +1614,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       testsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getTestsConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         configTests = testsSpy.firstCall.returnValue
         expect(configTests.title).toBe "0% Tests Passing"
@@ -1605,9 +1624,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays pending if some failing tests during current timebox", ->
 
-      @_prepareSomeFailingTestsData()
+      @prepareSomeFailingTestsData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 6)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 4, 16)
@@ -1615,7 +1634,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       testsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getTestsConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         configTests = testsSpy.firstCall.returnValue
         expect(configTests.title).toBe "33% Tests Passing"
@@ -1655,7 +1674,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
               Fail: 0
       ])
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 6)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 4, 16)
@@ -1663,7 +1682,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       testsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getTestsConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         configTests = testsSpy.firstCall.returnValue
         expect(configTests.title).toBe "100% Tests Passing"
@@ -1673,9 +1692,9 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
     it "displays error if any failing tests during past timeboxes", ->
 
-      @_prepareSomeFailingTestsData()
+      @prepareSomeFailingTestsData()
 
-      @_stubApp(
+      @stubApp(
         startDate:new Date(2011, 4, 6)
         endDate:new Date(2011, 4, 20, 23, 59, 59)
         today:new Date(2011, 5, 16)
@@ -1683,7 +1702,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
       testsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getTestsConfigObject')
 
-      @_createApp({}).then (app) =>
+      @createApp({}).then (app) =>
 
         configTests = testsSpy.firstCall.returnValue
         expect(configTests.title).toBe "33% Tests Passing"
