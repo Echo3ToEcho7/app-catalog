@@ -86,10 +86,28 @@
                 project: null
             };
 
-            this.setValue(this.settingsParent.app.getSetting("portfolioItemPicker"));
+            this._setValueFromSettings();
 
             this._loadPortfolioItem();
             this._configureChooser();
+        },
+
+        _setValueFromSettings: function() {
+            var newSettingsValue = this.settingsParent.app.getSetting("portfolioItemPicker"),
+                oldSettingsValue = this.settingsParent.app.getSetting("buttonchooser"),
+                value = "";
+
+            if(this._isSettingValid(newSettingsValue)) {
+                value = newSettingsValue;
+            } else if(this._isSettingValid(oldSettingsValue)) {
+                value = Ext.JSON.decode(oldSettingsValue).artifact._ref;
+            } else { }
+
+            this.setValue(value);
+        },
+
+        _isSettingValid: function(value) {
+            return value && value !== "undefined";
         },
 
         _loadPortfolioItem: function () {

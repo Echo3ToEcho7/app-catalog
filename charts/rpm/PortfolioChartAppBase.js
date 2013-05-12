@@ -146,7 +146,7 @@
         },
 
         _validateSettingsChoices: function () {
-            var piRef = this.getSetting(this.PI_SETTING),
+            var piRef = this._getSettingPortfolioItem(),
                 startDate = this._getSettingStartDate(),
                 endDate = this._getSettingEndDate(),
                 dataType = this.getSetting("chartAggregationType"),
@@ -166,6 +166,20 @@
 
         _getSettingEndDate: function() {
             return this.getSetting("enddate") || this.getSetting("endDate");
+        },
+
+        _getSettingPortfolioItem: function() {
+            var currentSetting = this.getSetting(this.PI_SETTING);
+            if(currentSetting && currentSetting !== "undefined") {
+                return currentSetting;
+            }
+
+            var previousSetting = this.getSetting("buttonchooser");
+            if (previousSetting && previousSetting !== "undefined") {
+                return Ext.JSON.decode(previousSetting).artifact._ref;
+            }
+
+            return "undefined";
         },
 
         _savedPortfolioItemValid: function (savedPi) {
