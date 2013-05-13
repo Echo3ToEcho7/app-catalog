@@ -207,6 +207,10 @@
                 cardConfig.fields = Rally.apps.portfolioitem.PortfolioKanbanCard.defaultFields;
             }
 
+            if (Ext.Array.intersect(cardConfig.fields, ['PercentDoneByStoryPlanEstimate','PercentDoneByStoryCount']).length > 0) {
+                columnConfig.additionalFetchFields = Ext.Array.merge(cardConfig.fields, ['PercentDoneByStoryPlanEstimate','PercentDoneByStoryCount']);
+            }
+
             columnConfig.additionalFetchFields.push('Discussion');
             cardConfig.fields.push('Discussion');
 
@@ -239,8 +243,6 @@
             this.down('#bodyContainer').add(cardboard);
             this.setLoading({ id: this.getMaskId() });
 
-            this._attachPercentDoneToolTip(cardboard);
-
             this._renderPolicies();
         },
 
@@ -248,7 +250,8 @@
             return 'btid-portfolio-kanban-board-load-mask-' + this.id;
         },
 
-        _onBoardLoad: function() {
+        _onBoardLoad: function(cardboard) {
+            this._attachPercentDoneToolTip(cardboard);
             this._publishContentUpdated();
             this.setLoading(false);
             Rally.environment.getMessageBus().publish(Rally.Message.piKanbanBoardReady);
@@ -307,20 +310,19 @@
         },
 
         _attachPercentDoneToolTip: function(cardboard) {
-            Ext.create('Rally.ui.tooltip.PercentDoneToolTip', {
-                target: cardboard.getEl(),
-                delegate: '.progress-bar-container',
-                percentDoneName: 'PercentDoneByStoryCount',
-                listeners: {
-                    beforeshow: function(tip) {
-                        var classString = this.cardboard.getCardConfig().showSlimDesign ? '.rui-card-slim' : '.rui-card';
-                        var cardElement = Ext.get(tip.triggerElement).up(classString);
-                        var card = Ext.getCmp(cardElement.id);
+            var classString = this.cardboard.getCardConfig().showSlimDesign ? '.rui-card-slim' : '.rui-card';
 
-                        tip.updateContent(card.getRecord().data);
-                    },
-                    scope: this
-                }
+            cardboard.getEl().select(classString + ' .progress-bar-container').each(function(flyEl) {
+                var el = Ext.get(flyEl.dom);
+                el.hover(function(){
+                    var cardEl = el.up(classString);
+                    var card = Ext.getCmp(cardEl.id);
+                    Ext4.create('Rally.ui.popover.PercentDonePopover', {
+                        target: el,
+                        percentDoneData: card.getRecord().data,
+                        percentDoneName: 'PercentDoneByStoryCount'
+                    });
+                },Ext.emptyFn);
             });
         },
 
@@ -375,6 +377,7 @@
         },
 
         _publishContentUpdatedNoDashboardLayout: function() {
+            this._attachPercentDoneToolTip(this.cardboard);
             this.fireEvent('contentupdated', {dashboardLayout: false});
         }
 

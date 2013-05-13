@@ -8,7 +8,6 @@
     Ext.define('Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', {
         extend: 'Rally.app.App',
         requires: [
-            'Rally.ui.tooltip.PercentDoneToolTip',
             'Rally.data.util.PortfolioItemHelper',
             'Rally.ui.notify.Notifier',
             'Rally.data.QueryFilter',

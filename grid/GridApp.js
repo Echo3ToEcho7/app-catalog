@@ -12,7 +12,8 @@
             'Rally.ui.grid.Grid',
             'Rally.ui.grid.RowActionColumn',
             'Rally.data.util.Sorter',
-            'Rally.data.QueryFilter'
+            'Rally.data.QueryFilter',
+            'Rally.ui.grid.plugin.PercentDonePopoverPlugin'
         ],
 
         launch: function() {
@@ -48,11 +49,13 @@
                     }
                 }
             ].concat(context.get('fetch').split(','));
+
             var gridConfig = {
                 xtype: 'rallygrid',
                 model: model,
                 columnCfgs: columns,
                 enableColumnHide: false,
+                plugins: this._getPlugins(columns),
                 storeConfig: {
                     sorters: Rally.data.util.Sorter.sorters(context.get('order')),
                     context: context.getDataContext()
@@ -73,6 +76,16 @@
                 ];
             }
             this.add(gridConfig);
+        },
+
+        _getPlugins: function(columns) {
+            var plugins = [];
+
+            if (Ext.Array.intersect(columns, ['PercentDoneByStoryPlanEstimate','PercentDoneByStoryCount']).length > 0) {
+                plugins.push('rallypercentdonepopoverplugin');
+            }
+
+            return plugins;
         }
     });
 })();
