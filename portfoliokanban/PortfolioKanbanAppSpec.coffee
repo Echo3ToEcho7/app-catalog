@@ -32,6 +32,15 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     _getTextsForElements: (cssQuery) ->
       Ext.Array.map(@app.getEl().query(cssQuery), (el) -> el.innerHTML).join('__')
 
+    _createAppAndWaitForVisible: (callback) ->
+      @_createApp(project: '/project/431439')
+      @waitForVisible(css: '.progress-bar-container.field-PercentDoneByStoryCount').then =>
+        callback()
+
+    _mouseOverAndWaitForVisible: (fieldName) ->
+      @mouseOver(css: '.progress-bar-container.field-' + fieldName).then =>
+        @waitForVisible(css: '.percentDonePopover')
+
   beforeEach ->
 
     Rally.environment.getContext().context.subscription.Modules = ['Rally Portfolio Manager']
@@ -52,6 +61,36 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
         @app.down('rallyfilterinfo').tooltip.destroy()
 
       @app.destroy()
+
+
+  it 'should create popover when hovering over a progress bar', ->
+    @ajax.whenQuerying('state').respondWith([
+      {
+      '_type': "State"
+      'Name': "Column1"
+      '_ref': '/state/1'
+      'WIPLimit': 4
+      }
+    ])
+    feature =
+      ObjectID: 878
+      _ref: '/portfolioitem/feature/878'
+      FormattedID: 'F1'
+      Name: 'Name of first PI'
+      Owner:
+        _ref: '/user/1'
+        _refObjectName: 'Name of Owner'
+      State: '/state/1'
+      Summary:
+        Discussion:
+          Count: 1
+
+    @ajax.whenQuerying('PortfolioItem/Feature').respondWith [feature]
+
+    if (Ext.isChrome)
+      @_createAppAndWaitForVisible =>
+        @_mouseOverAndWaitForVisible('PercentDoneByStoryCount').then =>
+          expect(Ext.select('.percentDonePopover').elements.length).toEqual(1)
 
   it 'loads type with ordinal of 1 if no type setting is provided', ->
 
