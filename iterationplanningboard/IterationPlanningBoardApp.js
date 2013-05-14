@@ -65,7 +65,7 @@
                         },
                         scope: this
                     },
-                    plugins: this.getContext().isFeatureEnabled('SCROLLING_ON_CARDBOARD') ? [
+                    plugins: [
                         {
                             ptype: 'rallytimeboxscrollablecardboard',
                             backwardsButtonConfig: {
@@ -85,7 +85,7 @@
                                 return Ext.Array.slice(this.cmp.getColumns(), 1, this.cmp.getColumns().length);
                             }
                         }
-                    ] : []
+                    ]
                 },
                 listeners: {
                     load: this._onLoad,
