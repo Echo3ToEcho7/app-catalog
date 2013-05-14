@@ -124,8 +124,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       expect(iterationJson._ref).toEqual column.getValue()
 
   beforeEach ->
-    @stub(Rally.alm.FeatureToggle, 'isEnabled').withArgs("SCROLLING_ON_CARDBOARD").returns(true)
-      .withArgs('ENABLE_SLIM_CARD_DESIGN').returns(true)
+    @stub(Rally.alm.FeatureToggle, 'isEnabled').withArgs('ENABLE_SLIM_CARD_DESIGN').returns(true)
 
     @ajax.whenQuerying('userstory').respondWith()
     @ajax.whenQuerying('defect').respondWith()
