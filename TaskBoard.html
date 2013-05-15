@@ -444,7 +444,7 @@ function initTaskboard() {
             teamMembers.push(schema.Owner.options[0]);
 
             var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
-            YAHOO.util.Connect.asyncRequest('GET', baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName&EmailAddress&LoginName",
+            YAHOO.util.Connect.asyncRequest('GET', baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName,EmailAddress,LoginName",
                     {
                         success:function (callback) {
                             var results = JSON.parse(callback.responseText).QueryResult.Results
