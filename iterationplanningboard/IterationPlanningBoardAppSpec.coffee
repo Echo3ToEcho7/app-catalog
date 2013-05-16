@@ -10,7 +10,7 @@ Ext.require [
 describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
   helpers
-    cardSelector: '.rui-card-slim'
+    cardSelector: '.rui-card'
 
     createApp: (options = {}) ->
       @iterationData = options.iterationData || Helpers.IterationDataCreatorHelper.createIterationData(options)
@@ -124,8 +124,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       expect(iterationJson._ref).toEqual column.getValue()
 
   beforeEach ->
-    @stub(Rally.alm.FeatureToggle, 'isEnabled').withArgs('ENABLE_SLIM_CARD_DESIGN').returns(true)
-
     @ajax.whenQuerying('userstory').respondWith()
     @ajax.whenQuerying('defect').respondWith()
     @ajax.whenQuerying('preference').respondWith({})

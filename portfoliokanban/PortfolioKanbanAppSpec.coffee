@@ -25,8 +25,6 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
       @app = Ext.create('Rally.apps.portfoliokanban.PortfolioKanbanApp', options)
 
-      @stub(@app.getContext(), 'isFeatureEnabled').withArgs('ENABLE_SLIM_CARD_DESIGN').returns true
-
       @waitForComponentReady @app
 
     _getTextsForElements: (cssQuery) ->

@@ -31,8 +31,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
         renderTo: 'testDiv'
       , config))
 
-      @stub(@app.getContext(), 'isFeatureEnabled').withArgs('ENABLE_SLIM_CARD_DESIGN').returns true
-
       @waitForComponentReady(@app)
 
   beforeEach ->
