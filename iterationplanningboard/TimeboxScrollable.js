@@ -29,7 +29,7 @@
             column.on('ready', this._onNewlyAddedColumnReady, this, {single: true});
 
             var columnEls = this.cmp.createColumnElements(forwards ? 'after' : 'before', insertNextToColumn);
-            this.cmp.renderColumn(column, columnEls.th, columnEls.td);
+            this.cmp.renderColumn(column, columnEls);
 
             this.cmp.fireEvent('scroll', this.cmp);
 
@@ -42,10 +42,6 @@
 
         _sizeButtonToColumnHeader: function(button, column){
             var columnHeaderHeight = column.getColumnHeaderCell().getHeight(Ext.isGecko || Ext.isIE);
-
-            if(column.getProgressBar()){
-                columnHeaderHeight = column.getProgressBar().getTop() - column.getColumnHeader().getEl().getTop();
-            }
 
             button.getEl().setHeight(columnHeaderHeight);
         }

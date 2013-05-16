@@ -45,7 +45,16 @@
              * @cfg {Rally.domain.WsapiModel[]}
              * The timebox records (Iteration or Release) for this column
              */
-            timeboxRecords: []
+            timeboxRecords: [],
+
+            /**
+             * @cfg {Object} columnStatusConfig
+             * A config object that will be applied to the column's status area (between the header and content cells).
+             * Used here for the progress bar.
+             */
+            columnStatusConfig: {
+                xtype: 'rallyiterationplanningboardcolumnprogressbar'
+            }
         },
 
         cls: 'column',
@@ -53,7 +62,8 @@
         currentTimeboxCls: 'current-timebox',
 
         requires: [
-            'Ext.XTemplate'
+            'Ext.XTemplate',
+            'Rally.apps.iterationplanningboard.IterationPlanningBoardColumnProgressBar'
         ],
 
         constructor: function(config) {
@@ -75,15 +85,23 @@
 
         initComponent: function() {
             this.callParent(arguments);
-            this.on('beforecarddroppedsave', this._onBeforeCardDrop, this);
-            this.on('addcard', this._drawProgressBar, this);
-            this.on('load', this._drawProgressBar, this);
-            this.on('removecard', this._drawProgressBar, this);
-            this.on('cardupdated', this._drawProgressBar, this);
 
-            this.on('afterrender', function() {
-                this._addPlanningClasses();
-            }, this, {single: true});
+            this.on({
+                beforecarddroppedsave:  this._onBeforeCardDrop,
+                addcard:                this._updateColumnStatus,
+                load:                   this._updateColumnStatus,
+                removecard:             this._updateColumnStatus,
+                cardupdated:            this._updateColumnStatus,
+                afterrender: {
+                    fn: this._addPlanningClasses,
+                    single: true
+                },
+                scope: this
+            });
+        },
+
+        _updateColumnStatus: function() {
+            this.columnStatus.update();
         },
 
         getStoreFilter: function(model) {
@@ -104,47 +122,65 @@
             ];
         },
 
+        getColumnStatus: function() {
+             return this.columnStatus;
+        },
+
+        getStatusCell: function() {
+            return Ext.get(this.statusCell);
+        },
+
         isMatchingRecord: function(record) {
             return Ext.Array.some(this.timeboxRecords, function(timeboxRecord) {
                 return Rally.util.Ref.getOidFromRef(record.get('Iteration')) === timeboxRecord.get('ObjectID');
             });
         },
 
-        drawHeader: function() {
+        afterRender: function() {
             this.callParent(arguments);
-            this._drawProgressBar();
+            this.drawStatus();
         },
 
-        _drawProgressBar: function() {
-            if(this.progressBar) {
-                this.progressBar.update(this.getIterationPlanningBoardHeaderTpl().apply(this.getIterationPlanningBoardHeaderTplData()));
-            } else {
-                this.progressBar = this.getColumnHeader().add({
-                    xtype: 'container',
-                    html: this.getIterationPlanningBoardHeaderTpl().apply(this.getIterationPlanningBoardHeaderTplData())
-                });
+        drawHeader: function() {
+            this.callParent(arguments);
+            this._addTimeboxDates();
+        },
+
+        drawStatus: function() {
+            if (this.columnStatusConfig && !this.getColumnStatus()) {
+                var config = {
+                    renderTo: this.getStatusCell(),
+                    column: this
+                };
+
+                config = Ext.merge({}, config, this.columnStatusConfig);
+                this.columnStatus = Ext.widget(config);
             }
         },
 
-        getIterationPlanningBoardHeaderTpl: function() {
-            this.headerTpl = this.headerTpl || Ext.create('Ext.XTemplate',
-                '<div class="timeboxDates">{formattedStartDate} - {formattedEndDate}</div>',
-                '{progressBarHtml}'
-            );
-
-            return this.headerTpl;
+        _addTimeboxDates: function() {
+            this.getColumnHeader().add({
+                xtype: 'component',
+                html: this.getTimeboxDatesTpl().apply(this.getTimeboxDatesTplData())
+            });
         },
 
-        getIterationPlanningBoardHeaderTplData: function() {
+        getTimeboxDatesTpl: function() {
+            this.timeboxDatesTpl = this.timeboxDatesTpl || Ext.create('Ext.XTemplate',
+                '<div class="timeboxDates">{formattedStartDate} - {formattedEndDate}</div>');
+
+            return this.timeboxDatesTpl;
+        },
+
+        getTimeboxDatesTplData: function() {
             return {
                 formattedStartDate: this._getFormattedDate(this.startDateField),
-                formattedEndDate: this._getFormattedDate(this.endDateField),
-                progressBarHtml: this._getProgressBarHtml()
+                formattedEndDate: this._getFormattedDate(this.endDateField)
             };
         },
 
         getProgressBar: function() {
-            return this.getColumnHeaderCell().down('.progress-bar-background');
+            return this.getColumnStatus();
         },
 
         _getFormattedDate: function(fieldName) {
@@ -167,44 +203,6 @@
             }
         },
 
-        _getProgressBarHtml: function() {
-            var totalPointCount = this._getTotalPointCount();
-            var plannedVelocity = this._getPlannedVelocity();
-            var tpl = Ext.create('Rally.ui.renderer.template.progressbar.TimeboxProgressBarTemplate', {
-                height: '14px',
-                width: '80%'
-            });
-            var html = tpl.apply({
-                percentDone: totalPointCount / plannedVelocity,
-                amountComplete: totalPointCount,
-                total: plannedVelocity
-            });
-
-            return html === '' ? html : '<div class="progress-bar-background">' + html + '</div>';
-        },
-
-        _getTotalPointCount: function() {
-            var sum = 0;
-            Ext.Array.each(this.getCards(true), function(card) {
-                var planEstimate = card.getRecord().get('PlanEstimate');
-                if (Ext.isNumber(planEstimate)) {
-                    sum += planEstimate;
-                }
-            });
-            return sum;
-        },
-
-        _getPlannedVelocity: function() {
-            var sum = 0;
-            Ext.Array.each(this.timeboxRecords, function(timeboxRecord) {
-                var plannedVelocity = timeboxRecord.get('PlannedVelocity');
-                if (Ext.isNumber(plannedVelocity)) {
-                    sum += plannedVelocity;
-                }
-            }, this);
-            return sum;
-        },
-
         _isCurrentTimebox: function(){
             var now = new Date();
             return this._getTimeboxRecord().get('StartDate') <= now && this._getTimeboxRecord().get('EndDate') >= now;
@@ -217,6 +215,7 @@
 
             }
             this.getContentCell().addCls(cls);
+            this.getStatusCell().addCls(cls);
             this.getColumnHeaderCell().addCls(cls);
         }
     });

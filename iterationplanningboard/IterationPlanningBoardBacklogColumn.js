@@ -23,6 +23,14 @@
             value: null
         },
 
+        getColumnStatus: function() {
+             return this.columnStatus;
+        },
+
+        getStatusCell: function() {
+            return Ext.get(this.statusCell);
+        },
+
         drawHeader: function() {
             this.callParent(arguments);
 
@@ -64,6 +72,7 @@
             this.on('afterrender', function() {
                 var cls = 'planning-column backlog';
                 this.getContentCell().addCls(cls);
+                this.getStatusCell().addCls(cls);
                 this.getColumnHeaderCell().addCls(cls);
             }, this, {single: true});
         },

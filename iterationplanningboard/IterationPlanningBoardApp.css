@@ -91,8 +91,15 @@ th.planning-column {
     padding: 15px 0 0 0;
 }
 
-.planning-column.current-timebox .column-header {
-    background: #ffffff url('currentIterationColumnHeader.png') repeat-x bottom;
+th.card-column.planning-column.current-timebox {
+    background: rgb(245,245,245); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(245,245,245,1) 0%, rgba(205,205,205,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(245,245,245,1)), color-stop(100%,rgba(205,205,205,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(245,245,245,1) 0%,rgba(205,205,205,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(245,245,245,1) 0%,rgba(205,205,205,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(245,245,245,1) 0%,rgba(205,205,205,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(245,245,245,1) 0%,rgba(205,205,205,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f5f5', endColorstr='#cdcdcd',GradientType=0 ); /* IE6-9 */
 }
 
 .cardboard .column-container .planning-column.current-timebox {
@@ -143,4 +150,23 @@ th.planning-column {
     width: 66%;
     text-align: center;
     vertical-align: top;
+}
+
+.cardboard .planning-column.card-column-status {
+    border: none;
+    border-right: 1px dotted #C6C6C6;
+}
+
+.cardboard .planning-column.card-column-status:last-child {
+    border-right: none
+}
+
+.cardboard .planning-column.current-timebox.card-column-status {
+    background-color: #D6D6D6;
+    border-top: 2px solid #D6d6d6;
+}
+
+.cardboard .planning-column.card-column-status .empty-status {
+    background-color: #424242;
+    height: 26px;
 }

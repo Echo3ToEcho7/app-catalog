@@ -59,10 +59,6 @@
                                 this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref);
                             }
                         },
-                        scroll: function() {
-                            this._unalignProgressBars();
-                            this._alignProgressBars();
-                        },
                         scope: this
                     },
                     plugins: [
@@ -103,18 +99,6 @@
             if (Rally.BrowserTest) {
                 Rally.BrowserTest.publishComponentReady(this);
             }
-            this._alignProgressBars();
-        },
-
-        _unalignProgressBars: function() {
-            this.getEl().select('.column-header').setHeight('auto');
-            this.getEl().select('.progress-bar-background').setStyle({ position: 'static' });
-        },
-
-        _alignProgressBars: function() {
-            var headerHeight = this.getEl().select('th.card-column').item(0).getHeight();
-            this.getEl().select('.column-header').setHeight(headerHeight - 1);
-            this.getEl().select('.progress-bar-background').setStyle({ position: 'absolute' });
         },
 
         _publishContentUpdated: function() {

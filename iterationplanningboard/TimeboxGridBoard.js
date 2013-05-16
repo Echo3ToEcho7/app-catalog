@@ -16,6 +16,7 @@
             'Rally.util.Ui',
             'Rally.data.ModelFactory',
             'Rally.ui.gridboard.TimeboxBlankSlate',
+            'Rally.apps.iterationplanningboard.TimeboxCardBoard',
             'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn',
             'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn'
         ],
@@ -59,6 +60,7 @@
             var initiallyVisibleTimeboxes = this._getInitiallyVisibleTimeboxes();
             var columns = this._getColumnConfigs(initiallyVisibleTimeboxes);
             return Ext.merge(this.callParent(arguments), {
+                xtype: 'rallytimeboxcardboard',
                 attribute: this.timeboxType,
                 columns: columns,
                 columnConfig: {

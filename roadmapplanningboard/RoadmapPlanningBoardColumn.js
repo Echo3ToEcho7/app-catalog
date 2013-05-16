@@ -104,13 +104,12 @@
                 height: '14px',
                 width: '80%'
             });
-            var html = tpl.apply({
+
+            return tpl.apply({
                 percentDone: this.getCards().length / this.capacity,
                 amountComplete: this.getCards().length,
                 total: this.capacity
             });
-
-            return html === '' ? html : '<div class="progress-bar-background">' + html + '</div>';
         }
     });
 
