@@ -64,7 +64,7 @@ th.planning-column {
     margin-bottom: 7px;
 }
 
-.planning-column.current-timebox .rui-card-slim {
+.planning-column.current-timebox .rui-card {
     box-shadow: rgba(192, 192, 192, 0.5) 2px 2px;
     -moz-box-shadow: rgba(192, 192, 192, 0.5) 2px 2px;
     -webkit-box-shadow: rgba(192, 192, 192, 0.5) 2px 2px;

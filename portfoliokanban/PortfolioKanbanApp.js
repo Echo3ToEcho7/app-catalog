@@ -191,10 +191,9 @@
             var cardConfig = {
                 xtype: 'rallyportfoliokanbancard',
                 editable: true,
-                showHeaderMenu: true,
-                showSlimDesign: this.getContext() && this.getContext().isFeatureEnabled('ENABLE_SLIM_CARD_DESIGN'),
-                showIconsAndHighlightBorder: this.getContext() && this.getContext().isFeatureEnabled('ENABLE_SLIM_CARD_DESIGN'),
-                showColorPopover: this.getContext() && this.getContext().isFeatureEnabled('ENABLE_SLIM_CARD_DESIGN')
+                showIconMenus: true,
+                showIconsAndHighlightBorder: true,
+                showColorPopover: true
             };
 
             var fields = this.getSetting('fields');
@@ -214,8 +213,6 @@
             columnConfig.additionalFetchFields.push('Discussion');
             cardConfig.fields.push('Discussion');
 
-            var cardboardCls = this.getContext() && this.getContext().isFeatureEnabled('ENABLE_SLIM_CARD_DESIGN') ? 'cardboard slim' : 'cardboard';
-
             cardboard = this.cardboard = Ext.widget('rallycardboard', {
                 types: [this.currentType.get('TypePath')],
                 context: this.getContext(),
@@ -223,7 +220,7 @@
                 attribute: 'State',
                 columns: columns,
                 ddGroup: this.currentType.get('TypePath'),
-                cls: cardboardCls,
+                cls: 'cardboard',
                 columnConfig: columnConfig,
                 cardConfig: cardConfig,
                 storeConfig: {
@@ -310,12 +307,10 @@
         },
 
         _attachPercentDoneToolTip: function(cardboard) {
-            var classString = this.cardboard.getCardConfig().showSlimDesign ? '.rui-card-slim' : '.rui-card';
-
-            cardboard.getEl().select(classString + ' .progress-bar-container').each(function(flyEl) {
+            cardboard.getEl().select('.rui-card .progress-bar-container').each(function(flyEl) {
                 var el = Ext.get(flyEl.dom);
                 el.hover(function(){
-                    var cardEl = el.up(classString);
+                    var cardEl = el.up('.rui-card');
                     var card = Ext.getCmp(cardEl.id);
                     Ext4.create('Rally.ui.popover.PercentDonePopover', {
                         target: el,

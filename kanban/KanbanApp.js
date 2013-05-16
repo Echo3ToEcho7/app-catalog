@@ -229,7 +229,7 @@
                 },
                 cardConfig: {
                     editable: true,
-                    showHeaderMenu: true,
+                    showIconMenus: true,
                     fields: this.getSetting('cardFields').split(','),
                     showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1
                 },

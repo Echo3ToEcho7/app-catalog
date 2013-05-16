@@ -36,7 +36,7 @@
                 },
                 cardConfig: {
                     editable: true,
-                    showHeaderMenu: true,
+                    showIconMenus: true,
                     fields: this.getSetting('fields').split(',')
                 },
                 listeners: {
