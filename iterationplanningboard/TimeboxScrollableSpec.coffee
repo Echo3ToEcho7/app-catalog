@@ -143,26 +143,6 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
       @scrollBackwards().then =>
         expect(filterSpy.callCount).toBe 1
 
-  it 'should size forwards button to column header when there is no progress bar', ->
-    @createBoard().then =>
-      expect(@plugin.forwardsButton.getHeight()).toBe @plugin.getLastVisibleScrollableColumn().getColumnHeaderCell().getHeight(Ext.isGecko || Ext.isIE)
-
-  it 'should size backwards button to column header when there is no progress bar', ->
-    @createBoard().then =>
-      expect(@plugin.backwardsButton.getHeight()).toBe @plugin.getFirstVisibleScrollableColumn().getColumnHeaderCell().getHeight(Ext.isGecko || Ext.isIE)
-
-  it 'should size forwards button to column header minus progress bar when there is a progress bar', ->
-    @createBoard(
-      plannedVelocity: 10
-    ).then =>
-      expect(@plugin.forwardsButton.getHeight()).toBe @plugin.getLastVisibleScrollableColumn().getProgressBar().getTop() - @plugin.getLastVisibleScrollableColumn().getColumnHeader().getEl().getTop()
-
-  it 'should size backwards button to column header minus progress bar when there is a progress bar', ->
-    @createBoard(
-      plannedVelocity: 10
-    ).then =>
-      expect(@plugin.backwardsButton.getHeight()).toBe  @plugin.getLastVisibleScrollableColumn().getProgressBar().getTop() - @plugin.getFirstVisibleScrollableColumn().getColumnHeader().getEl().getTop()
-
   helpers
     createBoard: (options = {}) ->
       @bucketedIterationRecords = Helpers.IterationDataCreatorHelper.createIterationData
@@ -174,7 +154,7 @@ describe 'Rally.apps.iterationplanningboard.TimeboxScrollable', ->
       columns = @createColumns @bucketedIterationRecords[options.recordsStartIndex ? 1 .. options.recordsEndIndex ? -2]
       @numColumns = columns.length
 
-      @cardboard = Ext.create 'Rally.ui.cardboard.CardBoard',
+      @cardboard = Ext.create 'Rally.apps.iterationplanningboard.TimeboxCardBoard',
         columnConfig:
           xtype: 'iterationplanningboardappplanningcolumn'
         columns: columns

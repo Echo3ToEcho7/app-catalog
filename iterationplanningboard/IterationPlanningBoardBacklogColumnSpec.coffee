@@ -102,14 +102,15 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
         subscription:
           StoryHierarchyEnabled: options.subscriptionStoryHierarchyEnabled ? true
 
-      headerCell = Ext.get('testDiv').createChild {tag: 'div'}
-      contentCell = Ext.get('testDiv').createChild {tag: 'div'}
+      contentCell = Ext.get('testDiv').createChild()
+
       @column = Ext.create('Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn',
         models: [@storyModel]
         renderTo: contentCell
         attribute: 'Iteration'
         contentCell: contentCell
-        headerCell: headerCell
+        headerCell: Ext.get('testDiv').createChild()
+        statusCell: Ext.get('testDiv').createChild()
         context: Ext.create('Rally.app.Context',
           initialValues:
             featureToggles: Rally.alm.FeatureToggle

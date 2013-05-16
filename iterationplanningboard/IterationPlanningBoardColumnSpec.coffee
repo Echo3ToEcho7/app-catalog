@@ -100,7 +100,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       iterationCount: 2
       plannedVelocity: 0
 
-    expect(@getProgressBarLabel()).toBeNull()
+    expect(@getProgressBarContainer()).toBeNull()
 
   it 'should not show percent bar when planned velocity is 0 and column has card with plan estimate', ->
     @createColumn
@@ -111,7 +111,8 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       Iteration: @column.getTimeboxRecords()[0].get('_ref')
       PlanEstimate: 2
     }
-    expect(@getProgressBarLabel()).toBeNull()
+
+    expect(@getProgressBarContainer()).toBeNull()
 
   it 'should show 0 out of planned velocity when column has no cards', ->
     @createColumn
@@ -164,7 +165,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       Iteration: @column.getTimeboxRecords()[0].get('_ref')
       PlanEstimate: 8
     }
-    expect(@getProgressBar().getColor 'background-color').toEqual @colors.blue
+    expect(@getProgressBarBar().getColor 'background-color').toEqual @colors.blue
 
   it 'should show a green bar when iteration capacity is 80% full', ->
     @createColumn
@@ -175,7 +176,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       Iteration: @column.getTimeboxRecords()[0].get('_ref')
       PlanEstimate: 8
     }
-    expect(@getProgressBar().getColor 'background-color').toEqual @colors.green
+    expect(@getProgressBarBar().getColor 'background-color').toEqual @colors.green
 
   it 'should show a green bar when iteration capacity is 100% full', ->
     @createColumn
@@ -186,7 +187,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       Iteration: @column.getTimeboxRecords()[0].get('_ref')
       PlanEstimate: 10
     }
-    expect(@getProgressBar().getColor 'background-color').toEqual @colors.green
+    expect(@getProgressBarBar().getColor 'background-color').toEqual @colors.green
 
   it 'should show a red bar when iteration capacity is greater than 100% full', ->
     @createColumn
@@ -197,18 +198,18 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       Iteration: @column.getTimeboxRecords()[0].get('_ref')
       PlanEstimate: 20
     }
-    expect(@getProgressBar().getColor 'background-color').toEqual @colors.red
+    expect(@getProgressBarBar().getColor 'background-color').toEqual @colors.red
 
 
   it 'should put a background color behind the progress bar', ->
     @createColumn
       plannedVelocity: 5
-    expect(@getProgressBarBackgroundContainer()).not.toBeNull()
+    expect(@getProgressBarContainer()).not.toBeNull()
 
   it 'should not put a progress bar background color when there is no progress bar', ->
     @createColumn
       plannedVelocity: 0
-    expect(@getProgressBarBackgroundContainer()).toBeNull()
+    expect(@getProgressBarContainer()).toBeNull()
 
   it 'should round plan estimate total to two decimal places', ->
     @createColumn
@@ -238,7 +239,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       iterationCount: 10
       plannedVelocity: 1.32
 
-    progressBarUpdateSpy = @stub(@column.progressBar, 'update')
+    progressBarUpdateSpy = @stub(@column.columnStatus, 'update')
 
     @column.fireEvent 'addcard'
 
@@ -250,7 +251,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       iterationCount: 10
       plannedVelocity: 1.32
 
-    progressBarUpdateSpy = @stub(@column.progressBar, 'update')
+    progressBarUpdateSpy = @stub(@column.columnStatus, 'update')
 
     @column.fireEvent 'load'
 
@@ -263,7 +264,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       iterationCount: 10
       plannedVelocity: 1.32
 
-    progressBarUpdateSpy = @stub(@column.progressBar, 'update')
+    progressBarUpdateSpy = @stub(@column.columnStatus, 'update')
 
     @column.fireEvent 'removecard'
 
@@ -275,7 +276,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       iterationCount: 10
       plannedVelocity: 1.32
 
-    progressBarUpdateSpy = @stub(@column.progressBar, 'update')
+    progressBarUpdateSpy = @stub(@column.columnStatus, 'update')
 
     @column.fireEvent 'cardupdated'
 
@@ -285,7 +286,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
     Model = Rally.test.mock.data.ModelFactory.getIterationModel()
     timeboxRecords = []
 
-    for i in [1 .. 4 ? 1]
+    for i in [1 .. 4]
       timeboxRecords.push new Model(
         _ref: "/iteration/#{i}"
         _refObjectName: 'my iteration'
@@ -299,6 +300,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       types: ['HierarchicalRequirement']
       renderTo: 'testDiv'
       headerCell: Ext.get 'testDiv'
+      statusCell: Ext.get 'testDiv'
       contentCell: Ext.get 'testDiv'
       attribute: 'Iteration'
       timeboxRecords: timeboxRecords
@@ -317,8 +319,8 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       Model = Rally.test.mock.data.ModelFactory.getIterationModel()
       timeboxRecords = []
 
-      for i in [1 .. options.iterationCount ? 1]
-        timeboxRecords.push new Model(
+      timeboxRecords = for i in [1 .. options.iterationCount ? 1]
+        new Model(
           _ref: "/iteration/#{i}"
           _refObjectName: options.name || 'my iteration'
           ObjectID: i
@@ -327,11 +329,13 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
           EndDate: options.endDate || new Date()
           PlannedVelocity: options.plannedVelocity
         )
+
       @column = Ext.create 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn',
         types: ['HierarchicalRequirement']
         renderTo: 'testDiv'
-        headerCell: Ext.get 'testDiv'
-        contentCell: Ext.get 'testDiv'
+        headerCell: Ext.get('testDiv').createChild()
+        statusCell: Ext.get('testDiv').createChild()
+        contentCell: Ext.get('testDiv').createChild()
         attribute: 'Iteration'
         timeboxRecords: timeboxRecords
         columnHeaderConfig:
@@ -344,12 +348,18 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
             featureToggles: Rally.alm.FeatureToggle
         )
 
+      @column.getProgressBar()?.update()
+
     createUserStoryRecord: (options) ->
       Model = Rally.test.mock.data.ModelFactory.getUserStoryModel()
       new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 1000)}, options))
 
-    getProgressBarLabel: -> @column.getColumnHeaderCell().down('.progress-bar-label')
+    getProgressBar: -> @column.getProgressBar()
 
-    getProgressBar: -> @column.getColumnHeaderCell().down('.progress-bar')
+    getProgressBarEl: -> @getProgressBar().getEl()
 
-    getProgressBarBackgroundContainer: -> @column.getColumnHeaderCell().down('.progress-bar-background')
+    getProgressBarBar: -> @getProgressBar().getEl().select('.progress-bar').item 0
+
+    getProgressBarContainer: -> @getProgressBarEl().select('.progress-bar-background').item 0
+
+    getProgressBarLabel: -> @getProgressBarEl().select('.progress-bar-label').item 0
