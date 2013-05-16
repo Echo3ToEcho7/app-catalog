@@ -444,13 +444,13 @@ function initTaskboard() {
             teamMembers.push(schema.Owner.options[0]);
 
             var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
-            YAHOO.util.Connect.asyncRequest('GET', baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName,EmailAddress,LoginName",
+            YAHOO.util.Connect.asyncRequest('GET', baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName,EmailAddress,UserName",
                     {
                         success:function (callback) {
                             var results = JSON.parse(callback.responseText).QueryResult.Results
                             for (i = 0; i < results.length; ++i) {
-                                var label = results[i].DisplayName || results[i].EmailAddress.split('@')[0];
-                                teamMembers.push({Label:label, Value:results[i].EmailAddress});
+                                var label = results[i].DisplayName || results[i].UserName.split('@')[0];
+                                teamMembers.push({Label:label, Value:results[i].UserName});
                             }
                             schema.Owner.options = teamMembers;
                             var editorConfig = {
