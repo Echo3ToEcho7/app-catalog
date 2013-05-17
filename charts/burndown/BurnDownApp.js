@@ -26,35 +26,66 @@
 
         launch: function () {
             this.callParent(arguments);
-
             this._setupChartSettings();
+            this._loadChart();
+        },
 
-            var context = this.getContext();
-            if (context && context.getTimeboxScope()) {
-                var dashboard_type = context.getTimeboxScope().getType();
-
-                if (dashboard_type === 'release') {
-
-                } else if (dashboard_type === 'iteration') {
-
-                } else {
-                    // not sure how this would ever get run...
-                }
-            } else {
-                this._loadSavedObject();
+        _loadChart: function () {
+            var timeboxScope = this._getTimeBoxScope();
+            if (timeboxScope) {
+                this._loadChartForDashboardPicker(timeboxScope);
+            }
+            else {
+                this._loadChartForSettingsPicker();
             }
         },
 
-        _loadSavedObject: function () {
-            var model = this.getSetting("chartTimebox"),
-                ref = "";
+        _loadChartForSettingsPicker: function () {
+            var ref = this._getRefBasedOnSettings();
+            if (ref) {
+                this._loadSavedObject(ref);
+            }
+            else {
+                this.owner.showSettings();
+            }
+        },
 
-            if (model === "iteration") {
-                ref = this.getSetting("Iteration");
-            } else if (model === "release") {
-                ref = this.getSetting("Release");
-            } else { }
+        _getTimeBoxScope: function () {
+            var context = this.getContext();
+            if (context) {
+                return context.getTimeboxScope();
+            }
 
+            return null;
+        },
+
+        _loadChartForDashboardPicker: function (timeboxScope) {
+            var dashboardType = timeboxScope.getType();
+
+            if (dashboardType === 'release') {
+
+            } else if (dashboardType === 'iteration') {
+
+            } else {
+
+            }
+        },
+
+        _getRefBasedOnSettings: function () {
+            var modelType = this.getSetting("chartTimebox");
+
+            if (modelType === "iteration") {
+                return this.getSetting("Iteration");
+            }
+            else if (modelType === "release") {
+                return this.getSetting("Release");
+            }
+            else {
+                return null;
+            }
+        },
+
+        _loadSavedObject: function (ref) {
             var store = Ext.create("Rally.data.WsapiDataStore", {
                 model: model,
                 filters: [
@@ -85,7 +116,7 @@
 
             this._addDateBoundsToConfig();
 
-            if(this.domainObject._type === "release") {
+            if (this.domainObject._type === "release") {
 //                this._addObjectIdToStoreConfig("Release");
                 this._fetchIterations();
             } else {
@@ -94,10 +125,10 @@
             }
         },
 
-        _getDomainObjectStartDate: function() {
+        _getDomainObjectStartDate: function () {
             var date;
 
-            if(this.domainObject._type === "release") {
+            if (this.domainObject._type === "release") {
                 date = this.domainObject.ReleaseStartDate;
             } else {
                 date = this.domainObject.StartDate;
@@ -106,10 +137,10 @@
             return this.dateToString(date);
         },
 
-        _getDomainObjectEndDate: function() {
+        _getDomainObjectEndDate: function () {
             var date;
 
-            if(this.domainObject._type === "release") {
+            if (this.domainObject._type === "release") {
                 date = this.domainObject.ReleaseDate;
             } else {
                 date = this.domainObject.EndDate;
@@ -118,7 +149,7 @@
             return this.dateToString(date);
         },
 
-        _fetchIterations: function() {
+        _fetchIterations: function () {
             var store = Ext.create("Rally.data.WsapiDataStore", {
                 model: "Iteration",
                 filters: [
@@ -144,14 +175,14 @@
             store.load();
         },
 
-        _onIterationsLoaded: function(store) {
+        _onIterationsLoaded: function (store) {
             this.iterations = store.getItems();
 
             this._addChart();
             this.down("rallychart").on("snapshotsAggregated", this._addIterationLines, this);
         },
 
-        _addIterationLines: function(chart) {
+        _addIterationLines: function (chart) {
             var axis = chart.chartConfig.xAxis,
                 categories = chart.chartData.categories,
                 iteration = 0;
@@ -171,7 +202,7 @@
             }
         },
 
-        _getPlotBand: function(categories, iteration, shouldColorize) {
+        _getPlotBand: function (categories, iteration, shouldColorize) {
             var startDate = this.dateStringToObject(iteration.StartDate),
                 endDate = this.dateStringToObject(iteration.EndDate);
 
@@ -191,10 +222,10 @@
             };
         },
 
-        _getPlotLine: function(categories, iteration, lastLine) {
+        _getPlotLine: function (categories, iteration, lastLine) {
             var dateObj;
 
-            if(lastLine) {
+            if (lastLine) {
                 dateObj = this.dateStringToObject(iteration.EndDate);
             } else {
                 dateObj = this.dateStringToObject(iteration.StartDate);
@@ -212,17 +243,17 @@
             };
         },
 
-        _addObjectIdToStoreConfig: function(type) {
+        _addObjectIdToStoreConfig: function (type) {
             var storeConfig = this.chartComponentConfig.storeConfig;
             storeConfig.find[type] = this.domainObject.ObjectID;
         },
 
-        _addDateBoundsToConfig: function() {
+        _addDateBoundsToConfig: function () {
 //            this._addDateBoundsToQuery();
             this._addDateBoundsToCalculator();
         },
 
-        _addDateBoundsToQuery: function() {
+        _addDateBoundsToQuery: function () {
             var findQuery = this.chartComponentConfig.storeConfig.find;
 
             findQuery._ValidFrom = {
@@ -231,14 +262,14 @@
             };
         },
 
-        _addDateBoundsToCalculator: function() {
+        _addDateBoundsToCalculator: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
 
             calcConfig.startDate = this._getDomainObjectStartDate();
             calcConfig.endDate = this._getDomainObjectEndDate();
         },
 
-        _addChart: function() {
+        _addChart: function () {
             this.add(this.chartComponentConfig);
             this.down("rallychart").on("snapshotsAggregated", this._onSnapshotDataReady, this);
         },
@@ -247,11 +278,11 @@
             this._updateDisplayType(chart);
         },
 
-        _updateDisplayType: function(chart) {
+        _updateDisplayType: function (chart) {
             var series = chart.chartData.series,
                 displayType = this.getSetting("chartDisplayType");
 
-            for(var i = 0; i < series.length; i++) {
+            for (var i = 0; i < series.length; i++) {
                 series[i].type = displayType;
             }
         },

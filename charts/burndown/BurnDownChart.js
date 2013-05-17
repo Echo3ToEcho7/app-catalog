@@ -16,7 +16,6 @@
                 find: {
                     "_TypeHierarchy": -51038,
                     "Children": null
-//                    "Iteration": 9693020302
                 },
                 fetch: ["ScheduleState", "PlanEstimate", "TaskEstimateTotal"],
                 hydrate: ["ScheduleState"],
