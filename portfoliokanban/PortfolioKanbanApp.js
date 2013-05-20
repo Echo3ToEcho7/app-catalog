@@ -309,15 +309,17 @@
         _attachPercentDoneToolTip: function(cardboard) {
             cardboard.getEl().select('.rui-card .progress-bar-container').each(function(flyEl) {
                 var el = Ext.get(flyEl.dom);
-                el.hover(function(){
+                el.on('click', function(){
                     var cardEl = el.up('.rui-card');
                     var card = Ext.getCmp(cardEl.id);
+                    var record = card.getRecord();
                     Ext4.create('Rally.ui.popover.PercentDonePopover', {
                         target: el,
-                        percentDoneData: card.getRecord().data,
-                        percentDoneName: 'PercentDoneByStoryCount'
+                        percentDoneData: record.data,
+                        percentDoneName: 'PercentDoneByStoryCount',
+                        piRef: record._ref
                     });
-                },Ext.emptyFn);
+                });
             });
         },
 
