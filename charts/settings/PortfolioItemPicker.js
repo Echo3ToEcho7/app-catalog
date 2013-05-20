@@ -21,19 +21,6 @@
             'Rally.apps.charts.settings.SettingsChangeMixin'
         ],
 
-        chooserConfig: {
-            artifactTypes: ['portfolioitem'],
-            storeConfig: {
-                context: {
-                    project: null
-                },
-                fetch: true
-            },
-            title: 'Choose a Portfolio Item',
-            closeAction: 'hide',
-            selectionButtonText: 'Select'
-        },
-
         emptyText: '<p>No portfolio items match your search criteria.</p>',
 
         items: [
@@ -74,48 +61,61 @@
 
         initComponent: function () {
             this.callParent(arguments);
+            this._addTestClass();
+        },
 
+        _addTestClass: function () {
             this.addCls(Rally.util.Test.toBrowserTestCssClass('buttonChooser'));
+        },
+
+        beforeRender: function () {
+            this._configureButton();
+            this._configurePicker();
+        },
+
+        _configureButton: function () {
             this.down('#portfolioItemButton').on('click', this._onButtonClick, this);
-            this.on('beforerender', this._configurePicker, this);
         },
 
         _configurePicker: function () {
-            this.requestContext = {
-                workspace: this.settingsParent.app.context.getWorkspaceRef(),
-                project: null
-            };
-
             this._setValueFromSettings();
-
+            this._setupRequestContext();
             this._loadPortfolioItem();
             this._configureChooser();
         },
 
-        _setValueFromSettings: function() {
-            var newSettingsValue = this.settingsParent.app.getSetting("portfolioItemPicker"),
-                oldSettingsValue = this.settingsParent.app.getSetting("buttonchooser"),
-                value = "";
-
-            if(this._isSettingValid(newSettingsValue)) {
-                value = newSettingsValue;
-            } else if(this._isSettingValid(oldSettingsValue)) {
-                value = Ext.JSON.decode(oldSettingsValue).artifact._ref;
-            } else { }
-
-            this.setValue(value);
+        _setupRequestContext: function () {
+            this.requestContext = {
+                workspace: this.settingsParent.app.context.getWorkspaceRef(),
+                project: null
+            };
         },
 
-        _isSettingValid: function(value) {
+        _setValueFromSettings: function () {
+            var newSettingsValue = this.settingsParent.app.getSetting("portfolioItemPicker"),
+                oldSettingsValue = this.settingsParent.app.getSetting("buttonchooser");
+
+            if (this._isSettingValid(newSettingsValue)) {
+                this.setValue(newSettingsValue);
+            } else if (this._isSettingValid(oldSettingsValue)) {
+                this.setValue(Ext.JSON.decode(oldSettingsValue).artifact._ref);
+            } else {
+                this.setValue("&nbsp;");
+            }
+        },
+
+        _isSettingValid: function (value) {
             return value && value !== "undefined";
         },
 
         _loadPortfolioItem: function () {
-            if (typeof this.value !== "string" || this.value === "undefined") {
-                return;
+            if (this._isSavedValueValid()) {
+                this._createPortfolioItemStore();
             }
+        },
 
-            var store = Ext.create("Rally.data.WsapiDataStore", {
+        _createPortfolioItemStore: function () {
+            Ext.create("Rally.data.WsapiDataStore", {
                 model: "Portfolio Item",
                 filters: [
                     {
@@ -125,21 +125,21 @@
                     }
                 ],
                 context: this.requestContext,
-                scope: this
+                autoLoad: true,
+                listeners: {
+                    load: this._onPortfolioItemRetrieved,
+                    scope: this
+                }
             });
+        },
 
-            store.on('load', this._onPortfolioItemRetrieved, this);
-            store.load();
+        _isSavedValueValid: function () {
+            return typeof this.value === "string" && this.value !== "undefined";
         },
 
         _onPortfolioItemRetrieved: function (store) {
             var storeData = store.getAt(0);
-
-            if (storeData && storeData.data) {
-                this.portfolioItem = storeData.data;
-                this._setDisplayValue();
-                this.sendSettingsChange(this.portfolioItem);
-            }
+            this._handleStoreResults(storeData);
         },
 
         _setDisplayValue: function () {
@@ -147,44 +147,57 @@
         },
 
         _onButtonClick: function () {
-            if (this.dialog) {
-                this.dialog.destroy();
-            }
+            this._destroyChooser();
 
             this.dialog = Ext.create("Rally.ui.dialog.ChooserDialog", this.chooserConfig);
             this.dialog.show();
+        },
+
+        _destroyChooser: function () {
+            if (this.dialog) {
+                this.dialog.destroy();
+            }
         },
 
         _getPortfolioItemDisplay: function () {
             return this.portfolioItem.FormattedID + ': ' + this.portfolioItem.Name;
         },
 
-        _onPortfolioItemChosen: function (results) {
-            if (results) {
-                this.portfolioItem = results.data;
+        _onPortfolioItemChosen: function (resultStore) {
+            this._handleStoreResults(resultStore);
+            this._destroyChooser();
+        },
+
+        _handleStoreResults: function(store) {
+            if (store && store.data) {
+                this.portfolioItem = store.data;
                 this._setDisplayValue();
+                this.setValue(this.portfolioItem._ref);
                 this.sendSettingsChange(this.portfolioItem);
             }
-
-            this.dialog.destroy();
         },
 
         _configureChooser: function () {
-            Ext.Object.merge(this.chooserConfig, {
+            this.chooserConfig = {
+                artifactTypes: ['portfolioitem'],
+                title: 'Choose a Portfolio Item',
+                closeAction: 'destroy',
+                selectionButtonText: 'Select',
                 listeners: {
                     artifactChosen: this._onPortfolioItemChosen,
                     scope: this
                 },
                 storeConfig: {
                     project: null,
-                    context: this.requestContext
+                    context: this.requestContext,
+                    fetch: true
                 },
                 gridConfig: {
                     viewConfig: {
                         emptyText: Rally.ui.EmptyTextFactory.getEmptyTextFor(this.emptyText)
                     }
                 }
-            });
+            };
         },
 
         setValue: function (value) {
