@@ -35,9 +35,10 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       @waitForVisible(css: '.progress-bar-container.field-PercentDoneByStoryCount').then =>
         callback()
 
-    _mouseOverAndWaitForVisible: (fieldName) ->
-      @mouseOver(css: '.progress-bar-container.field-' + fieldName).then =>
+    _clickAndWaitForVisible: (fieldName) ->
+      @click(css: '.progress-bar-container.field-' + fieldName).then =>
         @waitForVisible(css: '.percentDonePopover')
+
 
   beforeEach ->
 
@@ -61,7 +62,7 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
       @app.destroy()
 
 
-  it 'should create popover when hovering over a progress bar', ->
+  it 'should create popover when the progress bar is clicked', ->
     @ajax.whenQuerying('state').respondWith([
       {
       '_type': "State"
@@ -85,10 +86,10 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith [feature]
 
-    if (Ext.isChrome)
-      @_createAppAndWaitForVisible =>
-        @_mouseOverAndWaitForVisible('PercentDoneByStoryCount').then =>
-          expect(Ext.select('.percentDonePopover').elements.length).toEqual(1)
+    @_createAppAndWaitForVisible =>
+      @_clickAndWaitForVisible('PercentDoneByStoryCount').then =>
+        expect(Ext.select('.percentDonePopover').elements.length).toEqual(1)
+        @click(css: '.popover-chevron')
 
   it 'loads type with ordinal of 1 if no type setting is provided', ->
 
