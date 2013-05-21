@@ -18,10 +18,10 @@
 
         initComponent: function () {
             this.callParent(arguments);
-            this.add(this.getRadioGroup());
+            this.add(this._addRadioGroup());
         },
 
-        getRadioGroup: function () {
+        _addRadioGroup: function () {
             return {
                 xtype: "radiogroup",
                 name: this.settingName,

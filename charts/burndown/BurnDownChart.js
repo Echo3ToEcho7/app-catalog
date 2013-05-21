@@ -37,9 +37,6 @@
                 chart: {
                     zoomType: "xy"
                 },
-                title: {
-                    margin: 25
-                },
                 xAxis: {
                     categories: [],
                     tickmarkPlacement: "on",

@@ -13,7 +13,7 @@
             }
         },
 
-        getRadioGroup: function () {
+        _addRadioGroup: function () {
             return {
                 xtype: "container",
                 minWidth: 250,

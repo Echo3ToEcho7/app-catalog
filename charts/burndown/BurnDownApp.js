@@ -2,7 +2,8 @@
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define("Rally.apps.charts.burndown.BurnDownApp", {
-        extend: "Rally.app.App",
+        extend: "Rally.app.TimeboxScopedApp",
+
         settingsScope: "workspace",
 
         requires: [
@@ -19,75 +20,129 @@
 
         cls: "burndown-app",
 
-        help: {
-            cls: "burndown-help-container",
-            id: 0
+        scopedDashboard: false,
+        scopeObject: undefined,
+
+        getSettingsFields: function () {
+            this.chartSettings = this.chartSettings || Ext.create("Rally.apps.charts.burndown.BurnDownSettings", {
+                app: this
+            });
+
+            return this.chartSettings.getFields();
+        },
+
+        isOnScopedDashboard: function () {
+            return this.scopedDashboard;
+        },
+
+        onScopeChange: function (scope) {
+            this._updateScopeSetting(scope);
+            this._saveScopeValue(scope);
+            this._destroyChart();
+            this._loadScopeObject(this._getRefFromPicker(scope));
         },
 
         launch: function () {
-            this.callParent(arguments);
-            this._setupChartSettings();
-            this._loadChart();
-        },
-
-        _loadChart: function () {
-            var timeboxScope = this._getTimeBoxScope();
-            if (timeboxScope) {
-                this._loadChartForDashboardPicker(timeboxScope);
-            }
-            else {
-                this._loadChartForSettingsPicker();
-            }
-        },
-
-        _loadChartForSettingsPicker: function () {
-            var ref = this._getRefBasedOnSettings();
-            if (ref) {
-                this._loadSavedObject(ref);
-            }
-            else {
+            if (this._settingsInvalid()) {
                 this.owner.showSettings();
-            }
-        },
-
-        _getTimeBoxScope: function () {
-            var context = this.getContext();
-            if (context) {
-                return context.getTimeboxScope();
+                return;
             }
 
-            return null;
-        },
+            this._saveDashboardType();
+            this.callParent(arguments);
 
-        _loadChartForDashboardPicker: function (timeboxScope) {
-            var dashboardType = timeboxScope.getType();
-
-            if (dashboardType === 'release') {
-
-            } else if (dashboardType === 'iteration') {
-
+            if(this.isOnScopedDashboard()) {
+                this._loadScopeObject(this._getScopeRef());
             } else {
-
+                this._loadScopeValue();
             }
         },
 
-        _getRefBasedOnSettings: function () {
-            var modelType = this.getSetting("chartTimebox");
-
-            if (modelType === "iteration") {
-                return this.getSetting("Iteration");
-            }
-            else if (modelType === "release") {
-                return this.getSetting("Release");
-            }
-            else {
-                return null;
+        _destroyChart: function() {
+            var currentChart = this.down("rallychart");
+            if(currentChart) {
+                currentChart.destroy();
             }
         },
 
-        _loadSavedObject: function (ref) {
-            var store = Ext.create("Rally.data.WsapiDataStore", {
-                model: model,
+        _updateScopeSetting: function (picker) {
+            Ext.apply(this.settings, this._getSettingFromPicker(picker));
+        },
+
+        _saveScopeValue: function (picker) {
+            Rally.data.PreferenceManager.update({
+                appID: this.getContext().get('appID'),
+                settings: this._getSettingFromPicker(picker),
+                scope: this
+            });
+        },
+
+        _loadScopeValue: function() {
+            Rally.data.PreferenceManager.load({
+                appID: this.getContext().get('appID'),
+                success: function(loadedSettings){
+                    var settingValue = loadedSettings[this._getScopeType()];
+                    this._setScopeValue(settingValue);
+                    this._loadScopeObject(settingValue);
+                },
+                scope: this
+            });
+        },
+
+        _setScopeValue: function(value) {
+            this._getScopePicker().setValue(value);
+        },
+
+        _onScopeObjectLoaded: function (store) {
+            if (store.count() !== 1) {
+                // display error?
+                return;
+            }
+
+            this.scopeObject = store.getAt(0).data;
+
+            this._updateChartTitle();
+            this._addDateBounds();
+            this._addObjectIdToStoreConfig();
+
+            if (this._getScopeType() === "release") {
+                this._fetchIterations();
+            } else {
+                this._addChart();
+            }
+        },
+
+        _onIterationsLoaded: function (store) {
+            this.iterations = store.getItems();
+
+            this._addChart();
+            this.down("rallychart").on("snapshotsAggregated", this._addIterationLines, this);
+        },
+
+        _addDateBounds: function() {
+            this._addDateBoundsToQuery();
+            this._addDateBoundsToCalculator();
+        },
+
+        _addDateBoundsToQuery: function() {
+
+        },
+
+        _addDateBoundsToCalculator: function() {
+            var calcConfig = this.chartComponentConfig.calculatorConfig;
+            calcConfig.startDate = this.dateToString(this._getScopeObjectStartDate());
+            calcConfig.endDate = this.dateToString(this._getScopeObjectEndDate());
+        },
+
+        _addObjectIdToStoreConfig: function() {
+            var storeConfig = this.chartComponentConfig.storeConfig,
+                type = Ext.String.capitalize(this._getScopeType());
+            storeConfig.find[type] = this.scopeObject.ObjectID;
+        },
+
+        _loadScopeObject: function (ref) {
+            Ext.create("Rally.data.WsapiDataStore", {
+                model: this._getScopeType(),
                 filters: [
                     {
                         property: "ObjectID",
@@ -99,54 +154,12 @@
                     workspace: this.getContext().getWorkspaceRef(),
                     project: null
                 },
-                scope: this
+                autoLoad: true,
+                listeners: {
+                    load: this._onScopeObjectLoaded,
+                    scope: this
+                }
             });
-
-            store.on("load", this._onObjectLoaded, this);
-            store.load();
-        },
-
-        _onObjectLoaded: function (store) {
-            if (store.count() !== 1) {
-                // Should only have a single record, display error if more
-                return;
-            }
-
-            this.domainObject = store.getAt(0).data;
-
-            this._addDateBoundsToConfig();
-
-            if (this.domainObject._type === "release") {
-//                this._addObjectIdToStoreConfig("Release");
-                this._fetchIterations();
-            } else {
-                this._addObjectIdToStoreConfig("Iteration");
-                this._addChart();
-            }
-        },
-
-        _getDomainObjectStartDate: function () {
-            var date;
-
-            if (this.domainObject._type === "release") {
-                date = this.domainObject.ReleaseStartDate;
-            } else {
-                date = this.domainObject.StartDate;
-            }
-
-            return this.dateToString(date);
-        },
-
-        _getDomainObjectEndDate: function () {
-            var date;
-
-            if (this.domainObject._type === "release") {
-                date = this.domainObject.ReleaseDate;
-            } else {
-                date = this.domainObject.EndDate;
-            }
-
-            return this.dateToString(date);
         },
 
         _fetchIterations: function () {
@@ -156,12 +169,12 @@
                     {
                         property: "StartDate",
                         operator: ">=",
-                        value: this._getDomainObjectStartDate()
+                        value: this.dateToString(this._getScopeObjectStartDate())
                     },
                     {
                         property: "EndDate",
                         operator: "<=",
-                        value: this._getDomainObjectEndDate()
+                        value: this.dateToString(this._getScopeObjectEndDate())
                     }
                 ],
                 context: {
@@ -175,30 +188,20 @@
             store.load();
         },
 
-        _onIterationsLoaded: function (store) {
-            this.iterations = store.getItems();
-
-            this._addChart();
-            this.down("rallychart").on("snapshotsAggregated", this._addIterationLines, this);
-        },
-
         _addIterationLines: function (chart) {
             var axis = chart.chartConfig.xAxis,
-                categories = chart.chartData.categories,
-                iteration = 0;
+                categories = chart.chartData.categories;
 
             axis.plotLines = [];
             axis.plotBands = [];
 
-            while (iteration < this.iterations.length) {
-                axis.plotLines.push(this._getPlotLine(categories, this.iterations[iteration], false));
-                axis.plotBands.push(this._getPlotBand(categories, this.iterations[iteration], iteration % 2 !== 0));
-
-                iteration += 1;
+            for(var i = 0; i < this.iterations.length; i++) {
+                axis.plotLines.push(this._getPlotLine(categories, this.iterations[i], false));
+                axis.plotBands.push(this._getPlotBand(categories, this.iterations[i], i % 2 !== 0));
             }
 
-            if (iteration) {
-                axis.plotLines.push(this._getPlotLine(categories, this.iterations[iteration - 1], true));
+            if (this.iterations.length > 0) {
+                axis.plotLines.push(this._getPlotLine(categories, this.iterations[this.iterations.length - 1], true));
             }
         },
 
@@ -243,33 +246,9 @@
             };
         },
 
-        _addObjectIdToStoreConfig: function (type) {
-            var storeConfig = this.chartComponentConfig.storeConfig;
-            storeConfig.find[type] = this.domainObject.ObjectID;
-        },
-
-        _addDateBoundsToConfig: function () {
-//            this._addDateBoundsToQuery();
-            this._addDateBoundsToCalculator();
-        },
-
-        _addDateBoundsToQuery: function () {
-            var findQuery = this.chartComponentConfig.storeConfig.find;
-
-            findQuery._ValidFrom = {
-                "$gte": this._getDomainObjectStartDate(),
-                "$lte": this._getDomainObjectEndDate()
-            };
-        },
-
-        _addDateBoundsToCalculator: function () {
-            var calcConfig = this.chartComponentConfig.calculatorConfig;
-
-            calcConfig.startDate = this._getDomainObjectStartDate();
-            calcConfig.endDate = this._getDomainObjectEndDate();
-        },
-
         _addChart: function () {
+            this.chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
+
             this.add(this.chartComponentConfig);
             this.down("rallychart").on("snapshotsAggregated", this._onSnapshotDataReady, this);
         },
@@ -287,19 +266,120 @@
             }
         },
 
-        _setupChartSettings: function () {
-            this.chartSettings = Ext.create("Rally.apps.charts.burndown.BurnDownSettings", {
-                app: this
-            });
+        _updateChartTitle: function () {
+            var chartConfig = this.chartComponentConfig.chartConfig;
+            chartConfig.title = this._buildChartTitle();
         },
 
-        getSettingsFields: function () {
-            return this.chartSettings.getFields();
+        _buildChartTitle: function () {
+            var widthPerCharacter = 10,
+                totalCharacters = Math.floor(this.getWidth() / widthPerCharacter),
+                title = this._getDefaultTitle(),
+                align = "center";
+
+            if (this.scopeObject) {
+                title = this.scopeObject.Name;
+            }
+
+            if (totalCharacters < title.length) {
+                title = title.substring(0, totalCharacters) + "...";
+                align = "left";
+            }
+
+            return {
+                text: title,
+                align: align,
+                margin: 30
+            };
         },
 
-        onTimeboxScopeChange: function (scope) {
-            console.log('scope changed');
-            this.callParent(arguments);
+        _getDefaultTitle: function () {
+            return Ext.String.capitalize(this._getScopeType());
+        },
+
+        _getSettingFromPicker: function (picker) {
+            var settings = {};
+            settings[this._getScopeType()] = this._getRefFromPicker(picker);
+            return settings;
+        },
+
+        _getRefFromPicker: function(picker) {
+            return picker.getRecord().data._ref;
+        },
+
+        _getScopeRef: function() {
+            return this._getRefFromPicker(this._getScopePicker());
+        },
+
+        _settingsInvalid: function () {
+            var chartAggregationType = this.getSetting("chartAggregationType"),
+                chartDisplayType = this.getSetting("chartDisplayType"),
+                chartTimebox = this.getSetting("chartTimebox");
+
+            var invalid = function (value) {
+                return !value || value === "undefined";
+            };
+
+            return invalid(chartAggregationType) || invalid(chartDisplayType) || this._chartTimeboxInvalid(chartTimebox);
+        },
+
+        _chartTimeboxInvalid: function(chartTimebox) {
+            if(this.context.getTimeboxScope()) {
+                return false;
+            }
+
+            return !chartTimebox || chartTimebox === "undefined";
+        },
+
+        _saveDashboardType: function () {
+            var context = this.getContext();
+            this.scopedDashboard = !!(context && context.getTimeboxScope());
+            this.scopeType = this._getScopeType();
+        },
+
+        _getScopeType: function () {
+            if (this.isOnScopedDashboard()) {
+                return this._getDashboardScopeType();
+            } else {
+                return this._getSavedScopeType();
+            }
+        },
+
+        _getDashboardScopeType: function () {
+            return this.getContext().getTimeboxScope().getType();
+        },
+
+        _getSavedScopeType: function () {
+            return this.getSetting("chartTimebox");
+        },
+
+        _getScopePicker: function() {
+            if(this.isOnScopedDashboard()) {
+                return this.getContext().getTimeboxScope();
+            } else {
+                return this.down("rally" + this._getScopeType() + "combobox");
+            }
+        },
+
+        _getScopeObjectStartDate: function () {
+            if(!this.scopeObject) {
+                return new Date();
+            } else if (this.scopeObject._type === "release") {
+                return this.scopeObject.ReleaseStartDate;
+            } else {
+                return this.scopeObject.StartDate;
+            }
+        },
+
+        _getScopeObjectEndDate: function () {
+            if(!this.scopeObject) {
+                return new Date();
+            } else if (this.scopeObject._type === "release") {
+                return this.scopeObject.ReleaseDate;
+            } else {
+                return this.scopeObject.EndDate;
+            }
         }
+
     });
 }());
