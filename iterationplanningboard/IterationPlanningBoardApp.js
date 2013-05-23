@@ -56,7 +56,7 @@
                             var artifactsPref = this.gridboard.artifactTypeChooserPlugin.artifactsPref;
                             var allowedArtifacts = this.gridboard.getHeader().getRight().query('checkboxfield');
                             if (!Ext.isEmpty(artifactsPref) && artifactsPref.length !== allowedArtifacts.length) {
-                                this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref);
+                                this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref, true);
                             }
                         },
                         scope: this

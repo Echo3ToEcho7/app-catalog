@@ -343,22 +343,11 @@
             var artifactsPref = this.gridboard.artifactTypeChooserPlugin.artifactsPref;
             var allowedArtifacts = this.gridboard.getHeader().getRight().query('checkboxfield');
             if (!Ext.isEmpty(artifactsPref) && artifactsPref.length !== allowedArtifacts.length) {
-                this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref);
+                this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref, false);
             }
             if (Ext.Array.contains(artifactsPref, 'agreement')) {
                 this._onShowAgreementsClicked(null, true);
             }
-        },
-
-        _onCheckboxChecked: function(checkbox, checked) {
-            var types = Ext.Array.clone(this.cardboard.types);
-            if (checked) {
-                types.push(checkbox.inputValue);
-            } else {
-                Ext.Array.remove(types, checkbox.inputValue);
-            }
-            this.setLoading();
-            this.cardboard.refresh({ types: types });
         },
 
         _onShowAgreementsClicked: function(checkbox, checked) {
