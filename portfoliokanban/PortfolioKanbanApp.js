@@ -317,7 +317,7 @@
                         target: el,
                         percentDoneData: record.data,
                         percentDoneName: 'PercentDoneByStoryCount',
-                        piRef: record._ref
+                        piRef: record.data._ref
                     });
                 });
             });
