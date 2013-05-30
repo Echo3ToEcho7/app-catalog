@@ -106,7 +106,7 @@
                     'rallygridboardaddnew',
                     {
                         ptype: 'rallygridboardartifacttypechooser',
-                        artifactTypePreferenceKey: 'kanbanapp.rallygridboardartifacttypechooser',
+                        artifactTypePreferenceKey: 'artifact-types',
                         additionalTypesConfig: [this._getAgreementsTypeConfig()]
                     },
                     'rallygridboardtagfilter'

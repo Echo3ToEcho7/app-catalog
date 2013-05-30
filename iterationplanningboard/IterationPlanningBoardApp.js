@@ -36,7 +36,7 @@
                     },
                     {
                         ptype: 'rallygridboardartifacttypechooser',
-                        artifactTypePreferenceKey: 'iterationplanningboardapp.rallygridboardartifacttypechooser'
+                        artifactTypePreferenceKey: 'artifact-types'
                     }
                 ];
 
