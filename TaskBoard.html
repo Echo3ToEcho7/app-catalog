@@ -437,22 +437,28 @@ function initTaskboard() {
         },
 
         showEditor:function (item, schema) {
+            var options = [];
+            var currentOwner = item.Owner;
+            if (currentOwner) {
+                var label = currentOwner.DisplayName || currentOwner.LoginName.split('@')[0];
+                options.push({Label:label, Value:currentOwner.LoginName});
+            }
+            this.getEditors(item, schema, options);
+        },
+
+        getEditors:function(item, schema, options) {
             var self = this;
             var project = item.WorkProduct.Project;
-
-            var teamMembers = [];
-            teamMembers.push(schema.Owner.options[0]);
-
             var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
-            YAHOO.util.Connect.asyncRequest('GET', baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName,EmailAddress,UserName",
+            YAHOO.util.Connect.asyncRequest('GET', baseUrl + "/project/" + project.ObjectID + "/Editors.js?fetch=DisplayName,EmailAddress,UserName",
                     {
                         success:function (callback) {
                             var results = JSON.parse(callback.responseText).QueryResult.Results
                             for (i = 0; i < results.length; ++i) {
                                 var label = results[i].DisplayName || results[i].UserName.split('@')[0];
-                                teamMembers.push({Label:label, Value:results[i].UserName});
+                                options.push({Label:label, Value:results[i].UserName});
                             }
-                            schema.Owner.options = teamMembers;
+                            schema.Owner.options = self.sortEditors(options);
                             var editorConfig = {
                                 props:(showActuals) ? ['Estimate', 'ToDo', 'Actuals', 'Owner', 'State'] : ['Estimate', 'ToDo', 'Owner', 'State'],
                                 propertyKeyAccessors:{
@@ -482,6 +488,14 @@ function initTaskboard() {
                         }
                     }
                     , null);
+        },
+
+        sortEditors: function(options) {
+            return options.sort(function (a, b) {
+                var aLabel = a.Label.toUpperCase();
+                var bLabel = b.Label.toUpperCase();
+                return (aLabel < bLabel) ? -1 : (aLabel > bLabel) ? 1 : 0;
+            });
         },
 
         getParentRow:function (el) {
