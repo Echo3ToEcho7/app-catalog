@@ -102,7 +102,10 @@
             this.scopeObject = store.getAt(0).data;
 
             this._updateChartTitle();
+            this._updateYAxisTitle();
+
             this._addDateBounds();
+            this._addAggregationTypeToCalculator();
             this._addObjectIdToStoreConfig();
 
             if (this._getScopeType() === "release") {
@@ -132,6 +135,11 @@
             var calcConfig = this.chartComponentConfig.calculatorConfig;
             calcConfig.startDate = this.dateToString(this._getScopeObjectStartDate());
             calcConfig.endDate = this.dateToString(this._getScopeObjectEndDate());
+        },
+
+        _addAggregationTypeToCalculator: function() {
+            var calcConfig = this.chartComponentConfig.calculatorConfig;
+            calcConfig.chartAggregationType = this.getSetting("chartAggregationType");
         },
 
         _addObjectIdToStoreConfig: function() {
@@ -262,7 +270,26 @@
                 displayType = this.getSetting("chartDisplayType");
 
             for (var i = 0; i < series.length; i++) {
-                series[i].type = displayType;
+                if(series[i].name.indexOf("Ideal") === -1) {
+                    series[i].type = displayType;
+                }
+            }
+        },
+
+        _updateYAxisTitle: function () {
+            var chartConfig = this.chartComponentConfig.chartConfig;
+            chartConfig.yAxis = [{}];
+            chartConfig.yAxis[0].title = {
+                text: this._getAxisTitleBasedOnAggregationType()
+            };
+        },
+
+        _getAxisTitleBasedOnAggregationType: function() {
+            var aggregationType = this.getSetting("chartAggregationType");
+            if(aggregationType === "storycount") {
+                return "Count";
+            } else {
+                return "Points";
             }
         },
 

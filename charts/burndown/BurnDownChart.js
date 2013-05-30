@@ -31,7 +31,7 @@
                 completedScheduleStateNames: ["Accepted", "Released"]
             },
 
-            chartColors: ['#3399ff', '#66cc33'],
+            chartColors: ["#3399ff", "#66cc33", "#000000"],
 
             chartConfig: {
                 chart: {
@@ -45,13 +45,7 @@
                         text: "Days"
                     }
                 },
-                yAxis: [
-                    {
-                        title: {
-                            text: "Count"
-                        }
-                    }
-                ],
+                yAxis: [],
                 tooltip: {
                     formatter: function () {
                         return "" + this.x + "<br />" + this.series.name + ": " + this.y;

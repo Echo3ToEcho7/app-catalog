@@ -34,7 +34,7 @@
         },
 
         _isOnScopedDashboard: function() {
-            return this.app.isOnScopedDashboard() || !!this.app.context.getTimeboxScope();
+            return this.app.isOnScopedDashboard() && !!this.app.context.getTimeboxScope();
         },
 
         getFields: function() {
