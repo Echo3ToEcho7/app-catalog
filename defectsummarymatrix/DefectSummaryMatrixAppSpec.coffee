@@ -53,23 +53,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
 
     getDefectTableHeaderText: () ->
       header = @app.defectGridHeader
-      if (header)
-        header.getEl().getHTML()
-      else
-        ''
-
-    getMockDefectDataForAttribute: (attr) ->
-      Ext.Array.pluck(Ext.Array.filter(Rally.test.mock.data.ModelFactory.getModelDefinition('Defect').Attributes, (el) ->
-        el.Name == attr
-      )[0].AllowedValues, 'StringValue')
-
-    getMockPriorityDataWithBlankValuesConvertedToNone: () ->
-      priorities = @getMockDefectDataForAttribute('Priority')
-      Ext.Array.map(priorities, (el) ->
-        if el == ''
-          return 'None'
-        return el
-      )
+      (header && header.getEl().getHTML()) || ''
 
     createCustomDefectResponse: () ->
       @ajax.whenQuerying('defect').respondWith([
@@ -91,9 +75,19 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
       ReleaseDate: "2010-07-08T23:59:59.000Z"
     }
     ]
-    @ajax.whenQuerying('defect').respondWithCount 1
-    @states = @getMockDefectDataForAttribute('State')
-    @priorities = @getMockPriorityDataWithBlankValuesConvertedToNone()
+    
+
+    @states = ['Submitted', 'Open', 'Fixed', 'Closed']
+    priorities = [null, 'Resolve Immediately', 'High Attention', 'Normal', 'Low']
+    @priorities = _.map(priorities, (p) -> p || 'None')
+
+    @ajax.whenQueryingAllowedValues('defect', 'State').respondWith @states
+    @ajax.whenQueryingAllowedValues('defect', 'Priority').respondWith priorities
+
+    @ajax.whenQuerying('defect').respondWith
+      State: @states[0]
+      Priority: @priorities[1]
+
     @statesLength = @states.length
     @prioritiesLength = @priorities.length
     @col = 3

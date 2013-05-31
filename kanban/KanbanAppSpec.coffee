@@ -11,13 +11,19 @@ Ext.require [
 describe 'Rally.apps.kanban.KanbanApp', ->
 
   beforeEach ->
-    @ajax.whenQuerying('userstory').respondWith()
+    @ajax.whenQuerying('userstory').respondWithCount(1, {
+      values: [{
+        ScheduleState: 'In-Progress'
+      }]
+      createImmediateSubObjects: true
+    })
+
     @ajax.whenQuerying('defect').respondWith()
 
     @projectRef = Rally.environment.getContext().getProject()._ref
 
   afterEach ->
-    @app?.destroy()
+    Rally.test.destroyComponentsOfQuery 'kanbanapp'
 
   it 'has the correct default settings', ->
     @createApp().then =>
@@ -179,13 +185,12 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(filterInfo.getQuery()).toBe query
 
   it 'should show plan estimate when plan estimate field is enabled', ->
-    @ajax.whenQuerying('userstory').respondWithCount(1, createImmediateSubObjects: true)
     @createApp(cardFields: "Name,Discussion,Tasks,Defects,PlanEstimate").then =>
       expect(@app.getEl().down('.PlanEstimate')).not.toBeNull()
 
   it 'should not show plan estimate when plan estimate field is disabled', ->
-    @ajax.whenQuerying('userstory').respondWithCount(1, createImmediateSubObjects: true)
     @createApp(cardFields: "Name,Discussion,Tasks,Defects").then =>
+      expect(@app.getEl().down('.rui-card-content')).toBeDefined()
       expect(@app.getEl().down('.PlanEstimate')).toBeNull()
 
   it 'should specify the correct policy preference setting key', ->
