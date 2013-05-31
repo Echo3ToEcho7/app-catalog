@@ -46,6 +46,10 @@
                     },
                     cardConfig: {
                         fields: ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
+                    },
+                    listeners: {
+                        filter: this._onBoardFilter,
+                        filtercomplete: this._onBoardFilterComplete
                     }
                 },
                 listeners: {
@@ -75,6 +79,14 @@
             if (Rally.BrowserTest) {
                 Rally.BrowserTest.publishComponentReady(this);
             }
+        },
+
+        _onBoardFilter: function() {
+           this.setLoading(true);
+        },
+
+        _onBoardFilterComplete: function() {
+           this.setLoading(false);
         },
 
         _publishContentUpdated: function() {
