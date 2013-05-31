@@ -33,7 +33,7 @@
 
             Rally.data.ModelFactory.getModel({
                 type:'Defect',
-                success:this._onDefectModelRetrieved,
+                success: this._onDefectModelRetrieved,
                 scope: this
             });
         },
@@ -64,22 +64,39 @@
 
         _onDefectModelRetrieved: function(model) {
             this.defectModel = model;
-            this.states = this._extractFieldValues('State');
-            this.priorities = this._extractFieldValues('Priority');
-            this._initializeAllDefectStore();
+
+            this._extractAllowedValues(model, ['State', 'Priority']).then({
+                success: function(allowedValues) {
+                    this.states = allowedValues.State;
+                    this.priorities = allowedValues.Priority;
+                    this._initializeAllDefectStore();
+                },
+                scope: this
+            });
         },
 
-        _extractFieldValues: function(fieldName) {
-            var value,
-                result = [],
-                fieldValues = this.defectModel.getField(fieldName).allowedValues;
+        _extractAllowedValues: function(defectModel, fieldNames) {
+            var result = {};
+            var deferred = Ext.create('Deft.Deferred');
 
-            Ext.each(fieldValues, function(fieldValue) {
-                value = fieldValue.StringValue;
-                result.push(value === "" ? "None" : value);
+            _.each(fieldNames, function(fieldName) {
+                defectModel.getField(fieldName).getAllowedValueStore().load({
+                    callback: function(records, operation, success) {
+                        var allowedValues = _.map(records, function(record) {
+                            var value = record.get('StringValue');
+                            return value === '' ? 'None' : value;
+                        });
+
+                        result[fieldName] = allowedValues;
+
+                        if(_.keys(result).length === fieldNames.length) {
+                            deferred.resolve(result);
+                        }
+                    }
+                });
             });
 
-            return result;
+            return deferred.promise;
         },
 
         _hideComponentIfNeeded: function(component) {
