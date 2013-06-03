@@ -140,14 +140,26 @@
             this._showDnDRankWarning();
         },
 
+        _getPolicyForColumn: function(columnName, policyPrefKey) {
+                //Early versions of the board did not correctly scope policy prefs
+                //resulting in bleed across groupByField changes
+                var policy = this.getSetting(policyPrefKey) || this.getSetting(columnName + 'Policy');
+
+                if(!policy) {
+                    // account for the WSAPI 1.x->2.x transition related to custom fields
+                    policy = this.getSetting(policyPrefKey.replace(/^c_/, ''));
+                }
+
+                return policy;
+        },
+
         _getColumnConfig: function(columnSetting) {
             var columns = [];
             Ext.Object.each(columnSetting, function(column, values) {
                 var columnName = column || 'None';
                 var policyPrefKey = this.getSetting('groupByField') + columnName + 'Policy';
-                //Early versions of the board did not correctly scope policy prefs
-                //resulting in bleed across groupByField changes
-                var policy = this.getSetting(policyPrefKey) || this.getSetting(columnName + 'Policy');
+                
+                var policy = this._getPolicyForColumn(columnName, policyPrefKey);
 
                 var prefConfig = {
                     appID: this.getAppId(),
