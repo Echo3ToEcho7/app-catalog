@@ -209,6 +209,18 @@ describe 'Rally.apps.kanban.KanbanApp', ->
     @createApp(settings).then =>
       @assertPolicyCmpConfig(settingsKey, policy)
 
+  it 'should load policy setting when column has WSAPI 2.x c_ prefix', ->
+    policy = 'Foo'
+    groupByRoot = 'SomeCustomField'
+    groupByField = 'c_' + groupByRoot
+    settingsKey = groupByRoot + "DefinedPolicy"
+    settings = {}
+    settings.groupByField = groupByField
+    settings[settingsKey] = policy
+
+    @createApp(settings).then =>
+      @assertPolicyCmpConfig('c_' + settingsKey, policy)  
+
   it 'should be able to scroll forwards', ->
     @createApp({},
       renderTo: @createSmallContainer()
