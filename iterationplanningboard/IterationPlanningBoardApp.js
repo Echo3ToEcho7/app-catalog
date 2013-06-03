@@ -59,6 +59,8 @@
                                 this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref, true);
                             }
                         },
+                        filter: this._onBoardFilter,
+                        filtercomplete: this._onBoardFilterComplete,
                         scope: this
                     },
                     plugins: [
@@ -99,6 +101,14 @@
             if (Rally.BrowserTest) {
                 Rally.BrowserTest.publishComponentReady(this);
             }
+        },
+
+        _onBoardFilter: function() {
+           this.setLoading(true);
+        },
+
+        _onBoardFilterComplete: function() {
+           this.setLoading(false);
         },
 
         _publishContentUpdated: function() {
