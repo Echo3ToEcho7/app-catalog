@@ -452,18 +452,14 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
             expect(columns[0].getCards().length).toBe 1
 
   it 'should include filtered cards when calculating fullness of the iteration', ->
-    userStoryRecord = @createUserStoryRecord
-      Iteration: @getIteration1()
-      PlanEstimate: 2
-    @ajax.whenQuerying('userstory').respondWith([userStoryRecord.data])
-
-    defectRecord = @createDefectRecord
-      Iteration: @getIteration1()
-      PlanEstimate: 2
-    @ajax.whenQuerying('defect').respondWith([defectRecord.data])
+    options =
+     values:
+       Iteration: @getIteration1()
+       PlanEstimate: 2
+    @ajax.whenQuerying('userstory').respondWith(@mom.getData('userstory', options))
+    @ajax.whenQuerying('defect').respondWith(@mom.getData('defect', options))
 
     @createApp(plannedVelocity: 10).then =>
-
       expect(@getProgressBarHtml(1)).toBe '4 of 10'
 
       @filterByType('defect').then =>
