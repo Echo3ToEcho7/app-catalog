@@ -437,51 +437,80 @@ function initTaskboard() {
         },
 
         showEditor:function (item, schema) {
+            var options = [];
+            var currentOwner = item.Owner;
+            if (currentOwner) {
+                var label = currentOwner.DisplayName || currentOwner.LoginName.split('@')[0];
+                options.push({Label:label, Value:currentOwner.LoginName});
+            }
+            this.getEditors(item, schema, options, 1);
+        },
+
+        getAllEditors: function() {
+
+        },
+
+        displayEditorForUsers: function (item, schema, options) {
+            schema.Owner.options = this.sortEditors(options);
+            var editorConfig = {
+                props: (showActuals) ? ['Estimate', 'ToDo', 'Actuals', 'Owner', 'State'] : ['Estimate', 'ToDo', 'Owner', 'State'],
+                propertyKeyAccessors: {
+                    Owner: function (prop) {
+                        return prop != null ? prop.LoginName : null;
+                    }
+                },
+                propertyValueAccessors: {
+                    Owner: function (prop) {
+                        return prop != null ? prop._refObjectName : null;
+                    }
+                },
+                titleAccessor: function (obj) {
+                    return obj.FormattedID + '<br/>' + obj.Name;
+                },
+                onErrorCallback: function () {
+                    gridController.display();
+                },
+                onSaveCallback: function (changes) {
+                    gridController.saveChanges(item, changes, 'editor');
+                }
+            };
+            this.editor.display(item, schema, editorConfig);
+        },
+
+        getEditors: function (item, schema, options, currentOffset) {
             var self = this;
             var project = item.WorkProduct.Project;
-
-            var teamMembers = [];
-            teamMembers.push(schema.Owner.options[0]);
-
             var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
-            YAHOO.util.Connect.asyncRequest('GET', baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName,EmailAddress,UserName",
+            YAHOO.util.Connect.asyncRequest('GET', baseUrl + "/project/" + project.ObjectID + "/Editors.js?fetch=DisplayName,EmailAddress,UserName&pagesize=200&start=" + currentOffset,
                     {
-                        success:function (callback) {
-                            var results = JSON.parse(callback.responseText).QueryResult.Results
+                        success: function (callback) {
+                            var json = JSON.parse(callback.responseText);
+                            var results = json.QueryResult.Results;
+
                             for (i = 0; i < results.length; ++i) {
                                 var label = results[i].DisplayName || results[i].UserName.split('@')[0];
-                                teamMembers.push({Label:label, Value:results[i].UserName});
+                                options.push({Label: label, Value: results[i].UserName});
                             }
-                            schema.Owner.options = teamMembers;
-                            var editorConfig = {
-                                props:(showActuals) ? ['Estimate', 'ToDo', 'Actuals', 'Owner', 'State'] : ['Estimate', 'ToDo', 'Owner', 'State'],
-                                propertyKeyAccessors:{
-                                    Owner:function (prop) {
-                                        return prop != null ? prop.LoginName : null;
-                                    }
-                                },
-                                propertyValueAccessors:{
-                                    Owner:function (prop) {
-                                        return prop != null ? prop._refObjectName : null;
-                                    }
-                                },
-                                titleAccessor:function (obj) {
-                                    return obj.FormattedID + '<br/>' + obj.Name;
-                                },
-                                onErrorCallback:function () {
-                                    gridController.display();
-                                },
-                                onSaveCallback:function (changes) {
-                                    gridController.saveChanges(item, changes, 'editor');
-                                }
-                            };
-                            self.editor.display(item, schema, editorConfig);
+
+                            if (currentOffset + 200 <= json.QueryResult.TotalResultCount) {
+                                self.getEditors(item, schema, options, currentOffset + 200);
+                            } else {
+                                self.displayEditorForUsers(item, schema, options);
+                            }
                         },
-                        failure:function (o) {
+                        failure: function (o) {
                             console.log(o);
                         }
                     }
                     , null);
+        },
+
+        sortEditors: function(options) {
+            return options.sort(function (a, b) {
+                var aLabel = a.Label.toUpperCase();
+                var bLabel = b.Label.toUpperCase();
+                return (aLabel < bLabel) ? -1 : (aLabel > bLabel) ? 1 : 0;
+            });
         },
 
         getParentRow:function (el) {
