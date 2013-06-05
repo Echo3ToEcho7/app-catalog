@@ -33,6 +33,50 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       expect(@field.getErrors().length).toBe 1
       expect(@field.getErrors()[0]).toBe 'At least one column must be shown.'
 
+  it 'should display saved pref data for field when form loaded', ->
+    @_assertFieldSetWithPredefinedData(
+      shouldShowColumnLevelFieldPicker: false
+      expectedValues: ['Defined', 'Yes', '2', 'Defined', 'In-Progress', 'No', '∞', '--No Mapping--']
+    )
+
+  it 'should submitData for field when user saves form', ->
+    @_assertFieldSetWithPredefinedData(
+      shouldShowColumnLevelFieldPicker: false
+      expectedValues: ['Defined', 'Yes', '2', 'Defined', 'In-Progress', 'No', '∞', '--No Mapping--']
+    )
+
+    @waitForCallback(@readyCallback).then =>
+      data = @field.getSubmitData()
+      expect(data.foo).toBe @value
+
+  it 'should create column field picker if shouldShowColumnLevelFieldPicker enabled', ->
+    @_createKanbanSettingsField(
+      renderTo: 'testDiv',
+      shouldShowColumnLevelFieldPicker: true
+    )
+    @_refreshField()
+
+    @waitForCallback(@readyCallback).then =>
+      expect(@field._grid.columns.length).toBe 5
+      expect(@field._grid.columns[4].dataIndex).toBe 'cardFields'
+
+  it 'should not create column field picker if shouldShowColumnLevelFieldPicker disabled', ->
+    @_createKanbanSettingsField(
+      renderTo: 'testDiv',
+      shouldShowColumnLevelFieldPicker: false
+    )
+    @_refreshField()
+
+    @waitForCallback(@readyCallback).then =>
+      expect(@field._grid.columns.length).toBe 4
+      expect(@field._grid.columns[3].dataIndex).toBe 'scheduleStateMapping'
+
+  it 'should display saved pref data for field with cardFields', ->
+    @_assertFieldSetWithPredefinedData(
+      shouldShowColumnLevelFieldPicker: true
+      expectedValues: ['Defined', 'Yes', '2', 'Defined', 'mycardfield', 'In-Progress', 'No', '∞', '--No Mapping--', 'FormattedID,Name,Owner']
+    )
+
   it 'should destroy grid when destroyed', ->
     @_createKanbanSettingsField(
       renderTo: 'testDiv'
@@ -51,6 +95,26 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
           ready: @readyCallback
         , config)
       )
+
+    _assertFieldSetWithPredefinedData: (options) ->
+      @_createKanbanSettingsField(
+        renderTo: 'testDiv',
+        shouldShowColumnLevelFieldPicker: options.shouldShowColumnLevelFieldPicker
+      )
+      @_refreshField()
+      if options.shouldShowColumnLevelFieldPicker
+        @value = Ext.JSON.encode({
+          Defined: {wip:2, scheduleStateMapping:"Defined",cardFields:"mycardfield"}
+        })
+      else
+        @value = Ext.JSON.encode({
+          Defined: {wip:2, scheduleStateMapping:"Defined"}
+        })
+
+      @field.setValue(@value)
+      @waitForCallback(@readyCallback).then =>
+        cells = Ext.dom.Query.select('.x4-grid-cell > .x4-grid-cell-inner')
+        expect(html).toBe options.expectedValues[i] for html, i in Ext.Array.pluck(cells, 'innerHTML')
 
     _refreshField: ->
       scheduleStateField = Rally.test.mock.data.ModelFactory.getModel('UserStory').getField('ScheduleState')

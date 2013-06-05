@@ -88,6 +88,23 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(columns[0].wipLimit).toBe columnSettings.Defined.wip
       expect(columns[1].wipLimit).toBe columnSettings['In-Progress'].wip
 
+  it 'should show columns with correct fields when COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS enabled', ->
+    @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS').returns(true)
+    columnSettings =
+      Defined:
+        cardFields: 'Name,Defects,Project'
+      'In-Progress':
+        cardFields: 'ScheduleState'
+
+     @createApp({columns: Ext.JSON.encode(columnSettings)}).then =>
+       columns = @app.down('rallycardboard').getColumns()
+
+       expect(columns.length).toBe 2
+       expect(columns[0].cardConfig.fields).toEqual ''
+       expect(columns[0].fields).toEqual columnSettings.Defined.cardFields.split(',')
+       expect(columns[1].fields).toEqual columnSettings['In-Progress'].cardFields.split(',')
+       expect(columns[1].cardConfig.fields).toEqual ''
+
   it 'should filter the board when a type checkbox is clicked', ->
     @createApp().then =>
       board = @app.down('rallycardboard')
