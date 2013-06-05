@@ -15,8 +15,8 @@
             'Rally.ui.plugin.FieldValidationUi'
         ],
 
-        getFields: function() {
-            return [
+        getFields: function(config) {
+            var items = [
                 {
                     name: 'groupByField',
                     xtype: 'rallyfieldcombobox',
@@ -45,6 +45,7 @@
                     fieldLabel: '',
                     margin: '5px 0 0 80px',
                     xtype: 'kanbancolumnsettingsfield',
+                    shouldShowColumnLevelFieldPicker: config.shouldShowColumnLevelFieldPicker,
                     handlesEvents: {
                         fieldselected: function(field) {
                             this.refreshWithNewField(field);
@@ -56,8 +57,11 @@
                         }
                     },
                     bubbleEvents: 'columnsettingsready'
-                },
-                {
+                }
+            ];
+
+            if (!config.shouldShowColumnLevelFieldPicker) {
+                items.push({
                     name: 'cardFields',
                     readyEvent: 'ready',
                     fieldLabel: 'Card Fields',
@@ -83,7 +87,10 @@
                             }
                         }
                     }
-                },
+                });
+            }
+
+            items.push(
                 {
                     name: 'hideReleasedCards',
                     xtype: 'rallycheckboxfield',
@@ -112,7 +119,9 @@
                 {
                     type: 'query'
                 }
-            ];
+            );
+
+            return items;
         }
     });
 })();

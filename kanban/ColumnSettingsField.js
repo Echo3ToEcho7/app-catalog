@@ -51,86 +51,119 @@
             this.callParent(arguments);
 
             this._store = Ext.create('Ext.data.Store', {
-                fields: ['column', 'shown', 'wip', 'scheduleStateMapping'],
+                fields: ['column', 'shown', 'wip', 'scheduleStateMapping', 'cardFields'],
                 data: []
             });
 
             this._grid = Ext.create('Rally.ui.grid.Grid', {
                 autoWidth: true,
                 renderTo: this.inputEl,
-                columnCfgs: [
-                    {
-                        text: 'Column',
-                        dataIndex: 'column',
-                        emptyCellText: 'None',
-                        width: 200
-                    },
-                    {
-                        text: 'Show',
-                        dataIndex: 'shown',
-                        width: 100,
-                        renderer: function(value) {
-                            return value === true ? 'Yes' : 'No';
-                        },
-                        editor: {
-                            xtype: 'rallycombobox',
-                            displayField: 'name',
-                            valueField: 'value',
-                            editable: false,
-                            storeType: 'Ext.data.Store',
-                            storeConfig: {
-                                remoteFilter: false,
-                                fields: ['name', 'value'],
-                                data: [
-                                    {'name': 'Yes', 'value': true},
-                                    {'name': 'No', 'value': false}
-                                ]
-                            }
-                        }
-                    },
-                    {
-                        text: 'WIP',
-                        dataIndex: 'wip',
-                        width: 100,
-                        emptyCellText: '&#8734;',
-                        editor: {
-                            xtype: 'rallytextfield',
-                            maskRe: /[0-9]/,
-                            validator: function(value) {
-                                return (value === '' || (value > 0 && value <= 9999)) || 'WIP must be > 0 and < 9999.';
-                            },
-                            rawToValue: function(value) {
-                                return value === '' ? value : parseInt(value, 10);
-                            }
-                        }
-                    },
-                    {
-                        text: 'Schedule State Mapping',
-                        dataIndex: 'scheduleStateMapping',
-                        emptyCellText: '--No Mapping--',
-                        flex: 1,
-                        editor: {
-                            xtype: 'rallyfieldvaluecombobox',
-                            model: 'HierarchicalRequirement',
-                            field: 'ScheduleState',
-                            listeners: {
-                                ready: function(combo) {
-                                    var noMapping = {};
-                                    noMapping[combo.displayField] = '--No Mapping--';
-                                    noMapping[combo.valueField] = '';
-
-                                    combo.store.insert(0, [noMapping]);
-                                }
-                            }
-                        }
-                    }
-                ],
+                columnCfgs: this._getColumnCfgs(),
                 showPagingToolbar: false,
                 store: this._store,
                 editingConfig: {
                     publishMessages: false
                 }
             });
+        },
+
+        _getColumnCfgs: function() {
+            var columns = [
+                {
+                    text: 'Column',
+                    dataIndex: 'column',
+                    emptyCellText: 'None',
+                    flex: 2
+                },
+                {
+                    text: 'Show',
+                    dataIndex: 'shown',
+                    flex: 1,
+                    renderer: function (value) {
+                        return value === true ? 'Yes' : 'No';
+                    },
+                    editor: {
+                        xtype: 'rallycombobox',
+                        displayField: 'name',
+                        valueField: 'value',
+                        editable: false,
+                        storeType: 'Ext.data.Store',
+                        storeConfig: {
+                            remoteFilter: false,
+                            fields: ['name', 'value'],
+                            data: [
+                                {'name': 'Yes', 'value': true},
+                                {'name': 'No', 'value': false}
+                            ]
+                        }
+                    }
+                },
+                {
+                    text: 'WIP',
+                    dataIndex: 'wip',
+                    flex: 1,
+                    emptyCellText: '&#8734;',
+                    editor: {
+                        xtype: 'rallytextfield',
+                        maskRe: /[0-9]/,
+                        validator: function (value) {
+                            return (value === '' || (value > 0 && value <= 9999)) || 'WIP must be > 0 and < 9999.';
+                        },
+                        rawToValue: function (value) {
+                            return value === '' ? value : parseInt(value, 10);
+                        }
+                    }
+                },
+                {
+                    text: 'Schedule State Mapping',
+                    dataIndex: 'scheduleStateMapping',
+                    emptyCellText: '--No Mapping--',
+                    flex: 2,
+                    editor: {
+                        xtype: 'rallyfieldvaluecombobox',
+                        model: 'HierarchicalRequirement',
+                        field: 'ScheduleState',
+                        listeners: {
+                            ready: function (combo) {
+                                var noMapping = {};
+                                noMapping[combo.displayField] = '--No Mapping--';
+                                noMapping[combo.valueField] = '';
+
+                                combo.store.insert(0, [noMapping]);
+                            }
+                        }
+                    }
+                }
+            ];
+
+            if (this.shouldShowColumnLevelFieldPicker) {
+                columns.push({
+                    text: 'Fields',
+                    dataIndex: 'cardFields',
+                    width: 300,
+                    renderer: this._getCardFields,
+                    scope: this,
+                    editor: {
+                        xtype: 'rallyfieldpicker',
+                        cls: 'card-fields',
+                        modelTypes: ['UserStory', 'Defect'],
+                        autoExpand: true,
+                        alwaysExpanded: false,
+                        hideTrigger: true,
+                        fieldBlackList: ['DefectStatus', 'TaskStatus'],
+                        alwaysSelectedValues: ['FormattedID', 'Name', 'Owner'],
+                        storeConfig: {
+                            autoLoad: false
+                        },
+                        listeners: {
+                            selectionchange: function (picker) {
+                                picker.validate();
+                            }
+                        }
+                    }
+                });
+            }
+            return columns;
         },
 
         /**
@@ -145,6 +178,24 @@
             return data;
         },
 
+        _getCardFields: function (fields) {
+            var defaults = 'FormattedID,Name,Owner';
+            if (!Ext.isArray(fields)) {
+                if (fields) {
+                    return fields;
+                } else {
+                    return defaults;
+                }
+            }
+            var val = defaults.split(',');
+            Ext.Array.each(fields, function (currentItem) {
+                if (currentItem && currentItem.data && !Ext.Array.contains(val, currentItem.data.name)) {
+                    val.push(currentItem.data.name);
+                }
+            });
+            return val.join(",");
+        },
+
         _buildSettingValue: function() {
             var columns = {};
             this._store.each(function(record) {
@@ -153,6 +204,9 @@
                         wip: record.get('wip'),
                         scheduleStateMapping: record.get('scheduleStateMapping')
                     };
+                    if (this.shouldShowColumnLevelFieldPicker) {
+                        columns[record.get('column')].cardFields = this._getCardFields(record.get('cardFields'));
+                    }
                 }
             }, this);
             return columns;
@@ -199,6 +253,9 @@
                 wip: '',
                 scheduleStateMapping: ''
             };
+            if (this.shouldShowColumnLevelFieldPicker) {
+                column.cardFields = '';
+            }
 
             if (pref) {
                 Ext.apply(column, {
@@ -206,6 +263,12 @@
                     wip: pref.wip,
                     scheduleStateMapping: pref.scheduleStateMapping
                 });
+
+                if (this.shouldShowColumnLevelFieldPicker) {
+                    Ext.apply(column, {
+                        cardFields: pref.cardFields
+                    });
+                }
             }
 
             return column;

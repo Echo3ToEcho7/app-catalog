@@ -38,7 +38,7 @@
                     Completed: {wip: ''},
                     Accepted: {wip: ''}
                 }),
-                cardFields: 'Name,Discussion,Tasks,Defects',
+                cardFields: 'Name,Discussion,Tasks,Defects', //remove with COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS
                 hideReleasedCards: false,
                 showCardAge: true,
                 cardAgeThreshold: 3,
@@ -77,7 +77,13 @@
         },
 
         getSettingsFields: function() {
-            return Rally.apps.kanban.Settings.getFields();
+            return Rally.apps.kanban.Settings.getFields({
+                shouldShowColumnLevelFieldPicker: this._shouldShowColumnLevelFieldPicker()
+            });
+        },
+
+        _shouldShowColumnLevelFieldPicker: function() {
+            return this.getContext().isFeatureEnabled('COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS');
         },
 
         _onStoryModelRetrieved: function(model) {
@@ -158,7 +164,7 @@
             Ext.Object.each(columnSetting, function(column, values) {
                 var columnName = column || 'None';
                 var policyPrefKey = this.getSetting('groupByField') + columnName + 'Policy';
-                
+
                 var policy = this._getPolicyForColumn(columnName, policyPrefKey);
 
                 var prefConfig = {
@@ -171,6 +177,7 @@
                 var columnConfig = {
                     xtype: 'kanbancolumn',
                     wipLimit: values.wip,
+                    fields: (this._shouldShowColumnLevelFieldPicker() && values.cardFields) ? values.cardFields.split(',') : '',
                     value: column,
                     columnHeaderConfig: {
                         headerTpl: columnName
@@ -244,7 +251,7 @@
                 cardConfig: {
                     editable: true,
                     showIconMenus: true,
-                    fields: this.getSetting('cardFields').split(','),
+                    fields: (this._shouldShowColumnLevelFieldPicker()) ? '' : this.getSetting('cardFields').split(','),
                     showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1
                 },
                 loadMask: false,
