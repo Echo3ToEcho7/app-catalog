@@ -43,7 +43,22 @@
                 showCardAge: true,
                 cardAgeThreshold: 3,
                 pageSize: 25
+            },
+            defaultCardFields: 'FormattedID,Name,Owner,Discussion,Tasks,Defects'
+        },
+
+        constructor: function(config) {
+            this.initConfig(config);
+            if (this._shouldShowColumnLevelFieldPicker()) {
+                var defaultColumnSettings = Ext.JSON.decode(this.defaultSettings.columns);
+                Ext.Object.each(defaultColumnSettings, function(key, column) {
+                    if (!column.cardFields) {
+                        column.cardFields = this.defaultCardFields;
+                    }
+                }, this);
+                this.defaultSettings.columns = Ext.JSON.encode(defaultColumnSettings);
             }
+            this.callParent(arguments);
         },
 
         launch: function() {
@@ -78,7 +93,8 @@
 
         getSettingsFields: function() {
             return Rally.apps.kanban.Settings.getFields({
-                shouldShowColumnLevelFieldPicker: this._shouldShowColumnLevelFieldPicker()
+                shouldShowColumnLevelFieldPicker: this._shouldShowColumnLevelFieldPicker(),
+                defaultCardFields: this.defaultCardFields
             });
         },
 
@@ -177,7 +193,7 @@
                 var columnConfig = {
                     xtype: 'kanbancolumn',
                     wipLimit: values.wip,
-                    fields: (this._shouldShowColumnLevelFieldPicker() && values.cardFields) ? values.cardFields.split(',') : '',
+                    fields: this._getFieldsForColumn(values),
                     value: column,
                     columnHeaderConfig: {
                         headerTpl: columnName
@@ -204,6 +220,18 @@
             };
 
             return columns;
+        },
+
+        _getFieldsForColumn: function(values) {
+            var columnFields = [];
+            if (this._shouldShowColumnLevelFieldPicker()) {
+                if (values.cardFields) {
+                    columnFields = values.cardFields.split(',');
+                } else {
+                    columnFields = this.defaultCardFields.split(',');
+                }
+            }
+            return columnFields;
         },
 
         _onInvalidFilter: function() {
@@ -251,7 +279,7 @@
                 cardConfig: {
                     editable: true,
                     showIconMenus: true,
-                    fields: (this._shouldShowColumnLevelFieldPicker()) ? '' : this.getSetting('cardFields').split(','),
+                    fields: (this._shouldShowColumnLevelFieldPicker()) ? [] : this.getSetting('cardFields').split(','),
                     showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1
                 },
                 loadMask: false,

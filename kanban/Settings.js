@@ -46,6 +46,7 @@
                     margin: '5px 0 0 80px',
                     xtype: 'kanbancolumnsettingsfield',
                     shouldShowColumnLevelFieldPicker: config.shouldShowColumnLevelFieldPicker,
+                    defaultCardFields: config.defaultCardFields,
                     handlesEvents: {
                         fieldselected: function(field) {
                             this.refreshWithNewField(field);

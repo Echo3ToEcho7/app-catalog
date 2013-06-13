@@ -36,7 +36,9 @@
              *
              * The column settings value for this field
              */
-            value: undefined
+            value: undefined,
+
+            defaultCardFields: ''
         },
 
         onDestroy: function() {
@@ -179,13 +181,9 @@
         },
 
         _getCardFields: function (fields) {
-            var defaults = 'FormattedID,Name,Owner';
-            if (!Ext.isArray(fields)) {
-                if (fields) {
-                    return fields;
-                } else {
-                    return defaults;
-                }
+            var defaults = this.defaultCardFields;
+            if (!Ext.isArray(fields) && fields) {
+                return fields;
             }
             var val = defaults.split(',');
             Ext.Array.each(fields, function (currentItem) {
@@ -251,11 +249,9 @@
                 column: columnName,
                 shown: false,
                 wip: '',
-                scheduleStateMapping: ''
+                scheduleStateMapping: '',
+                cardFields: this.defaultCardFields
             };
-            if (this.shouldShowColumnLevelFieldPicker) {
-                column.cardFields = '';
-            }
 
             if (pref) {
                 Ext.apply(column, {
@@ -264,7 +260,7 @@
                     scheduleStateMapping: pref.scheduleStateMapping
                 });
 
-                if (this.shouldShowColumnLevelFieldPicker) {
+                if (pref.cardFields) {
                     Ext.apply(column, {
                         cardFields: pref.cardFields
                     });
