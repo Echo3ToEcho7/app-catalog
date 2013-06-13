@@ -27,7 +27,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
 
   it 'has the correct default settings', ->
     @createApp().then =>
-
+      cardFields = 'FormattedID,Name,Owner,Discussion,Tasks,Defects'
       expect(@app.getSetting('groupByField')).toBe 'ScheduleState'
       expect(@app.getSetting('columns')).toBe Ext.JSON.encode(
         Defined:
@@ -40,6 +40,25 @@ describe 'Rally.apps.kanban.KanbanApp', ->
           wip: ''
       )
       expect(@app.getSetting('cardFields')).toBe 'Name,Discussion,Tasks,Defects'
+
+  it 'has the correct default settings when COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS enabled', ->
+    @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS').returns(true)
+    @createApp().then =>
+      expect(@app.getSetting('groupByField')).toBe 'ScheduleState'
+      expect(@app.getSetting('columns')).toBe Ext.JSON.encode(
+        Defined:
+          wip: ''
+          cardFields: @app.defaultCardFields
+        'In-Progress':
+          wip: ''
+          cardFields: @app.defaultCardFields
+        Completed:
+          wip: ''
+          cardFields: @app.defaultCardFields
+        Accepted:
+          wip: ''
+          cardFields: @app.defaultCardFields
+      )
 
   it 'does not show add new when user is not a project editor', ->
     Rally.environment.getContext().getPermissions().userPermissions[0].Role = 'Viewer'
@@ -88,7 +107,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(columns[0].wipLimit).toBe columnSettings.Defined.wip
       expect(columns[1].wipLimit).toBe columnSettings['In-Progress'].wip
 
-  it 'should show columns with correct fields when COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS enabled', ->
+  it 'should show columns with correct card fields when COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS enabled', ->
     @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS').returns(true)
     columnSettings =
       Defined:
@@ -100,10 +119,26 @@ describe 'Rally.apps.kanban.KanbanApp', ->
        columns = @app.down('rallycardboard').getColumns()
 
        expect(columns.length).toBe 2
-       expect(columns[0].cardConfig.fields).toEqual ''
+       expect(columns[0].cardConfig.fields).toEqual []
        expect(columns[0].fields).toEqual columnSettings.Defined.cardFields.split(',')
        expect(columns[1].fields).toEqual columnSettings['In-Progress'].cardFields.split(',')
-       expect(columns[1].cardConfig.fields).toEqual ''
+       expect(columns[1].cardConfig.fields).toEqual []
+
+  it 'should show columns with default card fields when column settings but no column.cardFields setting', ->
+    @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS').returns(true)
+    defaultFields = ['FormattedID', 'Name', 'Owner', 'Discussion', 'Tasks', 'Defects']
+    columnSettings =
+      Defined:
+        wip: 1
+      'In-Progress':
+        wip: 2
+
+    @createApp({columns: Ext.JSON.encode(columnSettings)}).then =>
+      columns = @app.down('rallycardboard').getColumns()
+
+      expect(columns.length).toBe 2
+      expect(columns[0].fields).toEqual defaultFields
+      expect(columns[1].fields).toEqual defaultFields
 
   it 'should filter the board when a type checkbox is clicked', ->
     @createApp().then =>

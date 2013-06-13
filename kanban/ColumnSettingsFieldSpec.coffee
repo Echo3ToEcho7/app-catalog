@@ -39,7 +39,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       expectedValues: ['Defined', 'Yes', '2', 'Defined', 'In-Progress', 'No', '∞', '--No Mapping--']
     )
 
-  it 'should submitData for field when user saves form', ->
+  it 'should submit columns data for field when user saves form', ->
     @_assertFieldSetWithPredefinedData(
       shouldShowColumnLevelFieldPicker: false
       expectedValues: ['Defined', 'Yes', '2', 'Defined', 'In-Progress', 'No', '∞', '--No Mapping--']
@@ -72,9 +72,11 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       expect(@field._grid.columns[3].dataIndex).toBe 'scheduleStateMapping'
 
   it 'should display saved pref data for field with cardFields', ->
+    defaultCardFields = 'FooBar,MyField'
     @_assertFieldSetWithPredefinedData(
       shouldShowColumnLevelFieldPicker: true
-      expectedValues: ['Defined', 'Yes', '2', 'Defined', 'mycardfield', 'In-Progress', 'No', '∞', '--No Mapping--', 'FormattedID,Name,Owner']
+      defaultCardFields: defaultCardFields
+      expectedValues: ['Defined', 'Yes', '2', 'Defined', 'mycardfield', 'In-Progress', 'No', '∞', '--No Mapping--', defaultCardFields]
     )
 
   it 'should destroy grid when destroyed', ->
@@ -100,6 +102,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       @_createKanbanSettingsField(
         renderTo: 'testDiv',
         shouldShowColumnLevelFieldPicker: options.shouldShowColumnLevelFieldPicker
+        defaultCardFields: options.defaultCardFields
       )
       @_refreshField()
       if options.shouldShowColumnLevelFieldPicker
@@ -121,4 +124,3 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       @allowedValues = ["Defined", "In-Progress"]
       @ajax.whenQueryingAllowedValues(scheduleStateField).respondWith @allowedValues
       @field.refreshWithNewField scheduleStateField
-
