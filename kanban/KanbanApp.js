@@ -427,9 +427,6 @@
             params.iteration = 'u';
 
             var groupByFieldName = this.groupByField.name;
-            if (!this.getContext().isFeatureEnabled('WSAPI_2_0_LIVE')) {
-                groupByFieldName = 'c_' + groupByFieldName;
-            }
             params[groupByFieldName] = this.cardboard.getColumns()[0].getValue();
         },
 
