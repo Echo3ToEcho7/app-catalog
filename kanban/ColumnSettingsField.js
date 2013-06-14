@@ -180,12 +180,11 @@
             return data;
         },
 
-        _getCardFields: function (fields) {
-            var defaults = this.defaultCardFields;
+        _getCardFields: function(fields) {
             if (!Ext.isArray(fields) && fields) {
                 return fields;
             }
-            var val = defaults.split(',');
+            var val = ['FormattedID','Name','Owner'];
             Ext.Array.each(fields, function (currentItem) {
                 if (currentItem && currentItem.data && !Ext.Array.contains(val, currentItem.data.name)) {
                     val.push(currentItem.data.name);
