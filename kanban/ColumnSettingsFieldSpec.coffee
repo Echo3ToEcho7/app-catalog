@@ -49,6 +49,16 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       data = @field.getSubmitData()
       expect(data.foo).toBe @value
 
+  it 'should submit columns data with alwaysSelected cardFields if no fields set when user saves form', ->
+    @_assertFieldSetWithPredefinedData(
+      shouldShowColumnLevelFieldPicker: true
+      expectedValues: ['Defined', 'Yes', '2', 'Defined', 'mycardfield', 'In-Progress', 'No', '∞', '--No Mapping--', 'FormattedID,Name,Owner']
+    )
+
+    @waitForCallback(@readyCallback).then =>
+      data = @field.getSubmitData()
+      expect(data.foo).toBe @value
+
   it 'should create column field picker if shouldShowColumnLevelFieldPicker enabled', ->
     @_createKanbanSettingsField(
       renderTo: 'testDiv',
