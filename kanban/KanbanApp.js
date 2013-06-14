@@ -247,16 +247,7 @@
                     {ptype: 'rallycardboardprinting', pluginId: 'print'},
                     {
                         ptype: 'rallyscrollablecardboard',
-                        containerEl: this.getEl(),
-                        getFirstVisibleScrollableColumn: function() {
-                            return this.cmp.getVisibleColumns()[0];
-                        },
-                        getLastVisibleScrollableColumn: function() {
-                            return Rally.util.Array.last(this.cmp.getVisibleColumns());
-                        },
-                        getScrollableColumns: function() {
-                            return this.cmp.getColumns();
-                        }
+                        containerEl: this.getEl()
                     }
                 ],
                 types: this._getDefaultTypes(),

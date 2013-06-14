@@ -100,16 +100,10 @@
                     fieldLabel: 'Card Fields',
                     xtype: 'rallyfieldpicker',
                     alwaysSelectedValues: ['FormattedID', 'Name', 'Owner'],
-                    readyEvent: 'ready',
                     handlesEvents: {
                         typeselected: function(type, context) {
                             this.refreshWithNewModelTypes([type], context);
                         }
-                    },
-                    width: 300,
-                    margin: '0 0 255 0',
-                    storeConfig: {
-                        autoLoad: false
                     }
                 },
                 {

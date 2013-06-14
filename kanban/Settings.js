@@ -64,18 +64,11 @@
             if (!config.shouldShowColumnLevelFieldPicker) {
                 items.push({
                     name: 'cardFields',
-                    readyEvent: 'ready',
                     fieldLabel: 'Card Fields',
                     xtype: 'rallyfieldpicker',
-                    cls: 'card-fields',
                     modelTypes: ['userstory', 'defect'],
                     fieldBlackList: ['DefectStatus', 'TaskStatus'],
                     alwaysSelectedValues: ['FormattedID', 'Name', 'Owner'],
-                    width: 300,
-                    margin: '10px 0 255px 0',
-                    storeConfig: {
-                        autoLoad: false
-                    },
                     listeners: {
                         selectionchange: function(picker) {
                             picker.validate();
