@@ -370,7 +370,7 @@
                     },
                     scope: this
                 }
-            }).alignTo(this.getEl(), 'c-c');
+            });
         },
 
         _onBoardLoad: function() {
