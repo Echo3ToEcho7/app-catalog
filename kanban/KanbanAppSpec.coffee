@@ -84,7 +84,18 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       addNewHelper = new Helpers.AddNewHelper '.kanban'
       addNewHelper.addWithDetails('foo').then =>
         expect(editorOpenedStub).toHaveBeenCalledOnce()
-        expect(editorOpenedStub.getCall(0).args[1]['c_' + @app.getSetting('groupByField')]).toBe @app.cardboard.getColumns()[0].getValue()
+        expect(editorOpenedStub.getCall(0).args[1][@app.getSetting('groupByField')]).toBe @app.cardboard.getColumns()[0].getValue()
+
+  it 'should set custom group by field to first column value', ->
+    @createApp(
+      groupByField: 'KanbanState'
+    ).then =>
+      editorOpenedStub = @stub(Rally.nav.Manager, 'create')
+      addNewHelper = new Helpers.AddNewHelper '.kanban'
+      addNewHelper.addWithDetails('foo').then =>
+        expect(editorOpenedStub).toHaveBeenCalledOnce()
+        groupByField = "c_#{@app.getSetting('groupByField')}"
+        expect(editorOpenedStub.getCall(0).args[1][groupByField]).toBe @app.cardboard.getColumns()[0].getValue()
 
   it 'should show correct fields on cards', ->
     @createApp({cardFields: 'Name,Defects,Project'}).then =>
