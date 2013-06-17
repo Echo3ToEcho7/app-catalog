@@ -143,7 +143,7 @@
                     text: 'Fields',
                     dataIndex: 'cardFields',
                     width: 300,
-                    renderer: this._getCardFields,
+                    renderer: this._getRendererForCardFields,
                     scope: this,
                     editor: {
                         xtype: 'rallyfieldpicker',
@@ -180,9 +180,14 @@
             return data;
         },
 
+        _getRendererForCardFields: function(fields) {
+            var val = this._getCardFields(fields);
+            return val.join(', ');
+        },
+
         _getCardFields: function(fields) {
-            if (!Ext.isArray(fields) && fields) {
-                return fields;
+            if (Ext.isString(fields) && fields) {
+                return fields.split(',');
             }
             var val = ['FormattedID','Name','Owner'];
             Ext.Array.each(fields, function (currentItem) {
@@ -190,7 +195,7 @@
                     val.push(currentItem.data.name);
                 }
             });
-            return val.join(",");
+            return val;
         },
 
         _buildSettingValue: function() {
@@ -202,7 +207,8 @@
                         scheduleStateMapping: record.get('scheduleStateMapping')
                     };
                     if (this.shouldShowColumnLevelFieldPicker) {
-                        columns[record.get('column')].cardFields = this._getCardFields(record.get('cardFields'));
+                        var cardFields = this._getCardFields(record.get('cardFields'));
+                        columns[record.get('column')].cardFields = cardFields.join(',');
                     }
                 }
             }, this);
