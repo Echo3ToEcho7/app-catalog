@@ -437,15 +437,21 @@ function initTaskboard() {
         },
 
         showEditor: function (item, schema) {
-            var options = [];
+            var editors = [];
             var currentOwner = item.Owner;
             var me = this;
             if (currentOwner) {
                 var label = currentOwner.DisplayName || currentOwner.LoginName.split('@')[0];
-                options.push({Label: label, Value: currentOwner.LoginName});
+                editors.push({Label: label, Value: currentOwner.LoginName});
             }
-            this.getEditors(item, schema, options, 1, function(options){
-                me.displayEditorForUsers(item, schema, options);
+            var START_OFFSET = 1;
+            this.getEditors(item, editors, START_OFFSET, function () {
+                me.displayEditorForUsers(item, schema, editors);
+            });
+
+            var teamMembers = [];
+            this.getTeamMembers(item, teamMembers, START_OFFSET, function () {
+                console.log(teamMembers);
             });
         },
 
@@ -476,16 +482,17 @@ function initTaskboard() {
             this.editor.display(item, schema, editorConfig);
         },
 
-        getEditors: function (item, schema, options, currentOffset, callback) {
+        getEditors: function (item, options, currentOffset, callback) {
             var project = item.WorkProduct.Project;
             var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
             var me = this;
             var editorUrl = baseUrl + "/project/" + project.ObjectID + "/Editors.js?fetch=DisplayName,EmailAddress,UserName&pagesize=200&start=" + currentOffset;
             var editors = [];
-            YAHOO.util.Connect.asyncRequest('GET', editorUrl, {success: this.handleEditorsResponse(item, schema, options, currentOffset, callback), failure: function () {}, scope: this}, null);
+            YAHOO.util.Connect.asyncRequest('GET', editorUrl, {success: this.handleEditorsResponse(item, options, currentOffset, callback), failure: function () {
+            }, scope: this}, null);
         },
 
-        handleEditorsResponse: function (item, schema, options, currentOffset, callback) {
+        handleEditorsResponse: function (item, options, currentOffset, callback) {
             return function (response) {
                 var json = JSON.parse(response.responseText);
                 var results = json.QueryResult.Results;
@@ -496,9 +503,37 @@ function initTaskboard() {
                 }
 
                 if (currentOffset + 200 <= json.QueryResult.TotalResultCount) {
-                    this.getEditors(item, schema, options, currentOffset + 200);
+                    this.getEditors(item, options, currentOffset + 200);
                 } else {
-                    callback(options);
+                    callback();
+                }
+            };
+        },
+
+        getTeamMembers: function (item, options, currentOffset, callback) {
+            var project = item.WorkProduct.Project;
+            var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
+            var me = this;
+            var editorUrl = baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName,EmailAddress,UserName&pagesize=200&start=" + currentOffset;
+            var editors = [];
+            YAHOO.util.Connect.asyncRequest('GET', editorUrl, {success: this.handleTeamMembersResponse(item, options, currentOffset, callback), failure: function () {
+            }, scope: this}, null);
+        },
+
+        handleTeamMembersResponse: function (item, options, currentOffset, callback) {
+            return function (response) {
+                var json = JSON.parse(response.responseText);
+                var results = json.QueryResult.Results;
+
+                for (i = 0; i < results.length; ++i) {
+                    var label = results[i].DisplayName || results[i].UserName.split('@')[0];
+                    options.push({Label: label, Value: results[i].UserName});
+                }
+
+                if (currentOffset + 200 <= json.QueryResult.TotalResultCount) {
+                    this.getTeamMembers(item, options, currentOffset + 200);
+                } else {
+                    callback();
                 }
             };
         },
