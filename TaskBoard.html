@@ -16,12 +16,13 @@
 <script type="text/javascript" src="__SERVER_URL__/js/toolkit/0.02/toolkit.js"></script>
 <script type="text/javascript" src="__SERVER_URL__/js/toolkit/0.02/date.js"></script>
 <script type="text/javascript" src="__SERVER_URL__/js/toolkit/0.02/modal.js"></script>
-<script type="text/javascript" src="__SERVER_URL__/js/toolkit/0.02/html.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/js/toolkit/0.02.1/html.js"></script>
 <script type="text/javascript" src="__SERVER_URL__/js/toolkit/0.02/connection.js"></script>
 <script type="text/javascript" src="__SERVER_URL__/js/toolkit/0.02/grid.js"></script>
-<script type="text/javascript" src="__SERVER_URL__/js/toolkit/0.02/renderer/renderer.js"></script>
+<script type="text/javascript" src="__SERVER_URL__/js/toolkit/0.02.1/renderer/renderer.js"></script>
 <script type="text/javascript" src="__SERVER_URL__/js/toolkit/0.02/editor.js"></script>
 <script type="text/javascript" src="__SERVER_URL__/js/toolkit/0.02/datasource.js"></script>
+<script type="text/javascript" src="/slm/js-lib/async/async.min.js"></script>
 <script type="text/javascript">
 
 function initTaskboard() {
@@ -112,8 +113,6 @@ function initTaskboard() {
     }
 
     var viewConfig = {
-
-        // configure columns
         columnAttribute: "State",
         columnValuesAccessor: function (model, modelSchema) {
             var stateOptions = modelSchema.Task.State.options;
@@ -188,12 +187,10 @@ function initTaskboard() {
             container.innerHTML = html.join('');
         },
 
-        // configure cells
         cellSortFunction: function (a, b) {
             return a - b;
         },
 
-        // configure items
         itemRankAccessor: function (item) {
             return item.TaskIndex
         },
@@ -438,6 +435,7 @@ function initTaskboard() {
 
         showEditor: function (item, schema) {
             var editors = [];
+            var teamMembers = [];
             var currentOwner = item.Owner;
             var me = this;
             if (currentOwner) {
@@ -445,14 +443,52 @@ function initTaskboard() {
                 editors.push({Label: label, Value: currentOwner.LoginName});
             }
             var START_OFFSET = 1;
-            this.getEditors(item, editors, START_OFFSET, function () {
-                me.displayEditorForUsers(item, schema, editors);
+
+            var tasks = [];
+            tasks.push(function (callback) {
+                me.getEditors(item, editors, START_OFFSET, function () {
+                    callback(null);
+                });
             });
 
-            var teamMembers = [];
-            this.getTeamMembers(item, teamMembers, START_OFFSET, function () {
-                console.log(teamMembers);
+            tasks.push(function (callback) {
+                me.getTeamMembers(item, teamMembers, START_OFFSET, function () {
+                    callback(null);
+                });
             });
+
+            async.parallel(tasks, function () {
+                var owners = me.mergeEditorsWithTeamMembers(editors, teamMembers);
+                me.displayEditorForUsers(item, schema, owners);
+            });
+        },
+
+        mergeEditorsWithTeamMembers: function (editors, teamMembers) {
+            var teamMemberOptGroup = {label: "Team Members:", owners: []};
+            for (var i = 0; i < teamMembers.length; i++) {
+                var indexOfOwner = this.indexOfOwner(editors, teamMembers[i]);
+                while (indexOfOwner > -1) {
+                    editors.splice(indexOfOwner, 1);
+                    indexOfOwner = this.indexOfOwner(editors, teamMembers[i]);
+                }
+
+                teamMemberOptGroup.owners.push(teamMembers[i]);
+            }
+
+            if (teamMemberOptGroup.owners.length > 0) {
+                editors.push(teamMemberOptGroup);
+            }
+            return editors;
+        },
+
+        indexOfOwner: function (owners, owner) {
+            for (var i = 0; i < owners.length; i++) {
+                if (owners[i].Value === owner.Value) {
+                    return i;
+                }
+            }
+
+            return -1;
         },
 
         displayEditorForUsers: function (item, schema, options) {
@@ -487,27 +523,9 @@ function initTaskboard() {
             var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
             var me = this;
             var editorUrl = baseUrl + "/project/" + project.ObjectID + "/Editors.js?fetch=DisplayName,EmailAddress,UserName&pagesize=200&start=" + currentOffset;
-            var editors = [];
-            YAHOO.util.Connect.asyncRequest('GET', editorUrl, {success: this.handleEditorsResponse(item, options, currentOffset, callback), failure: function () {
+            var owners = [];
+            YAHOO.util.Connect.asyncRequest('GET', editorUrl, {success: this.handleOwnersResponse(item, options, currentOffset, this.getEditors, callback), failure: function () {
             }, scope: this}, null);
-        },
-
-        handleEditorsResponse: function (item, options, currentOffset, callback) {
-            return function (response) {
-                var json = JSON.parse(response.responseText);
-                var results = json.QueryResult.Results;
-
-                for (i = 0; i < results.length; ++i) {
-                    var label = results[i].DisplayName || results[i].UserName.split('@')[0];
-                    options.push({Label: label, Value: results[i].UserName});
-                }
-
-                if (currentOffset + 200 <= json.QueryResult.TotalResultCount) {
-                    this.getEditors(item, options, currentOffset + 200);
-                } else {
-                    callback();
-                }
-            };
         },
 
         getTeamMembers: function (item, options, currentOffset, callback) {
@@ -515,12 +533,12 @@ function initTaskboard() {
             var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
             var me = this;
             var editorUrl = baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName,EmailAddress,UserName&pagesize=200&start=" + currentOffset;
-            var editors = [];
-            YAHOO.util.Connect.asyncRequest('GET', editorUrl, {success: this.handleTeamMembersResponse(item, options, currentOffset, callback), failure: function () {
+            var owners = [];
+            YAHOO.util.Connect.asyncRequest('GET', editorUrl, {success: this.handleOwnersResponse(item, options, currentOffset, this.getTeamMembers, callback), failure: function () {
             }, scope: this}, null);
         },
 
-        handleTeamMembersResponse: function (item, options, currentOffset, callback) {
+        handleOwnersResponse: function (item, options, currentOffset, nextFunction, callback) {
             return function (response) {
                 var json = JSON.parse(response.responseText);
                 var results = json.QueryResult.Results;
@@ -531,7 +549,7 @@ function initTaskboard() {
                 }
 
                 if (currentOffset + 200 <= json.QueryResult.TotalResultCount) {
-                    this.getTeamMembers(item, options, currentOffset + 200);
+                    nextFunction(item, options, currentOffset + 200);
                 } else {
                     callback();
                 }
@@ -540,6 +558,10 @@ function initTaskboard() {
 
         sortEditors: function (options) {
             return options.sort(function (a, b) {
+                if(b.owners){
+                    return -1;
+                }
+
                 var aLabel = a.Label.toUpperCase();
                 var bLabel = b.Label.toUpperCase();
                 return (aLabel < bLabel) ? -1 : (aLabel > bLabel) ? 1 : 0;
