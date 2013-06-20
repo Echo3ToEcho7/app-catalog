@@ -42,7 +42,14 @@
                     tickmarkPlacement: "on",
                     tickInterval: 7,
                     title: {
-                        text: "Days"
+                        text: "Days",
+                        margin: 12
+                    },
+                    maxPadding: 0.25,
+                    labels: {
+                        x: 0,
+                        y: 20,
+                        overflow: "justify"
                     }
                 },
                 yAxis: [],

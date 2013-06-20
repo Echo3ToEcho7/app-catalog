@@ -4,50 +4,9 @@
     Ext.define("Rally.apps.charts.burndown.BurnDownCalculator", {
         extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
 
-//        prepareChartData: function () {
-//            var fields = ["ObjectID", "_ValidFrom", "_ValidTo", "ScheduleState", "PlanEstimate", "TaskRemainingTotal", "TaskEstimateTotal"];
-//            var final_snapshots = [];
-//            var snapshots = [
-//                [1, "2013-03-01T15:00:00.000Z", "2013-03-02T13:00:00.000Z", "Idea",          5             , 15                  , 15],
-//                [1, "2013-03-02T13:00:00.000Z", "2013-03-02T15:10:00.000Z", "Idea",          5             , 15                  , 15],
-//                [1, "2013-03-02T15:10:00.000Z", "2013-03-03T15:00:00.000Z", "In-Progress"  , 5             , 20                  , 15],
-//                [2, "2013-03-02T15:00:00.000Z", "2013-03-03T15:00:00.000Z", "Idea",          3             , 5                   , 5],
-//                [3, "2013-03-02T15:00:00.000Z", "2013-03-03T15:00:00.000Z", "Idea",          5             , 12                  , 12],
-//                [2, "2013-03-03T15:00:00.000Z", "2013-03-04T15:00:00.000Z", "In-Progress"  , 3             , 5                   , 5],
-//                [3, "2013-03-03T15:00:00.000Z", "2013-03-04T15:00:00.000Z", "Idea",          5             , 12                  , 12],
-//                [4, "2013-03-03T15:00:00.000Z", "2013-03-04T15:00:00.000Z", "Idea",          5             , 15                  , 15],
-//                [1, "2013-03-03T15:10:00.000Z", "2013-03-04T15:00:00.000Z", "In-Progress"  , 5             , 12                  , 15],
-//                [1, "2013-03-04T15:00:00.000Z", "2013-03-06T15:00:00.000Z", "Accepted"     , 5             , 0                   , 15],
-//                [2, "2013-03-04T15:00:00.000Z", "2013-03-06T15:00:00.000Z", "Completed"    , 3             , 1                   , 5],
-//                [3, "2013-03-04T15:00:00.000Z", "2013-03-05T15:00:00.000Z", "In-Progress"  , 5             , 10                  , 12],
-//                [4, "2013-03-04T15:00:00.000Z", "2013-03-06T15:00:00.000Z", "Idea",          5             , 15                  , 15],
-//                [5, "2013-03-04T15:00:00.000Z", "2013-03-06T15:00:00.000Z", "Idea",          2             , 4                   , 4],
-//                [3, "2013-03-05T15:00:00.000Z", "2013-03-07T15:00:00.000Z", "Completed"    , 5             , 5                   , 12],
-//                [1, "2013-03-06T15:00:00.000Z", "2013-03-07T15:00:00.000Z", "Released"     , 5             , 0                   , 15],
-//                [2, "2013-03-06T15:00:00.000Z", "2013-03-07T15:00:00.000Z", "Accepted"     , 3             , 0                   , 5],
-//                [4, "2013-03-06T15:00:00.000Z", "2013-03-07T15:00:00.000Z", "In-Progress"  , 5             , 7                   , 15],
-//                [5, "2013-03-06T15:00:00.000Z", "2013-03-07T15:00:00.000Z", "Idea",          2             , 4                   , 4],
-//                [1, "2013-03-07T15:00:00.000Z", "9999-01-01T00:00:00.000Z", "Released"     , 5            , 0                    , 15],
-//                [2, "2013-03-07T15:00:00.000Z", "9999-01-01T00:00:00.000Z", "Released"     , 3            , 0                    , 5],
-//                [3, "2013-03-07T15:00:00.000Z", "9999-01-01T00:00:00.000Z", "Accepted"     , 5            , 0                    , 12],
-//                [4, "2013-03-07T15:00:00.000Z", "9999-01-01T00:00:00.000Z", "Completed"    , 5            , 3                    , 15]
-//            ];
-//
-//            for (var i = 0; i < snapshots.length; i++) {
-//                var snapshot = {};
-//                for (var j = 0; j < fields.length; j++) {
-//                    snapshot[fields[j]] = snapshots[i][j];
-//                }
-//
-//                final_snapshots.push(snapshot);
-//            }
-//
-//            return this.runCalculation(final_snapshots);
-//        },
-
         getDerivedFieldsOnInput: function () {
-            var inProgressStates = ["Idea", "Defined", "In-Progress"],
-                completedStates = ["Completed", "Accepted", "Released"],
+            var inProgressStates = ["Idea", "Defined", "In-Progress", "Completed"],
+                completedStates = ["Accepted", "Released"],
                 aggregationType = this.config.chartAggregationType;
 
             return [

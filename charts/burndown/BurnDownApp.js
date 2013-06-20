@@ -54,8 +54,10 @@
             if(this.isOnScopedDashboard()) {
                 this._loadScopeObject(this._getScopeRef());
             } else {
-                this._loadScopeValue();
+                this._getScopePicker().on("ready", this._loadScopeValue, this);
             }
+
+            this._getScopePicker().on("change", this._saveScopeValue, this);
         },
 
         _destroyChart: function() {
@@ -71,17 +73,22 @@
 
         _saveScopeValue: function (picker) {
             Rally.data.PreferenceManager.update({
-                appID: this.getContext().get('appID'),
+                appID: this.getContext().get("appID"),
                 settings: this._getSettingFromPicker(picker),
                 scope: this
             });
         },
 
-        _loadScopeValue: function() {
+        _loadScopeValue: function(picker) {
             Rally.data.PreferenceManager.load({
-                appID: this.getContext().get('appID'),
-                success: function(loadedSettings){
+                appID: this.getContext().get("appID"),
+                success: function(loadedSettings) {
                     var settingValue = loadedSettings[this._getScopeType()];
+                    if(!settingValue || settingValue === "undefined") {
+                        this._saveScopeValue(picker);
+                        settingValue = this._getRefFromPicker(picker);
+                    }
+
                     this._setScopeValue(settingValue);
                     this._loadScopeObject(settingValue);
                 },
@@ -102,7 +109,7 @@
             this.scopeObject = store.getAt(0).data;
 
             this._updateChartTitle();
-            this._updateYAxisTitle();
+            this._updateYAxis();
 
             this._addDateBounds();
             this._addAggregationTypeToCalculator();
@@ -145,6 +152,7 @@
         _addObjectIdToStoreConfig: function() {
             var storeConfig = this.chartComponentConfig.storeConfig,
                 type = Ext.String.capitalize(this._getScopeType());
+            this._clearStoreConfig(storeConfig);
             storeConfig.find[type] = this.scopeObject.ObjectID;
         },
 
@@ -276,11 +284,25 @@
             }
         },
 
+        _updateYAxis: function() {
+            this._updateYAxisTitle();
+            this._updateYAxisConfig();
+        },
+
         _updateYAxisTitle: function () {
             var chartConfig = this.chartComponentConfig.chartConfig;
             chartConfig.yAxis = [{}];
             chartConfig.yAxis[0].title = {
                 text: this._getAxisTitleBasedOnAggregationType()
+            };
+        },
+
+        _updateYAxisConfig: function () {
+            var axis = this.chartComponentConfig.chartConfig.yAxis[0];
+            axis.min = 0;
+            axis.labels = {
+                x: -5,
+                y: 4
             };
         },
 
@@ -405,6 +427,16 @@
                 return this.scopeObject.ReleaseDate;
             } else {
                 return this.scopeObject.EndDate;
+            }
+        },
+
+        _clearStoreConfig: function(storeConfig) {
+            if(storeConfig.find.hasOwnProperty("Release")) {
+                delete storeConfig.find.Release;
+            }
+
+            if(storeConfig.find.hasOwnProperty("Iteration")) {
+                delete storeConfig.find.Iteration;
             }
         }
 
