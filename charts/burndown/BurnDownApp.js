@@ -101,25 +101,35 @@
         },
 
         _onScopeObjectLoaded: function (store) {
-            if (store.count() !== 1) {
-                // display error?
-                return;
+            if (this._hasDataToDisplay(store)) {
+                this._setScopeFromData(store);
+
+                this._updateChartTitle();
+                this._updateYAxis();
+
+                this._addDateBounds();
+                this._addAggregationTypeToCalculator();
+                this._addObjectIdToStoreConfig();
+                this._updateCompletedScheduleStates();
+
+                this._renderChartBasedOnType();
             }
+        },
 
-            this.scopeObject = store.getAt(0).data;
-
-            this._updateChartTitle();
-            this._updateYAxis();
-
-            this._addDateBounds();
-            this._addAggregationTypeToCalculator();
-            this._addObjectIdToStoreConfig();
-
+        _renderChartBasedOnType: function() {
             if (this._getScopeType() === "release") {
                 this._fetchIterations();
             } else {
                 this._addChart();
             }
+        },
+
+        _setScopeFromData: function (store) {
+            this.scopeObject = store.getAt(0).data;
+        },
+
+        _hasDataToDisplay: function(store) {
+            return store.count() >= 1;
         },
 
         _onIterationsLoaded: function (store) {
@@ -154,6 +164,11 @@
                 type = Ext.String.capitalize(this._getScopeType());
             this._clearStoreConfig(storeConfig);
             storeConfig.find[type] = this.scopeObject.ObjectID;
+        },
+
+        _updateCompletedScheduleStates: function() {
+            var calcConfig = this.chartComponentConfig.calculatorConfig;
+            calcConfig.completedScheduleStateNames = this._getCompletedScheduleStates();
         },
 
         _loadScopeObject: function (ref) {
@@ -438,6 +453,15 @@
             if(storeConfig.find.hasOwnProperty("Iteration")) {
                 delete storeConfig.find.Iteration;
             }
+        },
+
+        _getCompletedScheduleStates: function() {
+            var states = this.getSetting("customScheduleStates");
+            if(_.isString(states)) {
+                return states.split(",");
+            }
+
+            return [];
         }
 
     });

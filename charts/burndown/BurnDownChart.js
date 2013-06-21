@@ -28,7 +28,7 @@
             calculatorConfig: {
                 workDays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
                 timeZone: "GMT",
-                completedScheduleStateNames: ["Accepted", "Released"]
+                completedScheduleStateNames: ["Accepted"]
             },
 
             chartColors: ["#3399ff", "#66cc33", "#000000"],

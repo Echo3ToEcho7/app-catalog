@@ -5,8 +5,7 @@
         extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
 
         getDerivedFieldsOnInput: function () {
-            var inProgressStates = ["Idea", "Defined", "In-Progress", "Completed"],
-                completedStates = ["Accepted", "Released"],
+            var completedStates = this.config.completedScheduleStateNames,
                 aggregationType = this.config.chartAggregationType;
 
             return [
@@ -14,7 +13,7 @@
                     "as": "RemainingPoints",
                     "f": function(snapshot) {
                         var ss = snapshot.ScheduleState;
-                        if(inProgressStates.indexOf(ss) > -1 && snapshot.PlanEstimate) {
+                        if(completedStates.indexOf(ss) < 0 && snapshot.PlanEstimate) {
                             if(aggregationType === "storycount") {
                                 return 1;
                             } else {

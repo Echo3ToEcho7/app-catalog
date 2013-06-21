@@ -5,7 +5,8 @@
         requires: [
             "Rally.apps.charts.settings.ChartDisplayTypePicker",
             "Rally.apps.charts.settings.DataTypePicker",
-            "Rally.apps.charts.settings.TimeboxPicker"
+            "Rally.apps.charts.settings.TimeboxPicker",
+            "Rally.apps.charts.settings.ScheduleStatePicker"
         ],
 
         config: {
@@ -40,12 +41,14 @@
         getFields: function() {
             var dataTypePicker = this._buildSettingsComponent("chartdatatypepicker", "Data Type"),
                 displayPicker = this._buildSettingsComponent("chartdisplaytypepicker", "Chart Type"),
-                timeboxPicker = this._buildSettingsComponent("charttimeboxpicker", "Level");
+                timeboxPicker = this._buildSettingsComponent("charttimeboxpicker", "Level"),
+                scheduleStatePicker = this._buildSettingsComponent("chartschedulestatepicker",
+                    "Completed Schedule States");
 
             if(this._isOnScopedDashboard()) {
-                return [dataTypePicker, displayPicker];
+                return [dataTypePicker, displayPicker, scheduleStatePicker];
             } else {
-                return [timeboxPicker, dataTypePicker, displayPicker];
+                return [timeboxPicker, dataTypePicker, displayPicker, scheduleStatePicker];
             }
         }
     });

@@ -56,3 +56,7 @@
     min-height: 20px;
     width: 100px;
 }
+
+.schedule-state-selector .x4-boundlist-selected .x4-form-checkbox {
+    background-position: 0 -13px;
+}
