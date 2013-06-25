@@ -148,6 +148,7 @@
                     editor: {
                         xtype: 'rallyfieldpicker',
                         cls: 'card-fields',
+                        margin: 0,
                         modelTypes: ['UserStory', 'Defect'],
                         autoExpand: true,
                         alwaysExpanded: false,
