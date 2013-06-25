@@ -542,14 +542,14 @@ function initTaskboard() {
             return function (response) {
                 var json = JSON.parse(response.responseText);
                 var results = json.QueryResult.Results;
-
+                var pageSize = 200;
                 for (i = 0; i < results.length; ++i) {
                     var label = results[i].DisplayName || results[i].UserName.split('@')[0];
                     options.push({Label: label, Value: results[i].UserName});
                 }
 
-                if (currentOffset + 200 <= json.QueryResult.TotalResultCount) {
-                    nextFunction(item, options, currentOffset + 200);
+                if (currentOffset + pageSize  <= json.QueryResult.TotalResultCount) {
+                    nextFunction.call(this, item, options, currentOffset + pageSize, callback);
                 } else {
                     callback();
                 }
