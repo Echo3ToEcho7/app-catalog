@@ -5,6 +5,10 @@ Ext.require [
 ]
 
 describe 'Rally.apps.kanban.ColumnSettingsField', ->
+  beforeEach ->
+    @customFieldSubmitValue = 'c_mycardfield'
+    @customFieldRenderValue = 'mycardfield'
+
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'kanbancolumnsettingsfield'
 
@@ -33,67 +37,6 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       expect(@field.getErrors().length).toBe 1
       expect(@field.getErrors()[0]).toBe 'At least one column must be shown.'
 
-  it 'should display 4 columns with the scheduleStateMapping picker as the last column', ->
-     @_createKanbanSettingsField(
-       renderTo: 'testDiv',
-       shouldShowColumnLevelFieldPicker: false
-     )
-     @_refreshField()
-
-     @waitForCallback(@readyCallback).then =>
-       expect(@field._grid.columns.length).toBe 4
-       expect(@field._grid.columns[3].dataIndex).toBe 'scheduleStateMapping'
-
-  it 'should display 5 columns with the cardFields field picker as the last column if shouldShowColumnLevelFieldPicker on', ->
-    @_createKanbanSettingsField(
-      renderTo: 'testDiv',
-      shouldShowColumnLevelFieldPicker: true
-    )
-    @_refreshField()
-
-    @waitForCallback(@readyCallback).then =>
-      expect(@field._grid.columns.length).toBe 5
-      expect(@field._grid.columns[4].dataIndex).toBe 'cardFields'
-
-  it 'should display saved columns pref data', ->
-    @_assertFieldSetWithPredefinedData(
-      shouldShowColumnLevelFieldPicker: false
-      expectedValues: ['Defined', 'Yes', '2', 'Defined', 'In-Progress', 'No', '∞', '--No Mapping--']
-    )
-
-  it 'should display saved columns pref data with a cardFields column when shouldShowColumnLevelFieldPicker on', ->
-    @_assertFieldSetWithPredefinedData(
-      shouldShowColumnLevelFieldPicker: true
-      expectedValues: ['Defined', 'Yes', '2', 'Defined', 'mycardfield', 'In-Progress', 'No', '∞', '--No Mapping--', 'FormattedID, Name, Owner']
-    )
-
-  it 'should display saved columns pref data with default cardFields values when no cardFields saved and shouldShowColumnLevelFieldPicker on', ->
-    @_assertFieldSetWithPredefinedData(
-      shouldShowColumnLevelFieldPicker: true
-      defaultCardFields: 'FooBar,MyField'
-      expectedValues: ['Defined', 'Yes', '2', 'Defined', 'mycardfield', 'In-Progress', 'No', '∞', '--No Mapping--', 'FooBar, MyField']
-    )
-
-  it 'should submit columns pref data when user saves settings', ->
-    @_assertFieldSetWithPredefinedData(
-      shouldShowColumnLevelFieldPicker: false
-      expectedValues: ['Defined', 'Yes', '2', 'Defined', 'In-Progress', 'No', '∞', '--No Mapping--']
-    )
-
-    @waitForCallback(@readyCallback).then =>
-      data = @field.getSubmitData()
-      expect(data.foo).toBe @value
-
-  it 'should submit columns pref data with cardFields when user saves settings and shouldShowColumnLevelFieldPicker on', ->
-    @_assertFieldSetWithPredefinedData(
-      shouldShowColumnLevelFieldPicker: true
-      expectedValues: ['Defined', 'Yes', '2', 'Defined', 'mycardfield', 'In-Progress', 'No', '∞', '--No Mapping--', 'FormattedID, Name, Owner']
-    )
-
-    @waitForCallback(@readyCallback).then =>
-      data = @field.getSubmitData()
-      expect(data.foo).toBe @value
-
   it 'should destroy columns grid when destroyed', ->
     @_createKanbanSettingsField(
       renderTo: 'testDiv'
@@ -101,6 +44,81 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
     gridDestroySpy = @spy(@field._grid, 'destroy')
     @field.destroy()
     expect(gridDestroySpy).toHaveBeenCalledOnce()
+
+  describe 'shouldShowColumnLevelFieldPicker off', ->
+    it 'should display 4 columns with the scheduleStateMapping picker as the last column', ->
+       @_createKanbanSettingsField(
+         renderTo: 'testDiv',
+         shouldShowColumnLevelFieldPicker: false
+       )
+       @_refreshField()
+
+       @waitForCallback(@readyCallback).then =>
+         expect(@field._grid.columns.length).toBe 4
+         expect(@field._grid.columns[3].dataIndex).toBe 'scheduleStateMapping'
+
+    it 'should display saved columns pref data', ->
+      @_assertGridSetWithValues(
+        shouldShowColumnLevelFieldPicker: false
+        expectedValues: ['Defined', 'Yes', '2', 'Defined', 'In-Progress', 'No', '∞', '--No Mapping--']
+      )
+
+    it 'should submit columns pref data when user saves settings', ->
+      @_assertGridSetWithValues(
+        shouldShowColumnLevelFieldPicker: false
+        expectedValues: ['Defined', 'Yes', '2', 'Defined', 'In-Progress', 'No', '∞', '--No Mapping--']
+      )
+
+      @waitForCallback(@readyCallback).then =>
+        data = @field.getSubmitData()
+        expect(data.foo).toBe @value
+
+  describe 'shouldShowColumnLevelFieldPicker on', ->
+    it 'should display 5 columns with the cardFields field picker as the last column', ->
+      @_createKanbanSettingsField(
+        renderTo: 'testDiv',
+        shouldShowColumnLevelFieldPicker: true
+      )
+      @_refreshField()
+
+      @waitForCallback(@readyCallback).then =>
+        expect(@field._grid.columns.length).toBe 5
+        expect(@field._grid.columns[4].dataIndex).toBe 'cardFields'
+
+    it 'should display saved preferences for cardFields column', ->
+      @_assertGridSetWithValues(
+        shouldShowColumnLevelFieldPicker: true
+        expectedValues: ['Defined', 'Yes', '2', 'Defined', @customFieldRenderValue, 'In-Progress', 'No', '∞', '--No Mapping--', 'FormattedID, Name, Owner']
+      )
+
+    it 'should display cardFields column with default cardFields values when no cardFields preferences saved', ->
+      @_assertGridSetWithValues(
+        shouldShowColumnLevelFieldPicker: true
+        defaultCardFields: 'FooBar,MyField'
+        expectedValues: ['Defined', 'Yes', '2', 'Defined', @customFieldRenderValue, 'In-Progress', 'No', '∞', '--No Mapping--', 'FooBar, MyField']
+      )
+
+    it 'should remove leading c_ in card field name when saving settings', ->
+      @_assertGridSetWithValues(
+        shouldShowColumnLevelFieldPicker: true
+        expectedValues: ['Defined', 'Yes', '2', 'Defined', @customFieldRenderValue, 'In-Progress', 'No', '∞', '--No Mapping--', 'FormattedID, Name, Owner']
+      )
+
+      @waitForCallback(@readyCallback).then =>
+        data = @field.getSubmitData()
+        expect(data.foo).toBe @value
+
+    it 'should not remove non-leading c_ in card field name when saving settings', ->
+      fieldName = 'foo_c_'
+      @_assertGridSetWithValues(
+        cardFields: fieldName
+        shouldShowColumnLevelFieldPicker: true
+        expectedValues: ['Defined', 'Yes', '2', 'Defined', fieldName, 'In-Progress', 'No', '∞', '--No Mapping--', 'FormattedID, Name, Owner']
+      )
+
+      @waitForCallback(@readyCallback).then =>
+        data = @field.getSubmitData()
+        expect(data.foo).toBe @value
 
   helpers
     _createKanbanSettingsField: (config) ->
@@ -113,7 +131,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
         , config)
       )
 
-    _assertFieldSetWithPredefinedData: (options) ->
+    _assertGridSetWithValues: (options) ->
       @_createKanbanSettingsField(
         renderTo: 'testDiv',
         shouldShowColumnLevelFieldPicker: options.shouldShowColumnLevelFieldPicker
@@ -122,7 +140,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       @_refreshField()
       if options.shouldShowColumnLevelFieldPicker
         @value = Ext.JSON.encode({
-          Defined: {wip:2, scheduleStateMapping:"Defined",cardFields:"mycardfield"}
+          Defined: {wip:2, scheduleStateMapping:"Defined",cardFields: options.cardFields || @customFieldSubmitValue}
         })
       else
         @value = Ext.JSON.encode({
