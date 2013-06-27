@@ -182,8 +182,11 @@
         },
 
         _getRendererForCardFields: function(fields) {
-            var val = this._getCardFields(fields);
-            return val.join(', ');
+            var valWithoutPrefixes = [];
+            Ext.Array.each(this._getCardFields(fields), function(field) {
+                valWithoutPrefixes.push(field.replace(/^c_/, ''));
+            });
+            return valWithoutPrefixes.join(', ');
         },
 
         _getCardFields: function(fields) {
