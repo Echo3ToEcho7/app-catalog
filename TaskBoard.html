@@ -436,12 +436,7 @@ function initTaskboard() {
         showEditor: function (item, schema) {
             var editors = [];
             var teamMembers = [];
-            var currentOwner = item.Owner;
             var me = this;
-            if (currentOwner) {
-                var label = currentOwner.DisplayName || currentOwner.LoginName.split('@')[0];
-                editors.push({Label: label, Value: currentOwner.LoginName});
-            }
             var START_OFFSET = 1;
 
             var tasks = [];
@@ -458,12 +453,23 @@ function initTaskboard() {
             });
 
             async.parallel(tasks, function () {
-                var owners = me.mergeEditorsWithTeamMembers(editors, teamMembers);
+                var owners = me.mergeEditorsWithTeamMembers(me.sortUsers(editors), me.sortUsers(teamMembers));
+
+                var currentUser = me.getCurrentUser();
+                me.moveUserToBeginning(owners, currentUser);
+
+                var currentOwner = item.Owner;
+                var currentOwnerName = currentOwner.DisplayName || currentOwner.LoginName.split('@')[0];
+                if (currentUser != currentOwnerName && !RALLY.toolkit.HTML.Select.prototype.optionsContains(owners, currentOwnerName)) {
+                    owners.unshift({Label: currentOwnerName, Value: currentOwner.LoginName});
+                }
+
                 me.displayEditorForUsers(item, schema, owners);
             });
         },
 
         mergeEditorsWithTeamMembers: function (editors, teamMembers) {
+            var options = [];
             var teamMemberOptGroup = {label: "Team Members:", owners: []};
             for (var i = 0; i < teamMembers.length; i++) {
                 var indexOfOwner = this.indexOfOwner(editors, teamMembers[i]);
@@ -476,9 +482,16 @@ function initTaskboard() {
             }
 
             if (teamMemberOptGroup.owners.length > 0) {
-                editors.push(teamMemberOptGroup);
+                options.push(teamMemberOptGroup);
             }
-            return editors;
+
+            if (editors.length > 0) {
+                var editorsOptGroup = {label: "Editors:", owners: []};
+                editorsOptGroup.owners = editors;
+                options.push(editorsOptGroup);
+            }
+
+            return options;
         },
 
         indexOfOwner: function (owners, owner) {
@@ -492,7 +505,7 @@ function initTaskboard() {
         },
 
         displayEditorForUsers: function (item, schema, options) {
-            schema.Owner.options = this.sortEditors(options);
+            schema.Owner.options = options;
             var editorConfig = {
                 props: (showActuals) ? ['Estimate', 'ToDo', 'Actuals', 'Owner', 'State'] : ['Estimate', 'ToDo', 'Owner', 'State'],
                 propertyKeyAccessors: {
@@ -516,6 +529,26 @@ function initTaskboard() {
                 }
             };
             this.editor.display(item, schema, editorConfig);
+        },
+
+        getCurrentUser: function() {
+            return top.document.getElementById("options").getElementsByTagName("a")[0].text;
+        },
+
+        moveUserToBeginning: function(owners, userToMove) {
+            for(var i = 0; i < owners.length; i++) {
+                var ownersSublist = owners[i]["owners"];
+                if (ownersSublist) {
+                    for (var j = 0; j < ownersSublist.length; j++) {
+                        var user = ownersSublist[j];
+                        if (user["Label"] == userToMove) {
+                            var spliced = ownersSublist.splice(j,1);
+                            owners.unshift(spliced[0]);
+                            return;
+                        }
+                    }
+                }
+            }
         },
 
         getEditors: function (item, options, currentOffset, callback) {
@@ -556,14 +589,14 @@ function initTaskboard() {
             };
         },
 
-        sortEditors: function (options) {
+        sortUsers: function (options) {
             return options.sort(function (a, b) {
                 if(b.owners){
                     return -1;
                 }
 
-                var aLabel = a.Label.toUpperCase();
-                var bLabel = b.Label.toUpperCase();
+                var aLabel = a.Label == null ? "" : a.Label.toUpperCase();
+                var bLabel = b.Label == null ? "" : b.Label.toUpperCase();
                 return (aLabel < bLabel) ? -1 : (aLabel > bLabel) ? 1 : 0;
             });
         },
