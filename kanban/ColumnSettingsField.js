@@ -22,8 +22,7 @@
             'Rally.ui.combobox.ComboBox',
             'Rally.ui.TextField',
             'Rally.ui.combobox.FieldValueComboBox',
-            'Rally.ui.plugin.FieldValidationUi',
-            'Rally.ui.picker.FieldPicker'
+            'Rally.ui.plugin.FieldValidationUi'
         ],
 
         fieldSubTpl: '<div id="{id}" class="settings-grid"></div>',
