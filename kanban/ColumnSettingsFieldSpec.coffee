@@ -10,6 +10,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
     @customFieldRenderValue = 'mycardfield'
 
   afterEach ->
+    Rally.test.destroyComponentsOfQuery 'rallyfieldpicker'
     Rally.test.destroyComponentsOfQuery 'kanbancolumnsettingsfield'
 
   it 'creates rows for each allowed value', ->
@@ -120,6 +121,29 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
         data = @field.getSubmitData()
         expect(data.foo).toBe @value
 
+    it 'should clear grid store filter if enter clicked from field picker to preserve the selected values', ->
+      @_createKanbanSettingsField(
+        renderTo: 'testDiv',
+        shouldShowColumnLevelFieldPicker: true
+      )
+      @_refreshField(allowedValues: ['Defined'])
+      @field.setValue(Ext.JSON.encode Defined: wip: 2)
+      @waitForCallback(@readyCallback).then =>
+        fieldPickerEditor = @field._grid.columns[4].getEditor()
+        row =@field._grid.getView().getNode(@field._grid.getStore().getAt(0))
+        firstCell = Ext.get(row).down('td:first').dom
+        lastCell = Ext.get(row).down('td:last').dom
+        @click(firstCell).then =>
+          @click(lastCell).then =>
+            @once(condition: -> Ext.query('.rui-multi-object-list').length > 0).then =>
+              selectedValue = fieldPickerEditor.store.getAt(10)
+              fieldPickerEditor.onListItemSelect(selectedValue)
+              fieldPickerEditor.filter('apples')
+
+              @stub(Ext.EventObject, 'getKey').returns(Ext.EventObject.ENTER)
+              fieldPickerEditor.fireEvent('specialkey', fieldPickerEditor, Ext.EventObject)
+              expect(@field.getSubmitData().foo).toContain selectedValue.get('name')
+
   helpers
     _createKanbanSettingsField: (config) ->
       @readyCallback = @stub()
@@ -152,8 +176,8 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
         cells = Ext.dom.Query.select('.x4-grid-cell > .x4-grid-cell-inner')
         expect(html).toBe options.expectedValues[i] for html, i in Ext.Array.pluck(cells, 'innerHTML')
 
-    _refreshField: ->
+    _refreshField: (options={}) ->
       scheduleStateField = Rally.test.mock.data.ModelFactory.getModel('UserStory').getField('ScheduleState')
-      @allowedValues = ["Defined", "In-Progress"]
+      @allowedValues = options.allowedValues || ["Defined", "In-Progress"]
       @ajax.whenQueryingAllowedValues(scheduleStateField).respondWith @allowedValues
       @field.refreshWithNewField scheduleStateField
