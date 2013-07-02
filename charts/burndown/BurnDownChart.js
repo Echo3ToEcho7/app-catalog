@@ -1,4 +1,4 @@
-(function() {
+(function () {
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define("Rally.apps.charts.burndown.BurnDownChart", {
@@ -9,7 +9,7 @@
         chartComponentConfig: {
             xtype: "rallychart",
 
-            noDataMessage: "There could be no stories available or started for this portfolio item, missing plan estimate values, or work on this portfolio item has not yet been started.",
+            aggregationErrorMessage: "No data to display. Check the data type setting for displaying data based on count versus plan estimate.",
 
             storeType: "Rally.data.lookback.SnapshotStore",
             storeConfig: {
@@ -28,10 +28,11 @@
             calculatorConfig: {
                 workDays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
                 timeZone: "GMT",
-                completedScheduleStateNames: ["Accepted"]
+                completedScheduleStateNames: ["Accepted", "Released"],
+                enableProjections: true
             },
 
-            chartColors: ["#3399ff", "#66cc33", "#000000"],
+            chartColors: ["#3399ff", "#66cc33", "#000000", "#919191"],
 
             chartConfig: {
                 chart: {
@@ -55,7 +56,14 @@
                 yAxis: [],
                 tooltip: {
                     formatter: function () {
-                        return "" + this.x + "<br />" + this.series.name + ": " + this.y;
+                        var floatValue = parseFloat(this.y),
+                            value = this.y;
+
+                        if (!isNaN(floatValue)) {
+                            value = Math.floor(floatValue * 100) / 100;
+                        }
+
+                        return "" + this.x + "<br />" + this.series.name + ": " + value;
                     }
                 },
                 plotOptions: {
@@ -67,7 +75,8 @@
                                     enabled: true
                                 }
                             }
-                        }
+                        },
+                        connectNulls: true
                     },
                     column: {
                         pointPadding: 0,
