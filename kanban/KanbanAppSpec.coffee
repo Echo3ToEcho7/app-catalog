@@ -5,7 +5,8 @@ Ext.require [
   'Rally.apps.kanban.KanbanApp',
   'Rally.util.Array',
   'Rally.util.Element',
-  'Rally.ui.notify.Notifier'
+  'Rally.ui.notify.Notifier',
+  'Rally.app.Context'
 ]
 
 describe 'Rally.apps.kanban.KanbanApp', ->
@@ -27,7 +28,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
 
   it 'has the correct default settings', ->
     @createApp().then =>
-      cardFields = 'FormattedID,Name,Owner,Discussion,Tasks,Defects'
       expect(@app.getSetting('groupByField')).toBe 'ScheduleState'
       expect(@app.getSetting('columns')).toBe Ext.JSON.encode(
         Defined:
@@ -39,26 +39,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         Accepted:
           wip: ''
       )
-      expect(@app.getSetting('cardFields')).toBe 'Name,Discussion,Tasks,Defects'
-
-  it 'has the correct default settings when COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS enabled', ->
-    @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS').returns(true)
-    @createApp().then =>
-      expect(@app.getSetting('groupByField')).toBe 'ScheduleState'
-      expect(@app.getSetting('columns')).toBe Ext.JSON.encode(
-        Defined:
-          wip: ''
-          cardFields: @app.defaultCardFields
-        'In-Progress':
-          wip: ''
-          cardFields: @app.defaultCardFields
-        Completed:
-          wip: ''
-          cardFields: @app.defaultCardFields
-        Accepted:
-          wip: ''
-          cardFields: @app.defaultCardFields
-      )
+      expect(@app.getSetting('cardFields')).toBe 'FormattedID,Name,Owner,Discussion,Tasks,Defects'
 
   it 'does not show add new when user is not a project editor', ->
     Rally.environment.getContext().getPermissions().userPermissions[0].Role = 'Viewer'
@@ -126,30 +107,43 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       'In-Progress':
         cardFields: 'ScheduleState'
 
-     @createApp({columns: Ext.JSON.encode(columnSettings)}).then =>
-       columns = @app.down('rallycardboard').getColumns()
+    @createApp({columns: Ext.JSON.encode(columnSettings)}).then =>
+      columns = @app.down('rallycardboard').getColumns()
 
-       expect(columns.length).toBe 2
-       expect(columns[0].cardConfig.fields).toEqual []
-       expect(columns[0].fields).toEqual columnSettings.Defined.cardFields.split(',')
-       expect(columns[1].fields).toEqual columnSettings['In-Progress'].cardFields.split(',')
-       expect(columns[1].cardConfig.fields).toEqual []
+      expect(columns.length).toBe 2
+      expect(columns[0].cardConfig.fields).toEqual []
+      expect(columns[0].fields).toEqual columnSettings.Defined.cardFields.split(',')
+      expect(columns[1].fields).toEqual columnSettings['In-Progress'].cardFields.split(',')
+      expect(columns[1].cardConfig.fields).toEqual []
 
-  it 'should show columns with default card fields when column settings but no column.cardFields setting', ->
+  it 'should show columns with cardFields when no column.cardFields settings', ->
     @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS').returns(true)
-    defaultFields = ['FormattedID', 'Name', 'Owner', 'Discussion', 'Tasks', 'Defects']
     columnSettings =
       Defined:
         wip: 1
       'In-Progress':
         wip: 2
 
+    @createApp({cardFields: 'foobar', columns: Ext.JSON.encode(columnSettings)}).then =>
+      columns = @app.down('rallycardboard').getColumns()
+
+      expect(columns.length).toBe 2
+      expect(columns[0].fields).toEqual ['foobar']
+      expect(columns[1].fields).toEqual ['foobar']
+
+  it 'should show columns with defaultCardFields when no cardFields or column.cardFields settings', ->
+    @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS').returns(true)
+    columnSettings =
+      Defined:
+        wip: 1
+      'In-Progress':
+        wip: 2
     @createApp({columns: Ext.JSON.encode(columnSettings)}).then =>
       columns = @app.down('rallycardboard').getColumns()
 
       expect(columns.length).toBe 2
-      expect(columns[0].fields).toEqual defaultFields
-      expect(columns[1].fields).toEqual defaultFields
+      expect(columns[0].fields).toEqual @app.getSetting('cardFields').split(',')
+      expect(columns[1].fields).toEqual @app.getSetting('cardFields').split(',')
 
   it 'should filter the board when a type checkbox is clicked', ->
     @createApp().then =>

@@ -10,6 +10,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
     @customFieldRenderValue = 'mycardfield'
 
   afterEach ->
+    Rally.test.destroyComponentsOfQuery 'editor'
     Rally.test.destroyComponentsOfQuery 'kanbancolumnsettingsfield'
 
   it 'creates rows for each allowed value', ->
@@ -120,6 +121,33 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
         data = @field.getSubmitData()
         expect(data.foo).toBe @value
 
+    it 'should update column card field settings when "apply to all" is clicked', ->
+      fieldValue = 'AcceptedDate'
+      @_setupWithTwoColumnsShown(fieldValue)
+      @waitForCallback(@readyCallback).then =>
+        gridHelper = new Helpers.Grid(@field._grid)
+        gridHelper.startEditingCell('', 'cardFields').then (inlineEditor) =>
+          @click(css: '.' + inlineEditor.editor.field.rightCls.replace(' ', '.')).then =>
+            expect(@field._grid.store.getAt(0).get('cardFields')).toBe 'AcceptedDate'
+            expect(@field._grid.store.getAt(1).get('cardFields')).toContain 'AcceptedDate'
+
+    it 'should update column card field settings when "remove from all" is clicked', ->
+      fieldValue = 'AcceptedDate'
+      @_setupWithTwoColumnsShown(fieldValue)
+      @waitForCallback(@readyCallback).then =>
+        gridHelper = new Helpers.Grid(@field._grid)
+        gridHelper.startEditingCell('', 'cardFields').then (inlineEditor) =>
+          field = inlineEditor.editor.field
+          @click(css: '.' + field.rightCls.replace(' ', '.')).then =>
+            @once(
+              condition: => field.list.getEl().down('.' + field.rightCls.replace(' ', '.')).getHTML() == field.rightUpdateText
+              description: 'wait for right side action text to swap'
+            ).then =>
+              @click(css: '.' + field.rightCls.replace(' ', '.')).then =>
+                rowOneCardFieldsNameArray = Ext.Array.pluck(Ext.Array.pluck(@field._grid.store.getAt(0).get('cardFields'), 'data'), 'name')
+                expect(rowOneCardFieldsNameArray).not.toContain 'AcceptedDate'
+                expect(@field._grid.store.getAt(1).get('cardFields')).not.toContain 'AcceptedDate'
+
   helpers
     _createKanbanSettingsField: (config) ->
       @readyCallback = @stub()
@@ -152,8 +180,20 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
         cells = Ext.dom.Query.select('.x4-grid-cell > .x4-grid-cell-inner')
         expect(html).toBe options.expectedValues[i] for html, i in Ext.Array.pluck(cells, 'innerHTML')
 
-    _refreshField: ->
+    _refreshField: (allowedValues)->
       scheduleStateField = Rally.test.mock.data.ModelFactory.getModel('UserStory').getField('ScheduleState')
-      @allowedValues = ["Defined", "In-Progress"]
+      @allowedValues = allowedValues || ["Defined", "In-Progress"]
       @ajax.whenQueryingAllowedValues(scheduleStateField).respondWith @allowedValues
       @field.refreshWithNewField scheduleStateField
+
+    _setupWithTwoColumnsShown: (cardFieldForFirstColumn) ->
+      @_createKanbanSettingsField(
+             renderTo: 'testDiv',
+             shouldShowColumnLevelFieldPicker: true
+      )
+      @_refreshField()
+      value = Ext.JSON.encode(
+        Defined: {wip: 2, scheduleStateMapping: "Defined", cardFields: cardFieldForFirstColumn}
+        "In-Progress": {wip: 2, scheduleStateMapping: "Defined"}
+      )
+      @field.setValue(value)
