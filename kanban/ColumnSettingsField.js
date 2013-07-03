@@ -22,7 +22,8 @@
             'Rally.ui.combobox.ComboBox',
             'Rally.ui.TextField',
             'Rally.ui.combobox.FieldValueComboBox',
-            'Rally.ui.plugin.FieldValidationUi'
+            'Rally.ui.plugin.FieldValidationUi',
+            'Rally.apps.kanban.ColumnCardFieldPicker'
         ],
 
         fieldSubTpl: '<div id="{id}" class="settings-grid"></div>',
@@ -143,10 +144,11 @@
                     text: 'Fields',
                     dataIndex: 'cardFields',
                     width: 300,
+                    tdCls: Rally.util.Test.toBrowserTestCssClass('cardfields', ''),
                     renderer: this._getRendererForCardFields,
                     scope: this,
                     editor: {
-                        xtype: 'rallyfieldpicker',
+                        xtype: 'kanbancolumncardfieldpicker',
                         cls: 'card-fields',
                         margin: 0,
                         modelTypes: ['UserStory', 'Defect'],
@@ -161,7 +163,9 @@
                         listeners: {
                             selectionchange: function (picker) {
                                 picker.validate();
-                            }
+                            },
+                            rightactionclick: this._updateColumnCardFieldSettings,
+                            scope: this
                         }
                     }
                 });
@@ -200,6 +204,25 @@
                 }
             });
             return val;
+        },
+
+        _updateColumnCardFieldSettings: function(picker, selectedRecord, value, initialText) {
+            this._store.each(function(record) {
+                if (record.get('shown')) {
+                    var cardFields = this._getCardFields(record.get('cardFields'));
+
+                    if (initialText) {
+                        if (!Ext.Array.contains(cardFields, selectedRecord.get('name'))) {
+                            cardFields.push(selectedRecord.get('name'));
+                        }
+                    } else {
+                        Ext.Array.remove(cardFields, selectedRecord.get('name'));
+                    }
+                    record.set('cardFields', cardFields.join(','));
+                }
+            }, this);
+
+            this._store.loadRawData(this._store.getRange());
         },
 
         _buildSettingValue: function() {

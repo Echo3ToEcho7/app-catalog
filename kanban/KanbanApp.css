@@ -52,3 +52,9 @@
 .column-settings .settings-grid.rally-invalid-field {
     border: 1px solid #F00;
 }
+
+.rui-picker-right-action {
+  display: inline;
+  float: right;
+  padding-right: 4px;
+}

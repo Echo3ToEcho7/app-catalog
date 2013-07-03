@@ -38,27 +38,12 @@
                     Completed: {wip: ''},
                     Accepted: {wip: ''}
                 }),
-                cardFields: 'Name,Discussion,Tasks,Defects', //remove with COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS
+                cardFields: 'FormattedID,Name,Owner,Discussion,Tasks,Defects', //remove with COLUMN_LEVEL_FIELD_PICKER_ON_KANBAN_SETTINGS
                 hideReleasedCards: false,
                 showCardAge: true,
                 cardAgeThreshold: 3,
                 pageSize: 25
-            },
-            defaultCardFields: 'FormattedID,Name,Owner,Discussion,Tasks,Defects'
-        },
-
-        constructor: function(config) {
-            this.initConfig(config);
-            if (this._shouldShowColumnLevelFieldPicker()) {
-                var defaultColumnSettings = Ext.JSON.decode(this.defaultSettings.columns);
-                Ext.Object.each(defaultColumnSettings, function(key, column) {
-                    if (!column.cardFields) {
-                        column.cardFields = this.defaultCardFields;
-                    }
-                }, this);
-                this.defaultSettings.columns = Ext.JSON.encode(defaultColumnSettings);
             }
-            this.callParent(arguments);
         },
 
         launch: function() {
@@ -94,7 +79,7 @@
         getSettingsFields: function() {
             return Rally.apps.kanban.Settings.getFields({
                 shouldShowColumnLevelFieldPicker: this._shouldShowColumnLevelFieldPicker(),
-                defaultCardFields: this.defaultCardFields
+                defaultCardFields: this.getSetting('cardFields')
             });
         },
 
@@ -227,8 +212,8 @@
             if (this._shouldShowColumnLevelFieldPicker()) {
                 if (values.cardFields) {
                     columnFields = values.cardFields.split(',');
-                } else {
-                    columnFields = this.defaultCardFields.split(',');
+                } else if (this.getSetting('cardFields')) {
+                    columnFields = this.getSetting('cardFields').split(',');
                 }
             }
             return columnFields;
