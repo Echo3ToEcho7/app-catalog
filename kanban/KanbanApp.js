@@ -124,7 +124,6 @@
                     listeners: {
                         beforecreate: this._onBeforeCreate,
                         beforeeditorshow: this._onBeforeEditorShow,
-                        create: this._onCreate,
                         scope: this
                     }
                 },
@@ -245,7 +244,6 @@
                     filter: this._onBoardFilter,
                     filtercomplete: this._onBoardFilterComplete,
                     cardupdated: this._publishContentUpdatedNoDashboardLayout,
-                    cardcopied: this._onCardCopied,
                     scope: this
                 },
                 columnConfig: {
@@ -405,21 +403,6 @@
             var groupByFieldName = this.groupByField.name;
 
             params[groupByFieldName] = this.cardboard.getColumns()[0].getValue();
-        },
-
-        _onCreate: function(addNew, record) {
-            this._showCreationFlair(record);
-        },
-
-        _onCardCopied: function(card, record) {
-            this._showCreationFlair(record);
-        },
-
-        _showCreationFlair: function(record) {
-            Rally.ui.notify.Notifier.showCreate({
-                artifact: record,
-                rankScope: 'BACKLOG'
-            });
         },
 
         _publishContentUpdated: function() {

@@ -11,7 +11,6 @@
             'Rally.data.ModelFactory',
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
-            'Rally.ui.gridboard.plugin.GridBoardNotification',
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter'
         ],
         componentCls: 'iterationtrackingboard',
@@ -36,8 +35,7 @@
                 enableToggle: this.getContext().isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE'),
                 plugins: [
                     {ptype: 'rallygridboardaddnew'},
-                    {ptype: 'rallygridboardownerfilter'},
-                    {ptype: 'rallygridboardnotification'}
+                    {ptype: 'rallygridboardownerfilter'}
                 ],
                 modelNames: this.modelNames,
                 cardBoardConfig: {

@@ -12,7 +12,6 @@
             'Rally.apps.iterationplanningboard.TimeboxGridBoard',
             'Rally.apps.iterationplanningboard.TimeboxScrollable',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
-            'Rally.ui.gridboard.plugin.GridBoardNotification',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardManageIterations',
             'Rally.util.Array'
@@ -28,10 +27,6 @@
                 plugins = [
                     {
                         ptype: 'rallygridboardaddnew',
-                        rankScope: rankScope
-                    },
-                    {
-                        ptype: 'rallygridboardnotification',
                         rankScope: rankScope
                     },
                     {
