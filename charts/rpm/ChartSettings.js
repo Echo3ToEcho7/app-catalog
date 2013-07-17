@@ -4,7 +4,7 @@
     Ext.define("Rally.apps.charts.rpm.ChartSettings", {
 
         requires: [
-            "Rally.apps.charts.settings.DatePicker",
+            "Rally.apps.charts.settings.PortfolioDatePicker",
             "Rally.apps.charts.settings.PortfolioItemDataTypePicker",
             "Rally.apps.charts.settings.PortfolioItemPicker"
         ],
@@ -31,7 +31,7 @@
 
             return [
                 this._buildComponent("chartportfolioitempicker", componentJoiner),
-                this._buildComponent("chartdatepicker", componentJoiner),
+                this._buildComponent("chartportfoliodatepicker", componentJoiner),
                 this._buildComponent("chartportfoliodatatypepicker", componentJoiner)
             ];
         },

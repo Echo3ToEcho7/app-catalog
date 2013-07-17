@@ -1,14 +1,14 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define("Rally.apps.charts.settings.DatePicker", {
+    Ext.define("Rally.apps.charts.settings.GroupByState", {
         extend: "Ext.form.FieldContainer",
-        alias: "widget.chartdatepicker",
+        alias: "widget.chartgroupbystate",
 
         items: [
             {
                 xtype: "label",
-                text: "Date Picker!"
+                text: "Group by state!"
             }
         ]
     });
