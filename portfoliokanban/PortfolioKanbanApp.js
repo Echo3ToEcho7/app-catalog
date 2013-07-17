@@ -315,7 +315,6 @@
                     var record = card.getRecord();
                     Ext4.create('Rally.ui.popover.PercentDonePopover', {
                         target: el,
-                        targetSelector: '#' + cardEl.id + ' .progress-bar-container',
                         percentDoneData: record.data,
                         percentDoneName: 'PercentDoneByStoryCount',
                         piRef: record.data._ref
