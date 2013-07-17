@@ -13,6 +13,8 @@
         shouldHidePopoverOnBodyClick: true,
         shouldHidePopoverOnIframeClick: true,
         waitTimeForDateFieldValidation: 100,
+        cls: 'roadmap-planning-popover',
+        chevronPrefixCls: 'roadmap-planning-popover-chevron',
         items: [
             {
                 itemId: 'datesPopoverLayout',
