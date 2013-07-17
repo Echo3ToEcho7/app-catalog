@@ -30,12 +30,10 @@
     width: 400px;
 }
 
-/*Remove with NO_IE7_COMPAT toggle */
 .ext-ie .kanban .right .filterInfo {
     width: 25px;
 }
 
-/*Remove with NO_IE7_COMPAT toggle */
 .ext-ie .kanban .right .artifact-type-chooser {
     width: 265px;
 }
