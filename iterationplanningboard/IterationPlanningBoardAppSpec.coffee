@@ -56,12 +56,12 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @app.cardboard
 
     createUserStoryRecord: (options = {}) ->
-      Model = Rally.test.mock.data.ModelFactory.getUserStoryModel()
+      Model = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
       options._type = 'hierarchicalrequirement'
       new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 10000)}, options))
 
     createDefectRecord: (options = {}) ->
-      Model = Rally.test.mock.data.ModelFactory.getDefectModel()
+      Model = Rally.test.mock.data.WsapiModelFactory.getDefectModel()
       options._type = 'defect'
       new Model(Ext.merge({ObjectID: Ext.Number.randomInt(1, 10000)}, options))
 

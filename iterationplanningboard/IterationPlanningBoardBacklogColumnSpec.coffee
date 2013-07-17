@@ -2,8 +2,8 @@ Ext = window.Ext4 || window.Ext
 
 describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn', ->
   beforeEach ->
-    @storyModel = Rally.test.mock.data.ModelFactory.getUserStoryModel()
-    @defectModel = Rally.test.mock.data.ModelFactory.getDefectModel()
+    @storyModel = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
+    @defectModel = Rally.test.mock.data.WsapiModelFactory.getDefectModel()
     @ajax.whenQuerying('HierarchicalRequirement').respondWith()
 
   afterEach ->
@@ -119,11 +119,11 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
       )
 
     createStoryRecord: (data) ->
-      Model = Rally.test.mock.data.ModelFactory.getUserStoryModel()
+      Model = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
       new Model(data)
 
     createDefectRecord: (data) ->
-      Model = Rally.test.mock.data.ModelFactory.getDefectModel()
+      Model = Rally.test.mock.data.WsapiModelFactory.getDefectModel()
       new Model(data)
 
     shouldHaveFilterByNullIteration: (filter) ->

@@ -10,7 +10,7 @@ Ext.require [
     beforeEach ->
       @stub(Rally.app.Context.prototype, 'getSubscription').returns StoryHierarchyEnabled: true
 
-      @Model = Rally.test.mock.data.ModelFactory.getUserStoryModel()
+      @Model = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
 
       @ajax.whenQuerying('userstory').respondWith()
       @ajax.whenQuerying('defect').respondWith()
@@ -27,7 +27,7 @@ Ext.require [
       expect(storeFilterSpy.returnValues[0][1].value).toBe 0
 
     it 'should exclude a store when filtering on an invalid field', ->
-      defectModel = Rally.test.mock.data.ModelFactory.getDefectModel()
+      defectModel = Rally.test.mock.data.WsapiModelFactory.getDefectModel()
       models = [@Model, defectModel]
       column = @createColumn(
         models: models
@@ -82,7 +82,7 @@ Ext.require [
       expect(stores.length).toBe 0
 
     it 'should fire invalidfilter event when no valid filters are specified', ->
-      defectModel = Rally.test.mock.data.ModelFactory.getDefectModel()
+      defectModel = Rally.test.mock.data.WsapiModelFactory.getDefectModel()
       models = [@Model, defectModel]
       column = @createColumn(
         models: models

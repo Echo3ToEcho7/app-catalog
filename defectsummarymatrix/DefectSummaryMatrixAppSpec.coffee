@@ -2,7 +2,7 @@ Ext = window.Ext4 || window.Ext
 
 Ext.require [
   'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp'
-  'Rally.test.mock.data.ModelFactory'
+  'Rally.test.mock.data.WsapiModelFactory'
 ]
 
 describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->

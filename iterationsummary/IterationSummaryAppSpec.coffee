@@ -701,11 +701,11 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
       results = {}
       switch options.types[0]
         when 'Iteration'
-          results.Iteration = Rally.test.mock.data.ModelFactory.getModel('Iteration')
+          results.Iteration = Rally.test.mock.data.WsapiModelFactory.getModel('Iteration')
         when 'UserStory'
-          results.UserStory = Rally.test.mock.data.ModelFactory.getModel('UserStory')
+          results.UserStoRally.test.mock.data.WsapiModelFactoryctory.getModel('UserStory')
         when 'AllowedAttributeValue'
-          results.AllowedAttributeValue = Rally.test.mock.data.ModelFactory.getModel('AllowedAttributeValue')
+          results.AllowedAttribuRally.test.mock.data.WsapiModelFactorydelFactory.getModel('AllowedAttributeValue')
 
       options.success.call(options.scope, results)
     )

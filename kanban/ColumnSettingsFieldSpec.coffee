@@ -181,7 +181,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
         expect(html).toBe options.expectedValues[i] for html, i in Ext.Array.pluck(cells, 'innerHTML')
 
     _refreshField: (allowedValues)->
-      scheduleStateField = Rally.test.mock.data.ModelFactory.getModel('UserStory').getField('ScheduleState')
+      scheduleStateField = Rally.test.mock.data.WsapiModelFactory.getModel('UserStory').getField('ScheduleState')
       @allowedValues = allowedValues || ["Defined", "In-Progress"]
       @ajax.whenQueryingAllowedValues(scheduleStateField).respondWith @allowedValues
       @field.refreshWithNewField scheduleStateField

@@ -145,7 +145,7 @@ describe 'Rally.apps.board.BoardApp', ->
       )
 
     _createIterationRecord: (data={}) ->
-      IterationModel = Rally.test.mock.data.ModelFactory.getIterationModel()
+      IterationModel = Rally.test.mock.data.WsapiModelFactory.getIterationModel()
       Ext.create(IterationModel, Ext.apply(
         _ref: '/iteration/1',
         Name: 'Iteration 1',

@@ -1,5 +1,11 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.app.Context'
+  'Rally.test.mock.data.WsapiModelFactory'
+  'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp'
+]
+
 describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
 
   helpers
@@ -29,10 +35,10 @@ describe 'Rally.apps.portfoliohierarchy.PortfolioHierarchyApp', ->
 
     Rally.environment.getContext().context.subscription.Modules = ['Rally Portfolio Manager']
 
-    @userStoryModel = Rally.test.mock.data.ModelFactory.getUserStoryModel()
+    @userStoryModel = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
 
     @ajax.whenQuerying('typedefinition').respondWith [
-      Rally.test.mock.data.ModelFactory.getModelDefinition('PortfolioItemStrategy')
+      Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemStrategy')
     ]
     
   afterEach ->

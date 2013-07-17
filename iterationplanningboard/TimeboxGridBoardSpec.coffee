@@ -1,5 +1,9 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.apps.iterationplanningboard.TimeboxGridBoard'
+]
+
 describe 'Rally.apps.iterationplanningboard.TimeboxGridBoard', ->
   helpers
     createGridBoard: ->
@@ -12,6 +16,7 @@ describe 'Rally.apps.iterationplanningboard.TimeboxGridBoard', ->
       @gridBoard = Ext.create 'Rally.apps.iterationplanningboard.TimeboxGridBoard',
         renderTo: 'testDiv'
         context: @context
+        modelNames: ['User Story']
         messageBus: Ext.create 'Rally.MessageBus'
       @waitForComponentReady @gridBoard
 
