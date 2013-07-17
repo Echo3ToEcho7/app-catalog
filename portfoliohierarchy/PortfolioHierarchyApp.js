@@ -11,6 +11,7 @@
             'Rally.data.util.PortfolioItemHelper',
             'Rally.ui.notify.Notifier',
             'Rally.data.QueryFilter',
+            'Rally.util.Help',
             'Rally.util.Test'
         ],
 
