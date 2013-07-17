@@ -15,7 +15,7 @@
                 xtype: "chartdatepicker",
                 name: "date",
                 label: "Date Picker Label"
-            }
+            };
         },
 
         _getStatePicker: function() {
@@ -23,7 +23,7 @@
                 xtype: "chartgroupbystate",
                 name: "groupBy",
                 label: "Group By Label"
-            }
+            };
         },
 
         _getProjectPicker: function() {
@@ -31,7 +31,7 @@
                 type: "project",
                 name: "project",
                 label: "Project"
-            }
+            };
         },
 
         getFields: function() {
@@ -39,7 +39,7 @@
                 this._getStatePicker(),
                 this._getDatePicker(),
                 this._getProjectPicker()
-            ]
+            ];
         }
     });
 }());

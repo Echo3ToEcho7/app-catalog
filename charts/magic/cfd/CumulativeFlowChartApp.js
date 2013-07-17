@@ -116,8 +116,8 @@
             var today = new Date();
             var timePeriod = new Date(today - TIME_PERIOD_IN_MILLIS);
 
-            this.chartConfig.storeConfig.find['Project'] = this.getContext().getProject().ObjectID;
-            this.chartConfig.storeConfig.find['_ValidFrom'] = {
+            this.chartConfig.storeConfig.find.Project = this.getContext().getProject().ObjectID;
+            this.chartConfig.storeConfig.find._ValidFrom = {
                 "$gt": timePeriod.toISOString()
             };
             this.chartConfig.chartConfig.title = {
