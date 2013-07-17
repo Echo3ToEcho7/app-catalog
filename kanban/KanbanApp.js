@@ -10,6 +10,7 @@
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardTagFilter',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
+            'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.cardboard.KanbanPolicy',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.plugin.Scrollable',
@@ -106,18 +107,24 @@
         },
 
         _getGridboardConfig: function(cardboardConfig) {
+            var plugins = [
+                'rallygridboardaddnew',
+                {
+                    ptype: 'rallygridboardartifacttypechooser',
+                    artifactTypePreferenceKey: 'artifact-types',
+                    additionalTypesConfig: [this._getAgreementsTypeConfig()]
+                },
+                'rallygridboardtagfilter'
+            ];
+
+            if (this.getContext().isFeatureEnabled('FILTER_BY_OWNER_ON_KANBAN_APP')) {
+                plugins.push('rallygridboardownerfilter');
+            }
+
             return {
                 xtype: 'rallygridboard',
                 cardBoardConfig: cardboardConfig,
-                plugins: [
-                    'rallygridboardaddnew',
-                    {
-                        ptype: 'rallygridboardartifacttypechooser',
-                        artifactTypePreferenceKey: 'artifact-types',
-                        additionalTypesConfig: [this._getAgreementsTypeConfig()]
-                    },
-                    'rallygridboardtagfilter'
-                ],
+                plugins: plugins,
                 context: this.getContext(),
                 modelNames: this._getDefaultTypes(),
                 addNewPluginConfig: {
