@@ -12,7 +12,7 @@
             'Rally.apps.roadmapplanningboard.PlanningStore',
             'Rally.apps.roadmapplanningboard.RoadmapStore'
         ],
-        cls: 'planning-board roadmapPlanningBoardApp',
+        cls: 'roadmapPlanningBoardApp planning-board',
         componentCls: 'app',
 
         constructor: function(config) {

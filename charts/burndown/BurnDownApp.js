@@ -51,7 +51,7 @@
             this._saveDashboardType();
             this.callParent(arguments);
 
-            if(this.isOnScopedDashboard()) {
+            if (this.isOnScopedDashboard()) {
                 this._loadScopeObject(this._getScopeRef());
             } else {
                 this._getScopePicker().on("ready", this._loadScopeValue, this);
@@ -60,9 +60,9 @@
             this._getScopePicker().on("change", this._saveScopeValue, this);
         },
 
-        _destroyChart: function() {
+        _destroyChart: function () {
             var currentChart = this.down("rallychart");
-            if(currentChart) {
+            if (currentChart) {
                 currentChart.destroy();
             }
         },
@@ -79,12 +79,12 @@
             });
         },
 
-        _loadScopeValue: function(picker) {
+        _loadScopeValue: function (picker) {
             Rally.data.PreferenceManager.load({
                 appID: this.getContext().get("appID"),
-                success: function(loadedSettings) {
+                success: function (loadedSettings) {
                     var settingValue = loadedSettings[this._getScopeType()];
-                    if(!settingValue || settingValue === "undefined") {
+                    if (!settingValue || settingValue === "undefined") {
                         this._saveScopeValue(picker);
                         settingValue = this._getRefFromPicker(picker);
                     }
@@ -96,7 +96,7 @@
             });
         },
 
-        _setScopeValue: function(value) {
+        _setScopeValue: function (value) {
             this._getScopePicker().setValue(value);
         },
 
@@ -139,27 +139,27 @@
             this.down("rallychart").on("snapshotsAggregated", this._addIterationLines, this);
         },
 
-        _addDateBounds: function() {
+        _addDateBounds: function () {
             this._addDateBoundsToQuery();
             this._addDateBoundsToCalculator();
         },
 
-        _addDateBoundsToQuery: function() {
+        _addDateBoundsToQuery: function () {
 
         },
 
-        _addDateBoundsToCalculator: function() {
+        _addDateBoundsToCalculator: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
             calcConfig.startDate = this.dateToString(this._getScopeObjectStartDate());
             calcConfig.endDate = this.dateToString(this._getScopeObjectEndDate());
         },
 
-        _addAggregationTypeToCalculator: function() {
+        _addAggregationTypeToCalculator: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
             calcConfig.chartAggregationType = this.getSetting("chartAggregationType");
         },
 
-        _addObjectIdToStoreConfig: function() {
+        _addObjectIdToStoreConfig: function () {
             var storeConfig = this.chartComponentConfig.storeConfig,
                 type = Ext.String.capitalize(this._getScopeType());
             this._clearStoreConfig(storeConfig);
@@ -226,7 +226,7 @@
             axis.plotLines = [];
             axis.plotBands = [];
 
-            for(var i = 0; i < this.iterations.length; i++) {
+            for (var i = 0; i < this.iterations.length; i++) {
                 axis.plotLines.push(this._getPlotLine(categories, this.iterations[i], false));
                 axis.plotBands.push(this._getPlotBand(categories, this.iterations[i], i % 2 !== 0));
             }
@@ -293,20 +293,26 @@
                 displayType = this.getSetting("chartDisplayType");
 
             for (var i = 0; i < series.length; i++) {
-                if(series[i].name.indexOf("Ideal") === -1) {
+                if (this._seriesFollowsDisplayType(series[i])) {
                     series[i].type = displayType;
                 }
             }
         },
 
-        _updateYAxis: function() {
+        _seriesFollowsDisplayType: function (series) {
+            return series.name.indexOf("Ideal") === -1 && series.name.indexOf("Task To Do Prediction") === -1;
+        },
+
+        _updateYAxis: function () {
             this._updateYAxisTitle();
             this._updateYAxisConfig();
         },
 
         _updateYAxisTitle: function () {
             var chartConfig = this.chartComponentConfig.chartConfig;
-            chartConfig.yAxis = [{}];
+            chartConfig.yAxis = [
+                {}
+            ];
             chartConfig.yAxis[0].title = {
                 text: this._getAxisTitleBasedOnAggregationType()
             };
@@ -321,9 +327,9 @@
             };
         },
 
-        _getAxisTitleBasedOnAggregationType: function() {
+        _getAxisTitleBasedOnAggregationType: function () {
             var aggregationType = this.getSetting("chartAggregationType");
-            if(aggregationType === "storycount") {
+            if (aggregationType === "storycount") {
                 return "Count";
             } else {
                 return "Points";
@@ -367,11 +373,11 @@
             return settings;
         },
 
-        _getRefFromPicker: function(picker) {
+        _getRefFromPicker: function (picker) {
             return picker.getRecord().data._ref;
         },
 
-        _getScopeRef: function() {
+        _getScopeRef: function () {
             return this._getRefFromPicker(this._getScopePicker());
         },
 
@@ -387,8 +393,8 @@
             return invalid(chartAggregationType) || invalid(chartDisplayType) || this._chartTimeboxInvalid(chartTimebox);
         },
 
-        _chartTimeboxInvalid: function(chartTimebox) {
-            if(this.context.getTimeboxScope()) {
+        _chartTimeboxInvalid: function (chartTimebox) {
+            if (this.context.getTimeboxScope()) {
                 return false;
             }
 
@@ -417,8 +423,8 @@
             return this.getSetting("chartTimebox");
         },
 
-        _getScopePicker: function() {
-            if(this.isOnScopedDashboard()) {
+        _getScopePicker: function () {
+            if (this.isOnScopedDashboard()) {
                 return this.getContext().getTimeboxScope();
             } else {
                 return this.down("rally" + this._getScopeType() + "combobox");
@@ -426,7 +432,7 @@
         },
 
         _getScopeObjectStartDate: function () {
-            if(!this.scopeObject) {
+            if (!this.scopeObject) {
                 return new Date();
             } else if (this.scopeObject._type === "release") {
                 return this.scopeObject.ReleaseStartDate;
@@ -436,7 +442,7 @@
         },
 
         _getScopeObjectEndDate: function () {
-            if(!this.scopeObject) {
+            if (!this.scopeObject) {
                 return new Date();
             } else if (this.scopeObject._type === "release") {
                 return this.scopeObject.ReleaseDate;
@@ -445,12 +451,12 @@
             }
         },
 
-        _clearStoreConfig: function(storeConfig) {
-            if(storeConfig.find.hasOwnProperty("Release")) {
+        _clearStoreConfig: function (storeConfig) {
+            if (storeConfig.find.hasOwnProperty("Release")) {
                 delete storeConfig.find.Release;
             }
 
-            if(storeConfig.find.hasOwnProperty("Iteration")) {
+            if (storeConfig.find.hasOwnProperty("Iteration")) {
                 delete storeConfig.find.Iteration;
             }
         },

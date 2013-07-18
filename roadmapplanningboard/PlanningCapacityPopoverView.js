@@ -14,6 +14,8 @@
         placement: 'bottom',
         shouldHidePopoverOnBodyClick: true,
         shouldHidePopoverOnIframeClick: true,
+        cls: 'roadmap-planning-popover',
+        chevronPrefixCls: 'roadmap-planning-popover-chevron',
         items: [
             {
                 layout: {
