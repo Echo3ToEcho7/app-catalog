@@ -15,13 +15,6 @@
     margin: 5px;
 }
 
-.kanban .right .filterInfo {
-    float: right;
-    padding-right: 1px;
-    border-right: 1px solid #CCC;
-    margin-right: 5px;
-}
-
 .kanban .rui-notification {
     float: none;
     position: absolute;
