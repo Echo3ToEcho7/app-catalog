@@ -143,7 +143,7 @@
                 ],
                 proxy: {
                     type: 'rest',
-                    url: 'https://bld-timeline-01.f4tech.com:9020/timeline-service/api/timeframe',
+                    url: 'http://bld-timeline-01.f4tech.com:9020/timeline-service/api/timeframe',
                     reader: {
                         type: 'json',
                         root: 'data.results'
