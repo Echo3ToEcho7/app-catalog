@@ -120,7 +120,7 @@
       });
       return Ext.Ajax.request({
         method: 'POST',
-        url: 'https://bld-planning-01.f4tech.com/planning-service/api/plan/' + options.sourceColumn.planRecord.get('id') + '/features/to/' + options.destinationColumn.planRecord.get('id'),
+        url: 'http://bld-planning-01.f4tech.com:9030/planning-service/api/plan/' + options.sourceColumn.planRecord.get('id') + '/features/to/' + options.destinationColumn.planRecord.get('id'),
         jsonData: {
           data: [
             {
