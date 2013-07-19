@@ -55,9 +55,8 @@
                 this._loadScopeObject(this._getScopeRef());
             } else {
                 this._getScopePicker().on("ready", this._loadScopeValue, this);
+                this._getScopePicker().on("change", this._saveScopeValue, this);
             }
-
-            this._getScopePicker().on("change", this._saveScopeValue, this);
         },
 
         _destroyChart: function () {
@@ -109,14 +108,40 @@
 
                 this._addDateBounds();
                 this._addAggregationTypeToCalculator();
-                this._addObjectIdToStoreConfig();
                 this._updateCompletedScheduleStates();
 
-                this._renderChartBasedOnType();
+                var timeboxStore = Ext.create("Rally.data.WsapiDataStore", {
+                    model: this.scopeObject._type,
+                    filters: [
+                        {
+                            property: "Name",
+                            operator: "=",
+                            value: this.scopeObject.Name
+                        },
+                        {
+                            property: this._getScopeObjectStartDateName(),
+                            operator: "=",
+                            value: this._getScopeObjectStartDate().toISOString()
+                        },
+                        {
+                            property: this._getScopeObjectEndDateName(),
+                            operator: "=",
+                            value: this._getScopeObjectEndDate().toISOString()
+                        }
+                    ],
+                    context: {
+                        workspace: this.getContext().getWorkspaceRef(),
+                        project: this.getContext().getProjectRef()
+                    },
+                    scope: this
+                });
+
+                timeboxStore.on("load", this._getTimeboxesInScope, this);
+                timeboxStore.load();
             }
         },
 
-        _renderChartBasedOnType: function() {
+        _renderChartBasedOnType: function () {
             if (this._getScopeType() === "release") {
                 this._fetchIterations();
             } else {
@@ -128,8 +153,23 @@
             this.scopeObject = store.getAt(0).data;
         },
 
-        _hasDataToDisplay: function(store) {
+        _hasDataToDisplay: function (store) {
             return store.count() >= 1;
+        },
+
+        _getTimeboxesInScope: function (store) {
+            this.timeboxes = store.getItems();
+            var storeConfig = this.chartComponentConfig.storeConfig,
+                type = Ext.String.capitalize(this._getScopeType());
+            this._clearStoreConfig(storeConfig);
+            var oids = [];
+            for (var i = 0; i < this.timeboxes.length; i++) {
+                oids.push(this.timeboxes[i].ObjectID);
+            }
+            storeConfig.find[type] = { "$in" : oids };
+
+            this._renderChartBasedOnType();
+
         },
 
         _onIterationsLoaded: function (store) {
@@ -163,10 +203,10 @@
             var storeConfig = this.chartComponentConfig.storeConfig,
                 type = Ext.String.capitalize(this._getScopeType());
             this._clearStoreConfig(storeConfig);
-            storeConfig.find[type] = this.scopeObject.ObjectID;
+            storeConfig.find[type] = { "$in" : [ this.scopeObject.ObjectID ] };
         },
 
-        _updateCompletedScheduleStates: function() {
+        _updateCompletedScheduleStates: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
             calcConfig.completedScheduleStateNames = this._getCompletedScheduleStates();
         },
@@ -374,7 +414,13 @@
         },
 
         _getRefFromPicker: function (picker) {
-            return picker.getRecord().data._ref;
+            var data = picker.getRecord().data;
+            if(data !== "undefined") {
+                return picker.getRecord().data._ref;
+            }
+            else {
+                return null;
+            }
         },
 
         _getScopeRef: function () {
@@ -431,6 +477,26 @@
             }
         },
 
+        _getScopeObjectStartDateName: function () {
+            if (!this.scopeObject) {
+                return "";
+            } else if (this.scopeObject._type === "release") {
+                return "ReleaseStartDate";
+            } else {
+                return "StartDate";
+            }
+        },
+
+        _getScopeObjectEndDateName: function () {
+            if (!this.scopeObject) {
+                return "";
+            } else if (this.scopeObject._type === "release") {
+                return "ReleaseDate";
+            } else {
+                return "EndDate";
+            }
+        },
+
         _getScopeObjectStartDate: function () {
             if (!this.scopeObject) {
                 return new Date();
@@ -461,13 +527,13 @@
             }
         },
 
-        _getCompletedScheduleStates: function() {
+        _getCompletedScheduleStates: function () {
             var states = this.getSetting("customScheduleStates");
             if(_.isString(states)) {
                 return states.split(",");
             }
-
-            return [];
+            // return reasonable defaults, unless they have a state called Released that comes before Accepted...sigh.
+            return ["Accepted", "Released"];
         }
 
     });
