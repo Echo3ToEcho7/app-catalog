@@ -15,6 +15,9 @@
             lowestPIType: undefined,
             dropControllerConfig: {
                 ptype: 'orcacolumndropcontroller'
+            },
+            cardConfig: {
+                showIconsAndHighlightBorder: false
             }
         },
 
