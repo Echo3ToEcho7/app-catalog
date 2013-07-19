@@ -7,16 +7,49 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
     target = Ext.getBody()
     @storeFixtureFactory = Ext.create 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory'
-    planningStore = @storeFixtureFactory.getPlanningStoreFixture()
-    timeframeStore = @storeFixtureFactory.getTimeframeStoreFixture()
-    featureStore = @storeFixtureFactory.getFeatureStoreFixture()
-    secondFeatureStore = @storeFixtureFactory.getSecondFeatureStoreFixture()
+    planningStore = Deft.Injector.resolve('planningStore')
+    timeframeStore = Deft.Injector.resolve('timeframeStore')
+    featureStore = Deft.Injector.resolve('featureStore')
+    secondFeatureStore = Deft.Injector.resolve('secondFeatureStore')
 
     @leftColumnPlan = planningStore.getById('513617ecef8623df1391fefc')
     leftColumnTimeframe = timeframeStore.getById(@leftColumnPlan.get('timeframe').id)
 
     @leftColumn = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
-      stores: [featureStore]
+      stores: [Ext.create 'Ext.data.Store',
+            extend: 'Ext.data.Store'
+            model: Deft.Injector.resolve('appModelFactory').getFeatureModel()
+            proxy:
+                type: 'memory'
+            data: Rally.test.mock.ModelObjectMother.getRecords('PortfolioItemFeature',
+                {
+                    values: [
+                        {
+                            "ObjectID": "1000",
+                            "_ref": '/portfolioitem/feature/1000',
+                            "Name": "Android Support",
+                            "PreliminaryEstimate": {"Value": 4},
+                            "subscriptionId": "1"
+                        },
+                        {
+                            "ObjectID": "1001",
+                            "_ref": '/portfolioitem/feature/1001',
+                            "Name": "iOS Support",
+                            "PreliminaryEstimate": {"Value": 2},
+                            "subscriptionId": "1"
+                        },
+                        {
+                            "ObjectID": "1002",
+                            "_ref": '/portfolioitem/feature/1002',
+                            "Name": "HTML 5 Webapp",
+                            "PreliminaryEstimate": {"Value": 3},
+                            "subscriptionId": "1"
+                        }
+                    ]
+                }
+            )]
+      getStores: -> @stores
+      lowestPIType: 'PortfolioItem/Feature'
       planRecord: @leftColumnPlan
       timeboxRecord: leftColumnTimeframe
       renderTo: target
@@ -27,16 +60,37 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     rightColumnTimeframe = timeframeStore.getById(@rightColumnPlan.get('timeframe').id)
 
     @rightColumn = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
-      stores: [secondFeatureStore]
+      stores: [Ext.create 'Ext.data.Store',
+            extend: 'Ext.data.Store'
+            model: Deft.Injector.resolve('appModelFactory').getFeatureModel()
+            proxy:
+                type: 'memory'
+
+            data: Rally.test.mock.ModelObjectMother.getRecords('PortfolioItemFeature',
+                {
+                    values: [
+                        {
+                            "ObjectID": "1005",
+                            "_ref": '/portfolioitem/feature/1005',
+                            "Name": "Ubuntu Phone Application",
+                            "PreliminaryEstimate": {"Value": 4},
+                            "subscriptionId": "2"
+                        }
+                    ]
+                }
+            )]
+      getStores: -> @stores
       planRecord: @rightColumnPlan
+      lowestPIType: 'PortfolioItem/Feature'
       timeboxRecord: rightColumnTimeframe
       renderTo: target
       contentCell: target
       headerCell: target
 
     @backlogColumn = Ext.create 'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
+      getStores: -> @stores
       stores: [secondFeatureStore]
-      featureStore: secondFeatureStore
+      lowestPIType: 'PortfolioItem/Feature'
       renderTo: target
       contentCell: target
       headerCell: target
@@ -57,9 +111,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     @rightColumn?.destroy()
     @backlogColumn?.destroy()
 
-  it 'should be creatable', ->
-    expect(@leftColumnDropController).toBeTruthy()
-
   it 'should allow a card to be dropped in the same column and reorder the cards', ->
     ajaxRequest = @stub Ext.Ajax, 'request', (options) ->
       options.success()
@@ -68,9 +119,9 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     card = @leftColumn.getCards()[2]
 
     dragData = { card: card, column: @leftColumn }
-    @leftColumnDropController.onCardDropped(dragData, 5)
+    @leftColumnDropController.onCardDropped(dragData, 3)
 
-    targetCard = @leftColumn.getCards()[4]
+    targetCard = @leftColumn.getCards()[2]
     cardName = card.getRecord().get('name')
     targetCardName = targetCard.getRecord().get('name')
 
@@ -104,13 +155,13 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     card = @leftColumn.getCards()[2]
 
     expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-      feature.id == '51300182ef868cfedc980a39')).toBe true
+      feature.id == '1002')).toBe true
 
     dragData = { card: card, column: @leftColumn }
     @backlogColumnDropController.onCardDropped(dragData, 0)
 
     expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-      feature.id == '51300182ef868cfedc980a39')).toBe false
+      feature.id == '1002')).toBe false
     expect(saveStub.callCount).toBe 1
     expect(@leftColumn.getCards().length).toBe leftColumnCardCountBefore - 1
 
@@ -122,12 +173,12 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     card = @backlogColumn.getCards()[0]
 
     expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-      feature.id == '51300181ef868cfedc980a80')).toBe false
+      feature.id + '' == '1010')).toBe false
     dragData = { card: card, column: @backlogColumn }
     @leftColumnDropController.onCardDropped(dragData, 0)
 
     expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-      feature.id == '51300181ef868cfedc980a80')).toBe true
+      feature.id + '' == '1010')).toBe true
     expect(saveStub.callCount).toBe 1
     expect(@leftColumn.getCards().length).toBe leftColumnCardCountBefore + 1
 
@@ -140,17 +191,17 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     card = @leftColumn.getCards()[2]
 
     expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-      feature.id == '51300182ef868cfedc980a39')).toBe true
+      feature.id+'' == '1002')).toBe true
     expect(_.any(@rightColumn.planRecord.get('features'), (feature) ->
-      feature.id == '51300182ef868cfedc980a39')).toBe false
+      feature.id + '' == '1002')).toBe false
 
     dragData = { card: card, column: @leftColumn }
     @rightColumnDropController.onCardDropped(dragData, 0)
 
     expect(_.any(@leftColumn.planRecord.get('features'), (feature) ->
-      feature.id == '51300182ef868cfedc980a39')).toBe false
+      feature.id + '' == '1002')).toBe false
     expect(_.any(@rightColumn.planRecord.get('features'), (feature) ->
-      feature.id == '51300182ef868cfedc980a39')).toBe true
+      feature.id + '' == '1002')).toBe true
 
     expect(ajaxRequest.callCount).toBe 1
 

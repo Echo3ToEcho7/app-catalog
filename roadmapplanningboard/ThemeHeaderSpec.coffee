@@ -2,10 +2,11 @@ Ext = window.Ext4 || window.Ext
 
 describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
   beforeEach ->
-    deps = Ext.create 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
-    deps.loadDependencies()
+    @ajax.whenQuerying('PortfolioItem/Feature').respondWith([])
+    Ext.create('Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper').loadDependencies()
 
   afterEach ->
+    @board?.destroy()
     Deft.Injector.reset()
     @themeHeader?.destroy()
 
@@ -63,45 +64,56 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
     expect(@themeHeader.el.dom.innerHTML.indexOf('My Theme ')).toBe -1
 
   it 'should find containing cardboard with getCardboardComponent', ->
-    board = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
+
+    @board = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
       roadmapId: '413617ecef8623df1391fabc'
-    board.render Ext.getBody()
-    themeHeader = board.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
+      _retrieveLowestLevelPI: (callback) -> callback(Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
 
-    expect(themeHeader.getCardboardComponent()).toBe(board)
+    @board.render Ext.getBody()
+    deferred = Ext.create 'Deft.Deferred'
+    @board.on 'load', =>
+      themeHeader = @board.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
+      expect(themeHeader.getCardboardComponent()).toBe(@board)
+      deferred.resolve()
 
-    board.destroy()
+    deferred.promise
 
   it 'should fire headersizechanged when edit mode textarea resizes based on content', ->
-    board = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
+    @board = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
       roadmapId: '413617ecef8623df1391fabc'
+      _retrieveLowestLevelPI: (callback) -> callback(Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
       renderTo: Ext.getBody()
 
     # Allows us to verify whether headersizechanged was fired
     resizeStub = sinon.stub()
-    board.on 'headersizechanged', resizeStub
+    @board.on 'headersizechanged', resizeStub
 
-    themeHeader = board.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
-    themeHeader.themeContainer.goToEditMode()
+    deferred = Ext.create 'Deft.Deferred'
+    
+    @board.on 'load', =>
+      themeHeader = @board.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
+      themeHeader.themeContainer.goToEditMode()
 
-    resizeStub.reset()
+      resizeStub.reset()
 
-    textField = themeHeader.themeContainer.down('textareafield')
-    textField.setValue('Updated theme\nWith enough more\nlines that we are sure it will\nresize itself\nand tell the header to resize\nfor multi-line content')
+      textField = themeHeader.themeContainer.down('textareafield')
+      textField.setValue('Updated theme\nWith enough more\nlines that we are sure it will\nresize itself\nand tell the header to resize\nfor multi-line content')
 
-    expect(resizeStub).toHaveBeenCalledOnce()
+      expect(resizeStub).toHaveBeenCalledOnce()
 
-    resizeStub.reset()
+      resizeStub.reset()
 
-    textField.setValue('One line\nAnd another')
+      textField.setValue('One line\nAnd another')
 
-    expect(resizeStub).toHaveBeenCalledOnce()
+      expect(resizeStub).toHaveBeenCalledOnce()
+      deferred.resolve()
 
-    board.destroy()
+    deferred.promise
 
   it 'should fire headersizechanged when editor mode switches back to view mode',  ->
     board = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
       roadmapId: '413617ecef8623df1391fabc'
+      _retrieveLowestLevelPI: (callback) -> callback(Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
       renderTo: Ext.getBody()
 
     themeHeader = board.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
@@ -131,6 +143,7 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
   it 'should not fire headersizechanged until editor has been deleted', ->
     board = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
       roadmapId: '413617ecef8623df1391fabc'
+      _retrieveLowestLevelPI: (callback) -> callback(Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
       renderTo: Ext.getBody()
 
     themeHeader = board.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]

@@ -12,6 +12,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
         headerTemplate: Ext.create 'Ext.XTemplate'
         timeboxRecord: timeboxRecord
         stores: [@featureStoreFixture]
+        getStores: -> @stores
         planRecord: planRecord
         isRightmostColumn: isRightmostColumn
         columnHeaderConfig:
@@ -48,6 +49,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       headerCell: Ext.getBody()
       timeboxRecord: @timeboxRecord
       stores: [@featureStoreFixture]
+      getStores: -> @stores
       planRecord: planRecord
 
   afterEach ->
@@ -71,7 +73,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
 
   it 'should render a thermometer in the header template (filtered data)', ->
     @column.isMatchingRecord = (record) ->
-      record.data.name.indexOf('Android') > -1 || record.data.name.indexOf('iOS') > -1
+      record.data.Name.indexOf('Android') > -1 || record.data.Name.indexOf('iOS') > -1
 
     @column.refresh()
 

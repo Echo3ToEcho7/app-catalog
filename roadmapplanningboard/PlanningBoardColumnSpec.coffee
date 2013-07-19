@@ -8,6 +8,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
     target = Ext.getBody()
     @column = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
       stores: [Deft.Injector.resolve('featureStore')]
+      getStores: -> @stores
       renderTo: target
       contentCell: target
       headerCell: target
@@ -26,7 +27,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
     expect(@column.getCards().length).toBe 10
 
     @column.isMatchingRecord = (record) ->
-      record.get('name') == "Ubuntu Phone Application"
+      record.get('ObjectID') == 1000
     @column.refresh()
 
     expect(@column.getCards().length).toBe 1

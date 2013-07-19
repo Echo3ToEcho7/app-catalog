@@ -67,16 +67,16 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
                     },
                     "features": [
                         {
-                            "id": "51300181ef868cfedc980a37",
-                            "ref": "http://localhost:8080/portfolio-service/feature/51300181ef868cfedc980a37"
+                            "id": "1000",
+                            "ref": "http://localhost:8080/portfolio-service/feature/1000"
                         },
                         {
-                            "id": "51300182ef868cfedc980a38",
-                            "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a38"
+                            "id": "1001",
+                            "ref": "http://localhost:8080/portfolio-service/feature/1001"
                         },
                         {
-                            "id": "51300182ef868cfedc980a39",
-                            "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a39"
+                            "id": "1002",
+                            "ref": "http://localhost:8080/portfolio-service/feature/1002"
                         }
                     ]
                 },
@@ -92,8 +92,8 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
                     },
                     "features": [
                         {
-                            "id": "51300182ef868cfedc980a3c",
-                            "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a3c"
+                            "id": "1005",
+                            "ref": "http://localhost:8080/portfolio-service/feature/1005"
                         }
                     ]
                 },
@@ -124,6 +124,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         @planningStoreFixture.model.setProxy 'memory'
         @planningStoreFixture
 
+
     getFeatureStoreFixture: ->
         @featureStoreFixture = Ext.create 'Ext.data.Store',
             extend: 'Ext.data.Store'
@@ -131,79 +132,82 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
             proxy:
                 type: 'memory'
 
-            data: [
+            data: Rally.test.mock.ModelObjectMother.getRecords('PortfolioItemFeature',
                 {
-                    "id": "51300181ef868cfedc980a37",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300181ef868cfedc980a37",
-                    "name": "Android Support",
-                    "refinedEstimate": 4,
-                    "subscriptionId": "1"
-                },
-                {
-                    "id": "51300182ef868cfedc980a38",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a38",
-                    "name": "iOS Support",
-                    "refinedEstimate": 2,
-                    "subscriptionId": "1"
-                },
-                {
-                    "id": "51300182ef868cfedc980a39",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a39",
-                    "name": "HTML 5 Webapp",
-                    "refinedEstimate": 3,
-                    "subscriptionId": "1"
-                },
-                {
-                    "id": "51300182ef868cfedc980a3a",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a3a",
-                    "name": "Blackberry Native App",
-                    "refinedEstimate": 1,
-                    "subscriptionId": "1"
-                },
-                {
-                    "id": "51300182ef868cfedc980a3b",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a3b",
-                    "name": "Windows Phone Support",
-                    "refinedEstimate": 3,
-                    "subscriptionId": "2"
-                },
-                {
-                    "id": "51300182ef868cfedc980a3c",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a3c",
-                    "name": "Ubuntu Phone Application",
-                    "refinedEstimate": 4,
-                    "subscriptionId": "2"
-                },
-                {
-                    "id": "51300182ef868cfedc980a3d",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a3d",
-                    "name": "Tester's Large Test Card 1",
-                    "refinedEstimate": 13,
-                    "subscriptionId": "2"
-                },
-                {
-                    "id": "51300182ef868cfedc980a3e",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a3e",
-                    "name": "Tester's Large Test Card 2",
-                    "refinedEstimate": 21,
-                    "subscriptionId": "2"
-                },
-                {
-                    "id": "51300182ef868cfedc980a3f",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a3f",
-                    "name": "Tester's Large Test Card 3",
-                    "refinedEstimate": 13,
-                    "subscriptionId": "2"
-                },
-                {
-                    "id": "51300182ef868cfedc980a40",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a40",
-                    "name": "Tester's Large Test Card 4",
-                    "refinedEstimate": 8,
-                    "subscriptionId": "2"
+                    values: [
+                        {
+                            "ObjectID": "1000",
+                            "_ref": '/portfolioitem/feature/1000',
+                            "Name": "Android Support",
+                            "PreliminaryEstimate": {"Value": 4},
+                            "subscriptionId": "1"
+                        },
+                        {
+                            "ObjectID": "1001",
+                            "_ref": '/portfolioitem/feature/1001',
+                            "Name": "iOS Support",
+                            "PreliminaryEstimate": {"Value": 2},
+                            "subscriptionId": "1"
+                        },
+                        {
+                            "ObjectID": "1002",
+                            "_ref": '/portfolioitem/feature/1002',
+                            "Name": "HTML 5 Webapp",
+                            "PreliminaryEstimate": {"Value": 3},
+                            "subscriptionId": "1"
+                        },
+                        {
+                            "ObjectID": "1003",
+                            "_ref": '/portfolioitem/feature/1003',
+                            "Name": "Blackberry Native App",
+                            "PreliminaryEstimate": {"Value": 1},
+                            "subscriptionId": "1"
+                        },
+                        {
+                            "ObjectID": "1004",
+                            "_ref": '/portfolioitem/feature/1004',
+                            "Name": "Windows Phone Support",
+                            "PreliminaryEstimate": {"Value": 3},
+                            "subscriptionId": "2"
+                        },
+                        {
+                            "ObjectID": "1005",
+                            "_ref": '/portfolioitem/feature/1005',
+                            "Name": "Ubuntu Phone Application",
+                            "PreliminaryEstimate": {"Value": 4},
+                            "subscriptionId": "2"
+                        },
+                        {
+                            "ObjectID": "1006",
+                            "_ref": '/portfolioitem/feature/1006',
+                            "Name": "Tester's Large Test Card 1",
+                            "PreliminaryEstimate": {"Value": 13},
+                            "subscriptionId": "2"
+                        },
+                        {
+                            "ObjectID": "1007",
+                            "_ref": '/portfolioitem/feature/1007',
+                            "Name": "Tester's Large Test Card 2",
+                            "PreliminaryEstimate": {"Value": 21},
+                            "subscriptionId": "2"
+                        },
+                        {
+                            "ObjectID": "1008",
+                            "_ref": '/portfolioitem/feature/1008',
+                            "Name": "Tester's Large Test Card 3",
+                            "PreliminaryEstimate": {"Value": 13},
+                            "subscriptionId": "2"
+                        },
+                        {
+                            "ObjectID": "1009",
+                            "_ref": '/portfolioitem/feature/1009',
+                            "Name": "Tester's Large Test Card 4",
+                            "PreliminaryEstimate": {"Value": 8},
+                            "subscriptionId": "2"
+                        }
+                    ]
                 }
-            ]
-
+            )
         @featureStoreFixture.model.setProxy 'memory'
         @featureStoreFixture
 
@@ -213,23 +217,26 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
             model: Deft.Injector.resolve('appModelFactory').getFeatureModel()
             proxy:
                 type: 'memory'
-            data: [
-                {
-                    "id": "51300181ef868cfedc980a80",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300181ef868cfedc980a80",
-                    "name": "Battlestar Gallactica",
-                    "refinedEstimate": 6,
-                    "subscriptionId": "1"
-                },
-                {
-                    "id": "51300182ef868cfedc980a81",
-                    "ref": "http://localhost:8080/portfolio-service/feature/51300182ef868cfedc980a81",
-                    "name": "Firefly",
-                    "refinedEstimate": 3,
-                    "subscriptionId": "1"
+            data: Rally.test.mock.ModelObjectMother.getRecords('PortfolioItemFeature',
+                { values: 
+                    [
+                        {
+                            "ObjectID": "1010",
+                            "_ref": '/portfolioitem/feature/1010',
+                            "Name": "Battlestar Gallactica",
+                            "PreliminaryEstimate": {"Value": 6},
+                            "subscriptionId": "1"
+                        },
+                        {
+                            "ObjectID": "1011",
+                            "_ref": '/portfolioitem/feature/1011',
+                            "Name": "Firefly",
+                            "PreliminaryEstimate": {"Value": 3},
+                            "subscriptionId": "1"
+                        }
+                    ]
                 }
-            ]
-
+            )
         @secondFeatureStoreFixture.model.setProxy 'memory'
         @secondFeatureStoreFixture
 
