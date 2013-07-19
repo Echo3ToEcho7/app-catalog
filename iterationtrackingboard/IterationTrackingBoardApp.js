@@ -35,7 +35,10 @@
                 enableToggle: this.getContext().isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE'),
                 plugins: [
                     {ptype: 'rallygridboardaddnew'},
-                    {ptype: 'rallygridboardownerfilter'}
+                    {
+                        ptype: 'rallygridboardownerfilter',
+                        stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
+                    }
                 ],
                 modelNames: this.modelNames,
                 cardBoardConfig: {

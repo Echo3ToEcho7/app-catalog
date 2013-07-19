@@ -118,7 +118,10 @@
             ];
 
             if (this.getContext().isFeatureEnabled('FILTER_BY_OWNER_ON_KANBAN_APP')) {
-                plugins.push('rallygridboardownerfilter');
+                plugins.push({
+                    ptype: 'rallygridboardownerfilter',
+                    stateId: 'kanban-owner-filter-' + this.getAppId()
+                });
             }
 
             return {
