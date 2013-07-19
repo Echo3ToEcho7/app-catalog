@@ -37,7 +37,7 @@
                 plugins: [
                     'rallygridboardfilterinfo',
                     'rallygridboardaddnew',
-                    'rallygridboardownerfilter',
+                    'rallygridboardownerfilter'
                 ],
                 modelNames: this.modelNames,
                 cardBoardConfig: {
