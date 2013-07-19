@@ -12,10 +12,12 @@
         requires: ['Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', 'Rally.apps.roadmapplanningboard.OrcaColumnDropTarget'],
         config: {
             stores: [],
+            lowestPIType: undefined,
             dropControllerConfig: {
                 ptype: 'orcacolumndropcontroller'
             }
         },
+
         initComponent: function () {
             this.callParent(arguments);
             return this.on('beforerender', function () {
@@ -28,29 +30,50 @@
                 single: true
             });
         },
+
         getStores: function () {
-            return this.stores;
+
+            if (!this.planRecord || !this.planRecord.data.features.length) {
+                return [];
+            }
+
+            var filters = [];
+
+            _.each(this.planRecord.data.features, function(feature) {
+                filters.push({
+                    property: 'ObjectID',
+                    operator: '=',
+                    value: feature.id    
+                });
+            });
+
+            return [ 
+                Ext.create('Rally.data.WsapiDataStore', {
+                    model: this.lowestPIType,
+                    autoLoad: true,
+                    fetch: ['Value','FormattedID', 'Owner','Name', 'PreliminaryEstimate'],
+                    mergeFetch: true,
+                    filters: Rally.data.QueryFilter.or(filters)
+                })
+            ];
         },
+
         isMatchingRecord: function () {
             return true;
         },
+
         _getProgressBarHtml: function () {
             return '<div></div>';
         },
-        _queryForData: function () {
-            this.callParent(arguments);
-            if (!this.stores || !this.stores.length) {
-                return this._allCardsReady();
-            }
-        },
+
         findCardInfo: function (searchCriteria, includeHiddenCards) {
             var card, index, _i, _len, _ref;
 
-            searchCriteria = searchCriteria.get && searchCriteria.get('id') ? searchCriteria.get('id') : searchCriteria;
+            searchCriteria = searchCriteria.get && searchCriteria.get('ObjectID') ? searchCriteria.get('ObjectID') : searchCriteria;
             _ref = this.getCards(includeHiddenCards);
             for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
                 card = _ref[index];
-                if (card.getRecord().get('id') === searchCriteria || card.getEl() === searchCriteria || card.getEl() === Ext.get(searchCriteria)) {
+                if (card.getRecord().get('ObjectID') === searchCriteria || card.getEl() === searchCriteria || card.getEl() === Ext.get(searchCriteria)) {
                     return {
                         record: card.getRecord(),
                         index: index,
@@ -60,13 +83,7 @@
             }
             return null;
         },
-        _createCard: function (record, cardConfig) {
-            var card;
 
-            card = this.callParent(arguments);
-            card.popoverPlugin = undefined;
-            return card;
-        },
         destroy: function () {
             var plugin, _i, _len, _ref;
 

@@ -43,12 +43,11 @@
             roadmapStore = Deft.Injector.resolve('roadmapStore');
             timeframeStore = Deft.Injector.resolve('timeframeStore');
 
-            roadmapStore.load(function () {
-                timeframeStore.load(function () {
+            roadmapStore.load(function() {
+                timeframeStore.load(function() {
                     _this.add(Ext.create('Rally.apps.roadmapplanningboard.PlanningGridBoard', {
                         roadmapId: roadmapStore.first() ? roadmapStore.first().get('id') : undefined
                     }));
-
                 });
             });
         }

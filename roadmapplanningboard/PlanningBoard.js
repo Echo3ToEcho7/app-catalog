@@ -8,12 +8,12 @@
             }
         ],
         alias: 'widget.roadmapplanningboard',
-        inject: ['featureStore', 'timeframeStore', 'planningStore', 'roadmapStore', 'appModelFactory'],
-        requires: ['Rally.ui.cardboard.plugin.FixedHeader', 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', 'Rally.apps.roadmapplanningboard.BacklogBoardColumn'],
+        inject: ['timeframeStore', 'planningStore', 'roadmapStore', 'appModelFactory'],
+        requires: ['Rally.data.util.PortfolioItemHelper', 'Rally.ui.cardboard.plugin.FixedHeader', 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', 'Rally.apps.roadmapplanningboard.BacklogBoardColumn'],
         config: {
             roadmapId: null,
             cardConfig: {
-                fields: ['name', 'refinedEstimate'],
+                fields: ['FormattedID', 'Owner','Name', 'PreliminaryEstimate'],
                 skipDefaultFields: true
             },
             ddGroup: 'planningBoard',
@@ -24,15 +24,23 @@
 
         _retrieveModels: function () {
             var _this = this;
-
             this._roadmap = this.roadmapStore.getById(this.roadmapId);
-            return this.featureStore.load(function () {
-                _this.models = [_this.featureStore.model];
-                return _this.planningStore.load(function () {
-                    return _this.timeframeStore.load(function () {
-                        return _this._buildColumnsFromStore();
+
+            this._retrieveLowestLevelPI(function(record) {
+                _this.lowestPIType = record.get('TypePath');
+                _this.planningStore.load(function() {
+                    _this.timeframeStore.load(function() {
+                        _this._buildColumnsFromStore();
                     });
                 });
+            });
+        },
+
+        _retrieveLowestLevelPI: function(callback) {
+            Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
+                defaultToLowest: true,
+                success: callback,
+                scope: this
             });
         },
 
@@ -58,7 +66,7 @@
         _getBacklogColumnConfig: function () {
             return {
                 xtype: 'backlogplanningcolumn',
-                stores: [this.featureStore],
+                lowestPIType: this.lowestPIType,
                 cls: 'column backlog',
                 roadmap: this._roadmap
             };
@@ -83,7 +91,7 @@
 
             return this.addColumn({
                 xtype: 'timeframeplanningcolumn',
-                stores: [this.featureStore],
+                lowestPIType: this.lowestPIType,
                 timeboxRecord: timeframe,
                 planRecord: plan,
                 columnHeaderConfig: {
@@ -92,7 +100,7 @@
                     editable: true
                 },
                 isMatchingRecord: function (featureRecord) {
-                    return plan && plan.features().findExact('id', featureRecord.getId()) >= 0;
+                    return plan && plan.features().findExact('id', '' + featureRecord.get('ObjectID')) >= 0;
                 }
             });
         }

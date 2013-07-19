@@ -172,11 +172,15 @@
                         type: 'string'
                     },
                     {
-                        name: 'name',
+                        name: 'ObjectID',
                         type: 'string'
                     },
                     {
-                        name: 'refinedEstimate',
+                        name: 'Name',
+                        type: 'string'
+                    },
+                    {
+                        name: 'PreliminaryEstimate',
                         type: 'int'
                     },
                     {
@@ -190,7 +194,7 @@
                 ],
                 proxy: {
                     type: 'rest',
-                    url: "https://bld-orcafe-01.f4tech.com/portfolio-service/api/feature",
+                    url: "http://localhost:8090/portfolio-service/api/feature",
                     reader: {
                         type: 'json',
                         root: 'data.results'

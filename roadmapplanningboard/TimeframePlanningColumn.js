@@ -14,10 +14,11 @@
             planRecord: undefined,
             dateFormat: 'M j',
             headerTemplate: undefined,
-            pointField: 'refinedEstimate',
+            pointField: 'PreliminaryEstimate',
             isRightmostColumn: false,
             progressBarTitle: 'Edit Planned Capacity Range'
         },
+        
         initComponent: function () {
             var _ref, _ref1;
 
@@ -32,6 +33,7 @@
                 }, this);
             }
         },
+
         onAfterRender: function (event) {
             this.columnHeader.getEl().on('click', this.onProgressBarClick, this, {
                 delegate: '.progress-bar-container'
@@ -40,6 +42,7 @@
                 delegate: '.timeboxDates'
             });
         },
+
         onProgressBarClick: function (event) {
             var _this = this;
 
@@ -77,6 +80,7 @@
             });
             return this.popover;
         },
+
         onTimeboxDatesClick: function (event) {
             var _this = this;
 
@@ -110,6 +114,7 @@
                 }
             });
         },
+
         _drawDateRange: function () {
             if (this.dateRange) {
                 return this.dateRange.update(this.getDateHeaderTplData());
@@ -121,6 +126,7 @@
                 });
             }
         },
+
         _drawProgressBar: function () {
             if (this.progressBar) {
                 return this.progressBar.update(this.getHeaderTplData());
@@ -132,6 +138,7 @@
                 });
             }
         },
+
         _drawTheme: function () {
             if (!this.theme && this.planRecord) {
                 this.theme = this.getColumnHeader().add({
@@ -141,6 +148,7 @@
                 });
             }
         },
+
         getHeaderTplData: function () {
             var fraction, _ref,
                 _this = this;
@@ -149,7 +157,10 @@
                 denominator: ((_ref = this.planRecord) !== null ? _ref.get('highCapacity') : undefined) || 0,
                 numeratorItems: this.getCards(true),
                 numeratorItemValueFunction: function (card) {
-                    return card.getRecord().get(_this.pointField);
+                    if (card.getRecord().get(_this.pointField)) {
+                        return card.getRecord().get(_this.pointField).Value || 0;
+                    }
+                    return 0;
                 }
             });
             return {
@@ -158,17 +169,20 @@
                 progressBarTitle: this.progressBarTitle
             };
         },
+
         getDateHeaderTplData: function () {
             return {
                 formattedDate: this._getDateRange()
             };
         },
+
         drawHeader: function () {
             this.callParent(arguments);
             this._drawDateRange();
             this._drawProgressBar();
             return this._drawTheme();
         },
+
         _getDateRange: function () {
             var formattedEndDate, formattedStartDate;
 
@@ -179,6 +193,7 @@
             }
             return "" + formattedStartDate + " - " + formattedEndDate;
         },
+
         _getFormattedDate: function (dateField) {
             var date;
 
@@ -187,6 +202,7 @@
                 return Ext.Date.format(date, this.dateFormat);
             }
         },
+
         _getProgressBarHtml: function (fraction) {
             var _ref, _ref1;
 

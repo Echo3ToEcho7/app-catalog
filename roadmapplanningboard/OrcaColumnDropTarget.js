@@ -12,6 +12,7 @@
         dropAllowed: "planningBoard",
         dropNotAllowed: "planningBoard",
         column: undefined,
+
         constructor: function (dropEl, config) {
             this.mergeConfig(config);
             this.callParent([dropEl, this.config]);
@@ -26,6 +27,7 @@
             this.dropIndicator.setVisibilityMode(Ext.dom.AbstractElement.DISPLAY);
             return this.column.on('destroy', this._onColumnDestroy, this);
         },
+        
         notifyDrop: function (source, e, data) {
             var allowDrop, card, cardInfo, cards, column, dropHandler, index, position, samePlace;
 
@@ -59,6 +61,7 @@
             this.column.getContentCell().removeCls(DROP_CLASS);
             return allowDrop && !samePlace;
         },
+        
         notifyEnter: function (source, e, data) {
             if (data.dndContainer && data.dndContainer !== this.column.dropControllerPlugin.getDndContainer()) {
                 data.dndContainer.removeCls(DROP_CLASS);
@@ -68,11 +71,13 @@
             this.notifyOver(source, e, data);
             return false;
         },
+        
         notifyOut: function (source, e, data) {
             this.column.dropControllerPlugin.getDndContainer().removeCls(DROP_CLASS);
             this.dropIndicator.setVisible(false);
             return false;
         },
+        
         notifyOver: function (source, e, data) {
             var cards, column, found, index, last, mouseEventY, records;
 
@@ -122,11 +127,13 @@
             }
             return false;
         },
+        
         _onColumnDestroy: function () {
             this.column.un('destroy', this._onColumnDestroy, this);
             this.dropIndicator.destroy();
             return this.destroy();
         },
+        
         _mouseIsOverCard: function (card, mouseEventY) {
             var cardContainerHeight, cardContainerY;
 
@@ -134,12 +141,14 @@
             cardContainerHeight = card.getEl().getSize().height;
             return cardContainerY <= mouseEventY && (cardContainerHeight + cardContainerY) >= mouseEventY;
         },
+        
         _mouseIsBeforeCard: function (card, mouseEventY) {
             var cardContainerY;
 
             cardContainerY = card.getEl().getY();
             return mouseEventY < cardContainerY;
         },
+        
         _addDropIndicatorAfter: function (card, data) {
             this.dropIndicator.setVisible(false);
             data.target = {
@@ -149,6 +158,7 @@
             this.dropIndicator.insertAfter(card.getEl());
             return this.dropIndicator.setVisible(true);
         },
+        
         _addDropIndicatorBefore: function (card, data) {
             this.dropIndicator.setVisible(false);
             data.target = {

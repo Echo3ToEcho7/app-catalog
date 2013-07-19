@@ -212,8 +212,19 @@
     height: 100%;
 }
 
+.roadmapPlanningBoardApp .cardboard .theHeader .card-column {
+    background-color: #FFF;
+}
+
 .roadmapPlanningBoardApp .cardboard .column-container .column-header {
     font-size: 10pt;
+}
+
+.roadmapPlanningBoardApp .cardboard .column-container .column-header .columnTpl{
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'Open Sans', sans-serif;
+    color: rgb(0, 0, 0);
 }
 
 .roadmapPlanningBoardApp .cardboard .column-container .column-header .editableField {

@@ -6,10 +6,12 @@
   Ext.define('Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', {
     extend: 'Rally.ui.cardboard.plugin.ColumnDropController',
     alias: 'plugin.orcacolumndropcontroller',
+
     init: function(column) {
       this.callParent(arguments);
       this.cmp = column;
     },
+
     _addDropTarget: function() {
       var column = this.cmp;
       this.dropTarget = Ext.create('Rally.apps.roadmapplanningboard.OrcaColumnDropTarget', this.getDndContainer(), {
@@ -18,9 +20,11 @@
       });
       return this.dropTarget;
     },
+
     canDragDropCard: function(card) {
       return true;
     },
+
     onCardDropped: function(dragData, index) {
       var card, column, record, records, relativeRank, relativeRecord, sourceColumn, type;
 
@@ -65,13 +69,14 @@
         }
       }
     },
+
     _moveIntoBacklog: function(options) {
       var record,
         _this = this;
 
       record = options.card.getRecord();
       options.sourceColumn.planRecord.set('features', Ext.Array.filter(options.sourceColumn.planRecord.get('features'), function(obj) {
-        return obj.id !== record.get('id');
+        return obj.id !== '' + record.get('ObjectID');
       }));
       return options.sourceColumn.planRecord.save({
         success: function() {
@@ -85,14 +90,15 @@
         }
       });
     },
+
     _moveOutOfBacklog: function(options) {
       var record,
         _this = this;
 
       record = options.card.getRecord();
       options.destinationColumn.planRecord.get('features').push({
-        id: record.get('id'),
-        ref: record.get('ref')
+        id: record.get('ObjectID'),
+        ref: record.get('_ref')
       });
       return options.destinationColumn.planRecord.save({
         success: function() {
@@ -106,17 +112,18 @@
         }
       });
     },
+
     _moveFromColumnToColumn: function(options) {
       var record,
         _this = this;
 
       record = options.card.getRecord();
       options.sourceColumn.planRecord.set('features', Ext.Array.filter(options.sourceColumn.planRecord.get('features'), function(obj) {
-        return obj.id !== record.get('id');
+        return obj.id !==  '' + record.get('ObjectID');
       }));
       options.destinationColumn.planRecord.get('features').push({
-        id: record.get('id'),
-        ref: record.get('ref')
+        id: record.get('ObjectID'),
+        ref: record.get('_ref')
       });
       return Ext.Ajax.request({
         method: 'POST',
@@ -124,8 +131,8 @@
         jsonData: {
           data: [
             {
-              id: record.get('id'),
-              ref: record.get('ref')
+              id: record.get('ObjectID') + '',
+              ref: record.get('_ref')
             }
           ]
         },
@@ -143,11 +150,13 @@
         }
       });
     },
+
     _onDropSaveSuccess: function(column, sourceColumn, card, updatedRecord, type) {
       if (column) {
         return column.fireEvent('aftercarddroppedsave', this, card, type);
       }
     },
+
     _onDropSaveFailure: function(column, sourceColumn, record, card, sourceIndex, errorSource) {
       if (errorSource.error && errorSource.error.errors && errorSource.error.errors.length) {
         Rally.ui.notify.Notifier.showError({
@@ -156,12 +165,14 @@
       }
       return sourceColumn.addCard(card, sourceIndex, true);
     },
+
     _addDragZone: function() {
       var column;
 
       column = this.cmp;
       this._dragZone = Ext.create('Ext.dd.DragZone', this.getDndContainer(), {
         ddGroup: column.ddGroup,
+
         onBeforeDrag: function(data, e) {
           var avatar;
 
@@ -174,6 +185,7 @@
           shadow: false,
           dropNotAllowed: "cardboard"
         }),
+
         getDragData: function(e) {
           var avatar, dragEl, sourceEl;
 
@@ -192,11 +204,13 @@
             };
           }
         },
+
         getRepairXY: function() {
           return this.dragData.repairXY;
         }
       });
     },
+
     destroy: function() {
       var _ref, _ref1, _ref2;
 
