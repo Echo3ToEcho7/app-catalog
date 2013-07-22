@@ -53,7 +53,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
   it 'resets view on scope change', ->
     @createApp().then =>
       removeStub = @stub(@app, 'remove')
-      addContentStub = @stub(@app, 'addContent')
 
       newScope = Ext.create('Rally.app.TimeboxScope',
         record: new @IterationModel @iterationData[1]
@@ -62,10 +61,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @app.onTimeboxScopeChange newScope
 
       expect(removeStub).toHaveBeenCalledOnce()
-      sinon.assert.calledWith removeStub, 'gridBoard'
+      expect(removeStub).toHaveBeenCalledWith 'gridBoard'
 
-      expect(addContentStub).toHaveBeenCalledOnce()
-      sinon.assert.calledWith addContentStub, newScope
+      expect(@app.down('#gridBoard')).toBeDefined()
 
   it 'fires contentupdated event after board load', ->
     contentUpdatedHandlerStub = @stub()

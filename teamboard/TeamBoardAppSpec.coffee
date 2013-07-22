@@ -71,7 +71,7 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
       expect(cardEl.query('.field-content').length).toBe fieldNames.length
 
       for fieldName in fieldNames
-        expect(cardEl.down('.field-content.' + fieldName)).not.toBe null
+        expect(cardEl.down('.field-content.' + fieldName)).not.toBeNull()
 
     cardboard: ->
       @app.down('.rallycardboard')

@@ -777,7 +777,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
   it "sets timeBoxInfo every time iteraton scope is changed", ->
     @prepareTestSetData(Pass: 2, Fail: 1, Inconclusive: 1)
-    timeBoxInfoStub = @stub(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_calculateTimeBoxInfo')
+    timeBoxInfoStub = @stub(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_determineTimeBoxInfo')
     timeBoxInfoStub.returns(@stubTimeBoxInfo('past'))
 
     @createApp({}).then (app) =>
@@ -799,21 +799,21 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
 
   it "refreshes app on objectUpdate of artifacts", ->
     @createApp({}).then (app) =>
-      addContentStub = @stub(app, 'addContent')
+      addStub = @stub(app, 'add')
 
       messageBus = Rally.environment.getMessageBus()
       for type in ['Defect', 'HierarchicalRequirement', 'DefectSuite', 'TestSet', 'TestCase']
         messageBus.publish(Rally.Message.objectUpdate, @mom.getRecord(type))
 
-      expect(addContentStub.callCount).toBe 5
+      expect(addStub.callCount).toBe 5
 
   it "does not refresh app on objectUpdate of non-artifacts", ->
     @createApp({}).then (app) =>
-      addContentSpy = @spy(app, 'addContent')
+      addSpy = @spy(app, 'add')
 
       Rally.environment.getMessageBus().publish(Rally.Message.objectUpdate, @mom.getRecord('Release'))
 
-      expect(addContentSpy).not.toHaveBeenCalled()
+      expect(addSpy).not.toHaveBeenCalled()
 
   it "only fetches iteration schema once", ->
     httpGetSpy = @spy(Rally.env.IoProvider.prototype, 'httpGet')
