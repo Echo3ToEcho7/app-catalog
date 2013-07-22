@@ -34,11 +34,13 @@
                 context: this.getContext(),
                 enableToggle: this.getContext().isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE'),
                 plugins: [
-                    {ptype: 'rallygridboardaddnew'},
                     {
-                        ptype: 'rallygridboardownerfilter',
+                        ptype: 'rallygridboardfilterinfo',
+                        isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
                         stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
-                    }
+                    },
+                    'rallygridboardaddnew',
+                    'rallygridboardownerfilter'
                 ],
                 modelNames: this.modelNames,
                 cardBoardConfig: {

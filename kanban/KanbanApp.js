@@ -11,11 +11,11 @@
             'Rally.ui.gridboard.plugin.GridBoardTagFilter',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
+            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.cardboard.KanbanPolicy',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.plugin.Scrollable',
-            'Rally.ui.report.StandardReport',
-            'Rally.ui.tooltip.FilterInfo'
+            'Rally.ui.report.StandardReport'
         ],
         cls: 'kanban',
         alias: 'widget.kanbanapp',
@@ -108,6 +108,11 @@
 
         _getGridboardConfig: function(cardboardConfig) {
             var plugins = [
+                {
+                    ptype: 'rallygridboardfilterinfo',
+                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
+                    queryString: this.getSetting('query')
+                },
                 'rallygridboardaddnew',
                 {
                     ptype: 'rallygridboardartifacttypechooser',
@@ -136,24 +141,8 @@
                         beforeeditorshow: this._onBeforeEditorShow,
                         scope: this
                     }
-                },
-                listeners: {
-                    afterrender: this._onGridBoardAfterRender,
-                    scope: this
                 }
             };
-        },
-
-        _onGridBoardAfterRender: function(gridBoard) {
-            gridBoard.getHeader().getRight().add({
-                xtype: 'rallyfilterinfo',
-                projectName: this.getSetting('project') && this.getContext().getProject().Name || 'Following Global Project Setting',
-                scopeUp: this.getSetting('projectScopeUp'),
-                scopeDown: this.getSetting('projectScopeDown'),
-                query: this.getSetting('query')
-            });
-
-            this._showDnDRankWarning();
         },
 
         _getPolicyForColumn: function(columnName, policyPrefKey) {
@@ -446,23 +435,6 @@
                 handler: this._onShowAgreementsClicked,
                 scope: this
             };
-        },
-
-        /**
-         * @private
-         * Show a warning flair if the workspace is manually ranked
-         */
-        _showDnDRankWarning: function() {
-            if (!this.getContext().getWorkspace().WorkspaceConfiguration.DragDropRankingEnabled) {
-
-                var notification = Ext.create('Rally.ui.notify.Notification', {
-                    message: "Drag and drop re-ranking is disabled for Manual Rank Workspaces.",
-                    duration: 5000
-                });
-
-                this.down('.rallyleftright').add(notification);
-            }
-
         }
     });
 })();

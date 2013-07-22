@@ -14,6 +14,7 @@
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardManageIterations',
+            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.util.Array'
         ],
         cls: 'planning-board',
@@ -25,6 +26,10 @@
         _showBoard: function() {
             var rankScope = 'BACKLOG',
                 plugins = [
+                    {
+                        ptype: 'rallygridboardfilterinfo',
+                        isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false
+                    },
                     {
                         ptype: 'rallygridboardaddnew',
                         rankScope: rankScope
