@@ -22,6 +22,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
     @ajax.whenQuerying('defect').respondWith()
 
     @projectRef = Rally.environment.getContext().getProject()._ref
+    @projectName = 'Project 1'
 
   afterEach ->
     Rally.test.destroyComponentsOfQuery 'kanbanapp'
@@ -229,7 +230,11 @@ describe 'Rally.apps.kanban.KanbanApp', ->
   it 'should show filter info when scoped to a specific project', ->
     projectScopeUp = true
     projectScopeDown = false
-    @createApp(project: @projectRef, projectScopeUp: projectScopeUp, projectScopeDown: projectScopeDown).then =>
+    @createApp({project: @projectRef}, null,
+      project: {_ref: @projectRef, Name: 'blah'}
+      projectScopeUp: projectScopeUp
+      projectScopeDown: projectScopeDown
+    ).then =>
       filterInfo = @app.down('rallyfilterinfo')
       expect(filterInfo.getProjectName()).toBe @app.getContext().getProject().Name
       expect(filterInfo.getScopeUp()).toBe projectScopeUp
@@ -317,16 +322,18 @@ describe 'Rally.apps.kanban.KanbanApp', ->
 
 
   helpers
-    createApp: (settings = {}, options = {}) ->
+    createApp: (settings = {}, options = {}, context = {}) ->
       @app = Ext.create 'Rally.apps.kanban.KanbanApp',
         context: Ext.create('Rally.app.Context',
           initialValues:
-            project:
-              _ref: @projectRef
-              Name: 'Project 1'
-            workspace:
-              WorkspaceConfiguration:
-                DragDropRankingEnabled: if Ext.isDefined(options.DragDropRankingEnabled) then options.DragDropRankingEnabled else true
+            Ext.merge({
+              project:
+                _ref: @projectRef
+                Name: @projectName
+              workspace:
+                WorkspaceConfiguration:
+                  DragDropRankingEnabled: if Ext.isDefined(options.DragDropRankingEnabled) then options.DragDropRankingEnabled else true},
+              context)
         )
         settings: settings
         renderTo: options.renderTo || 'testDiv'
