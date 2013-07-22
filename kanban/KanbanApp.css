@@ -7,10 +7,6 @@
     float: right;
 }
 
-.kanban .right table label {
-    margin-top: 3px;
-}
-
 .kanban .checkbox {
     margin: 5px;
 }
