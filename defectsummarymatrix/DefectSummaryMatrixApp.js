@@ -38,7 +38,7 @@
             });
         },
 
-        addContent: function(scope) {
+        _addContent: function(scope) {
             this._hideComponentIfNeeded(this.defectGridHeader);
             this._hideComponentIfNeeded(this.defectGrid);
 
@@ -55,7 +55,7 @@
             if (this.matrixGrid) {
                 this.matrixGrid.setLoading(true);
             }
-            this.addContent(scope);
+            this._addContent(scope);
         },
 
         onNoAvailableTimeboxes: function() {

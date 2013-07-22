@@ -18,13 +18,9 @@
 
         scopeType: 'iteration',
 
-        addContent: function(scope) {
-            this._loadModels();
-        },
-
         onScopeChange: function(scope) {
             this.remove('gridBoard');
-            this.addContent(scope);
+            this._loadModels();
         },
 
         _addGridBoard: function() {

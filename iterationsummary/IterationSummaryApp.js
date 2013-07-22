@@ -53,13 +53,13 @@
             var types = ['defect', 'hierarchicalrequirement', 'testset', 'defectsuite', 'testcase'];
 
             if (Ext.Array.contains(types, record.get('_type').toLowerCase())) {
-                this.addContent();
+                this._addContent();
             }
         },
 
         onScopeChange: function(scope) {
-            this.timeBoxInfo = this._calculateTimeBoxInfo(this._tzOffset);
-            this.addContent();
+            delete this._tzOffset;
+            this._addContent();
         },
 
         _isHsOrTeamEdition: function() {
@@ -90,7 +90,7 @@
                         } else {
                             this._tzOffset = 0;
                         }
-                        this.timeBoxInfo = this._calculateTimeBoxInfo(this._tzOffset);
+                        this.timeBoxInfo = this._determineTimeBoxInfo(this._tzOffset);
                         deferred.resolve();
                     },
                     scope: this
@@ -127,7 +127,7 @@
             return deferred.promise;
         },
 
-        addContent: function(scope) {
+        _addContent: function(scope) {
             var iteration = this.getIteration();
 
             return this.calculateTimeboxInfo().then({
@@ -198,7 +198,7 @@
             return message;
         },
 
-        _calculateTimeBoxInfo: function(tzOffset) {
+        _determineTimeBoxInfo: function(tzOffset) {
             var timeboxCounts = Rally.util.Timebox.getCounts(this.getStartDate(), this.getEndDate(),
                                 this.getContext().getWorkspace().WorkspaceConfiguration.WorkDays, tzOffset);
 
