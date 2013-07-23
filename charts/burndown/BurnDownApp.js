@@ -55,9 +55,8 @@
                 this._loadScopeObject(this._getScopeRef());
             } else {
                 this._getScopePicker().on("ready", this._loadScopeValue, this);
+                this._getScopePicker().on("change", this._saveScopeValue, this);
             }
-
-            this._getScopePicker().on("change", this._saveScopeValue, this);
         },
 
         _destroyChart: function () {
@@ -384,13 +383,19 @@
         _settingsInvalid: function () {
             var chartAggregationType = this.getSetting("chartAggregationType"),
                 chartDisplayType = this.getSetting("chartDisplayType"),
-                chartTimebox = this.getSetting("chartTimebox");
+                chartTimebox = this.getSetting("chartTimebox"),
+                chartScheduleStates = this.getSetting("customScheduleStates");
 
             var invalid = function (value) {
                 return !value || value === "undefined";
             };
 
-            return invalid(chartAggregationType) || invalid(chartDisplayType) || this._chartTimeboxInvalid(chartTimebox);
+            return invalid(chartAggregationType) || invalid(chartDisplayType) ||
+                this._chartTimeboxInvalid(chartTimebox) || this._chartScheduleStatesInvalid(chartScheduleStates);
+        },
+
+         _chartScheduleStatesInvalid: function (chartScheduleStates) {
+            return !chartScheduleStates || chartScheduleStates === "undefined" || chartScheduleStates.length == 0;
         },
 
         _chartTimeboxInvalid: function (chartTimebox) {
@@ -467,7 +472,8 @@
                 return states.split(",");
             }
 
-            return [];
+            // return a reasonable default in case they somehow managed to select no states...(which shouldn't happen)
+            return ["Accepted"];
         }
 
     });
