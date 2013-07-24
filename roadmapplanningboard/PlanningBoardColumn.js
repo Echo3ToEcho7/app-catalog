@@ -20,7 +20,7 @@
                 showIconsAndHighlightBorder: true,
                 showPlusIcon: false,
                 showColorIcon: true,
-                showGearIcon: false,
+                showGearIcon: true,
                 showReadyIcon: false,
                 showBlockedIcon: false
             }
