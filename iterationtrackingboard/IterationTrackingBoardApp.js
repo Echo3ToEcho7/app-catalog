@@ -14,7 +14,8 @@
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
-            'Rally.ui.cardboard.plugin.ColumnPolicy'
+            'Rally.ui.cardboard.plugin.ColumnPolicy',
+            'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
         ],
         componentCls: 'iterationtrackingboard',
         alias: 'widget.rallyiterationtrackingboard',

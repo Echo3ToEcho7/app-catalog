@@ -20,7 +20,6 @@
 
         cls: "burndown-app",
 
-        scopedDashboard: false,
         scopeObject: undefined,
 
         getSettingsFields: function () {
@@ -31,15 +30,10 @@
             return this.chartSettings.getFields();
         },
 
-        isOnScopedDashboard: function () {
-            return this.scopedDashboard;
-        },
-
         onScopeChange: function (scope) {
-            this._updateScopeSetting(scope);
-            this._saveScopeValue(scope);
-            this._destroyChart();
-            this._loadScopeObject(this._getRefFromPicker(scope));
+            if (!this.ignoreOnScopeChange) {
+                this._rebuildChartForScope(scope.getRecord().get('_ref'));
+            }
         },
 
         launch: function () {
@@ -48,72 +42,81 @@
                 return;
             }
 
-            this._saveDashboardType();
+            this._saveScopeType();
             this.callParent(arguments);
 
-            if (this.isOnScopedDashboard()) {
-                this._loadScopeObject(this._getScopeRef());
-            } else {
-                this._getScopePicker().on("ready", this._loadScopeValue, this);
+            if (!this.isOnScopedDashboard()) {
+                this.ignoreOnScopeChange = true;
+                this._getScopePicker().on("ready", this._loadScopePreference, this, {single: true});
             }
+        },
 
-            this._getScopePicker().on("change", this._saveScopeValue, this);
+        _rebuildChartForScope: function(scopeRef) {
+            this._destroyChart();
+
+            this._saveScopePreference(scopeRef);
+            this._loadScopeObject(scopeRef);
         },
 
         _destroyChart: function () {
-            var currentChart = this.down("rallychart");
-            if (currentChart) {
-                currentChart.destroy();
+            this.remove("burndownchart");
+        },
+
+        _saveScopePreference: function (scopeRef) {
+            if (!this.isOnScopedDashboard()) {
+                var settings = {};
+                settings[this._getScopeType()] = scopeRef;
+
+                Rally.data.PreferenceManager.update({
+                    appID: this.getContext().get("appID"),
+                    settings: settings,
+                    scope: this
+                });
             }
         },
 
-        _updateScopeSetting: function (picker) {
-            Ext.apply(this.settings, this._getSettingFromPicker(picker));
-        },
-
-        _saveScopeValue: function (picker) {
-            Rally.data.PreferenceManager.update({
-                appID: this.getContext().get("appID"),
-                settings: this._getSettingFromPicker(picker),
-                scope: this
-            });
-        },
-
-        _loadScopeValue: function (picker) {
+        _loadScopePreference: function (picker) {
             Rally.data.PreferenceManager.load({
                 appID: this.getContext().get("appID"),
-                success: function (loadedSettings) {
-                    var settingValue = loadedSettings[this._getScopeType()];
-                    if (!settingValue || settingValue === "undefined") {
-                        this._saveScopeValue(picker);
-                        settingValue = this._getRefFromPicker(picker);
+                success: function (preferences) {
+                    var scopeRef = preferences[this._getScopeType()];
+                    if (!scopeRef || scopeRef === "undefined") {
+                        var pickerRecord = picker.getRecord();
+                        if (pickerRecord) {
+                            scopeRef = pickerRecord.get('_ref');
+                            this._saveScopePreference(scopeRef);
+                        }
                     }
+                    this.ignoreOnScopeChange = false;
 
-                    this._setScopeValue(settingValue);
-                    this._loadScopeObject(settingValue);
+                    if (scopeRef && scopeRef !== "undefined") {
+                        this._setScopeValue(scopeRef);
+                        scopeRef = this._getScopePicker().getValue();
+                        if (scopeRef) {
+                            this._rebuildChartForScope(scopeRef);
+                        }
+                    }
                 },
                 scope: this
             });
         },
 
-        _setScopeValue: function (value) {
-            this._getScopePicker().setValue(value);
+        _setScopeValue: function (scopeRef) {
+            this._getScopePicker().setValue(scopeRef);
         },
 
-        _onScopeObjectLoaded: function (store) {
-            if (this._hasDataToDisplay(store)) {
-                this._setScopeFromData(store);
+        _onScopeObjectLoaded: function (record) {
+            this._setScopeFromData(record);
 
-                this._updateChartTitle();
-                this._updateYAxis();
+            this._updateChartTitle();
+            this._updateYAxis();
 
-                this._addDateBounds();
-                this._addAggregationTypeToCalculator();
-                this._addObjectIdToStoreConfig();
-                this._updateCompletedScheduleStates();
+            this._addDateBounds();
+            this._addAggregationTypeToCalculator();
+            this._addObjectIdToStoreConfig();
+            this._updateCompletedScheduleStates();
 
-                this._renderChartBasedOnType();
-            }
+            this._renderChartBasedOnType();
         },
 
         _renderChartBasedOnType: function() {
@@ -124,12 +127,8 @@
             }
         },
 
-        _setScopeFromData: function (store) {
-            this.scopeObject = store.getAt(0).data;
-        },
-
-        _hasDataToDisplay: function(store) {
-            return store.count() >= 1;
+        _setScopeFromData: function (record) {
+            this.scopeObject = record.data;
         },
 
         _onIterationsLoaded: function (store) {
@@ -171,25 +170,23 @@
             calcConfig.completedScheduleStateNames = this._getCompletedScheduleStates();
         },
 
-        _loadScopeObject: function (ref) {
-            Ext.create("Rally.data.WsapiDataStore", {
-                model: this._getScopeType(),
-                filters: [
-                    {
-                        property: "ObjectID",
-                        operator: "=",
-                        value: Rally.util.Ref.getOidFromRef(ref)
-                    }
-                ],
+        _loadScopeObject: function (scopeRef) {
+            Rally.data.ModelFactory.getModel({
+                type: this._getScopeType(),
+
                 context: {
                     workspace: this.getContext().getWorkspaceRef(),
                     project: null
                 },
-                autoLoad: true,
-                listeners: {
-                    load: this._onScopeObjectLoaded,
-                    scope: this
-                }
+                success: function(model) {
+                    model.load(Rally.util.Ref.getOidFromRef(scopeRef), {
+                        success: function(record) {
+                            this._onScopeObjectLoaded(record);
+                        },
+                        scope: this
+                    });
+                },
+                scope: this
             });
         },
 
@@ -367,20 +364,6 @@
             return Ext.String.capitalize(this._getScopeType());
         },
 
-        _getSettingFromPicker: function (picker) {
-            var settings = {};
-            settings[this._getScopeType()] = this._getRefFromPicker(picker);
-            return settings;
-        },
-
-        _getRefFromPicker: function (picker) {
-            return picker.getRecord().data._ref;
-        },
-
-        _getScopeRef: function () {
-            return this._getRefFromPicker(this._getScopePicker());
-        },
-
         _settingsInvalid: function () {
             var chartAggregationType = this.getSetting("chartAggregationType"),
                 chartDisplayType = this.getSetting("chartDisplayType"),
@@ -401,9 +384,8 @@
             return !chartTimebox || chartTimebox === "undefined";
         },
 
-        _saveDashboardType: function () {
+        _saveScopeType: function () {
             var context = this.getContext();
-            this.scopedDashboard = !!(context && context.getTimeboxScope());
             this.scopeType = this._getScopeType();
         },
 

@@ -8,6 +8,7 @@
 
         chartComponentConfig: {
             xtype: "rallychart",
+            itemId: "burndownchart",
 
             aggregationErrorMessage: "No data to display. Check the data type setting for displaying data based on count versus plan estimate.",
 
