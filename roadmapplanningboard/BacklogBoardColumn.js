@@ -20,8 +20,7 @@
                 Ext.create('Rally.data.WsapiDataStore', {
                     model: this.lowestPIType,
                     autoLoad: true,
-                    fetch: ['Value','FormattedID', 'Owner','Name', 'PreliminaryEstimate'],
-                    mergeFetch: true
+                    fetch: ['Value','FormattedID', 'Owner','Name', 'PreliminaryEstimate', 'DisplayColor']
                 })
             ];
         },
