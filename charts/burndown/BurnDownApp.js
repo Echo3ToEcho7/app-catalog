@@ -199,13 +199,6 @@
             calcConfig.chartAggregationType = this.getSetting("chartAggregationType");
         },
 
-        _addObjectIdToStoreConfig: function () {
-            var storeConfig = this.chartComponentConfig.storeConfig,
-                type = Ext.String.capitalize(this._getScopeType());
-            this._clearStoreConfig(storeConfig);
-            storeConfig.find[type] = { "$in" : [ this.scopeObject.ObjectID ] };
-        },
-
         _updateCompletedScheduleStates: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
             calcConfig.completedScheduleStateNames = this._getCompletedScheduleStates();
