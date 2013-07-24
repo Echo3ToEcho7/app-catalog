@@ -12,7 +12,9 @@
             'Rally.ui.gridboard.GridBoard',
             'Rally.ui.gridboard.plugin.GridBoardAddNew',
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
-            'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
+            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
+            'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
+            'Rally.ui.cardboard.plugin.ColumnPolicy'
         ],
         componentCls: 'iterationtrackingboard',
         alias: 'widget.rallyiterationtrackingboard',
@@ -37,12 +39,21 @@
                         stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
                     },
                     'rallygridboardaddnew',
+                    {
+                        ptype: 'rallygridboardartifacttypechooser',
+                        artifactTypePreferenceKey: 'artifact-types',
+                        showAgreements: this.getContext().isFeatureEnabled('SHOW_POLICIES_ON_ITERATION_BOARDS')
+                    },
                     'rallygridboardownerfilter'
                 ],
                 modelNames: this.modelNames,
                 cardBoardConfig: {
                     columnConfig: {
-                        additionalFetchFields: ['PortfolioItem']
+                        additionalFetchFields: ['PortfolioItem'],
+                        plugins: [{
+                            ptype: 'rallycolumnpolicy',
+                            app: this
+                        }]
                     },
                     cardConfig: {
                         fields: ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
