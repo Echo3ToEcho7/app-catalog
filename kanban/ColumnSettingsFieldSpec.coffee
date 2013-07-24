@@ -121,7 +121,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
         data = @field.getSubmitData()
         expect(data.foo).toBe @value
 
-    it 'should update column card field settings when "apply to all" is clicked', ->
+    it 'should update column card field settings when apply to all is clicked', ->
       fieldValue = 'AcceptedDate'
       @_setupWithTwoColumnsShown(fieldValue)
       @waitForCallback(@readyCallback).then =>
@@ -131,7 +131,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
             expect(@field._grid.store.getAt(0).get('cardFields')).toBe 'AcceptedDate'
             expect(@field._grid.store.getAt(1).get('cardFields')).toContain 'AcceptedDate'
 
-    it 'should update column card field settings when "remove from all" is clicked', ->
+    it 'should update column card field settings when remove from all is clicked', ->
       fieldValue = 'AcceptedDate'
       @_setupWithTwoColumnsShown(fieldValue)
       @waitForCallback(@readyCallback).then =>
