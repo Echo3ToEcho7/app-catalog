@@ -22,7 +22,11 @@
                 showColorIcon: true,
                 showGearIcon: true,
                 showReadyIcon: false,
-                showBlockedIcon: false
+                showBlockedIcon: false,
+                showEditMenuItem: true,
+                showCopyMenuItem: false,
+                showSplitMenuItem: false,
+                showDeleteMenuItem: true
             }
         },
 
