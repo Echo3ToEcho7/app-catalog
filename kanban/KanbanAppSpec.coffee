@@ -320,6 +320,16 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       args = notificationStub.getCall(0).args[0]
       expect(args.message).toBe 'Invalid query: (Foo = Bar)'
 
+  it 'should have correct icons on cards', ->
+    @createApp().then =>
+      expect(@app.getEl().query('.rally-card-icon').length).toBe 5
+      expect(@app.getEl().query('.card-gear-icon').length).toBe 1
+      expect(@app.getEl().query('.card-plus-icon').length).toBe 1
+      expect(@app.getEl().query('.card-ready-icon').length).toBe 1
+      expect(@app.getEl().query('.card-blocked-icon').length).toBe 1
+      expect(@app.getEl().query('.card-color-icon').length).toBe 1
+
+
 
   helpers
     createApp: (settings = {}, options = {}, context = {}) ->
