@@ -191,9 +191,7 @@
             var cardConfig = {
                 xtype: 'rallyportfoliokanbancard',
                 editable: true,
-                showIconMenus: true,
-                showIconsAndHighlightBorder: true,
-                showColorPopover: true
+                showColorIcon: true
             };
 
             var fields = this.getSetting('fields');
