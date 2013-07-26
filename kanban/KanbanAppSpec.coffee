@@ -357,8 +357,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
 
     assertPolicyCmpConfig: (settingsKey, policy) ->
       column = @app.down('rallycardboard').getColumns()[0]
-      plugin = _.find(column.plugins, {ptype: 'rallycolumnpolicy'});
-      prefConfigSettings = plugin.policyCmpConfig.prefConfig.settings
+      prefConfigSettings = column.policyCmpConfig.prefConfig.settings
       expect(Ext.Object.getKeys(prefConfigSettings)[0]).toBe settingsKey
       expect(prefConfigSettings[settingsKey]).toBe policy
-      expect(plugin.policyCmpConfig.policies).toBe policy
+      expect(column.policyCmpConfig.policies).toBe policy
