@@ -12,7 +12,6 @@
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
-            'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.cardboard.KanbanPolicy',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.plugin.Scrollable',
@@ -118,7 +117,7 @@
                 {
                     ptype: 'rallygridboardartifacttypechooser',
                     artifactTypePreferenceKey: 'artifact-types',
-                    showAgreements: true
+                    additionalTypesConfig: [this._getAgreementsTypeConfig()]
                 },
                 'rallygridboardtagfilter'
             ];
@@ -146,23 +145,49 @@
             };
         },
 
+        _getPolicyForColumn: function(columnName, policyPrefKey) {
+                //Early versions of the board did not correctly scope policy prefs
+                //resulting in bleed across groupByField changes
+                var policy = this.getSetting(policyPrefKey) || this.getSetting(columnName + 'Policy');
+
+                if(!policy) {
+                    // account for the WSAPI 1.x->2.x transition related to custom fields
+                    policy = this.getSetting(policyPrefKey.replace(/^c_/, ''));
+                }
+
+                return policy;
+        },
+
         _getColumnConfig: function(columnSetting) {
             var columns = [];
             Ext.Object.each(columnSetting, function(column, values) {
+                var columnName = column || 'None';
+                var policyPrefKey = this.getSetting('groupByField') + columnName + 'Policy';
+
+                var policy = this._getPolicyForColumn(columnName, policyPrefKey);
+
+                var prefConfig = {
+                    appID: this.getAppId(),
+                    project: this.getContext().getProject(),
+                    settings: {}
+                };
+                prefConfig.settings[policyPrefKey] = policy;
+
                 var columnConfig = {
                     xtype: 'kanbancolumn',
-                    enableWipLimit: true,
                     wipLimit: values.wip,
-                    plugins: [{
-                        ptype: 'rallycolumnpolicy',
-                        app: this
-                    }],
                     fields: this._getFieldsForColumn(values),
                     value: column,
                     columnHeaderConfig: {
-                        headerTpl: column || 'None'
+                        headerTpl: columnName
                     },
                     cardLimit: 100,
+                    policyCmpConfig: {
+                        xtype: 'rallykanbanpolicy',
+                        policies: policy,
+                        prefConfig: prefConfig,
+                        title: 'Exit Agreement'
+                    },
                     listeners: {
                         invalidfilter: {
                             fn: this._onInvalidFilter,
@@ -221,8 +246,8 @@
                     scope: this
                 },
                 columnConfig: {
-                    xtype: 'rallycardboardcolumn',
-                    enableWipLimit: true
+                    xtype: 'rallykanbancolumn',
+                    enablePolicies: true
                 },
                 cardConfig: {
                     editable: true,
@@ -290,6 +315,7 @@
         _getDefaultTypes: function() {
             return ['User Story', 'Defect'];
         },
+
         _buildStandardReportConfig: function(reportConfig) {
             var scope = this.getContext().getDataContext();
             return {
@@ -349,8 +375,16 @@
             if (!Ext.isEmpty(artifactsPref) && artifactsPref.length !== allowedArtifacts.length) {
                 this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref, false);
             }
+            if (Ext.Array.contains(artifactsPref, 'agreement')) {
+                this._onShowAgreementsClicked(null, true);
+            }
         },
 
+        _onShowAgreementsClicked: function(checkbox, checked) {
+            Ext.each(this.cardboard.getColumns(), function(column) {
+                column.togglePolicy(checked);
+            });
+        },
 
         _onBeforeCreate: function(addNew, record, params) {
             Ext.apply(params, {
@@ -389,6 +423,18 @@
                     card.getRecord().set('ScheduleState', setting.scheduleStateMapping);
                 }
             }
+        },
+
+        _getAgreementsTypeConfig: function() {
+            return {
+                xtype: 'checkboxfield',
+                cls: 'type-checkbox agreements-checkbox',
+                boxLabel: 'Agreements',
+                itemId: 'showAgreements',
+                inputValue: 'agreement',
+                handler: this._onShowAgreementsClicked,
+                scope: this
+            };
         }
     });
 })();
