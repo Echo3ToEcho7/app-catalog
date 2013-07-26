@@ -2,7 +2,7 @@
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define('Rally.apps.kanban.Column', {
-        extend: 'Rally.ui.cardboard.Column',
+        extend: 'Rally.ui.cardboard.KanbanColumn',
         alias: 'widget.kanbancolumn',
 
         getStoreFilter: function(model) {

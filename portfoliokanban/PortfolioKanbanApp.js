@@ -10,7 +10,9 @@
         requires: [
             'Rally.data.util.PortfolioItemHelper',
             'Rally.apps.portfoliokanban.PortfolioKanbanCard',
-            'Rally.ui.cardboard.plugin.ColumnPolicy',
+            'Rally.apps.portfoliokanban.PortfolioKanbanPolicy',
+            'Rally.ui.cardboard.KanbanColumn',
+            'Rally.ui.cardboard.KanbanPolicy',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.Card',
             'Rally.data.QueryFilter',
@@ -179,17 +181,11 @@
             }
 
             var columnConfig = {
-                xtype: 'rallycardboardcolumn',
+                xtype: 'rallykanbancolumn',
                 cardLimit: 50,
                 drawFooter: Ext.emptyFn,
-                enableWipLimit: true,
-                plugins: [{
-                    ptype: 'rallycolumnpolicy',
-                    app: this,
-                    policyCmpConfig: {
-                        title: 'Exit Policy'
-                    }
-                }]
+                enablePolicies: true,
+                enableWipLimit: true
             };
 
             var cardConfig = {
@@ -330,11 +326,7 @@
             var showPoliciesCheckbox = this.down("#showPoliciesCheckbox");
 
             Ext.each(this.cardboard.getColumns(), function(column) {
-                if (showPoliciesCheckbox.getValue()) {
-                    column.fireEvent('showpolicy');
-                } else {
-                    column.fireEvent('hidepolicy');
-                }
+                column.togglePolicy(showPoliciesCheckbox.getValue());
             });
         },
 
