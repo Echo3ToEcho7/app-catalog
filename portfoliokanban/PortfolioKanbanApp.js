@@ -1,4 +1,4 @@
-(function() {
+(function () {
     var Ext = window.Ext4 || window.Ext;
 
     /**
@@ -11,8 +11,8 @@
             'Rally.data.util.PortfolioItemHelper',
             'Rally.apps.portfoliokanban.PortfolioKanbanCard',
             'Rally.apps.portfoliokanban.PortfolioKanbanPolicy',
-            'Rally.ui.cardboard.KanbanColumn',
-            'Rally.ui.cardboard.KanbanPolicy',
+            'Rally.ui.cardboard.plugin.ColumnPolicy',
+            'Rally.ui.cardboard.Column',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.Card',
             'Rally.data.QueryFilter',
@@ -51,16 +51,16 @@
             }
         ],
 
-        afterRender: function() {
+        afterRender: function () {
             this.callParent(arguments);
 
-            if(Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
+            if (Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
 
-               Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
+                Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
                     typeRef: this.getSetting('type'),
                     defaultToLowest: true,
                     context: this.getContext().getDataContext(),
-                    success: function(record) {
+                    success: function (record) {
                         this.currentType = record;
 
                         this._drawHeader();
@@ -78,7 +78,7 @@
             }
         },
 
-        _drawHeader: function() {
+        _drawHeader: function () {
             var header = this.down('#header');
 
             header.add([
@@ -88,9 +88,9 @@
             ]);
         },
 
-        _loadCardboard: function() {
+        _loadCardboard: function () {
             this._loadStates({
-                success: function(states) {
+                success: function (states) {
                     var columns = this._createColumns(states);
                     if (this.rendered) {
                         this._drawCardboard(columns);
@@ -111,7 +111,7 @@
          * @param options.success called when states are loaded
          * @param options.scope the scope to call success with
          */
-        _loadStates: function(options) {
+        _loadStates: function (options) {
             Ext.create('Rally.data.WsapiDataStore', {
                 model: 'State',
                 context: this.getContext().getDataContext(),
@@ -134,7 +134,7 @@
                     }
                 ],
                 listeners: {
-                    load: function(store, records) {
+                    load: function (store, records) {
                         if (options.success) {
                             options.success.call(options.scope || this, records);
                         }
@@ -148,7 +148,7 @@
          * Given a set of columns, build a cardboard component. Otherwise show an empty message.
          * @param columns
          */
-        _drawCardboard: function(columns) {
+        _drawCardboard: function (columns) {
             if (columns) {
                 this._showColumns(columns);
             }
@@ -157,7 +157,7 @@
             }
         },
 
-        _showColumns: function(columns) {
+        _showColumns: function (columns) {
             var cardboard = this.down('#cardboard'),
                 filters = [
                     {
@@ -181,10 +181,9 @@
             }
 
             var columnConfig = {
-                xtype: 'rallykanbancolumn',
+                xtype: 'rallycardboardcolumn',
                 cardLimit: 50,
                 drawFooter: Ext.emptyFn,
-                enablePolicies: true,
                 enableWipLimit: true
             };
 
@@ -204,8 +203,8 @@
                 cardConfig.fields = Rally.apps.portfolioitem.PortfolioKanbanCard.defaultFields;
             }
 
-            if (Ext.Array.intersect(cardConfig.fields, ['PercentDoneByStoryPlanEstimate','PercentDoneByStoryCount']).length > 0) {
-                columnConfig.additionalFetchFields = Ext.Array.merge(cardConfig.fields, ['PercentDoneByStoryPlanEstimate','PercentDoneByStoryCount']);
+            if (Ext.Array.intersect(cardConfig.fields, ['PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount']).length > 0) {
+                columnConfig.additionalFetchFields = Ext.Array.merge(cardConfig.fields, ['PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount']);
             }
 
             columnConfig.additionalFetchFields.push('Discussion');
@@ -241,18 +240,18 @@
             this._renderPolicies();
         },
 
-        getMaskId: function() {
+        getMaskId: function () {
             return 'btid-portfolio-kanban-board-load-mask-' + this.id;
         },
 
-        _onBoardLoad: function(cardboard) {
+        _onBoardLoad: function (cardboard) {
             this._attachPercentDoneToolTip(cardboard);
             this._publishContentUpdated();
             this.setLoading(false);
             Rally.environment.getMessageBus().publish(Rally.Message.piKanbanBoardReady);
         },
 
-        _showNoColumns: function() {
+        _showNoColumns: function () {
             this.add({
                 xtype: 'container',
                 cls: 'no-type-text',
@@ -265,7 +264,7 @@
          * @private
          * @return columns for the cardboard, as a map with keys being the column name.
          */
-        _createColumns: function(states) {
+        _createColumns: function (states) {
             if (!states.length) {
                 return undefined;
             }
@@ -276,14 +275,18 @@
                         headerTpl: 'No Entry'
                     },
                     value: null,
-                    policyCmpConfig: {
-                        xtype: 'rallyportfoliokanbanpolicy',
-                        hidden: true
-                    }
+                    plugins: [{
+                        ptype: 'rallycolumnpolicy',
+                        policyCmpConfig: {
+                            xtype: 'rallyportfoliokanbanpolicy',
+                            hidden: true,
+                            title: 'Exit Policy'
+                        }
+                    }]
                 }
             ];
 
-            Ext.Array.each(states, function(state) {
+            Ext.Array.each(states, function (state) {
                 columns.push({
                     value: state.get('_ref'),
                     wipLimit: state.get('WIPLimit'),
@@ -293,21 +296,25 @@
                         fieldToDisplay: 'Name',
                         editable: false
                     },
-                    policyCmpConfig: {
-                        xtype: 'rallyportfoliokanbanpolicy',
-                        stateRecord: state,
-                        hidden: true
-                    }
+                    plugins: [{
+                        ptype: 'rallycolumnpolicy',
+                        policyCmpConfig: {
+                            xtype: 'rallyportfoliokanbanpolicy',
+                            hidden: true,
+                            stateRecord: state,
+                            title: 'Exit Policy'
+                        }
+                    }]
                 });
             });
 
             return columns;
         },
 
-        _attachPercentDoneToolTip: function(cardboard) {
-            cardboard.getEl().select('.rui-card .progress-bar-container').each(function(flyEl) {
+        _attachPercentDoneToolTip: function (cardboard) {
+            cardboard.getEl().select('.rui-card .progress-bar-container').each(function (flyEl) {
                 var el = Ext.get(flyEl.dom);
-                el.on('click', function(){
+                el.on('click', function () {
                     var cardEl = el.up('.rui-card');
                     var card = Ext.getCmp(cardEl.id);
                     var record = card.getRecord();
@@ -322,15 +329,19 @@
             });
         },
 
-        _renderPolicies: function() {
+        _renderPolicies: function () {
             var showPoliciesCheckbox = this.down("#showPoliciesCheckbox");
 
-            Ext.each(this.cardboard.getColumns(), function(column) {
-                column.togglePolicy(showPoliciesCheckbox.getValue());
+            Ext.each(this.cardboard.getColumns(), function (column) {
+                if (showPoliciesCheckbox.getValue()) {
+                    column.fireEvent('showpolicy');
+                } else {
+                    column.fireEvent('hidepolicy');
+                }
             });
         },
 
-        _buildShowPolicies: function() {
+        _buildShowPolicies: function () {
             return Ext.widget('checkbox', {
                 cls: 'showPolicies',
                 itemId: 'showPoliciesCheckbox',
@@ -346,7 +357,7 @@
 
         },
 
-        _buildHelpComponent: function(config) {
+        _buildHelpComponent: function (config) {
             return Ext.create('Ext.Component', Ext.apply({
                 cls: Rally.util.Test.toBrowserTestCssClass('portfolio-kanban-help-container'),
                 renderTpl: Rally.util.Help.getIcon({
@@ -355,7 +366,7 @@
             }, config));
         },
 
-        _buildFilterInfo: function() {
+        _buildFilterInfo: function () {
             return Ext.create('Rally.ui.tooltip.FilterInfo', {
                 projectName: this.getSetting('project') && this.getContext().get('project').Name || 'Following Global Project Setting',
                 typePath: this.currentType.get('Name'),
@@ -365,14 +376,14 @@
             });
         },
 
-        _publishContentUpdated: function() {
+        _publishContentUpdated: function () {
             this.fireEvent('contentupdated');
             if (Rally.BrowserTest) {
                 Rally.BrowserTest.publishComponentReady(this);
             }
         },
 
-        _publishContentUpdatedNoDashboardLayout: function() {
+        _publishContentUpdatedNoDashboardLayout: function () {
             this._attachPercentDoneToolTip(this.cardboard);
             this.fireEvent('contentupdated', {dashboardLayout: false});
         }

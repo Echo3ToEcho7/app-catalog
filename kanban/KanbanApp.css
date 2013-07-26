@@ -1,16 +1,3 @@
-.kanban .show-label {
-    margin-top: 3px;
-    float: right;
-}
-
-.kanban .right table {
-    float: right;
-}
-
-.kanban .checkbox {
-    margin: 5px;
-}
-
 .kanban .rui-notification {
     float: none;
     position: absolute;
