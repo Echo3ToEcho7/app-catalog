@@ -173,3 +173,9 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     expect(@board.getColumns()[1].isRightmostColumn).not.toBeTruthy()
     expect(@board.getColumns()[2].isRightmostColumn).not.toBeTruthy()
     expect(@board.getColumns()[3].isRightmostColumn).toBeTruthy()
+
+  it 'attribute should be set to empty', ->
+    @board.render(Ext.getBody())
+    expect(@board.attribute == '').toBeTruthy()
+
+    
