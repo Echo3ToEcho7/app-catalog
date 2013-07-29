@@ -97,7 +97,7 @@
 
       record = options.card.getRecord();
       options.destinationColumn.planRecord.get('features').push({
-        id: record.get('ObjectID'),
+        id: record.get('ObjectID').toString(),
         ref: record.get('_ref')
       });
       return options.destinationColumn.planRecord.save({

@@ -29,10 +29,10 @@
             var _this = this;
 
             return !this.roadmap || (this.planningStore.findBy(function (planningRecord) {
-                return _this.roadmap.plans().getById(planningRecord.get('id')) && 
-                    (planningRecord.features().findBy(function (planFeatureRecord) {
-                        return featureRecord.get('ObjectID') == planFeatureRecord.get('id');
-                }, _this)) >= 0;
+                return _this.roadmap.plans().getById(planningRecord.get('id')) &&
+                    (_.find(planningRecord.get('features'), function (planFeatureRecord) {
+                        return featureRecord.get('ObjectID') == planFeatureRecord.id;
+                    }));
             }, this)) === -1;
         }
     });

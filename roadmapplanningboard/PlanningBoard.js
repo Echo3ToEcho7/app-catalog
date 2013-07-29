@@ -18,7 +18,8 @@
             },
             ddGroup: 'planningBoard',
             dropAllowed: "planningBoard",
-            dropNotAllowed: "planningBoard"
+            dropNotAllowed: "planningBoard",
+            attribute: ''
         },
         _roadmap: null,
 
@@ -100,7 +101,7 @@
                     editable: true
                 },
                 isMatchingRecord: function (featureRecord) {
-                    return plan && plan.features().findExact('id', '' + featureRecord.get('ObjectID')) >= 0;
+                    return plan && _.find(plan.get('features'), function(feature) { return feature.id === featureRecord.get('ObjectID').toString(); });
                 }
             });
         }
