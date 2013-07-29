@@ -200,7 +200,7 @@
                 cardConfig.fields = fields.split(',').sort();
             } else {
                 columnConfig.additionalFetchFields = [];
-                cardConfig.fields = Rally.apps.portfolioitem.PortfolioKanbanCard.defaultFields;
+                cardConfig.fields = Rally.apps.portfoliokanban.PortfolioKanbanCard.defaultFields;
             }
 
             if (Ext.Array.intersect(cardConfig.fields, ['PercentDoneByStoryPlanEstimate', 'PercentDoneByStoryCount']).length > 0) {
