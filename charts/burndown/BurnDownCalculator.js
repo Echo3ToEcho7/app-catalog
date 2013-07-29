@@ -64,10 +64,6 @@
         getSummaryMetricsConfig: function () {
             return [
                 {
-                    "field": "Task To Do",
-                    "f": "max"
-                },
-                {
                     'as': 'Scope_max',
                     'f': function(seriesData) {
                             var max = 0, i = 0;
