@@ -57,11 +57,7 @@
                     lowField.resetOriginalValue();
                     highField.resetOriginalValue();
                     this.persistIfStoreAvailable(lowValue, highValue);
-                } else {
-
                 }
-            } else {
-
             }
             return true;
         },

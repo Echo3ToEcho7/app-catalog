@@ -82,9 +82,9 @@
         _addDateSelectedTransitions: function (dateField) {
             dateField.addCls('transition-bg-color');
             dateField.addCls('dateSelected');
-            return setTimeout((function () {
+            return setTimeout(function () {
                 return dateField.removeCls('dateSelected');
-            }), 1);
+            }, 1);
         },
         _resetAndAddClsToDateField: function (dateField) {
             _.each(this._getDateFields(), function (component) {

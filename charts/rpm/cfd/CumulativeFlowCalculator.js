@@ -5,51 +5,37 @@
         extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
 
         getDerivedFieldsOnInput: function () {
-            var self = this,
-                derivedFields = [],
-                scheduleStates = this.config.scheduleStates;
-
-            for (var i = 0, length = scheduleStates.length; i < length; i += 1) {
-                (function (state) {
-                    derivedFields.push({
-                        "as": state,
-                        "f": function (snapshot) {
-                            if (self.config.chartAggregationType === 'storycount') {
-                                if(snapshot.ScheduleState) {
-                                    return snapshot.ScheduleState === state ? 1 : 0;
-                                }
-
-                                return 0;
-                            } else {
-                                if(snapshot.PlanEstimate) {
-                                    return snapshot.ScheduleState === state ? snapshot.PlanEstimate : 0;
-                                }
-
-                                return 0;
+            return _.map(this.config.scheduleStates, function(state) {
+                return {
+                    "as": state,
+                    "f": function (snapshot) {
+                        if (this.config.chartAggregationType === 'storycount') {
+                            if(snapshot.ScheduleState) {
+                                return snapshot.ScheduleState === state ? 1 : 0;
                             }
 
-                        }
-                    });
-                }(scheduleStates[i]));
-            }
+                            return 0;
+                        } else {
+                            if (snapshot.PlanEstimate) {
+                                return snapshot.ScheduleState === state ? snapshot.PlanEstimate : 0;
+                            }
 
-            return derivedFields;
+                            return 0;
+                        }
+
+                    }
+                };
+            }, this);
         },
 
         getMetrics: function () {
-            var metrics = [],
-                scheduleStates = this.config.scheduleStates;
-
-            for (var i = 0, length = scheduleStates.length; i < length; i += 1) {
-                var state = scheduleStates[i];
-                metrics.push({
+            return _.map(this.config.scheduleStates, function(state) {
+                return {
                     "field": state,
                     "as": state,
                     "f": "sum"
-                });
-            }
-
-            return metrics;
+                };
+            });
         }
     });
 }());

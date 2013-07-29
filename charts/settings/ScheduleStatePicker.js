@@ -51,8 +51,6 @@
                     },
                     scope: this
                 });
-            } else {
-                // throw an error here?
             }
         },
 

@@ -31,7 +31,7 @@
             return !this.roadmap || (this.planningStore.findBy(function (planningRecord) {
                 return _this.roadmap.plans().getById(planningRecord.get('id')) &&
                     (_.find(planningRecord.get('features'), function (planFeatureRecord) {
-                        return featureRecord.get('ObjectID') == planFeatureRecord.id;
+                        return featureRecord.get('ObjectID') === parseInt(planFeatureRecord.id, 10);
                     }));
             }, this)) === -1;
         }

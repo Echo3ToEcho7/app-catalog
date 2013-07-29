@@ -55,11 +55,11 @@
                 filters.push({
                     property: 'ObjectID',
                     operator: '=',
-                    value: feature.id    
+                    value: feature.id
                 });
             });
 
-            return [ 
+            return [
                 Ext.create('Rally.data.WsapiDataStore', {
                     model: this.lowestPIType,
                     autoLoad: true,
