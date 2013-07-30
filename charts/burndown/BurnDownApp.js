@@ -147,8 +147,6 @@
             this._addAggregationTypeToCalculator();
             this._updateCompletedScheduleStates();
             this._loadTimeboxes();
-
-            this._renderChartBasedOnType();
         },
 
         _renderChartBasedOnType: function () {
