@@ -38,8 +38,10 @@
 
         launch: function () {
             if (this._settingsInvalid()) {
-                this.owner.showSettings();
-                return;
+                if (this.owner) {
+                    this.owner.showSettings();
+                    return;
+                }
             }
 
             this._saveScopeType();
