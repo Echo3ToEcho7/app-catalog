@@ -343,7 +343,7 @@
         },
 
         _seriesFollowsDisplayType: function (series) {
-            return series.name.indexOf('Ideal') === -1 && series.name.indexOf('Task To Do Prediction') === -1;
+            return series.name.indexOf('Ideal') === -1 && series.name.indexOf('Prediction') === -1;
         },
 
         _updateYAxis: function () {

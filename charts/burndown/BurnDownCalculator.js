@@ -50,7 +50,7 @@
             return [
                 {
                     "field": "RemainingPoints",
-                    "as": "Task To Do",
+                    "as": "To Do",
                     "f": "sum"
                 },
                 {
@@ -64,7 +64,7 @@
         getSummaryMetricsConfig: function () {
             return [
                 {
-                    "field": "Task To Do",
+                    "field": "To Do",
                     "f": "max"
                 }
             ];
@@ -75,7 +75,7 @@
                 {
                     "as": "Ideal",
                     "f": function (row, index, summaryMetrics, seriesData) {
-                        var max = summaryMetrics["Task To Do_max"],
+                        var max = summaryMetrics["To Do_max"],
                             increments = seriesData.length - 1,
                             incrementAmount = max / increments;
                         return Math.floor(100 * (max - index * incrementAmount)) / 100;
@@ -83,7 +83,7 @@
                     "display": "line"
                 },
                 {
-                    "as": "Task To Do Prediction",
+                    "as": "Prediction",
                     "f": function (row, index, summaryMetrics, seriesData) {
                         return null;
                     },
@@ -97,12 +97,12 @@
             return {
                 series: [
                     {
-                        "as": "Task To Do Prediction",
-                        "field": "Task To Do"
+                        "as": "Prediction",
+                        "field": "To Do"
                     }
                 ],
                 continueWhile: function (point) {
-                    return point["Task To Do Prediction"] > 0;
+                    return point["Prediction"] > 0;
                 }
             };
         },
@@ -137,7 +137,7 @@
             });
 
             chartData.series = _.filter(series, function (seriesData) {
-                return seriesData.name != "Task To Do Prediction";
+                return seriesData.name != "Prediction";
             });
 
             chartData.categories = _.first(categories, endDateIndex + 1);
