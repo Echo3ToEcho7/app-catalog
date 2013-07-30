@@ -328,6 +328,7 @@
 
         _onSnapshotDataReady: function (chart) {
             this._updateDisplayType(chart);
+            this._updateXAxisLabelSpacing(chart);
         },
 
         _updateDisplayType: function (chart) {
@@ -368,6 +369,10 @@
                 x: -5,
                 y: 4
             };
+        },
+
+        _updateXAxisLabelSpacing: function (chart) {
+            chart.chartConfig.xAxis.labels.step = Math.round( chart.chartData.categories.length / 100 );
         },
 
         _getAxisTitleBasedOnAggregationType: function () {
