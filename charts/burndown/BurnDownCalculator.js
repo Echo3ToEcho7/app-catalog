@@ -68,8 +68,8 @@
                     'f': function(seriesData) {
                             var max = 0, i = 0;
                             for (i=0;i<seriesData.length;i++) {
-                                if(seriesData[i]['Accepted'] + seriesData[i]['Task To Do'] > max) {
-                                    max = seriesData[i]['Accepted'] + seriesData[i]['Task To Do'];
+                                if(seriesData[i].Accepted + seriesData[i]['To Do'] > max) {
+                                    max = seriesData[i].Accepted + seriesData[i]['To Do'];
                                 }
                             }
                             return max;
@@ -83,7 +83,7 @@
                 {
                     "as": "Ideal",
                     "f": function (row, index, summaryMetrics, seriesData) {
-                        var max = summaryMetrics["Scope_max"],
+                        var max = summaryMetrics.Scope_max,
                             increments = seriesData.length - 1,
                             incrementAmount = max / increments;
                         return Math.floor(100 * (max - index * incrementAmount)) / 100;
@@ -110,7 +110,7 @@
                     }
                 ],
                 continueWhile: function (point) {
-                    return point["Prediction"] > 0;
+                    return point.Prediction > 0;
                 }
             };
         },

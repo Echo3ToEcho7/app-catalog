@@ -32,7 +32,7 @@
                             values = stringValue.split(",");
                         }
 
-                        if(values.length == 0 || (values.length == 1 && values[0] == "")) {
+                        if(values.length === 0 || (values.length == 1 && values[0] === "")) {
                             var acceptedSeen = false;
                             values = [];
                             for(var i = 0; i < combobox.store.data.items.length; i++) {
@@ -45,7 +45,7 @@
                             }
                         }
                         combobox.setValue(values);
-                    }
+                    };
                 }
             };
 

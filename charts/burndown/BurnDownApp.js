@@ -47,7 +47,7 @@
 
             if (!this.isOnScopedDashboard()) {
                 this.ignoreOnScopeChange = true;
-                this._getScopePicker().on("ready", this._loadScopePreference, this, {single: true});
+                this._getScopePicker().on('ready', this._loadScopePreference, this, {single: true});
             }
         },
 
@@ -59,7 +59,7 @@
         },
 
         _destroyChart: function () {
-            this.remove("burndownchart");
+            this.remove('burndownchart');
         },
 
         _saveScopePreference: function (scopeRef) {
@@ -68,7 +68,7 @@
                 settings[this._getScopeType()] = scopeRef;
 
                 Rally.data.PreferenceManager.update({
-                    appID: this.getContext().get("appID"),
+                    appID: this.getContext().get('appID'),
                     settings: settings,
                     scope: this
                 });
@@ -77,10 +77,10 @@
 
         _loadScopePreference: function (picker) {
             Rally.data.PreferenceManager.load({
-                appID: this.getContext().get("appID"),
+                appID: this.getContext().get('appID'),
                 success: function (preferences) {
                     var scopeRef = preferences[this._getScopeType()];
-                    if (!scopeRef || scopeRef === "undefined") {
+                    if (!scopeRef || scopeRef === 'undefined') {
                         var pickerRecord = picker.getRecord();
                         if (pickerRecord) {
                             scopeRef = pickerRecord.get('_ref');
@@ -89,7 +89,7 @@
                     }
                     this.ignoreOnScopeChange = false;
 
-                    if (scopeRef && scopeRef !== "undefined") {
+                    if (scopeRef && scopeRef !== 'undefined') {
                         this._setScopeValue(scopeRef);
                         scopeRef = this._getScopePicker().getValue();
                         if (scopeRef) {
@@ -411,10 +411,10 @@
         },
 
         _settingsInvalid: function () {
-            var chartAggregationType = this.getSetting("chartAggregationType"),
-                chartDisplayType = this.getSetting("chartDisplayType"),
-                chartTimebox = this.getSetting("chartTimebox"),
-                chartScheduleStates = this.getSetting("customScheduleStates");
+            var chartAggregationType = this.getSetting('chartAggregationType'),
+                chartDisplayType = this.getSetting('chartDisplayType'),
+                chartTimebox = this.getSetting('chartTimebox'),
+                chartScheduleStates = this.getSetting('customScheduleStates');
 
             var invalid = function (value) {
                 return !value || value === 'undefined';
@@ -425,7 +425,7 @@
         },
 
          _chartScheduleStatesInvalid: function (chartScheduleStates) {
-            return !chartScheduleStates || chartScheduleStates === "undefined" || chartScheduleStates.length == 0;
+            return !chartScheduleStates || chartScheduleStates === 'undefined' || chartScheduleStates.length === 0;
         },
 
         _chartTimeboxInvalid: function (chartTimebox) {
@@ -522,7 +522,7 @@
             }
 
             // return a reasonable default in case they somehow managed to select no states...(which shouldn't happen)
-            return ["Accepted"];
+            return ['Accepted'];
         }
 
     });
