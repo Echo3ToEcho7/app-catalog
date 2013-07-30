@@ -411,14 +411,21 @@
         },
 
         _settingsInvalid: function () {
-            var chartAggregationType = this.getSetting('chartAggregationType');
-            var chartDisplayType = this.getSetting('chartDisplayType');
-            var chartTimebox = this.getSetting('chartTimebox');
+            var chartAggregationType = this.getSetting("chartAggregationType"),
+                chartDisplayType = this.getSetting("chartDisplayType"),
+                chartTimebox = this.getSetting("chartTimebox"),
+                chartScheduleStates = this.getSetting("customScheduleStates");
+
             var invalid = function (value) {
                 return !value || value === 'undefined';
             };
 
-            return invalid(chartAggregationType) || invalid(chartDisplayType) || this._chartTimeboxInvalid(chartTimebox);
+            return invalid(chartAggregationType) || invalid(chartDisplayType) ||
+                this._chartTimeboxInvalid(chartTimebox) || this._chartScheduleStatesInvalid(chartScheduleStates);
+        },
+
+         _chartScheduleStatesInvalid: function (chartScheduleStates) {
+            return !chartScheduleStates || chartScheduleStates === "undefined" || chartScheduleStates.length == 0;
         },
 
         _chartTimeboxInvalid: function (chartTimebox) {
@@ -513,8 +520,9 @@
             if(_.isString(states)) {
                 return states.split(',');
             }
-            // return reasonable defaults, unless they have a state called Released that comes before Accepted...sigh.
-            return ['Accepted', 'Released'];
+
+            // return a reasonable default in case they somehow managed to select no states...(which shouldn't happen)
+            return ["Accepted"];
         }
 
     });
