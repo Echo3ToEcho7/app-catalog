@@ -27,6 +27,7 @@ describe 'Rally.apps.charts.burndown.BurnDownApp', ->
         chartAggregationType: 'storycount'
         chartDisplayType: 'line'
         chartTimebox: 'iteration'
+        customScheduleStates: ['Accepted']
 
       @ajax.whenQuerying('iteration').respondWith iterations
       iterReadRequest = @ajax.whenReading('iteration', iterations[0].ObjectID).respondWith iterations[0]
