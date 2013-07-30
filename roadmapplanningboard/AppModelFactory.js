@@ -1,13 +1,13 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
     Ext.define('Rally.apps.roadmapplanningboard.AppModelFactory', {
-        requires: ['Rally.data.Model'],
+        requires: ['Rally.apps.roadmapplanningboard.BaseModel'],
         getPlanningModel: function () {
             if (this.planningModel) {
                 return this.planningModel;
             }
             this.planningModel = Ext.define('Rally.apps.roadmapplanningboard.PlanningModel', {
-                extend: 'Rally.data.Model',
+                extend: 'Rally.apps.roadmapplanningboard.BaseModel',
                 fields: [
                     {
                         name: 'id',
@@ -68,7 +68,7 @@
                 return this.roadmapModel;
             }
             this.roadmapModel = Ext.define('Rally.apps.roadmapplanningboard.RoadmapModel', {
-                extend: 'Rally.data.Model',
+                extend: 'Rally.apps.roadmapplanningboard.BaseModel',
                 fields: [
                     {
                         name: 'id',
@@ -115,7 +115,7 @@
                 return this.timeframeModel;
             }
             this.timeframeModel = Ext.define('Rally.apps.roadmapplanningboard.TimeframeModel', {
-                extend: 'Rally.data.Model',
+                extend: 'Rally.apps.roadmapplanningboard.BaseModel',
                 fields: [
                     {
                         name: 'id',
@@ -165,7 +165,7 @@
                 return this.featureModel;
             }
             this.featureModel = Ext.define('Rally.apps.roadmapplanningboard.FeatureModel', {
-                extend: 'Rally.data.Model',
+                extend: 'Rally.apps.roadmapplanningboard.BaseModel',
                 fields: [
                     {
                         name: 'id',
