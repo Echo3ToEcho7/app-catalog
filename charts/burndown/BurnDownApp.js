@@ -1,29 +1,29 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define("Rally.apps.charts.burndown.BurnDownApp", {
-        extend: "Rally.app.TimeboxScopedApp",
+    Ext.define('Rally.apps.charts.burndown.BurnDownApp', {
+        extend: 'Rally.app.TimeboxScopedApp',
 
-        settingsScope: "workspace",
+        settingsScope: 'workspace',
 
         requires: [
-            "Rally.apps.charts.burndown.BurnDownSettings",
-            "Rally.data.WsapiDataStore",
-            "Rally.ui.combobox.IterationComboBox",
-            "Rally.ui.combobox.ReleaseComboBox"
+            'Rally.apps.charts.burndown.BurnDownSettings',
+            'Rally.data.WsapiDataStore',
+            'Rally.ui.combobox.IterationComboBox',
+            'Rally.ui.combobox.ReleaseComboBox'
         ],
 
         mixins: [
-            "Rally.apps.charts.DateMixin",
-            "Rally.apps.charts.burndown.BurnDownChart"
+            'Rally.apps.charts.DateMixin',
+            'Rally.apps.charts.burndown.BurnDownChart'
         ],
 
-        cls: "burndown-app",
+        cls: 'burndown-app',
 
         scopeObject: undefined,
 
         getSettingsFields: function () {
-            this.chartSettings = this.chartSettings || Ext.create("Rally.apps.charts.burndown.BurnDownSettings", {
+            this.chartSettings = this.chartSettings || Ext.create('Rally.apps.charts.burndown.BurnDownSettings', {
                 app: this
             });
 
@@ -105,6 +105,38 @@
             this._getScopePicker().setValue(scopeRef);
         },
 
+        _loadTimeboxes: function() {
+            var timeboxStore = Ext.create('Rally.data.WsapiDataStore', {
+                model: this.scopeObject._type,
+                filters: [
+                    {
+                        property: 'Name',
+                        operator: '=',
+                        value: this.scopeObject.Name
+                    },
+                    {
+                        property: this._getScopeObjectStartDateName(),
+                        operator: '=',
+                        value: Rally.util.DateTime.toIsoString(this._getScopeObjectStartDate(), true)
+                    },
+                    {
+                        property: this._getScopeObjectEndDateName(),
+                        operator: '=',
+                        value: Rally.util.DateTime.toIsoString(this._getScopeObjectEndDate(), true)
+                    }
+                ],
+                context: {
+                    workspace: this.getContext().getWorkspaceRef(),
+                    project: this.getContext().getProjectRef()
+                },
+                fetch: ['ObjectID'],
+                limit: Infinity
+            });
+
+            timeboxStore.on('load', this._getTimeboxesInScope, this);
+            timeboxStore.load();
+        },
+
         _onScopeObjectLoaded: function (record) {
             this._setScopeFromData(record);
 
@@ -113,14 +145,14 @@
 
             this._addDateBounds();
             this._addAggregationTypeToCalculator();
-            this._addObjectIdToStoreConfig();
             this._updateCompletedScheduleStates();
+            this._loadTimeboxes();
 
             this._renderChartBasedOnType();
         },
 
-        _renderChartBasedOnType: function() {
-            if (this._getScopeType() === "release") {
+        _renderChartBasedOnType: function () {
+            if (this._getScopeType() === 'release') {
                 this._fetchIterations();
             } else {
                 this._addChart();
@@ -131,11 +163,29 @@
             this.scopeObject = record.data;
         },
 
+        _getTimeboxesInScope: function (store) {
+            var storeConfig = this.chartComponentConfig.storeConfig;
+            var type = Ext.String.capitalize(this._getScopeType());
+            var oids = [];
+            var i;
+
+            this.timeboxes = store.getItems();
+            this._clearStoreConfig(storeConfig);
+
+            for (i = 0; i < this.timeboxes.length; i++) {
+                oids.push(this.timeboxes[i].ObjectID);
+            }
+            storeConfig.find[type] = { '$in' : oids };
+
+            this._renderChartBasedOnType();
+
+        },
+
         _onIterationsLoaded: function (store) {
             this.iterations = store.getItems();
 
             this._addChart();
-            this.down("rallychart").on("snapshotsAggregated", this._addIterationLines, this);
+            this.down('rallychart').on('snapshotsAggregated', this._addIterationLines, this);
         },
 
         _addDateBounds: function () {
@@ -149,23 +199,16 @@
 
         _addDateBoundsToCalculator: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
-            calcConfig.startDate = this.dateToString(this._getScopeObjectStartDate());
-            calcConfig.endDate = this.dateToString(this._getScopeObjectEndDate());
+            calcConfig.startDate = Rally.util.DateTime.toIsoString(this._getScopeObjectStartDate(), true);
+            calcConfig.endDate = Rally.util.DateTime.toIsoString(this._getScopeObjectEndDate(), true);
         },
 
         _addAggregationTypeToCalculator: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
-            calcConfig.chartAggregationType = this.getSetting("chartAggregationType");
+            calcConfig.chartAggregationType = this.getSetting('chartAggregationType');
         },
 
-        _addObjectIdToStoreConfig: function () {
-            var storeConfig = this.chartComponentConfig.storeConfig,
-                type = Ext.String.capitalize(this._getScopeType());
-            this._clearStoreConfig(storeConfig);
-            storeConfig.find[type] = this.scopeObject.ObjectID;
-        },
-
-        _updateCompletedScheduleStates: function() {
+        _updateCompletedScheduleStates: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
             calcConfig.completedScheduleStateNames = this._getCompletedScheduleStates();
         },
@@ -191,39 +234,40 @@
         },
 
         _fetchIterations: function () {
-            var store = Ext.create("Rally.data.WsapiDataStore", {
-                model: "Iteration",
+            var store = Ext.create('Rally.data.WsapiDataStore', {
+                model: 'Iteration',
                 filters: [
                     {
-                        property: "StartDate",
-                        operator: ">=",
-                        value: this.dateToString(this._getScopeObjectStartDate())
+                        property: 'StartDate',
+                        operator: '>=',
+                        value: Rally.util.DateTime.toIsoString(this._getScopeObjectStartDate(), true)
                     },
                     {
-                        property: "EndDate",
-                        operator: "<=",
-                        value: this.dateToString(this._getScopeObjectEndDate())
+                        property: 'EndDate',
+                        operator: '<=',
+                        value: Rally.util.DateTime.toIsoString(this._getScopeObjectEndDate(), true)
                     }
                 ],
                 context: {
                     workspace: this.getContext().getWorkspaceRef(),
                     project: this.getContext().getProjectRef()
                 },
-                scope: this
+                limit: Infinity
             });
 
-            store.on("load", this._onIterationsLoaded, this);
+            store.on('load', this._onIterationsLoaded, this);
             store.load();
         },
 
         _addIterationLines: function (chart) {
-            var axis = chart.chartConfig.xAxis,
-                categories = chart.chartData.categories;
+            var axis = chart.chartConfig.xAxis;
+            var categories = chart.chartData.categories;
+            var i;
 
             axis.plotLines = [];
             axis.plotBands = [];
 
-            for (var i = 0; i < this.iterations.length; i++) {
+            for (i = 0; i < this.iterations.length; i++) {
                 axis.plotLines.push(this._getPlotLine(categories, this.iterations[i], false));
                 axis.plotBands.push(this._getPlotBand(categories, this.iterations[i], i % 2 !== 0));
             }
@@ -234,19 +278,18 @@
         },
 
         _getPlotBand: function (categories, iteration, shouldColorize) {
-            var startDate = this.dateStringToObject(iteration.StartDate),
-                endDate = this.dateStringToObject(iteration.EndDate);
-
-            var startDateStr = Ext.Date.format(startDate, "Y-m-d"),
-                endDateStr = Ext.Date.format(endDate, "Y-m-d");
+            var startDate = this.dateStringToObject(iteration.StartDate);
+            var endDate = this.dateStringToObject(iteration.EndDate);
+            var startDateStr = Ext.Date.format(startDate, 'Y-m-d');
+            var endDateStr = Ext.Date.format(endDate, 'Y-m-d');
 
             return {
-                color: shouldColorize ? "#F2FAFF" : "#FFFFFF",
+                color: shouldColorize ? '#F2FAFF' : '#FFFFFF',
                 from: categories.indexOf(startDateStr),
                 to: categories.indexOf(endDateStr),
                 label: {
                     text: iteration.Name,
-                    align: "center",
+                    align: 'center',
                     rotation: 0,
                     y: -7
                 }
@@ -255,6 +298,8 @@
 
         _getPlotLine: function (categories, iteration, lastLine) {
             var dateObj;
+            var dateStr;
+            var dateIndex;
 
             if (lastLine) {
                 dateObj = this.dateStringToObject(iteration.EndDate);
@@ -262,12 +307,12 @@
                 dateObj = this.dateStringToObject(iteration.StartDate);
             }
 
-            var dateStr = Ext.Date.format(dateObj, "Y-m-d");
-            var dateIndex = categories.indexOf(dateStr);
+            dateStr = Ext.Date.format(dateObj, 'Y-m-d');
+            dateIndex = categories.indexOf(dateStr);
 
             return {
-                color: "#BBBBBB",
-                dashStyle: "ShortDash",
+                color: '#BBBBBB',
+                dashStyle: 'ShortDash',
                 width: 2,
                 zIndex: 3,
                 value: dateIndex
@@ -278,7 +323,7 @@
             this.chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
 
             this.add(this.chartComponentConfig);
-            this.down("rallychart").on("snapshotsAggregated", this._onSnapshotDataReady, this);
+            this.down('rallychart').on('snapshotsAggregated', this._onSnapshotDataReady, this);
         },
 
         _onSnapshotDataReady: function (chart) {
@@ -286,10 +331,11 @@
         },
 
         _updateDisplayType: function (chart) {
-            var series = chart.chartData.series,
-                displayType = this.getSetting("chartDisplayType");
+            var series = chart.chartData.series;
+            var displayType = this.getSetting('chartDisplayType');
+            var i;
 
-            for (var i = 0; i < series.length; i++) {
+            for (i = 0; i < series.length; i++) {
                 if (this._seriesFollowsDisplayType(series[i])) {
                     series[i].type = displayType;
                 }
@@ -297,7 +343,7 @@
         },
 
         _seriesFollowsDisplayType: function (series) {
-            return series.name.indexOf("Ideal") === -1 && series.name.indexOf("Task To Do Prediction") === -1;
+            return series.name.indexOf('Ideal') === -1 && series.name.indexOf('Task To Do Prediction') === -1;
         },
 
         _updateYAxis: function () {
@@ -325,11 +371,11 @@
         },
 
         _getAxisTitleBasedOnAggregationType: function () {
-            var aggregationType = this.getSetting("chartAggregationType");
-            if (aggregationType === "storycount") {
-                return "Count";
+            var aggregationType = this.getSetting('chartAggregationType');
+            if (aggregationType === 'storycount') {
+                return 'Count';
             } else {
-                return "Points";
+                return 'Points';
             }
         },
 
@@ -339,18 +385,18 @@
         },
 
         _buildChartTitle: function () {
-            var widthPerCharacter = 10,
-                totalCharacters = Math.floor(this.getWidth() / widthPerCharacter),
-                title = this._getDefaultTitle(),
-                align = "center";
+            var widthPerCharacter = 10;
+            var totalCharacters = Math.floor(this.getWidth() / widthPerCharacter);
+            var title = this._getDefaultTitle();
+            var align = 'center';
 
             if (this.scopeObject) {
                 title = this.scopeObject.Name;
             }
 
             if (totalCharacters < title.length) {
-                title = title.substring(0, totalCharacters) + "...";
-                align = "left";
+                title = title.substring(0, totalCharacters) + '...';
+                align = 'left';
             }
 
             return {
@@ -365,12 +411,11 @@
         },
 
         _settingsInvalid: function () {
-            var chartAggregationType = this.getSetting("chartAggregationType"),
-                chartDisplayType = this.getSetting("chartDisplayType"),
-                chartTimebox = this.getSetting("chartTimebox");
-
+            var chartAggregationType = this.getSetting('chartAggregationType');
+            var chartDisplayType = this.getSetting('chartDisplayType');
+            var chartTimebox = this.getSetting('chartTimebox');
             var invalid = function (value) {
-                return !value || value === "undefined";
+                return !value || value === 'undefined';
             };
 
             return invalid(chartAggregationType) || invalid(chartDisplayType) || this._chartTimeboxInvalid(chartTimebox);
@@ -381,7 +426,7 @@
                 return false;
             }
 
-            return !chartTimebox || chartTimebox === "undefined";
+            return !chartTimebox || chartTimebox === 'undefined';
         },
 
         _saveScopeType: function () {
@@ -402,21 +447,41 @@
         },
 
         _getSavedScopeType: function () {
-            return this.getSetting("chartTimebox");
+            return this.getSetting('chartTimebox');
         },
 
         _getScopePicker: function () {
             if (this.isOnScopedDashboard()) {
                 return this.getContext().getTimeboxScope();
             } else {
-                return this.down("rally" + this._getScopeType() + "combobox");
+                return this.down('rally' + this._getScopeType() + 'combobox');
+            }
+        },
+
+        _getScopeObjectStartDateName: function () {
+            if (!this.scopeObject) {
+                return '';
+            } else if (this.scopeObject._type === 'release') {
+                return 'ReleaseStartDate';
+            } else {
+                return 'StartDate';
+            }
+        },
+
+        _getScopeObjectEndDateName: function () {
+            if (!this.scopeObject) {
+                return '';
+            } else if (this.scopeObject._type === 'release') {
+                return 'ReleaseDate';
+            } else {
+                return 'EndDate';
             }
         },
 
         _getScopeObjectStartDate: function () {
             if (!this.scopeObject) {
                 return new Date();
-            } else if (this.scopeObject._type === "release") {
+            } else if (this.scopeObject._type === 'release') {
                 return this.scopeObject.ReleaseStartDate;
             } else {
                 return this.scopeObject.StartDate;
@@ -426,7 +491,7 @@
         _getScopeObjectEndDate: function () {
             if (!this.scopeObject) {
                 return new Date();
-            } else if (this.scopeObject._type === "release") {
+            } else if (this.scopeObject._type === 'release') {
                 return this.scopeObject.ReleaseDate;
             } else {
                 return this.scopeObject.EndDate;
@@ -434,22 +499,22 @@
         },
 
         _clearStoreConfig: function (storeConfig) {
-            if (storeConfig.find.hasOwnProperty("Release")) {
+            if (storeConfig.find.hasOwnProperty('Release')) {
                 delete storeConfig.find.Release;
             }
 
-            if (storeConfig.find.hasOwnProperty("Iteration")) {
+            if (storeConfig.find.hasOwnProperty('Iteration')) {
                 delete storeConfig.find.Iteration;
             }
         },
 
-        _getCompletedScheduleStates: function() {
-            var states = this.getSetting("customScheduleStates");
+        _getCompletedScheduleStates: function () {
+            var states = this.getSetting('customScheduleStates');
             if(_.isString(states)) {
-                return states.split(",");
+                return states.split(',');
             }
-
-            return [];
+            // return reasonable defaults, unless they have a state called Released that comes before Accepted...sigh.
+            return ['Accepted', 'Released'];
         }
 
     });
