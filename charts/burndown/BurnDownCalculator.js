@@ -64,8 +64,16 @@
         getSummaryMetricsConfig: function () {
             return [
                 {
-                    "field": "To Do",
-                    "f": "max"
+                    'as': 'Scope_max',
+                    'f': function(seriesData) {
+                            var max = 0, i = 0;
+                            for (i=0;i<seriesData.length;i++) {
+                                if(seriesData[i]['Accepted'] + seriesData[i]['Task To Do'] > max) {
+                                    max = seriesData[i]['Accepted'] + seriesData[i]['Task To Do'];
+                                }
+                            }
+                            return max;
+                         }
                 }
             ];
         },
@@ -75,7 +83,7 @@
                 {
                     "as": "Ideal",
                     "f": function (row, index, summaryMetrics, seriesData) {
-                        var max = summaryMetrics["To Do_max"],
+                        var max = summaryMetrics["Scope_max"],
                             increments = seriesData.length - 1,
                             incrementAmount = max / increments;
                         return Math.floor(100 * (max - index * incrementAmount)) / 100;
