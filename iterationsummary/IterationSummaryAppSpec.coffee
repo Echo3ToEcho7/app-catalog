@@ -754,10 +754,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
     testsSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getTestsConfigObject')
     defectSpy = @spy(Rally.apps.iterationsummary.IterationSummaryApp.prototype, '_getDefectsConfigObject')
 
-    app = Ext.create('Rally.apps.iterationsummary.IterationSummaryApp',
-      context: @getContext()
-    )
-    @waitForComponentReady(app).then ->
+    @createApp({}).then (app) =>
 
       configDefects = defectSpy.firstCall.returnValue
       # only the 2 defects from user story - should exclude the 3 from defect suite
