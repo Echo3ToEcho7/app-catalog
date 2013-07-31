@@ -1,9 +1,10 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-  'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
-  'Rally.alm.FeatureToggle',
-  'Rally.util.Array',
+  'Rally.ui.cardboard.CardBoard'
+  'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser'
+  'Rally.alm.FeatureToggle'
+  'Rally.util.Array'
   'Rally.util.DateTime'
 ]
 
@@ -275,9 +276,8 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     artifactsPrefStub = @stub(Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser.prototype, 'artifactsPref', artifactsPref)
 
     @createApp().then =>
-
       expect(addLocalFilterStub).toHaveBeenCalledOnce()
-      expect(addLocalFilterStub.getCall(0).args[1]).toBe artifactsPref
+      expect(addLocalFilterStub.getCall(0).args[1]).toEqual artifactsPref
 
   it 'should not apply local filter if artifacts type pref exists and it shows all types', ->
     addLocalFilterStub = @stub(Rally.ui.cardboard.CardBoard.prototype, 'addLocalFilter')
@@ -285,7 +285,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     artifactsPrefStub = @stub(Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser.prototype, 'artifactsPref', artifactsPref)
 
     @createApp().then =>
-
       expect(addLocalFilterStub).not.toHaveBeenCalled()
 
   it 'should not apply local filter if artifacts type pref does not exist', ->
