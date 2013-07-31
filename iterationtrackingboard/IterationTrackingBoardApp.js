@@ -20,6 +20,7 @@
         componentCls: 'iterationtrackingboard',
         alias: 'widget.rallyiterationtrackingboard',
 
+        settingsScope: 'project',
         scopeType: 'iteration',
 
         onScopeChange: function(scope) {

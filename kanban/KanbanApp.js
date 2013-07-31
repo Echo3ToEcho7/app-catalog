@@ -13,7 +13,7 @@
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
-            'Rally.ui.cardboard.KanbanPolicy',
+            'Rally.ui.cardboard.PolicyContainer',
             'Rally.ui.cardboard.CardBoard',
             'Rally.ui.cardboard.plugin.Scrollable',
             'Rally.ui.report.StandardReport'
