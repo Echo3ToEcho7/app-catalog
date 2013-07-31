@@ -18,7 +18,7 @@
                     "_TypeHierarchy": -51038,
                     "Children": null
                 },
-                fetch: ["ScheduleState", "PlanEstimate", "TaskEstimateTotal"],
+                fetch: ["ScheduleState", "PlanEstimate"],
                 hydrate: ["ScheduleState"],
                 sort: {
                     "_ValidFrom": 1
