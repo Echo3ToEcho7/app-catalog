@@ -52,13 +52,6 @@
                 plugins: plugins,
                 cardBoardConfig: {
                     listeners: {
-                        load: function() {
-                            var artifactsPref = this.gridboard.artifactTypeChooserPlugin.artifactsPref;
-                            var allowedArtifacts = this.gridboard.getHeader().getRight().query('checkboxfield');
-                            if (!Ext.isEmpty(artifactsPref) && artifactsPref.length !== allowedArtifacts.length) {
-                                this.gridboard.getGridOrBoard().addLocalFilter('ByType', artifactsPref, true);
-                            }
-                        },
                         filter: this._onBoardFilter,
                         filtercomplete: this._onBoardFilterComplete,
                         scope: this
