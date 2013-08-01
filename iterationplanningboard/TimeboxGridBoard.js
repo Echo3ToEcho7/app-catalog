@@ -70,11 +70,6 @@
                         fetch: ['Parent', 'Requirement']
                     }
                 },
-                cardConfig: {
-                    editable: true,
-                    showIconMenus: true,
-                    fields: ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
-                },
                 scrollableColumnRecords: this.timeboxes
             });
         },

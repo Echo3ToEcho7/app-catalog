@@ -17,15 +17,28 @@
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
         ],
+        mixins: ['Rally.app.CardFieldSelectable'],
         componentCls: 'iterationtrackingboard',
         alias: 'widget.rallyiterationtrackingboard',
 
         settingsScope: 'project',
         scopeType: 'iteration',
 
+
         onScopeChange: function(scope) {
             this.remove('gridBoard');
             this._loadModels();
+        },
+
+        getSettingsFields: function () {
+            var fields = this.callParent(arguments);
+            this.appendCardFieldPickerSetting(fields);
+            return fields;
+        },
+
+        launch: function() {
+            this.showFieldPicker = this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS');
+            this.callParent(arguments);
         },
 
         _addGridBoard: function() {
@@ -63,7 +76,7 @@
                         }]
                     },
                     cardConfig: {
-                        fields: ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
+                        fields: this.getCardFieldNames(['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate'])
                     },
                     listeners: {
                         filter: this._onBoardFilter,
