@@ -28,25 +28,30 @@
         },
 
         _addGridBoard: function() {
+            var plugins = [
+                {
+                    ptype: 'rallygridboardfilterinfo',
+                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
+                    stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
+                },
+                'rallygridboardaddnew',
+                'rallygridboardownerfilter'
+            ];
+
+            if (this.getContext().isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS')) {
+                plugins.splice(2, 0, {
+                    ptype: 'rallygridboardartifacttypechooser',
+                    artifactTypePreferenceKey: 'artifact-types',
+                    showAgreements: true
+                });
+            }
+
             this.gridboard = this.add({
                 itemId: 'gridBoard',
                 xtype: 'rallygridboard',
                 context: this.getContext(),
                 enableToggle: this.getContext().isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE'),
-                plugins: [
-                    {
-                        ptype: 'rallygridboardfilterinfo',
-                        isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
-                        stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
-                    },
-                    'rallygridboardaddnew',
-                    {
-                        ptype: 'rallygridboardartifacttypechooser',
-                        artifactTypePreferenceKey: 'artifact-types',
-                        showAgreements: this.getContext().isFeatureEnabled('SHOW_POLICIES_ON_ITERATION_BOARDS')
-                    },
-                    'rallygridboardownerfilter'
-                ],
+                plugins: plugins,
                 modelNames: this.modelNames,
                 cardBoardConfig: {
                     columnConfig: {
