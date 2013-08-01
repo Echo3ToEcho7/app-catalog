@@ -133,7 +133,7 @@
             return chartData;
         },
 
-        _indexOfToday: function(chartdata) {
+        _indexOfToday: function(chartData) {
              var today = Ext.Date.format(new Date(), 'Y-m-d'),
                  index = chartData.categories.indexOf(today);
              return index;
