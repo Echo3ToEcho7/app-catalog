@@ -36,7 +36,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
     expect(@column.getContentCell().hasCls 'planning-column').toBeTruthy()
     expect(@column.getColumnHeaderCell().hasCls 'planning-column').toBeTruthy()
 
-  it 'should fire ready when the column has not stores', ->
+  it 'should fire ready when the column has no stores', ->
     isReady = false
     blankColumn = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
       stores: []
