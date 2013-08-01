@@ -17,10 +17,10 @@
                     "as": "RemainingPoints",
                     "f": function (snapshot) {
                         var ss = snapshot.ScheduleState;
-                        if(completedStates.indexOf(ss) < 0 && snapshot.PlanEstimate) {
+                        if(completedStates.indexOf(ss) < 0) {
                             if(aggregationType === "storycount") {
                                 return 1;
-                            } else {
+                            } else if (snapshot.PlanEstimate) {
                                 return snapshot.PlanEstimate;
                             }
                         }
@@ -32,10 +32,10 @@
                     "as": "AcceptedPoints",
                     "f": function (snapshot) {
                         var ss = snapshot.ScheduleState;
-                        if (completedStates.indexOf(ss) > -1 && snapshot.PlanEstimate) {
+                        if (completedStates.indexOf(ss) > -1) {
                             if (aggregationType === "storycount") {
                                 return 1;
-                            } else {
+                            } else if (snapshot.PlanEstimate) {
                                 return snapshot.PlanEstimate;
                             }
                         }
