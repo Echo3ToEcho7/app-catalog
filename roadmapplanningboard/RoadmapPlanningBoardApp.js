@@ -1,6 +1,5 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
-    Ext.Ajax.withCredentials = true;
 
     Ext.define('Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', {
         extend: 'Rally.app.App',
