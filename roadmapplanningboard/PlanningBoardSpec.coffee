@@ -117,7 +117,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   it 'should be correctly configured with stores from deft', ->
     expect(@board.timeframeStore).toBeTruthy()
-    expect(@board.planningStore).toBeTruthy()
+    expect(@board.planStore).toBeTruthy()
 
   it 'should have appropriate plan capacity range', ->
     @board.render(Ext.getBody())

@@ -1,12 +1,16 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
+  
+    require: [
+        'Rally.test.mock.data.WsapiModelFactory'
+    ]
 
     getRoadmapStoreFixture: ->
         return @roadmapStoreFixture if @roadmapStoreFixture
 
         @roadmapStoreFixture = Ext.create 'Ext.data.Store',
-            model: Deft.Injector.resolve('appModelFactory').getRoadmapModel()
+            model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('roadmap')
             proxy:
                 type: 'memory'
 
@@ -45,12 +49,11 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         @roadmapStoreFixture.model.setProxy 'memory'
         @roadmapStoreFixture
 
-    getPlanningStoreFixture: ->
-        return @planningStoreFixture if @planningStoreFixture
+    getPlanStoreFixture: ->
+        return @planStoreFixture if @planStoreFixture
         
-        @planningStoreFixture = Ext.create 'Ext.data.Store',
-            extend: 'Ext.data.Store'
-            model: Deft.Injector.resolve('appModelFactory').getPlanningModel()
+        @planStoreFixture = Ext.create 'Ext.data.Store',
+            model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('plan')
             proxy:
                 type: 'memory'
 
@@ -121,14 +124,12 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
                 }
             ]
 
-        @planningStoreFixture.model.setProxy 'memory'
-        @planningStoreFixture
-
+        @planStoreFixture.model.setProxy 'memory'
+        @planStoreFixture
 
     getFeatureStoreFixture: ->
         @featureStoreFixture = Ext.create 'Ext.data.Store',
-            extend: 'Ext.data.Store'
-            model: Deft.Injector.resolve('appModelFactory').getFeatureModel()
+            model: Rally.test.mock.data.WsapiModelFactory.getModel 'PortfolioItem/Feature'
             proxy:
                 type: 'memory'
 
@@ -213,8 +214,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
 
     getSecondFeatureStoreFixture: ->
         @secondFeatureStoreFixture = Ext.create 'Ext.data.Store',
-            extend: 'Ext.data.Store'
-            model: Deft.Injector.resolve('appModelFactory').getFeatureModel()
+            model: Rally.test.mock.data.WsapiModelFactory.getModel 'PortfolioItem/Feature'
             proxy:
                 type: 'memory'
             data: Rally.test.mock.ModelObjectMother.getRecords('PortfolioItemFeature',
@@ -242,8 +242,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
 
     getTimeframeStoreFixture: ->
         @timeframeStoreFixture = Ext.create 'Ext.data.Store',
-            extend: 'Ext.data.Store'
-            model: Deft.Injector.resolve('appModelFactory').getTimeframeModel()
+            model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('timeframe')
             proxy:
                 type: 'memory'
             data: [

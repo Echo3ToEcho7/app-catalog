@@ -11,7 +11,7 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
     @themeHeader?.destroy()
 
   it 'displays theme from planModel', ->
-    planRecord = Ext.create Deft.Injector.resolve('planningStore').model,
+    planRecord = Ext.create Deft.Injector.resolve('planStore').model,
       id: 'ABC123',
       name: 'Q1',
       theme: 'Take over the world!'
@@ -24,7 +24,7 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
     expect(@themeHeader.el.dom.innerHTML.indexOf(planRecord.get('theme'))).not.toBe -1
 
   it 'displays "Add Theme" when model theme is blank', ->
-    planRecord = Ext.create Deft.Injector.resolve('planningStore').model,
+    planRecord = Ext.create Deft.Injector.resolve('planStore').model,
       id: 'ABC123',
       name: 'Q1',
       theme: undefined
@@ -37,7 +37,7 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
     expect(@themeHeader.el.dom.innerHTML.indexOf('Add theme')).not.toBe -1
 
   it 'displays "Add Theme" when model theme is whitespace', ->
-    planRecord = Ext.create Deft.Injector.resolve('planningStore').model,
+    planRecord = Ext.create Deft.Injector.resolve('planStore').model,
       id: 'ABC123',
       name: 'Q1',
       theme: '  \n'
@@ -50,7 +50,7 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
     expect(@themeHeader.el.dom.innerHTML.indexOf('Add theme')).not.toBe -1
 
   it 'should trim whitespace from theme', ->
-    planRecord = Ext.create Deft.Injector.resolve('planningStore').model,
+    planRecord = Ext.create Deft.Injector.resolve('planStore').model,
       id: 'ABC123',
       name: 'Q1',
       theme: 'My Theme  \n'

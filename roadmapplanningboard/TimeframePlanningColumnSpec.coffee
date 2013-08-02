@@ -21,7 +21,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
           fieldToDisplay: 'name'
 
     getDefaultPlanRecord: ->
-      Ext.create @appModelFactory.getPlanningModel(),
+      Ext.create @appModelFactory.getPlanModel(),
         id: 'Foo',
         name: 'Q1',
         theme: 'Take over the world!'
@@ -40,7 +40,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       name: 'Q1'
       start: new Date('04/01/2013')
       end: new Date('06/30/2013')
-    planRecord = Ext.create @appModelFactory.getPlanningModel(),
+    planRecord = Ext.create @appModelFactory.getPlanModel(),
       lowCapacity: 22
       highCapacity: 42
     @column = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
@@ -88,7 +88,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
     column = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
       timeboxRecord: @timeboxRecord
       stores: [@featureStoreFixture]
-      planRecord: Ext.create @appModelFactory.getPlanningModel(),
+      planRecord: Ext.create @appModelFactory.getPlanModel(),
         lowCapacity: 0
         highCapacity: 0
 

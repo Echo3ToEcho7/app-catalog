@@ -20,7 +20,7 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
     @backlogColumn?.destroy()
 
   it 'is using injected stores', ->
-    expect(@backlogColumn.planningStore).toBeTruthy()
+    expect(@backlogColumn.planStore).toBeTruthy()
 
   it 'has a backlog filter', ->
     expect(@backlogColumn.getCards().length).toBe(6)

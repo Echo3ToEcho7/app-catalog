@@ -15,9 +15,9 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
         fn: ->
           storeFixtureFactory.getSecondFeatureStoreFixture()
 
-      planningStore:
+      planStore:
         fn: ->
-          storeFixtureFactory.getPlanningStoreFixture()
+          storeFixtureFactory.getPlanStoreFixture()
 
       timeframeStore:
         fn: ->

@@ -7,18 +7,18 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
     target = Ext.getBody()
     @storeFixtureFactory = Ext.create 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory'
-    planningStore = Deft.Injector.resolve('planningStore')
+    planStore = Deft.Injector.resolve('planStore')
     timeframeStore = Deft.Injector.resolve('timeframeStore')
     featureStore = Deft.Injector.resolve('featureStore')
     secondFeatureStore = Deft.Injector.resolve('secondFeatureStore')
 
-    @leftColumnPlan = planningStore.getById('513617ecef8623df1391fefc')
+    @leftColumnPlan = planStore.getById('513617ecef8623df1391fefc')
     leftColumnTimeframe = timeframeStore.getById(@leftColumnPlan.get('timeframe').id)
 
     @leftColumn = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
       stores: [Ext.create 'Ext.data.Store',
             extend: 'Ext.data.Store'
-            model: Deft.Injector.resolve('appModelFactory').getFeatureModel()
+            model: Rally.test.mock.data.WsapiModelFactory.getModel 'PortfolioItem/Feature'
             proxy:
                 type: 'memory'
             data: Rally.test.mock.ModelObjectMother.getRecords('PortfolioItemFeature',
@@ -56,13 +56,13 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       contentCell: target
       headerCell: target
 
-    @rightColumnPlan = planningStore.getById('513617f7ef8623df1391fefd')
+    @rightColumnPlan = planStore.getById('513617f7ef8623df1391fefd')
     rightColumnTimeframe = timeframeStore.getById(@rightColumnPlan.get('timeframe').id)
 
     @rightColumn = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
       stores: [Ext.create 'Ext.data.Store',
             extend: 'Ext.data.Store'
-            model: Deft.Injector.resolve('appModelFactory').getFeatureModel()
+            model: Rally.test.mock.data.WsapiModelFactory.getModel 'PortfolioItem/Feature'
             proxy:
                 type: 'memory'
 
