@@ -122,7 +122,7 @@
         return obj.id !==  '' + record.get('ObjectID');
       }));
       options.destinationColumn.planRecord.get('features').push({
-        id: record.get('ObjectID'),
+        id: record.get('ObjectID').toString(),
         ref: record.get('_ref')
       });
       return Ext.Ajax.request({

@@ -50,7 +50,7 @@
                 },
                 proxy: {
                     type: 'rest',
-                    url: 'http://bld-planning-01.f4tech.com:9030/planning-service/api/plan',
+                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/plan',
                     reader: {
                         type: 'json',
                         root: 'data.results'
@@ -92,7 +92,7 @@
                 },
                 proxy: {
                     type: 'rest',
-                    url: 'http://bld-planning-01.f4tech.com:9030/planning-service/api/roadmap',
+                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/roadmap',
                     reader: {
                         type: 'json',
                         root: 'data.results'
@@ -143,7 +143,7 @@
                 ],
                 proxy: {
                     type: 'rest',
-                    url: 'http://bld-timeline-01.f4tech.com:9020/timeline-service/api/timeframe',
+                    url: 'https://bld-orcafe-01.f4tech.com/timeline-service/api/timeframe',
                     reader: {
                         type: 'json',
                         root: 'data.results'
@@ -194,7 +194,7 @@
                 ],
                 proxy: {
                     type: 'rest',
-                    url: "http://localhost:8090/portfolio-service/api/feature",
+                    url: "https://bld-orcafe-01.f4tech.com/portfolio-service/api/feature",
                     reader: {
                         type: 'json',
                         root: 'data.results'

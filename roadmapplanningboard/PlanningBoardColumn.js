@@ -13,6 +13,9 @@
         config: {
             stores: [],
             lowestPIType: undefined,
+            storeConfig: {
+                fetch: ['Value', 'FormattedID', 'Owner','Name', 'PreliminaryEstimate', 'DisplayColor']
+            },
             dropControllerConfig: {
                 ptype: 'orcacolumndropcontroller'
             },
@@ -63,7 +66,7 @@
                 Ext.create('Rally.data.WsapiDataStore', {
                     model: this.lowestPIType,
                     autoLoad: true,
-                    fetch: ['Value','FormattedID', 'Owner','Name', 'PreliminaryEstimate', 'DisplayColor'],
+                    fetch: this.storeConfig.fetch,
                     filters: Rally.data.QueryFilter.or(filters)
                 })
             ];
