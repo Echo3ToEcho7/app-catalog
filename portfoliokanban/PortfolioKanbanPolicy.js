@@ -7,7 +7,7 @@
      * Used by the Rally.ui.cardboard.KanbanColumn
      */
     Ext.define('Rally.apps.portfoliokanban.PortfolioKanbanPolicy', {
-        extend: 'Rally.ui.cardboard.KanbanPolicy',
+        extend: 'Rally.ui.cardboard.PolicyContainer',
         alias: 'widget.rallyportfoliokanbanpolicy',
 
         config: {
