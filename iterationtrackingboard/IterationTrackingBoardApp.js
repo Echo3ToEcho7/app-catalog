@@ -17,36 +17,55 @@
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
         ],
+        mixins: ['Rally.app.CardFieldSelectable'],
         componentCls: 'iterationtrackingboard',
         alias: 'widget.rallyiterationtrackingboard',
 
+        settingsScope: 'project',
         scopeType: 'iteration',
+
 
         onScopeChange: function(scope) {
             this.remove('gridBoard');
             this._loadModels();
         },
 
+        getSettingsFields: function () {
+            var fields = this.callParent(arguments);
+            this.appendCardFieldPickerSetting(fields);
+            return fields;
+        },
+
+        launch: function() {
+            this.showFieldPicker = this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS');
+            this.callParent(arguments);
+        },
+
         _addGridBoard: function() {
+            var plugins = [
+                {
+                    ptype: 'rallygridboardfilterinfo',
+                    isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
+                    stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
+                },
+                'rallygridboardaddnew',
+                'rallygridboardownerfilter'
+            ];
+
+            if (this.getContext().isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS')) {
+                plugins.splice(2, 0, {
+                    ptype: 'rallygridboardartifacttypechooser',
+                    artifactTypePreferenceKey: 'artifact-types',
+                    showAgreements: true
+                });
+            }
+
             this.gridboard = this.add({
                 itemId: 'gridBoard',
                 xtype: 'rallygridboard',
                 context: this.getContext(),
                 enableToggle: this.getContext().isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE'),
-                plugins: [
-                    {
-                        ptype: 'rallygridboardfilterinfo',
-                        isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
-                        stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
-                    },
-                    'rallygridboardaddnew',
-                    {
-                        ptype: 'rallygridboardartifacttypechooser',
-                        artifactTypePreferenceKey: 'artifact-types',
-                        showAgreements: this.getContext().isFeatureEnabled('SHOW_POLICIES_ON_ITERATION_BOARDS')
-                    },
-                    'rallygridboardownerfilter'
-                ],
+                plugins: plugins,
                 modelNames: this.modelNames,
                 cardBoardConfig: {
                     columnConfig: {
@@ -57,7 +76,7 @@
                         }]
                     },
                     cardConfig: {
-                        fields: ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
+                        fields: this.getCardFieldNames(['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate'])
                     },
                     listeners: {
                         filter: this._onBoardFilter,
@@ -107,6 +126,24 @@
 
         _publishContentUpdatedNoDashboardLayout: function() {
             this.fireEvent('contentupdated', {dashboardLayout: false});
+        },
+
+        _getAddNewParams: function() {
+            return this.gridboard.addNewPlugin._getAddNewParams();
+        },
+
+        _onAddNewBeforeCreate: function(addNew, record, params) {
+            this.gridboard.addNewPlugin._onAddNewBeforeCreate(addNew, record, params);
+        },
+
+        _onAddNewBeforeEditorShow: function(addNew, params) {
+            params.Iteration = this.getIterationRef() || 'u';
+            params.Release = 'u';
+            Ext.apply(params, this._getAddNewParams());
+        },
+
+        _onAddNewCreate: function(addNew, record) {
+            this.gridboard.addNewPlugin._onAddNewBeforeCreate(addNew, record);
         }
     });
 })();

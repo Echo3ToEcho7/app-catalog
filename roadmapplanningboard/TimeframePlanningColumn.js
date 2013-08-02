@@ -23,9 +23,12 @@
             var _ref, _ref1;
 
             this.callParent(arguments);
+
             this.on('ready', this.drawHeader, this);
             this.on('addcard', this.drawHeader, this);
+            this.on('cardupdated', this.drawHeader, this);
             this.on('removecard', this.drawHeader, this);
+
             this.on('afterrender', this.onAfterRender, this);
             if (this.planRecord && this.planRecord.store) {
                 this.planRecord.store.on('update', function () {
