@@ -5,31 +5,30 @@
         extend: 'Rally.app.App',
         requires: [
             'Rally.apps.roadmapplanningboard.PlanningGridBoard',
-            'Rally.apps.roadmapplanningboard.AppModelFactory',
-            'Rally.apps.roadmapplanningboard.FeatureStore',
-            'Rally.apps.roadmapplanningboard.TimeframeStore',
-            'Rally.apps.roadmapplanningboard.PlanningStore',
-            'Rally.apps.roadmapplanningboard.RoadmapStore'
+            'Rally.apps.roadmapplanningboard.AppModelFactory'
         ],
         cls: 'roadmapPlanningBoardApp planning-board',
         componentCls: 'app',
 
         constructor: function(config) {
             Deft.Injector.configure({
-                appModelFactory: {
-                    className: 'Rally.apps.roadmapplanningboard.AppModelFactory'
-                },
-                featureStore: {
-                    className: 'Rally.apps.roadmapplanningboard.FeatureStore'
-                },
                 timeframeStore: {
-                    className: 'Rally.apps.roadmapplanningboard.TimeframeStore'
+                    className: 'Ext.data.Store',
+                    parameters: [{
+                        model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('timeframe')
+                    }]
                 },
-                planningStore: {
-                    className: 'Rally.apps.roadmapplanningboard.PlanningStore'
+                planStore: {
+                    className: 'Ext.data.Store',
+                    parameters: [{
+                        model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('plan')
+                    }]
                 },
                 roadmapStore: {
-                    className: 'Rally.apps.roadmapplanningboard.RoadmapStore'
+                    className: 'Ext.data.Store',
+                    parameters: [{
+                        model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('roadmap')
+                    }]
                 }
             });
             this.mergeConfig(config);
@@ -45,7 +44,7 @@
             roadmapStore.load(function() {
                 timeframeStore.load(function() {
                     _this.add(Ext.create('Rally.apps.roadmapplanningboard.PlanningGridBoard', {
-                        roadmapId: roadmapStore.first() ? roadmapStore.first().get('id') : undefined
+                        roadmapId: roadmapStore.first() ? roadmapStore.first().getId() : undefined
                     }));
                 });
             });
