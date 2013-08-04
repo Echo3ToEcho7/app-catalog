@@ -1,7 +1,10 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
     Ext.define('Rally.apps.roadmapplanningboard.AppModelFactory', {
-        requires: ['Rally.data.Model'],
+        requires: [
+            'Rally.data.Model',
+            'Rally.apps.roadmapplanningboard.Proxy'
+        ],
         getPlanningModel: function () {
             if (this.planningModel) {
                 return this.planningModel;
@@ -49,16 +52,8 @@
                     model: this.getFeatureModel().$className
                 },
                 proxy: {
-                    type: 'rest',
-                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/plan',
-                    reader: {
-                        type: 'json',
-                        root: 'data.results'
-                    },
-                    writer: {
-                        type: 'json',
-                        root: 'data'
-                    }
+                    type: 'roadmap',
+                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/plan'
                 }
             });
             return this.planningModel;
@@ -91,16 +86,8 @@
                     model: this.getPlanningModel().$className
                 },
                 proxy: {
-                    type: 'rest',
-                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/roadmap',
-                    reader: {
-                        type: 'json',
-                        root: 'data.results'
-                    },
-                    writer: {
-                        type: 'json',
-                        root: 'data'
-                    }
+                    type: 'roadmap',
+                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/roadmap'
                 }
             });
             return this.roadmapModel;
@@ -142,16 +129,8 @@
                     }
                 ],
                 proxy: {
-                    type: 'rest',
-                    url: 'https://bld-orcafe-01.f4tech.com/timeline-service/api/timeframe',
-                    reader: {
-                        type: 'json',
-                        root: 'data.results'
-                    },
-                    writer: {
-                        type: 'json',
-                        root: 'data'
-                    }
+                    type: 'roadmap',
+                    url: 'https://bld-orcafe-01.f4tech.com/timeline-service/api/timeframe'
                 },
                 belongsTo: {
                     model: 'Rally.apps.roadmapplanningboard.TimelineModel',
