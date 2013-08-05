@@ -17,10 +17,19 @@
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.util.Array'
         ],
+        mixins: ['Rally.app.CardFieldSelectable'],
         cls: 'planning-board',
+        modelNames: ['User Story', 'Defect'],
 
         launch: function() {
+            this.showFieldPicker = this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS');
             this._showBoard();
+        },
+
+        getSettingsFields: function () {
+            var fields = this.callParent(arguments);
+            this.appendCardFieldPickerSetting(fields);
+            return fields;
         },
 
         _showBoard: function() {
@@ -48,9 +57,14 @@
             this.gridboard = this.add({
                 xtype: 'iterationplanningboardapptimeboxgridboard',
                 context: this.getContext(),
-                modelNames: ['User Story', 'Defect'],
+                modelNames: this.modelNames,
                 plugins: plugins,
                 cardBoardConfig: {
+                    cardConfig: {
+                        editable: true,
+                        showIconMenus: true,
+                        fields: this.getCardFieldNames(['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate'])
+                    },
                     listeners: {
                         filter: this._onBoardFilter,
                         filtercomplete: this._onBoardFilterComplete,
@@ -87,6 +101,15 @@
                     scope: this
                 }
             });
+        },
+
+        _getCardFields: function() {
+            if (this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS')) {
+                var fieldString = this.getSetting('cardFields') || '';
+                return fieldString.split(',');
+            }
+
+            return [];
         },
 
         _onLoad: function() {

@@ -17,15 +17,28 @@
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
         ],
+        mixins: ['Rally.app.CardFieldSelectable'],
         componentCls: 'iterationtrackingboard',
         alias: 'widget.rallyiterationtrackingboard',
 
         settingsScope: 'project',
         scopeType: 'iteration',
 
+
         onScopeChange: function(scope) {
             this.remove('gridBoard');
             this._loadModels();
+        },
+
+        getSettingsFields: function () {
+            var fields = this.callParent(arguments);
+            this.appendCardFieldPickerSetting(fields);
+            return fields;
+        },
+
+        launch: function() {
+            this.showFieldPicker = this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS');
+            this.callParent(arguments);
         },
 
         _addGridBoard: function() {
@@ -63,7 +76,7 @@
                         }]
                     },
                     cardConfig: {
-                        fields: ['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']
+                        fields: this.getCardFieldNames(['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate'])
                     },
                     listeners: {
                         filter: this._onBoardFilter,
@@ -113,6 +126,24 @@
 
         _publishContentUpdatedNoDashboardLayout: function() {
             this.fireEvent('contentupdated', {dashboardLayout: false});
+        },
+
+        _getAddNewParams: function() {
+            return this.gridboard.addNewPlugin._getAddNewParams();
+        },
+
+        _onAddNewBeforeCreate: function(addNew, record, params) {
+            this.gridboard.addNewPlugin._onAddNewBeforeCreate(addNew, record, params);
+        },
+
+        _onAddNewBeforeEditorShow: function(addNew, params) {
+            params.Iteration = this.getIterationRef() || 'u';
+            params.Release = 'u';
+            Ext.apply(params, this._getAddNewParams());
+        },
+
+        _onAddNewCreate: function(addNew, record) {
+            this.gridboard.addNewPlugin._onAddNewBeforeCreate(addNew, record);
         }
     });
 })();

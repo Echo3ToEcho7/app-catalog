@@ -116,13 +116,35 @@
         },
 
         runCalculation: function (snapshots) {
-            var chartData = this.callParent(arguments);
+            var chartData = this.callParent(arguments),
+                todayIndex;
+
+            todayIndex = this._indexOfToday(chartData);
+
+            if(todayIndex > 0) {
+                this._removeFutureSeries(chartData, 0, todayIndex);
+                this._removeFutureSeries(chartData, 1, todayIndex);
+            }
 
             if (this.enableProjections && this._projectionsSlopePositive(chartData)) {
                 this._removeProjectionSeries(chartData);
             }
 
             return chartData;
+        },
+
+        _indexOfToday: function(chartData) {
+             var today = Ext.Date.format(new Date(), 'Y-m-d'),
+                 index = chartData.categories.indexOf(today);
+             return index;
+        },
+
+        _removeFutureSeries: function (chartData, seriesIndex, dayIndex) {
+            if(chartData.series[seriesIndex].data.length > dayIndex) {
+                while(++dayIndex < chartData.series[seriesIndex].data.length) {
+                    chartData.series[seriesIndex].data[dayIndex] = null;
+                }
+            }
         },
 
         _projectionsSlopePositive: function (chartData) {

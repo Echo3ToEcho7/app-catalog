@@ -25,30 +25,15 @@
             });
         },
 
+        _getFetchOnlyFields:function(){
+            return ['LatestDiscussionAgeInMinutes'];
+        },
+
         _createGrid: function(model) {
             var context = this.getContext(),
-                    pageSize = context.get('pageSize');
-            var columns = [
-                {
-                    xtype: 'rallyrowactioncolumn',
-                    rowActionsFn: function(record) {
-                        return [
-                            {
-                                xtype: 'rallyrecordmenuitemedit',
-                                record: record
-                            },
-                            {
-                                xtype: 'rallyrecordmenuitemcopy',
-                                record: record
-                            },
-                            {
-                                xtype: 'rallyrecordmenuitemdelete',
-                                record: record
-                            }
-                        ];
-                    }
-                }
-            ].concat(context.get('fetch').split(','));
+                pageSize = context.get('pageSize'),
+                fetch = context.get('fetch'),
+                columns = this._getColumns(fetch);
 
             var gridConfig = {
                 xtype: 'rallygrid',
@@ -57,6 +42,7 @@
                 enableColumnHide: false,
                 plugins: this._getPlugins(columns),
                 storeConfig: {
+                    fetch: fetch,
                     sorters: Rally.data.util.Sorter.sorters(context.get('order')),
                     context: context.getDataContext()
                 },
@@ -76,6 +62,38 @@
                 ];
             }
             this.add(gridConfig);
+        },
+
+        _getColumns: function(fetch){
+            var defaultColumns = [
+                {
+                    xtype: 'rallyrowactioncolumn',
+                    rowActionsFn: function(record) {
+                        return [
+                            {
+                                xtype: 'rallyrecordmenuitemedit',
+                                record: record
+                            },
+                            {
+                                xtype: 'rallyrecordmenuitemcopy',
+                                record: record
+                            },
+                            {
+                                xtype: 'rallyrecordmenuitemdelete',
+                                record: record
+                            }
+                        ];
+                    }
+                }
+            ];
+
+            if (fetch) {
+                var columnsFromFetch = Ext.Array.difference(fetch.split(','), this._getFetchOnlyFields());
+                return defaultColumns.concat(columnsFromFetch);
+            } else {
+                return defaultColumns;
+            }
+
         },
 
         _getPlugins: function(columns) {

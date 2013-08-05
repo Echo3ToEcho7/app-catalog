@@ -6,7 +6,7 @@
     Ext.define('Rally.apps.roadmapplanningboard.BacklogBoardColumn', {
         extend: 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
         alias: 'widget.backlogplanningcolumn',
-        inject: ['planningStore'],
+        inject: ['planStore'],
         config: {
             roadmap: null,
             lowestPIType: undefined,
@@ -28,10 +28,10 @@
         isMatchingRecord: function (featureRecord) {
             var _this = this;
 
-            return !this.roadmap || (this.planningStore.findBy(function (planningRecord) {
-                return _this.roadmap.plans().getById(planningRecord.get('id')) &&
-                    (_.find(planningRecord.get('features'), function (planFeatureRecord) {
-                        return featureRecord.get('ObjectID') === parseInt(planFeatureRecord.id, 10);
+            return !this.roadmap || (this.planStore.findBy(function (planRecord) {
+                return _this.roadmap.plans().getById(planRecord.getId()) &&
+                    (_.find(planRecord.get('features'), function (planFeatureRecord) {
+                        return featureRecord.getId() === parseInt(planFeatureRecord.id, 10);
                     }));
             }, this)) === -1;
         }
