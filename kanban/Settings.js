@@ -8,7 +8,7 @@
         singleton: true,
         requires: [
             'Rally.apps.kanban.ColumnSettingsField',
-            'Rally.apps.kanban.CardAgeSettingsField',
+            'Rally.app.settings.CardAgeField',
             'Rally.ui.combobox.FieldComboBox',
             'Rally.ui.picker.FieldPicker',
             'Rally.ui.CheckboxField',
@@ -93,10 +93,11 @@
                     boxLabel: 'Hide cards in last visible column if assigned to a release'
                 },
                 {
-                    xtype: 'kanbancardagesettingsfield',
-                    fieldLabel: '',
-                    margin: '5 0 10 80',
-                    mapsToMultiplePreferenceKeys: ['showCardAge', 'cardAgeThreshold']
+                    type: 'cardage',
+                    config: {
+                        fieldLabel: '',
+                        margin: '5 0 10 80'
+                    }
                 },
                 {
                     name: 'pageSize',

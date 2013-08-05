@@ -33,6 +33,14 @@
         getSettingsFields: function () {
             var fields = this.callParent(arguments);
             this.appendCardFieldPickerSetting(fields);
+
+            fields.push({
+                type: 'cardage',
+                config: {
+                    margin: '0 0 0 80'
+                }
+            });
+
             return fields;
         },
 
