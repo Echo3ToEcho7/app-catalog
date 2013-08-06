@@ -32,7 +32,11 @@
 
         getSettingsFields: function () {
             var fields = this.callParent(arguments);
-            this.appendCardFieldPickerSetting(fields);
+
+            if (!this.isShowingBlankSlate()) {
+                this.appendCardFieldPickerSetting(fields);
+            }
+
             return fields;
         },
 
