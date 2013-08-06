@@ -80,3 +80,15 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     @createApp().then =>
 
       expect(@app.gridboard.getGridOrBoard().columnConfig.additionalFetchFields).toContain 'PortfolioItem'
+
+  describe 'when blank slate is not shown', ->
+    it 'should show field picker in settings ', ->
+      @createApp(isShowingBlankSlate: -> false).then =>
+        @app.showFieldPicker = true
+        expect(Ext.isObject(_.find(@app.getSettingsFields(), name: 'cardFields'))).toBe true
+
+  describe 'when blank slate is shown', ->
+    it 'should not show field picker in settings ', ->
+      @createApp(isShowingBlankSlate: -> true).then =>
+        @app.showFieldPicker = true
+        expect(Ext.isEmpty(_.find(@app.getSettingsFields(), name: 'cardFields'))).toBe true
