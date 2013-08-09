@@ -24,7 +24,7 @@
         clientMetrics: [
             {
                 method: '_onEditLinkClick',
-                defaultUserAction: 'iteration summary app - edit iteration link clicked'
+                description: 'iteration summary app - edit iteration link clicked'
             }
         ],
 
