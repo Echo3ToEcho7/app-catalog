@@ -155,7 +155,7 @@
                         autoExpand: true,
                         alwaysExpanded: false,
                         hideTrigger: true,
-                        fieldBlackList: ['DefectStatus', 'TaskStatus'],
+                        fieldBlackList: ['DefectStatus', 'TaskStatus', 'DisplayColor'],
                         alwaysSelectedValues: ['FormattedID', 'Name', 'Owner'],
                         storeConfig: {
                             autoLoad: false
