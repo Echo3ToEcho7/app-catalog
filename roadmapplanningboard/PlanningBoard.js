@@ -2,14 +2,24 @@
     var Ext = window.Ext4 || window.Ext;
     Ext.define('Rally.apps.roadmapplanningboard.PlanningBoard', {
         extend: 'Rally.ui.cardboard.CardBoard',
+        alias: 'widget.roadmapplanningboard',
+        
         plugins: [
             {
                 ptype: 'rallyfixedheadercardboard'
             }
         ],
-        alias: 'widget.roadmapplanningboard',
-        inject: ['timeframeStore', 'planningStore', 'roadmapStore', 'appModelFactory'],
-        requires: ['Rally.data.util.PortfolioItemHelper', 'Rally.ui.cardboard.plugin.FixedHeader', 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', 'Rally.apps.roadmapplanningboard.BacklogBoardColumn'],
+        
+        inject: ['timeframeStore', 'planStore', 'roadmapStore'],
+        
+        requires: [
+            'Rally.data.util.PortfolioItemHelper',
+            'Rally.ui.cardboard.plugin.FixedHeader',
+            'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
+            'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
+            'Rally.apps.roadmapplanningboard.BacklogBoardColumn'
+        ],
+        
         config: {
             roadmapId: null,
             cardConfig: {
@@ -29,7 +39,7 @@
 
             this._retrieveLowestLevelPI(function(record) {
                 _this.lowestPIType = record.get('TypePath');
-                _this.planningStore.load(function() {
+                _this.planStore.load(function() {
                     _this.timeframeStore.load(function() {
                         _this._buildColumnsFromStore();
                     });
@@ -76,11 +86,11 @@
         _addColumnFromTimeframe: function (timeframe, roadmapResultPlans) {
             var planForTimeframe;
 
-            planForTimeframe = this.planningStore.getAt(this.planningStore.findBy(function (record) {
+            planForTimeframe = this.planStore.getAt(this.planStore.findBy(function (record) {
                 return record.get('timeframe').id === timeframe.getId();
             }));
             if (!planForTimeframe || (roadmapResultPlans.findBy(function (record) {
-                return record.data.id === planForTimeframe.data.id;
+                return record.getId() === planForTimeframe.getId();
             })) === -1) {
                 return null;
             }
@@ -101,7 +111,7 @@
                     editable: true
                 },
                 isMatchingRecord: function (featureRecord) {
-                    return plan && _.find(plan.get('features'), function(feature) { return feature.id === featureRecord.get('ObjectID').toString(); });
+                    return plan && _.find(plan.get('features'), function(feature) { return feature.id === featureRecord.getId().toString(); });
                 }
             });
         }

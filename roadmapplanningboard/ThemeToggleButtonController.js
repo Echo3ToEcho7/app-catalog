@@ -15,7 +15,7 @@
             }
         },
         clientMetrics: {
-            userActionProperty: 'getClickAction',
+            descriptionProperty: 'getClickAction',
             method: 'onClick'
         },
         onClick: function () {

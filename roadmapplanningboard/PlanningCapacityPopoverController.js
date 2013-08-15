@@ -16,7 +16,7 @@
             }
         },
         clientMetrics: {
-            userActionProperty: 'getClickAction',
+            descriptionProperty: 'getClickAction',
             method: 'onBeforeDestroy'
         },
         init: function () {

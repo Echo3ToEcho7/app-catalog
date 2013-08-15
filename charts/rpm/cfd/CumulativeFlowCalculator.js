@@ -5,12 +5,14 @@
         extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
 
         getDerivedFieldsOnInput: function () {
+            var chartAggregationType = this.config.chartAggregationType;
+
             return _.map(this.config.scheduleStates, function(state) {
                 return {
                     "as": state,
                     "f": function (snapshot) {
-                        if (this.config.chartAggregationType === 'storycount') {
-                            if(snapshot.ScheduleState) {
+                        if (chartAggregationType === 'storycount') {
+                            if (snapshot.ScheduleState) {
                                 return snapshot.ScheduleState === state ? 1 : 0;
                             }
 

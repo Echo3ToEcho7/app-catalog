@@ -321,6 +321,7 @@
 
         _addChart: function () {
             this.chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
+            this._updateChartConfigDateFormat();
 
             this.add(this.chartComponentConfig);
             this.down('rallychart').on('snapshotsAggregated', this._onSnapshotDataReady, this);
@@ -372,6 +373,9 @@
         },
 
         _updateXAxisLabelSpacing: function (chart) {
+            if(this.container.dom.offsetWidth < 1000) {
+                chart.chartConfig.xAxis.labels.staggerLines = 2;
+            }
             chart.chartConfig.xAxis.labels.step = Math.round( chart.chartData.categories.length / 100 );
         },
 
@@ -383,6 +387,40 @@
                 return 'Points';
             }
         },
+
+        _updateChartConfigDateFormat: function () {
+            var self = this;
+
+            this.chartComponentConfig.chartConfig.xAxis.labels.formatter = function () {
+                return self._formatDate(self.dateStringToObject(this.value));
+            };
+        },
+
+        _parseRallyDateFormatToHighchartsDateFormat: function () {
+            var dateFormat = this._getUserConfiguredDateFormat() || this._getWorkspaceConfiguredDateFormat();
+
+            for (var i = 0; i < this.dateFormatters.length; i++) {
+                dateFormat = dateFormat.replace(this.dateFormatters[i].key, this.dateFormatters[i].value);
+            }
+
+            return dateFormat;
+        },
+
+        _formatDate: function (date) {
+            if (!this.dateFormat) {
+                this.dateFormat = this._parseRallyDateFormatToHighchartsDateFormat();
+            }
+
+            return Highcharts.dateFormat(this.dateFormat, date.getTime());
+        },
+
+        _getUserConfiguredDateFormat: function () {
+            return this.getContext().getUser().UserProfile.DateFormat;
+        },
+
+         _getWorkspaceConfiguredDateFormat: function () {
+            return this.getContext().getWorkspace().WorkspaceConfiguration.DateFormat;
+         },
 
         _updateChartTitle: function () {
             var chartConfig = this.chartComponentConfig.chartConfig;

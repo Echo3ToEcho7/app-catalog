@@ -32,12 +32,15 @@
 
         getSettingsFields: function () {
             var fields = this.callParent(arguments);
-            this.appendCardFieldPickerSetting(fields);
+
+            if (!this.isShowingBlankSlate()) {
+                this.appendCardFieldPickerSetting(fields);
+            }
 
             fields.push({
                 type: 'cardage',
                 config: {
-                    margin: '0 0 0 80'
+                margin: '0 0 0 80'
                 }
             });
 

@@ -67,7 +67,7 @@
                     fieldLabel: 'Card Fields',
                     xtype: 'rallyfieldpicker',
                     modelTypes: ['userstory', 'defect'],
-                    fieldBlackList: ['DefectStatus', 'TaskStatus'],
+                    fieldBlackList: ['DefectStatus', 'TaskStatus', 'DisplayColor'],
                     alwaysSelectedValues: ['FormattedID', 'Name', 'Owner'],
                     listeners: {
                         selectionchange: function(picker) {

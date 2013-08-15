@@ -34,7 +34,7 @@
         clientMetrics: [
             {
                 method: '_showHelp',
-                defaultUserAction: 'portfolio-kanban-show-help'
+                description: 'portfolio-kanban-show-help'
             }
         ],
 

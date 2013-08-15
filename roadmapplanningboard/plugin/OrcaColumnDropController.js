@@ -76,7 +76,7 @@
 
       record = options.card.getRecord();
       options.sourceColumn.planRecord.set('features', Ext.Array.filter(options.sourceColumn.planRecord.get('features'), function(obj) {
-        return obj.id !== '' + record.get('ObjectID');
+        return obj.id !== '' + record.getId();
       }));
       return options.sourceColumn.planRecord.save({
         success: function() {
@@ -97,7 +97,7 @@
 
       record = options.card.getRecord();
       options.destinationColumn.planRecord.get('features').push({
-        id: record.get('ObjectID').toString(),
+        id: record.getId().toString(),
         ref: record.get('_ref')
       });
       return options.destinationColumn.planRecord.save({
@@ -119,19 +119,19 @@
 
       record = options.card.getRecord();
       options.sourceColumn.planRecord.set('features', Ext.Array.filter(options.sourceColumn.planRecord.get('features'), function(obj) {
-        return obj.id !==  '' + record.get('ObjectID');
+        return obj.id !==  '' + record.getId();
       }));
       options.destinationColumn.planRecord.get('features').push({
-        id: record.get('ObjectID').toString(),
+        id: record.getId().toString(),
         ref: record.get('_ref')
       });
       return Ext.Ajax.request({
         method: 'POST',
-        url: 'http://bld-planning-01.f4tech.com:9030/planning-service/api/plan/' + options.sourceColumn.planRecord.get('id') + '/features/to/' + options.destinationColumn.planRecord.get('id'),
+        url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/plan/' + options.sourceColumn.planRecord.getId() + '/features/to/' + options.destinationColumn.planRecord.getId(),
         jsonData: {
           data: [
             {
-              id: record.get('ObjectID') + '',
+              id: record.getId() + '',
               ref: record.get('_ref')
             }
           ]

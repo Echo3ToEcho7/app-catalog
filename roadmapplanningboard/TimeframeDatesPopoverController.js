@@ -12,7 +12,7 @@
             dateType: true
         },
         clientMetrics: {
-            userActionProperty: '_datesUpdatedAction',
+            descriptionProperty: '_datesUpdatedAction',
             method: '_saveModel'
         },
         init: function () {

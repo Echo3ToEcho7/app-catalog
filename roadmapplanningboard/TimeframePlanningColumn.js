@@ -6,7 +6,15 @@
     Ext.define('Rally.apps.roadmapplanningboard.TimeframePlanningColumn', {
         extend: 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
         alias: 'widget.timeframeplanningcolumn',
-        requires: ['Rally.apps.roadmapplanningboard.ThemeHeader', 'Rally.apps.roadmapplanningboard.PlanCapacityProgressBar', 'Rally.apps.roadmapplanningboard.util.Fraction', 'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView', 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView'],
+        
+        requires: [
+            'Rally.apps.roadmapplanningboard.ThemeHeader',
+            'Rally.apps.roadmapplanningboard.PlanCapacityProgressBar',
+            'Rally.apps.roadmapplanningboard.util.Fraction',
+            'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView',
+            'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView'
+        ],
+        
         config: {
             startDateField: 'start',
             endDateField: 'end',
