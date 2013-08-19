@@ -21,7 +21,7 @@
         clientMetrics: [
             {
                 method: '_onMatrixCellClicked',
-                defaultUserAction: 'matrix cell clicked'
+                description: 'matrix cell clicked'
             }
         ],
 

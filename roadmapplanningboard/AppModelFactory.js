@@ -1,12 +1,63 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
+
+    /**
+     * @private
+     * This should never be called directly, but only through the {@link Rally.data.ModelFactory}
+     */
     Ext.define('Rally.apps.roadmapplanningboard.AppModelFactory', {
-        requires: ['Rally.data.Model'],
-        getPlanningModel: function () {
-            if (this.planningModel) {
-                return this.planningModel;
+        
+        singleton: true,
+        
+        requires: [
+            'Rally.data.Model',
+            'Rally.apps.roadmapplanningboard.Proxy'
+        ],
+
+        /**
+         * @property
+         * {String[]} modelTypes An array of types this factory knows how to handle. These
+         */
+        modelTypes: [
+            'plan',
+            'roadmap',
+            'timeframe'
+        ],
+        
+        getModel: function (options) {
+            var model = {},
+                type;
+            
+            if (!Ext.isObject(options)) {
+                type = options;
+            } else {
+                type = options.type;
             }
-            this.planningModel = Ext.define('Rally.apps.roadmapplanningboard.PlanningModel', {
+            
+            model = this[this._getModelTypeName(type)]();
+            
+            return model;
+        },
+        
+        getModels: function (options) {
+            var models = {};
+            
+            _.each(options.types, function (type) {
+                Ext.apply(models, this.getModel(options, type));
+            });
+            
+            return models;
+        },
+        
+        _getModelTypeName: function (type) {
+            return 'get' + type.charAt(0).toUpperCase() + type.slice(1) + 'Model';
+        },
+        
+        getPlanModel: function () {
+            if (this.planModel) {
+                return this.planModel;
+            }
+            this.planModel = Ext.define('Rally.apps.roadmapplanningboard.PlanModel', {
                 extend: 'Rally.data.Model',
                 fields: [
                     {
@@ -44,24 +95,12 @@
                     name: 'timeframe',
                     model: this.getTimeframeModel().$className
                 },
-                hasMany: {
-                    name: 'features',
-                    model: this.getFeatureModel().$className
-                },
                 proxy: {
-                    type: 'rest',
-                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/plan',
-                    reader: {
-                        type: 'json',
-                        root: 'data.results'
-                    },
-                    writer: {
-                        type: 'json',
-                        root: 'data'
-                    }
+                    type: 'roadmap',
+                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/plan'
                 }
             });
-            return this.planningModel;
+            return this.planModel;
         },
         getRoadmapModel: function () {
             if (this.roadmapModel) {
@@ -88,26 +127,18 @@
                 ],
                 hasMany: {
                     name: 'plans',
-                    model: this.getPlanningModel().$className
+                    model: this.getPlanModel().$className
                 },
                 proxy: {
-                    type: 'rest',
-                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/roadmap',
-                    reader: {
-                        type: 'json',
-                        root: 'data.results'
-                    },
-                    writer: {
-                        type: 'json',
-                        root: 'data'
-                    }
+                    type: 'roadmap',
+                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/roadmap'
                 }
             });
             return this.roadmapModel;
         },
-        _stripTime: function (v, rec) {
-            if (v) {
-                return Ext.Date.clearTime(Ext.Date.parse(v, 'c'));
+        _stripTime: function (value) {
+            if (value) {
+                return Ext.Date.clearTime(Ext.Date.parse(value, 'c'));
             }
         },
         getTimeframeModel: function () {
@@ -142,16 +173,8 @@
                     }
                 ],
                 proxy: {
-                    type: 'rest',
-                    url: 'https://bld-orcafe-01.f4tech.com/timeline-service/api/timeframe',
-                    reader: {
-                        type: 'json',
-                        root: 'data.results'
-                    },
-                    writer: {
-                        type: 'json',
-                        root: 'data'
-                    }
+                    type: 'roadmap',
+                    url: 'https://bld-orcafe-01.f4tech.com/timeline-service/api/timeframe'
                 },
                 belongsTo: {
                     model: 'Rally.apps.roadmapplanningboard.TimelineModel',
@@ -159,57 +182,9 @@
                 }
             });
             return this.timeframeModel;
-        },
-        getFeatureModel: function () {
-            if (this.featureModel) {
-                return this.featureModel;
-            }
-            this.featureModel = Ext.define('Rally.apps.roadmapplanningboard.FeatureModel', {
-                extend: 'Rally.data.Model',
-                fields: [
-                    {
-                        name: 'id',
-                        type: 'string'
-                    },
-                    {
-                        name: 'ObjectID',
-                        type: 'string'
-                    },
-                    {
-                        name: 'Name',
-                        type: 'string'
-                    },
-                    {
-                        name: 'PreliminaryEstimate',
-                        type: 'int'
-                    },
-                    {
-                        name: 'ref',
-                        type: 'string'
-                    },
-                    {
-                        name: 'blocked',
-                        value: false
-                    }
-                ],
-                proxy: {
-                    type: 'rest',
-                    url: "https://bld-orcafe-01.f4tech.com/portfolio-service/api/feature",
-                    reader: {
-                        type: 'json',
-                        root: 'data.results'
-                    },
-                    writer: {
-                        type: 'json',
-                        root: 'data'
-                    }
-                },
-                belongsTo: {
-                    model: 'Rally.apps.roadmapplanningboard.PlanModel'
-                }
-            });
-            return this.featureModel;
         }
+    }, function () {
+        Rally.data.ModelFactory.registerTypes(this.modelTypes, this);
     });
 
-}).call(this);
+})();
