@@ -97,7 +97,7 @@
                     },
                     cardConfig: {
                         fields: this.getCardFieldNames(['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']),
-                        showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1
+                        showAge: (this.getSetting('showCardAge') && this.showCardAgeEnabled) ? this.getSetting('cardAgeThreshold') : -1
                     },
                     listeners: {
                         filter: this._onBoardFilter,
