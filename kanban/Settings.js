@@ -8,7 +8,6 @@
         singleton: true,
         requires: [
             'Rally.apps.kanban.ColumnSettingsField',
-            'Rally.apps.kanban.CardAgeSettingsField',
             'Rally.ui.combobox.FieldComboBox',
             'Rally.ui.picker.FieldPicker',
             'Rally.ui.CheckboxField',
@@ -67,7 +66,7 @@
                     fieldLabel: 'Card Fields',
                     xtype: 'rallyfieldpicker',
                     modelTypes: ['userstory', 'defect'],
-                    fieldBlackList: ['DefectStatus', 'TaskStatus'],
+                    fieldBlackList: ['DefectStatus', 'TaskStatus', 'DisplayColor'],
                     alwaysSelectedValues: ['FormattedID', 'Name', 'Owner'],
                     listeners: {
                         selectionchange: function(picker) {
@@ -93,10 +92,11 @@
                     boxLabel: 'Hide cards in last visible column if assigned to a release'
                 },
                 {
-                    xtype: 'kanbancardagesettingsfield',
-                    fieldLabel: '',
-                    margin: '5 0 10 80',
-                    mapsToMultiplePreferenceKeys: ['showCardAge', 'cardAgeThreshold']
+                    type: 'cardage',
+                    config: {
+                        fieldLabel: '',
+                        margin: '5 0 10 80'
+                    }
                 },
                 {
                     name: 'pageSize',

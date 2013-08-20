@@ -201,6 +201,11 @@
             var calcConfig = this.chartComponentConfig.calculatorConfig;
             calcConfig.startDate = Rally.util.DateTime.toIsoString(this._getScopeObjectStartDate(), true);
             calcConfig.endDate = Rally.util.DateTime.toIsoString(this._getScopeObjectEndDate(), true);
+
+            // S53625: If the time-box has ended, disable the projection line
+            if (new Date() > this._getScopeObjectEndDate()) {
+                calcConfig.enableProjections = false;
+            }
         },
 
         _addAggregationTypeToCalculator: function () {

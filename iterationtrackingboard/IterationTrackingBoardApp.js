@@ -24,6 +24,12 @@
         settingsScope: 'project',
         scopeType: 'iteration',
 
+        config: {
+            defaultSettings: {
+                showCardAge: true,
+                cardAgeThreshold: 3
+            }
+        },
 
         onScopeChange: function(scope) {
             this.remove('gridBoard');
@@ -32,12 +38,26 @@
 
         getSettingsFields: function () {
             var fields = this.callParent(arguments);
-            this.appendCardFieldPickerSetting(fields);
+
+            if (!this.isShowingBlankSlate()) {
+                this.appendCardFieldPickerSetting(fields);
+            }
+
+            if(this.showCardAgeEnabled)  {
+                fields.push({
+                    type: 'cardage',
+                    config: {
+                        margin: '0 0 0 80'
+                    }
+                });
+            }
+
             return fields;
         },
 
         launch: function() {
             this.showFieldPicker = this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS');
+            this.showCardAgeEnabled = this.getContext().isFeatureEnabled('SHOW_CARD_AGE_IN_ITERATION_BOARD_SETTINGS');
             this.callParent(arguments);
         },
 
@@ -76,7 +96,8 @@
                         }]
                     },
                     cardConfig: {
-                        fields: this.getCardFieldNames(['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate'])
+                        fields: this.getCardFieldNames(['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']),
+                        showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1
                     },
                     listeners: {
                         filter: this._onBoardFilter,
