@@ -39,7 +39,7 @@
 
         _validateStoreFilter: function(store, filter) {
             if(Ext.isString(filter.property)) {
-                return filter.property.split('.').length > 1 || store.model.hasField(filter.property);
+                return filter.property === 'TypeDefOid' || filter.property.split('.').length > 1 || store.model.hasField(filter.property);
             } else {
                 return this._validateStoreFilter(store, filter.property) && this._validateStoreFilter(store, filter.value);
             }
