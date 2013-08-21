@@ -71,7 +71,7 @@
             if ( _column !== null) {
                 _column.isRightmostColumn = true;
             }
-            return this._renderColumns();
+            return this.renderColumns();
         },
 
         _getBacklogColumnConfig: function () {
