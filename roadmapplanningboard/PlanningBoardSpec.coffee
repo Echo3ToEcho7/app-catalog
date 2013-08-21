@@ -87,32 +87,30 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
 
   it 'should render with a backlog column', ->
-    @board.render(Ext.getBody())
-    backlogColumn = @board.getColumns()[0]
+    @board.render('testDiv')
+    @waitForComponentReady(@board).then =>
+      backlogColumn = @board.getColumns()[0]
 
-    expect(backlogColumn).toBeTruthy()
-    expect(backlogColumn.getColumnHeader().getHeaderValue()).toBe "Backlog"
+      expect(backlogColumn).toBeTruthy()
+      expect(backlogColumn.getColumnHeader().getHeaderValue()).toBe "Backlog"
 
   it 'should have three visible planning columns', ->
-    @board.render(Ext.getBody())
+    @board.render('testDiv')
+    @waitForComponentReady(@board).then =>
 
-    expect(@board.getColumns()[1].getColumnHeader().getHeaderValue()).toBe "Q1"
-    expect(@board.getColumns()[2].getColumnHeader().getHeaderValue()).toBe "Q2"
-    expect(@board.getColumns()[3].getColumnHeader().getHeaderValue()).toBe "Future Planning Period"
+      expect(@board.getColumns()[1].getColumnHeader().getHeaderValue()).toBe "Q1"
+      expect(@board.getColumns()[2].getColumnHeader().getHeaderValue()).toBe "Q2"
+      expect(@board.getColumns()[3].getColumnHeader().getHeaderValue()).toBe "Future Planning Period"
 
   it 'should have features in the appropriate columns', ->
-    @board.render(Ext.getBody())
+    @board.render('testDiv')
+    @waitForComponentReady(@board).then =>
 
-    deferred = Ext.create 'Deft.Deferred'
-    _this = this
-    @board.on 'load', ->
-      expect(_this.board.getColumns()[1].getCards().length).toBe 3
-      expect(_this.board.getColumns()[2].getCards().length).toBe 1
-      expect(_this.board.getColumns()[3].getCards().length).toBe 0
-      expect(_this.board.getColumns().length).toBe(4)
-      deferred.resolve()
+      expect(this.board.getColumns()[1].getCards().length).toBe 3
+      expect(this.board.getColumns()[2].getCards().length).toBe 1
+      expect(this.board.getColumns()[3].getCards().length).toBe 0
+      expect(this.board.getColumns().length).toBe(4)
 
-    deferred.promise
   # 3 + backlog
 
   it 'should be correctly configured with stores from deft', ->
@@ -120,22 +118,14 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
     expect(@board.planStore).toBeTruthy()
 
   it 'should have appropriate plan capacity range', ->
-    @board.render(Ext.getBody())
-    deferred = Ext.create 'Deft.Deferred'
-    _this = this
-    
-    @board.on 'load', ->
-      expect(_this.board.getColumns()[1].getPlanRecord().get('lowCapacity')).toBe 2
-      expect(_this.board.getColumns()[1].getPlanRecord().get('highCapacity')).toBe 8
-      expect(_this.board.getColumns()[2].getPlanRecord().get('lowCapacity')).toBe 3
-      expect(_this.board.getColumns()[2].getPlanRecord().get('highCapacity')).toBe 30
-      expect(_this.board.getColumns()[3].getPlanRecord().get('lowCapacity')).toBe 15
-      expect(_this.board.getColumns()[3].getPlanRecord().get('highCapacity')).toBe 25
-
-      deferred.resolve()
-
-    deferred.promise
-
+    @board.render('testDiv')
+    @waitForComponentReady(@board).then =>
+      expect(this.board.getColumns()[1].getPlanRecord().get('lowCapacity')).toBe 2
+      expect(this.board.getColumns()[1].getPlanRecord().get('highCapacity')).toBe 8
+      expect(this.board.getColumns()[2].getPlanRecord().get('lowCapacity')).toBe 3
+      expect(this.board.getColumns()[2].getPlanRecord().get('highCapacity')).toBe 30
+      expect(this.board.getColumns()[3].getPlanRecord().get('lowCapacity')).toBe 15
+      expect(this.board.getColumns()[3].getPlanRecord().get('highCapacity')).toBe 25
 
   # it 'should have a blank roadmap with 3 plans', ->
   #   newboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
@@ -167,15 +157,15 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
   #   testBoard.destroy()
 
   it 'should set isRightmostColumn flag in last column only', ->
-    @board.render(Ext.getBody())
+    @board.render('testDiv')
+    @waitForComponentReady(@board).then =>
 
-    expect(@board.getColumns()[0].isRightmostColumn).not.toBeTruthy()
-    expect(@board.getColumns()[1].isRightmostColumn).not.toBeTruthy()
-    expect(@board.getColumns()[2].isRightmostColumn).not.toBeTruthy()
-    expect(@board.getColumns()[3].isRightmostColumn).toBeTruthy()
+      expect(@board.getColumns()[0].isRightmostColumn).not.toBeTruthy()
+      expect(@board.getColumns()[1].isRightmostColumn).not.toBeTruthy()
+      expect(@board.getColumns()[2].isRightmostColumn).not.toBeTruthy()
+      expect(@board.getColumns()[3].isRightmostColumn).toBeTruthy()
 
   it 'attribute should be set to empty', ->
-    @board.render(Ext.getBody())
-    expect(@board.attribute == '').toBeTruthy()
-
-    
+    @board.render('testDiv')
+    @waitForComponentReady(@board).then =>
+      expect(@board.attribute == '').toBeTruthy()
