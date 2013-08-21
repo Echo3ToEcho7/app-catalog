@@ -14,10 +14,10 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
     Rally.test.destroyComponentsOfQuery 'kanbancolumnsettingsfield'
 
   it 'creates rows for each allowed value', ->
-    @_createKanbanSettingsField(
+    @createKanbanSettingsField(
       renderTo: 'testDiv'
     )
-    @_refreshField()
+    @refreshField()
 
     @waitForCallback(@readyCallback).then =>
       firstCells = Ext.dom.Query.select('.x4-grid-cell-first > .x4-grid-cell-inner')
@@ -25,34 +25,34 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       expect(html).toBe @allowedValues[i] for html, i in Ext.Array.pluck(firstCells, 'innerHTML')
 
   it 'only validates field if the store has been loaded', ->
-    @_createKanbanSettingsField()
+    @createKanbanSettingsField()
     expect(@field.getErrors().length).toBe 0
 
   it 'validates field when store loaded', ->
-    @_createKanbanSettingsField(
+    @createKanbanSettingsField(
       renderTo: 'testDiv'
     )
-    @_refreshField()
+    @refreshField()
 
     @waitForCallback(@readyCallback).then =>
       expect(@field.getErrors().length).toBe 1
       expect(@field.getErrors()[0]).toBe 'At least one column must be shown.'
 
   it 'should destroy columns grid when destroyed', ->
-    @_createKanbanSettingsField(
+    @createKanbanSettingsField(
       renderTo: 'testDiv'
     )
     gridDestroySpy = @spy(@field._grid, 'destroy')
     @field.destroy()
     expect(gridDestroySpy).toHaveBeenCalledOnce()
 
-  describe 'shouldShowColumnLevelFieldPicker off', ->
+  describe 'with shouldShowColumnLevelFieldPicker off', ->
     it 'should display 4 columns with the scheduleStateMapping picker as the last column', ->
-       @_createKanbanSettingsField(
+       @createKanbanSettingsField(
          renderTo: 'testDiv',
          shouldShowColumnLevelFieldPicker: false
        )
-       @_refreshField()
+       @refreshField()
 
        @waitForCallback(@readyCallback).then =>
          expect(@field._grid.columns.length).toBe 4
@@ -74,13 +74,13 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
         data = @field.getSubmitData()
         expect(data.foo).toBe @value
 
-  describe 'shouldShowColumnLevelFieldPicker on', ->
+  describe 'with shouldShowColumnLevelFieldPicker on', ->
     it 'should display 5 columns with the cardFields field picker as the last column', ->
-      @_createKanbanSettingsField(
+      @createKanbanSettingsField(
         renderTo: 'testDiv',
         shouldShowColumnLevelFieldPicker: true
       )
-      @_refreshField()
+      @refreshField()
 
       @waitForCallback(@readyCallback).then =>
         expect(@field._grid.columns.length).toBe 5
@@ -138,18 +138,19 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
         gridHelper = new Helpers.Grid(@field._grid)
         gridHelper.startEditingCell('', 'cardFields').then (inlineEditor) =>
           field = inlineEditor.editor.field
-          @click(css: '.' + field.rightCls.replace(' ', '.')).then =>
+          fieldRightClsSelector = '.' + field.rightCls.replace(' ', '.')
+          @click(css: fieldRightClsSelector).then =>
             @once(
-              condition: => field.list.getEl().down('.' + field.rightCls.replace(' ', '.')).getHTML() == field.rightUpdateText
+              condition: => field.list.getEl().down(fieldRightClsSelector).getHTML() == field.rightUpdateText
               description: 'wait for right side action text to swap'
             ).then =>
-              @click(css: '.' + field.rightCls.replace(' ', '.')).then =>
-                rowOneCardFieldsNameArray = Ext.Array.pluck(Ext.Array.pluck(@field._grid.store.getAt(0).get('cardFields'), 'data'), 'name')
+              @click(css: fieldRightClsSelector).then =>
+                rowOneCardFieldsNameArray = _.pluck(_.pluck(@field._grid.store.getAt(0).get('cardFields'), 'data'), 'name')
                 expect(rowOneCardFieldsNameArray).not.toContain 'AcceptedDate'
                 expect(@field._grid.store.getAt(1).get('cardFields')).not.toContain 'AcceptedDate'
 
   helpers
-    _createKanbanSettingsField: (config) ->
+    createKanbanSettingsField: (config) ->
       @readyCallback = @stub()
 
       @field = Ext.create('Rally.apps.kanban.ColumnSettingsField', Ext.apply(
@@ -160,12 +161,12 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       )
 
     _assertGridSetWithValues: (options) ->
-      @_createKanbanSettingsField(
+      @createKanbanSettingsField(
         renderTo: 'testDiv',
         shouldShowColumnLevelFieldPicker: options.shouldShowColumnLevelFieldPicker
         defaultCardFields: options.defaultCardFields
       )
-      @_refreshField()
+      @refreshField()
       if options.shouldShowColumnLevelFieldPicker
         @value = Ext.JSON.encode({
           Defined: {wip:2, scheduleStateMapping:"Defined",cardFields: options.cardFields || @customFieldSubmitValue}
@@ -180,18 +181,17 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
         cells = Ext.dom.Query.select('.x4-grid-cell > .x4-grid-cell-inner')
         expect(html).toBe options.expectedValues[i] for html, i in Ext.Array.pluck(cells, 'innerHTML')
 
-    _refreshField: (allowedValues)->
+    refreshField: (@allowedValues = ["Defined", "In-Progress"]) ->
       scheduleStateField = Rally.test.mock.data.WsapiModelFactory.getModel('UserStory').getField('ScheduleState')
-      @allowedValues = allowedValues || ["Defined", "In-Progress"]
       @ajax.whenQueryingAllowedValues(scheduleStateField).respondWith @allowedValues
       @field.refreshWithNewField scheduleStateField
 
     _setupWithTwoColumnsShown: (cardFieldForFirstColumn) ->
-      @_createKanbanSettingsField(
+      @createKanbanSettingsField(
              renderTo: 'testDiv',
              shouldShowColumnLevelFieldPicker: true
       )
-      @_refreshField()
+      @refreshField()
       value = Ext.JSON.encode(
         Defined: {wip: 2, scheduleStateMapping: "Defined", cardFields: cardFieldForFirstColumn}
         "In-Progress": {wip: 2, scheduleStateMapping: "Defined"}
