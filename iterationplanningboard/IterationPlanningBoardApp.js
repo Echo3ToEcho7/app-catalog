@@ -63,7 +63,8 @@
                     cardConfig: {
                         editable: true,
                         showIconMenus: true,
-                        fields: this.getCardFieldNames(['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate'])
+                        fields: this.getCardFieldNames(['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']),
+                        showBlockedReason: this.getContext().isFeatureEnabled('F929_ENABLE_BLOCKED_REASON_PROMPT_ON_BOARDS')
                     },
                     listeners: {
                         filter: this._onBoardFilter,
