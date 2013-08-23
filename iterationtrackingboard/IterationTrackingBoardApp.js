@@ -27,7 +27,8 @@
         config: {
             defaultSettings: {
                 showCardAge: true,
-                cardAgeThreshold: 3
+                cardAgeThreshold: 3,
+                cardFields: 'Parent,Tasks,Defects,Discussion,PlanEstimate'
             }
         },
 
@@ -96,7 +97,7 @@
                         }]
                     },
                     cardConfig: {
-                        fields: this.getCardFieldNames(['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']),
+                        fields: this.getCardFieldNames(),
                         showAge: (this.getSetting('showCardAge') && this.showCardAgeEnabled) ? this.getSetting('cardAgeThreshold') : -1,
                         showBlockedReason: this.getContext().isFeatureEnabled('F929_ENABLE_BLOCKED_REASON_PROMPT_ON_BOARDS')
                     },
