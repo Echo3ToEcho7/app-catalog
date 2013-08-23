@@ -500,3 +500,8 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     ).then =>
       @click(className: 'scroll-forwards').then =>
         @assertColumnIsFor Rally.util.Array.last(@iterationData), Rally.util.Array.last(@getTimeboxColumns())
+
+  it 'should have a default card fields setting', ->
+    @createApp().then =>
+      expect(@app.getSetting('cardFields')).toBe 'Parent,Tasks,Defects,Discussion,PlanEstimate'
+

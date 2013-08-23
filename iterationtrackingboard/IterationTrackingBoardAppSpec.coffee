@@ -81,6 +81,10 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
       expect(@app.gridboard.getGridOrBoard().columnConfig.additionalFetchFields).toContain 'PortfolioItem'
 
+  it 'should have a default card fields setting', ->
+    @createApp().then =>
+      expect(@app.getSetting('cardFields')).toBe 'Parent,Tasks,Defects,Discussion,PlanEstimate'
+
   describe 'when blank slate is not shown', ->
     it 'should show field picker in settings ', ->
       @createApp(isShowingBlankSlate: -> false).then =>
