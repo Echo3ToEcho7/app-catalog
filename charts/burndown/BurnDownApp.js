@@ -199,13 +199,19 @@
 
         _addDateBoundsToCalculator: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
+            var endDate = this._getScopeObjectEndDate();
+            var now = new Date();
             calcConfig.startDate = Rally.util.DateTime.toIsoString(this._getScopeObjectStartDate(), true);
-            calcConfig.endDate = Rally.util.DateTime.toIsoString(this._getScopeObjectEndDate(), true);
-
+            if(now > this._getScopeObjectStartDate() && now < this._getScopeObjectEndDate()) {
+                endDate = now;
+            }
+            calcConfig.endDate = Rally.util.DateTime.toIsoString(endDate, true);
             // S53625: If the time-box has ended, disable the projection line
-            if (new Date() > this._getScopeObjectEndDate()) {
+            if (now > this._getScopeObjectEndDate()) {
                 calcConfig.enableProjections = false;
             }
+            // add scopeEndDate, which may or may not be the same as endDate
+            calcConfig.scopeEndDate = this._getScopeObjectEndDate();
         },
 
         _addAggregationTypeToCalculator: function () {
@@ -327,6 +333,7 @@
         _addChart: function () {
             this.chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
             this._updateChartConfigDateFormat();
+            this._updateChartConfigWorkdays();
 
             this.add(this.chartComponentConfig);
             this.down('rallychart').on('snapshotsAggregated', this._onSnapshotDataReady, this);
@@ -334,7 +341,7 @@
 
         _onSnapshotDataReady: function (chart) {
             this._updateDisplayType(chart);
-            this._updateXAxisLabelSpacing(chart);
+            this._updateXAxis(chart);
         },
 
         _updateDisplayType: function (chart) {
@@ -377,11 +384,22 @@
             };
         },
 
-        _updateXAxisLabelSpacing: function (chart) {
+        _updateXAxis: function (chart) {
             if(this.container.dom.offsetWidth < 1000) {
                 chart.chartConfig.xAxis.labels.staggerLines = 2;
             }
             chart.chartConfig.xAxis.labels.step = Math.round( chart.chartData.categories.length / 100 );
+            var calcConfig = this.chartComponentConfig.calculatorConfig;
+
+            chart.chartConfig.xAxis.tickInterval = this._configureChartTicks(chart.chartData.categories.length);
+        },
+
+        _configureChartTicks: function (days) {
+            var pixelTickWidth = 125,
+                appWidth = this.getWidth(),
+                ticks = Math.floor(appWidth / pixelTickWidth);
+
+            return Math.ceil(days / ticks);
         },
 
         _getAxisTitleBasedOnAggregationType: function () {
@@ -399,6 +417,10 @@
             this.chartComponentConfig.chartConfig.xAxis.labels.formatter = function () {
                 return self._formatDate(self.dateStringToObject(this.value));
             };
+        },
+
+        _updateChartConfigWorkdays: function () {
+            this.chartComponentConfig.calculatorConfig.workDays = this._getWorkspaceConfiguredWorkdays().split(',');
         },
 
         _parseRallyDateFormatToHighchartsDateFormat: function () {
@@ -423,9 +445,13 @@
             return this.getContext().getUser().UserProfile.DateFormat;
         },
 
-         _getWorkspaceConfiguredDateFormat: function () {
+        _getWorkspaceConfiguredDateFormat: function () {
             return this.getContext().getWorkspace().WorkspaceConfiguration.DateFormat;
-         },
+        },
+
+        _getWorkspaceConfiguredWorkdays: function () {
+            return this.getContext().getWorkspace().WorkspaceConfiguration.WorkDays;
+        },
 
         _updateChartTitle: function () {
             var chartConfig = this.chartComponentConfig.chartConfig;

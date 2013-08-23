@@ -27,7 +27,6 @@
 
             calculatorType: "Rally.apps.charts.burndown.BurnDownCalculator",
             calculatorConfig: {
-                workDays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
                 timeZone: "GMT",
                 completedScheduleStateNames: ["Accepted", "Released"],
                 enableProjections: true
