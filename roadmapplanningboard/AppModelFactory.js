@@ -136,9 +136,17 @@
             });
             return this.roadmapModel;
         },
-        _stripTime: function (value) {
-            if (value) {
-                return Ext.Date.clearTime(Ext.Date.parse(value, 'c'));
+        /**
+         * The server will give us Zulu time. We need to make sure we're normalizing for our timezone
+         * and stripping the time since we only care about the date
+         * @param value The value from the server
+         * @returns {Ext.Date}
+         * @private
+         */
+        _normalizeDate: function (value) {
+            var date = new Date(value);
+            if (date.getTime()) {
+                return Ext.Date.add(date, Ext.Date.MINUTE, date.getTimezoneOffset());
             }
         },
         getTimeframeModel: function () {
@@ -159,12 +167,12 @@
                     {
                         name: 'start',
                         type: 'date',
-                        convert: this._stripTime
+                        convert: this._normalizeDate
                     },
                     {
                         name: 'end',
                         type: 'date',
-                        convert: this._stripTime
+                        convert: this._normalizeDate
                     },
                     {
                         name: 'updatable',
