@@ -209,6 +209,8 @@
             // S53625: If the time-box has ended, disable the projection line
             if (now > this._getScopeObjectEndDate()) {
                 calcConfig.enableProjections = false;
+            } else {
+                calcConfig.enableProjections = true;
             }
             // add scopeEndDate, which may or may not be the same as endDate
             calcConfig.scopeEndDate = this._getScopeObjectEndDate();
