@@ -35,6 +35,14 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
     expect(filter[1].property).toBe 'Requirement'
     expect(filter[1].value).toBeNull()
 
+  it 'should not show closed defects', ->
+    @createColumn()
+    filter = @column.getStoreFilter(@defectModel)
+
+    expect(filter[2].property).toBe 'State'
+    expect(filter[2].operator).toBe '!='
+    expect(filter[2].value).toBe 'Closed'
+
   it 'should not show user stories with children', ->
     @createColumn()
     record = @createStoryRecord
