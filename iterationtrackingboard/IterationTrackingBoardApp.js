@@ -106,6 +106,20 @@
                         filtercomplete: this._onBoardFilterComplete
                     }
                 },
+                gridConfig: {
+                    columnCfgs: [
+                        'FormattedID',
+                        'Name',
+                        'ScheduleState',
+                        'Blocked',
+                        {text: 'Plan Est', dataIndex: 'PlanEstimate'},
+                        'TaskStatus',
+                        {text: 'Task Est', dataIndex: 'TaskEstimateTotal'},
+                        {text: 'To Do',  dataIndex: 'TaskRemainingTotal'},
+                        'Owner',
+                        'DefectStatus',
+                        'Discussion']
+                },
                 listeners: {
                     load: this._onLoad,
                     toggle: this._publishContentUpdated,
