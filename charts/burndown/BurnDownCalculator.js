@@ -108,8 +108,8 @@
         getProjectionsConfig: function () {
             var days = (this.scopeEndDate.getTime() -
                 Rally.util.DateTime.fromIsoString(this.startDate).getTime()) / (24*1000*60*60);
-            var doubleTimeboxEnd = Ext.Date.add(Rally.util.DateTime.fromIsoString(this.startDate), Ext.Date.DAY, Math.floor(days) * 2);
-            var timeboxEnd = this.scopeEndDate;
+            var doubleTimeboxEnd = Ext.Date.add(Rally.util.DateTime.fromIsoString(this.startDate), Ext.Date.DAY, (Math.floor(days) * 2) - 1);
+            var timeboxEnd = Ext.Date.add(this.scopeEndDate, Ext.Date.DAY, -1);
             return {
                 doubleTimeboxEnd: doubleTimeboxEnd,
                 timeboxEnd: timeboxEnd,
