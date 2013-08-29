@@ -24,7 +24,7 @@
         },
 
         getColumnStatus: function() {
-             return this.columnStatus;
+            return this.columnStatus;
         },
 
         getStatusCell: function() {
@@ -122,10 +122,16 @@
                     });
                 }
             } else if (model.elementName === 'Defect') {
-                filters.push({
-                    property: 'Requirement',
-                    value: null
-                });
+                Ext.Array.push(filters,
+                    {
+                        property: 'Requirement',
+                        value: null
+                    },
+                    {
+                        property: 'State',
+                        operator: '!=',
+                        value: 'Closed'
+                    });
             }
 
             return filters;
