@@ -21,6 +21,8 @@
         cls: 'burndown-app',
 
         scopeObject: undefined,
+        
+        customScheduleStates: ['Accepted'],	// a reasonable default
 
         getSettingsFields: function () {
             this.chartSettings = this.chartSettings || Ext.create('Rally.apps.charts.burndown.BurnDownSettings', {
@@ -43,6 +45,8 @@
                     return;
                 }
             }
+
+            this._loadUserStoryModel();
 
             this._saveScopeType();
             this.callParent(arguments);
@@ -221,7 +225,7 @@
 
         _updateCompletedScheduleStates: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
-            calcConfig.completedScheduleStateNames = this._getCompletedScheduleStates();
+            calcConfig.completedScheduleStateNames = this.customScheduleStates;
         },
 
         _loadScopeObject: function (scopeRef) {
@@ -487,19 +491,14 @@
         _settingsInvalid: function () {
             var chartAggregationType = this.getSetting('chartAggregationType'),
                 chartDisplayType = this.getSetting('chartDisplayType'),
-                chartTimebox = this.getSetting('chartTimebox'),
-                chartScheduleStates = this.getSetting('customScheduleStates');
+                chartTimebox = this.getSetting('chartTimebox');
 
             var invalid = function (value) {
                 return !value || value === 'undefined';
             };
 
             return invalid(chartAggregationType) || invalid(chartDisplayType) ||
-                this._chartTimeboxInvalid(chartTimebox) || this._chartScheduleStatesInvalid(chartScheduleStates);
-        },
-
-         _chartScheduleStatesInvalid: function (chartScheduleStates) {
-            return !chartScheduleStates || chartScheduleStates === 'undefined' || chartScheduleStates.length === 0;
+                this._chartTimeboxInvalid(chartTimebox);
         },
 
         _chartTimeboxInvalid: function (chartTimebox) {
@@ -589,15 +588,62 @@
             }
         },
 
-        _getCompletedScheduleStates: function () {
-            var states = this.getSetting('customScheduleStates');
-            if(_.isString(states)) {
-                return states.split(',');
-            }
+        _loadUserStoryModel: function() {
+            Rally.data.ModelFactory.getModel({
+                type: "UserStory",
+                context: this._getContext(),
+                success: function(model) {
+                    this._getScheduleStateValues(model);
+                },
+                scope: this
+            });
+        },
 
-            // return a reasonable default in case they somehow managed to select no states...(which shouldn't happen)
-            return ['Accepted'];
+        _getContext: function() {
+            return {
+                workspace: this.context.getWorkspaceRef(),
+                project: null
+            };
+        },
+
+        _getScheduleStateValues: function (model) {
+            if(model) {
+                model.getField("ScheduleState").getAllowedValueStore().load({
+                    callback: function(records, operation, success) {
+                        var scheduleStates = _.collect(records, function(obj) {
+                            return obj.raw;
+                        });
+
+                        var store = this._wrapRecords(scheduleStates);
+                        var	values = [];
+
+                        var acceptedSeen = false;
+                        values = [];
+                        for(var i = 0; i < store.data.items.length; i++) {
+                            if(store.data.items[i].data.StringValue == 'Accepted') {
+                                acceptedSeen = true;
+                            }
+                            if(acceptedSeen) {
+                                values.push(store.data.items[i].data.StringValue);
+                            }
+                        }
+
+                        if(values.length > 0) {
+                            this.customScheduleStates = values;
+                        }
+                    },
+                    scope: this
+                });
+            }
+        },
+        
+        _wrapRecords: function(records) {
+            return Ext.create("Ext.data.JsonStore", {
+                fields: ["_ref", "StringValue"],
+                data: records
+            });
         }
+
 
     });
 }());
