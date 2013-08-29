@@ -21,6 +21,12 @@
         cls: 'planning-board',
         modelNames: ['User Story', 'Defect'],
 
+        config: {
+            defaultSettings: {
+                cardFields: 'Parent,Tasks,Defects,Discussion,PlanEstimate'
+            }
+        },
+
         launch: function() {
             this.showFieldPicker = this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS');
             this._showBoard();
@@ -63,7 +69,7 @@
                     cardConfig: {
                         editable: true,
                         showIconMenus: true,
-                        fields: this.getCardFieldNames(['Parent', 'Tasks', 'Defects', 'Discussion', 'PlanEstimate']),
+                        fields:  this.getCardFieldNames(),
                         showBlockedReason: this.getContext().isFeatureEnabled('F929_ENABLE_BLOCKED_REASON_PROMPT_ON_BOARDS')
                     },
                     listeners: {
