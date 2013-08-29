@@ -89,7 +89,7 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
     @board.on 'headersizechanged', resizeStub
 
     deferred = Ext.create 'Deft.Deferred'
-    
+
     @board.on 'load', =>
       themeHeader = @board.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
       themeHeader.themeContainer.goToEditMode()

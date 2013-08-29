@@ -3,6 +3,14 @@ Ext = window.Ext4 || window.Ext
 Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
 
   loadDependencies: ->
+
+    Rally.test.mock.env.Global.setupEnvironment({
+      services: {
+        planning_service_url: 'http://localhost:9999',
+        timeline_service_url: 'http://localhost:8888'
+      }
+    });
+
     Deft.Injector.configure
       appModelFactory:
         className: 'Rally.apps.roadmapplanningboard.AppModelFactory'

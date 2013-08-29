@@ -10,7 +10,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         return @roadmapStoreFixture if @roadmapStoreFixture
 
         @roadmapStoreFixture = Ext.create 'Ext.data.Store',
-            model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('roadmap')
+            model: Rally.apps.roadmapplanningboard.AppModelFactory.getRoadmapModel()
             proxy:
                 type: 'memory'
 
@@ -53,7 +53,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         return @planStoreFixture if @planStoreFixture
         
         @planStoreFixture = Ext.create 'Ext.data.Store',
-            model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('plan')
+            model: Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel()
             proxy:
                 type: 'memory'
 
@@ -242,7 +242,7 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
 
     getTimeframeStoreFixture: ->
         @timeframeStoreFixture = Ext.create 'Ext.data.Store',
-            model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('timeframe')
+            model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel()
             proxy:
                 type: 'memory'
             data: [
