@@ -68,7 +68,7 @@
                 },
                 proxy: {
                     type: 'roadmap',
-                    url: Rally.environment.getContext().context.services + '/api/plan'
+                    url: Rally.environment.getContext().context.services.planning_service_url + '/api/plan'
                 }
             });
             return this.planModel;
@@ -103,7 +103,7 @@
                 },
                 proxy: {
                     type: 'roadmap',
-                    url: Rally.environment.getContext().context.services + '/api/roadmap'
+                    url: Rally.environment.getContext().context.services.planning_service_url + '/api/roadmap'
                 }
             });
             return this.roadmapModel;
@@ -155,7 +155,7 @@
                 ],
                 proxy: {
                     type: 'roadmap',
-                    url: Rally.environment.getContext().context.services + '/api/timeframe'
+                    url: Rally.environment.getContext().context.services.timeline_service_url + '/api/timeframe'
                 },
                 belongsTo: {
                     model: 'Rally.apps.roadmapplanningboard.TimelineModel',
