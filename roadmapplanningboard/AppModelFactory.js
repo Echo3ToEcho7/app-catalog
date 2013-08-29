@@ -23,36 +23,7 @@
             'roadmap',
             'timeframe'
         ],
-        
-        getModel: function (options) {
-            var model = {},
-                type;
-            
-            if (!Ext.isObject(options)) {
-                type = options;
-            } else {
-                type = options.type;
-            }
-            
-            model = this[this._getModelTypeName(type)]();
-            
-            return model;
-        },
-        
-        getModels: function (options) {
-            var models = {};
-            
-            _.each(options.types, function (type) {
-                Ext.apply(models, this.getModel(options, type));
-            });
-            
-            return models;
-        },
-        
-        _getModelTypeName: function (type) {
-            return 'get' + type.charAt(0).toUpperCase() + type.slice(1) + 'Model';
-        },
-        
+
         getPlanModel: function () {
             if (this.planModel) {
                 return this.planModel;
@@ -97,11 +68,12 @@
                 },
                 proxy: {
                     type: 'roadmap',
-                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/plan'
+                    url: Rally.environment.getContext().context.services + '/api/plan'
                 }
             });
             return this.planModel;
         },
+
         getRoadmapModel: function () {
             if (this.roadmapModel) {
                 return this.roadmapModel;
@@ -131,7 +103,7 @@
                 },
                 proxy: {
                     type: 'roadmap',
-                    url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/roadmap'
+                    url: Rally.environment.getContext().context.services + '/api/roadmap'
                 }
             });
             return this.roadmapModel;
@@ -149,6 +121,7 @@
                 return Ext.Date.clearTime(Ext.Date.add(date, Ext.Date.MINUTE, date.getTimezoneOffset()));
             }
         },
+
         getTimeframeModel: function () {
             if (this.timeframeModel) {
                 return this.timeframeModel;
@@ -182,7 +155,7 @@
                 ],
                 proxy: {
                     type: 'roadmap',
-                    url: 'https://bld-orcafe-01.f4tech.com/timeline-service/api/timeframe'
+                    url: Rally.environment.getContext().context.services + '/api/timeframe'
                 },
                 belongsTo: {
                     model: 'Rally.apps.roadmapplanningboard.TimelineModel',

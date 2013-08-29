@@ -127,7 +127,7 @@
       });
       return Ext.Ajax.request({
         method: 'POST',
-        url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/plan/' + options.sourceColumn.planRecord.getId() + '/features/to/' + options.destinationColumn.planRecord.getId(),
+        url: Rally.environment.getContext().context.services + '/api/plan' + options.sourceColumn.planRecord.getId() + '/features/to/' + options.destinationColumn.planRecord.getId(),
         jsonData: {
           data: [
             {
