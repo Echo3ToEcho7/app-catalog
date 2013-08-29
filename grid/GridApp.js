@@ -1,5 +1,7 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
+    var appAutoScroll = Ext.isIE7 || Ext.isIE8;
+    var gridAutoScroll = !appAutoScroll;
 
     Ext.define('Rally.apps.grid.GridApp', {
         extend: 'Rally.app.App',
@@ -15,6 +17,8 @@
             'Rally.data.QueryFilter',
             'Rally.ui.grid.plugin.PercentDonePopoverPlugin'
         ],
+
+        autoScroll: appAutoScroll,
 
         launch: function() {
             // TODO: need to pass dataScope here
@@ -40,6 +44,7 @@
                 model: model,
                 columnCfgs: columns,
                 enableColumnHide: false,
+                autoScroll: gridAutoScroll,
                 plugins: this._getPlugins(columns),
                 storeConfig: {
                     fetch: fetch,
