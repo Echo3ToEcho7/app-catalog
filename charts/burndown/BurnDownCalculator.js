@@ -108,9 +108,11 @@
         getProjectionsConfig: function () {
             var days = (this.scopeEndDate.getTime() -
                 Rally.util.DateTime.fromIsoString(this.startDate).getTime()) / (24*1000*60*60);
-            var projEndDate = Ext.Date.add(Rally.util.DateTime.fromIsoString(this.startDate), Ext.Date.DAY, Math.floor(days) * 2);
+            var doubleTimeboxEnd = Ext.Date.add(Rally.util.DateTime.fromIsoString(this.startDate), Ext.Date.DAY, Math.floor(days) * 2);
+            var timeboxEnd = this.scopeEndDate;
             return {
-                projEndDate: projEndDate,
+                doubleTimeboxEnd: doubleTimeboxEnd,
+                timeboxEnd: timeboxEnd,
                 series: [
                     {
                         "as": "Prediction",
@@ -119,7 +121,8 @@
                 ],
                 continueWhile: function (point) {
                     var dt = Rally.util.DateTime.fromIsoString(point.tick);
-                    return point.Prediction > 0 && dt < this.projEndDate;
+                    var end = (this.series[0].slope >= 0) ? this.timeboxEnd : this.doubleTimeboxEnd;
+                    return point.Prediction > 0 && dt < end;
                 }
             };
         },
