@@ -152,7 +152,7 @@
     },
 
     _constructUrl: function(sourceId, destinationId) {
-        return Rally.environment.getContext().context.services.planning_service_url + '/api/plan/' + sourceId + '/features/to/' + destinationId
+        return Rally.environment.getContext().context.services.planning_service_url + '/api/plan/' + sourceId + '/features/to/' + destinationId;
     },
 
     _onDropSaveSuccess: function(column, sourceColumn, card, updatedRecord, type) {
