@@ -18,11 +18,12 @@
                     "_TypeHierarchy": -51038,
                     "Children": null
                 },
-                fetch: ["ScheduleState", "PlanEstimate"],
+                fetch: ["ScheduleState", "PlanEstimate", "ObjectId", "_ValidFrom", "_ValidTo"],
                 hydrate: ["ScheduleState"],
                 sort: {
                     "_ValidFrom": 1
-                }
+                },
+                compress: true
             },
 
             calculatorType: "Rally.apps.charts.burndown.BurnDownCalculator",
