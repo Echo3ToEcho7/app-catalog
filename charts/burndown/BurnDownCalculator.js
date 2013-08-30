@@ -106,7 +106,13 @@
         },
 
         getProjectionsConfig: function () {
+            var days = (this.scopeEndDate.getTime() -
+                Rally.util.DateTime.fromIsoString(this.startDate).getTime()) / (24*1000*60*60);
+            var doubleTimeboxEnd = Ext.Date.add(Rally.util.DateTime.fromIsoString(this.startDate), Ext.Date.DAY, (Math.floor(days) * 2) - 1);
+            var timeboxEnd = Ext.Date.add(this.scopeEndDate, Ext.Date.DAY, -1);
             return {
+                doubleTimeboxEnd: doubleTimeboxEnd,
+                timeboxEnd: timeboxEnd,
                 series: [
                     {
                         "as": "Prediction",
@@ -114,7 +120,9 @@
                     }
                 ],
                 continueWhile: function (point) {
-                    return point.Prediction > 0;
+                    var dt = Rally.util.DateTime.fromIsoString(point.tick);
+                    var end = (this.series[0].slope >= 0) ? this.timeboxEnd : this.doubleTimeboxEnd;
+                    return point.Prediction > 0 && dt < end;
                 }
             };
         },
@@ -125,10 +133,6 @@
 
             if(new Date() < this.scopeEndDate) {
                 this._recomputeIdeal(chartData, this.scopeEndDate);
-            }
-
-            if (this.enableProjections && this._projectionsSlopePositive(chartData)) {
-                this._removeProjectionSeries(chartData);
             }
 
             return chartData;
@@ -210,23 +214,6 @@
                 index = chartData.categories.indexOf(dateStr) + 1;
             }
             return index;
-        },
-
-        _removeProjectionSeries: function (chartData) {
-            var series = chartData.series,
-                categories = chartData.categories;
-
-            var endDateIndex = this._indexOfNextWorkday(chartData, this.scopeEndDate);
-
-            _.each(series, function (seriesData) {
-                seriesData.data = _.first(seriesData.data, endDateIndex + 1);
-            });
-
-            chartData.series = _.filter(series, function (seriesData) {
-                return seriesData.name != "Prediction";
-            });
-
-            chartData.categories = _.first(categories, endDateIndex + 1);
         }
     });
 }());
