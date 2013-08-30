@@ -32,7 +32,7 @@
                 enableProjections: true
             },
 
-            chartColors: ["#3399ff", "#66cc33", "#000000", "#919191"],
+            chartColors: ["#005eb8", "#8dc63f", "#666666", "#c0c0c0"],
 
             chartConfig: {
                 chart: {
