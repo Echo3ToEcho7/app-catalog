@@ -207,3 +207,14 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
     expect(@leftColumn.getCards().length).toBe leftColumnCardCountBefore - 1
     expect(@rightColumn.getCards().length).toBe rightColumnCardCountBefore + 1
+
+  it 'should construct correct url when dragging card from plan to plan', ->
+    ajaxRequest = @stub Ext.Ajax, 'request', (options) ->
+      options.success()
+
+    card = @leftColumn.getCards()[2]
+
+    dragData = { card: card, column: @leftColumn }
+    @rightColumnDropController.onCardDropped(dragData, 0)
+
+    expect(ajaxRequest.args[0][0].url).toBe "http://localhost:9999/api/plan/#{@leftColumn.planRecord.get('id')}/features/to/#{@rightColumn.planRecord.get('id')}"
