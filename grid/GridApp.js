@@ -44,6 +44,7 @@
                 model: model,
                 columnCfgs: columns,
                 enableColumnHide: false,
+                enableRanking: true,
                 autoScroll: gridAutoScroll,
                 plugins: this._getPlugins(columns),
                 storeConfig: {
