@@ -106,7 +106,13 @@
         },
 
         getProjectionsConfig: function () {
+            var days = (this.scopeEndDate.getTime() -
+                Rally.util.DateTime.fromIsoString(this.startDate).getTime()) / (24*1000*60*60);
+            var doubleTimeboxEnd = Ext.Date.add(Rally.util.DateTime.fromIsoString(this.startDate), Ext.Date.DAY, (Math.floor(days) * 2) - 1);
+            var timeboxEnd = Ext.Date.add(this.scopeEndDate, Ext.Date.DAY, -1);
             return {
+                doubleTimeboxEnd: doubleTimeboxEnd,
+                timeboxEnd: timeboxEnd,
                 series: [
                     {
                         "as": "Prediction",
@@ -114,7 +120,9 @@
                     }
                 ],
                 continueWhile: function (point) {
-                    return point.Prediction > 0;
+                    var dt = Rally.util.DateTime.fromIsoString(point.tick);
+                    var end = (this.series[0].slope >= 0) ? this.timeboxEnd : this.doubleTimeboxEnd;
+                    return point.Prediction > 0 && dt < end;
                 }
             };
         },
@@ -127,16 +135,15 @@
                 this._recomputeIdeal(chartData, this.scopeEndDate);
             }
 
-            if (this.enableProjections && this._projectionsSlopePositive(chartData)) {
-                this._removeProjectionSeries(chartData);
-            }
-
             return chartData;
         },
 
         _recomputeIdeal: function(chartData, endDate) {
              var index;
              if(chartData.categories.length < 1) {
+                return;
+             }
+             if(this.workDays.length < 1) {
                 return;
              }
 
@@ -159,14 +166,17 @@
                 index = chartData.categories.length - 1;
              } else {
                  // it is in "scope"...set index to the index of the last workday in scope
-                 index = this._indexOfScopeEnd(chartData, endDate);
+                 index = this._indexOfDate(chartData, endDate);
                  if(index === -1) {
                     // it's in "scope", but falls on a non-workday...back up to the previous workday
                     while (this.workDays.indexOf(Ext.Date.format(endDate, 'l')) == -1) {
                         endDate = Ext.Date.add(endDate, Ext.Date.DAY, -1);
-                        index = this._indexOfScopeEnd(chartData, endDate);
+                        index = this._indexOfDate(chartData, endDate);
                     }
                  }
+             }
+             if(index < 0) {
+                return;
              }
              // set first and last point, and let connectNulls fill in the rest
              var i;
@@ -177,9 +187,9 @@
              seriesData[index] = 0;
         },
 
-        _indexOfScopeEnd: function(chartData, scopeEndDate) {
-             var endDate = Ext.Date.format(scopeEndDate, 'Y-m-d');
-             return chartData.categories.indexOf(endDate);
+        _indexOfDate: function(chartData, date) {
+             var dateStr = Ext.Date.format(date, 'Y-m-d');
+             return chartData.categories.indexOf(dateStr);
         },
 
         _removeFutureSeries: function (chartData, seriesIndex, dayIndex) {
@@ -196,37 +206,6 @@
             }
 
             return true;
-        },
-
-        _indexOfNextWorkday: function(chartData, date) {
-            var dateStr = Ext.Date.format(date, 'Y-m-d');
-            var index = chartData.categories.indexOf(dateStr);
-            if(index == -1) {
-                while (this.workDays.indexOf(Ext.Date.format(date, 'l')) == -1) {
-                    date = Ext.Date.add(date, Ext.Date.DAY, -1);
-
-                }
-                dateStr = Ext.Date.format(date, 'Y-m-d');
-                index = chartData.categories.indexOf(dateStr) + 1;
-            }
-            return index;
-        },
-
-        _removeProjectionSeries: function (chartData) {
-            var series = chartData.series,
-                categories = chartData.categories;
-
-            var endDateIndex = this._indexOfNextWorkday(chartData, this.scopeEndDate);
-
-            _.each(series, function (seriesData) {
-                seriesData.data = _.first(seriesData.data, endDateIndex + 1);
-            });
-
-            chartData.series = _.filter(series, function (seriesData) {
-                return seriesData.name != "Prediction";
-            });
-
-            chartData.categories = _.first(categories, endDateIndex + 1);
         }
     });
 }());

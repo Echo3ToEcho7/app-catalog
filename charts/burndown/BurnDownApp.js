@@ -213,6 +213,8 @@
             // S53625: If the time-box has ended, disable the projection line
             if (now > this._getScopeObjectEndDate()) {
                 calcConfig.enableProjections = false;
+            } else {
+                calcConfig.enableProjections = true;
             }
             // add scopeEndDate, which may or may not be the same as endDate
             calcConfig.scopeEndDate = this._getScopeObjectEndDate();
@@ -295,13 +297,11 @@
         _getPlotBand: function (categories, iteration, shouldColorize) {
             var startDate = this.dateStringToObject(iteration.StartDate);
             var endDate = this.dateStringToObject(iteration.EndDate);
-            var startDateStr = Ext.Date.format(startDate, 'Y-m-d');
-            var endDateStr = Ext.Date.format(endDate, 'Y-m-d');
 
             return {
                 color: shouldColorize ? '#F2FAFF' : '#FFFFFF',
-                from: categories.indexOf(startDateStr),
-                to: categories.indexOf(endDateStr),
+                from: this._getNearestWorkday(categories, startDate),
+                to: this._getNearestWorkday(categories, endDate),
                 label: {
                     text: iteration.Name,
                     align: 'center',
@@ -311,9 +311,26 @@
             };
         },
 
+        _getNearestWorkday: function(categories, date) {
+            var dateStr = Ext.Date.format(date, 'Y-m-d');
+            var index = categories.indexOf(dateStr);
+            if(index === -1) {
+                var workdays = this._getWorkspaceConfiguredWorkdays();
+                if(workdays.length < 1) {
+                    return -1;
+                }
+                // date not in categories (probably) means it falls on a non-workday...back up to the next previous workday
+                while (workdays.indexOf(Ext.Date.format(date, 'l')) == -1 && date > this._getScopeObjectStartDate()) {
+                    date = Ext.Date.add(date, Ext.Date.DAY, -1);
+                    dateStr = Ext.Date.format(date, 'Y-m-d');
+                    index = categories.indexOf(dateStr);
+                }
+            }
+            return index;
+        },
+
         _getPlotLine: function (categories, iteration, lastLine) {
             var dateObj;
-            var dateStr;
             var dateIndex;
 
             if (lastLine) {
@@ -322,8 +339,7 @@
                 dateObj = this.dateStringToObject(iteration.StartDate);
             }
 
-            dateStr = Ext.Date.format(dateObj, 'Y-m-d');
-            dateIndex = categories.indexOf(dateStr);
+            dateIndex = this._getNearestWorkday(categories, dateObj);
 
             return {
                 color: '#BBBBBB',
