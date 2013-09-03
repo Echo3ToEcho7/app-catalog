@@ -20,6 +20,18 @@
 
         cls: 'burndown-app',
 
+        items: [
+            {
+                xtype: 'container',
+                itemId: 'header',
+                cls: 'header'
+            }
+        ],
+
+        help: {
+            id: 278
+        },
+
         scopeObject: undefined,
 
         getSettingsFields: function () {
@@ -44,6 +56,8 @@
                 }
             }
 
+            this._addHelpComponent();
+
             this._saveScopeType();
             this.callParent(arguments);
 
@@ -51,6 +65,19 @@
                 this.ignoreOnScopeChange = true;
                 this._getScopePicker().on('ready', this._loadScopePreference, this, {single: true});
             }
+        },
+
+        _addHelpComponent: function () {
+            this.down('#header').add(this._buildHelpComponent());
+        },
+
+        _buildHelpComponent: function () {
+            return Ext.create('Ext.Component', {
+                renderTpl: Rally.util.Help.getIcon({
+                    cls: Rally.util.Test.toBrowserTestCssClass(this.help.cls),
+                    id: this.help.id
+                })
+            });
         },
 
         _rebuildChartForScope: function(scopeRef) {
