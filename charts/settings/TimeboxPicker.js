@@ -26,11 +26,11 @@
                 name: this.settingName,
                 itemId: this.settingName,
                 label: "Level",
-                columns: [100, 100, 100],
+                columns: [160, 100, 100],
                 vertical: false,
                 items: [
-                    { boxLabel: "Iteration", name: this.settingName, inputValue: "iteration" },
-                    { boxLabel: "Release", name: this.settingName, inputValue: "release" }
+                    { boxLabel: "Release", name: this.settingName, inputValue: "release", checked: true },
+                    { boxLabel: "Iteration", name: this.settingName, inputValue: "iteration" }
                 ],
                 listeners: {
                     beforerender: this.setRadioValue,

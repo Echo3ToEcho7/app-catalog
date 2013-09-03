@@ -25,11 +25,11 @@
             return {
                 xtype: "radiogroup",
                 name: this.settingName,
-                columns: [100, 150],
+                columns: [160, 100],
                 vertical: false,
                 items: [
-                    { boxLabel: "Story Count", name: this.settingName, inputValue: "storycount" },
-                    { boxLabel: "Story Plan Estimate", name: this.settingName, inputValue: "storypoints" }
+                    { boxLabel: "Story Plan Estimate", name: this.settingName, inputValue: "storypoints", checked: true },
+                    { boxLabel: "Story Count", name: this.settingName, inputValue: "storycount" }
                 ],
                 listeners: {
                     beforerender: this.setRadioValue,

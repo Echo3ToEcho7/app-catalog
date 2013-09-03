@@ -1,5 +1,7 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
+    var appAutoScroll = Ext.isIE7 || Ext.isIE8;
+    var gridAutoScroll = !appAutoScroll;
 
     Ext.define('Rally.apps.grid.GridApp', {
         extend: 'Rally.app.App',
@@ -15,6 +17,8 @@
             'Rally.data.QueryFilter',
             'Rally.ui.grid.plugin.PercentDonePopoverPlugin'
         ],
+
+        autoScroll: appAutoScroll,
 
         launch: function() {
             // TODO: need to pass dataScope here
@@ -40,11 +44,17 @@
                 model: model,
                 columnCfgs: columns,
                 enableColumnHide: false,
+                enableRanking: true,
+                autoScroll: gridAutoScroll,
                 plugins: this._getPlugins(columns),
                 storeConfig: {
                     fetch: fetch,
                     sorters: Rally.data.util.Sorter.sorters(context.get('order')),
-                    context: context.getDataContext()
+                    context: context.getDataContext(),
+                    listeners: {
+                        load: this._updateAppContainerSize,
+                        scope: this
+                    }
                 },
                 pagingToolbarCfg: {
                     pageSizes: [pageSize]
@@ -62,6 +72,18 @@
                 ];
             }
             this.add(gridConfig);
+        },
+
+        _updateAppContainerSize: function() {
+            if (this.appContainer) {
+                var grid = this.down('rallygrid');
+                grid.el.setHeight('auto');
+                grid.body.setHeight('auto');
+                grid.view.el.setHeight('auto');
+                this.appContainer.setSize({height: grid.getHeight() + _.reduce(grid.getDockedItems(), function(acc, item) {
+                    return acc + item.getHeight() + item.el.getMargin('tb');
+                }, 0)});
+            }
         },
 
         _getColumns: function(fetch){

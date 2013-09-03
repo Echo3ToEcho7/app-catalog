@@ -15,19 +15,19 @@
                 timeframeStore: {
                     className: 'Ext.data.Store',
                     parameters: [{
-                        model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('timeframe')
+                        model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel()
                     }]
                 },
                 planStore: {
                     className: 'Ext.data.Store',
                     parameters: [{
-                        model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('plan')
+                        model: Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel()
                     }]
                 },
                 roadmapStore: {
                     className: 'Ext.data.Store',
                     parameters: [{
-                        model: Rally.apps.roadmapplanningboard.AppModelFactory.getModel('roadmap')
+                        model: Rally.apps.roadmapplanningboard.AppModelFactory.getRoadmapModel()
                     }]
                 }
             });
