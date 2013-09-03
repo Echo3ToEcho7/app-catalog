@@ -127,6 +127,7 @@
       });
       return Ext.Ajax.request({
         method: 'POST',
+        withCredentials: true,
         url: this._constructUrl(options.sourceColumn.planRecord.getId(), options.destinationColumn.planRecord.getId()),
         jsonData: {
           data: [
