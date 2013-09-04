@@ -351,11 +351,12 @@
         },
 
         _addChart: function () {
-            this.chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
             this._updateChartConfigDateFormat();
             this._updateChartConfigWorkdays();
+            var chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
 
-            this.add(this.chartComponentConfig);
+
+            this.add(chartComponentConfig);
             this.down('rallychart').on('snapshotsAggregated', this._onSnapshotDataReady, this);
         },
 
