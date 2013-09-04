@@ -270,7 +270,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       @filterByType('defect').then =>
         expect(@getVisibleCards('hierarchicalrequirement').length).toBe 1
 
-  it 'should apply local filter if artifacts type pref exists', ->
+  it 'should apply local filter', ->
     addLocalFilterStub = @stub(Rally.ui.cardboard.CardBoard.prototype, 'addLocalFilter')
     artifactsPref = ['defect']
     artifactsPrefStub = @stub(Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser.prototype, 'artifactsPref', artifactsPref)
@@ -278,20 +278,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     @createApp().then =>
       expect(addLocalFilterStub).toHaveBeenCalledOnce()
       expect(addLocalFilterStub.getCall(0).args[1]).toEqual artifactsPref
-
-  it 'should not apply local filter if artifacts type pref exists and it shows all types', ->
-    addLocalFilterStub = @stub(Rally.ui.cardboard.CardBoard.prototype, 'addLocalFilter')
-    artifactsPref = ['defect', 'hierarchicalrequirement']
-    artifactsPrefStub = @stub(Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser.prototype, 'artifactsPref', artifactsPref)
-
-    @createApp().then =>
-      expect(addLocalFilterStub).not.toHaveBeenCalled()
-
-  it 'should not apply local filter if artifacts type pref does not exist', ->
-    addLocalFilterStub = @stub(Rally.ui.cardboard.CardBoard.prototype, 'addLocalFilter')
-    artifactsPrefStub = @stub(Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser.prototype, 'artifactsPref', undefined)
-
-    expect(addLocalFilterStub).not.toHaveBeenCalled()
 
   it 'does not show add new or manage iterations when user is not a project editor', ->
     @stub(Rally.auth.UserPermissions.prototype, 'isProjectEditor').returns false
