@@ -218,6 +218,7 @@
                 store: store,
                 showPagingToolbar: false,
                 sortableColumns: false,
+                showRowActionsColumn: false,
                 columnCfgs: this._buildColumns(),
                 listeners: {
                     cellclick: this._onMatrixCellClicked,
