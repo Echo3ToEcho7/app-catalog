@@ -14,7 +14,6 @@
         
         constructor: function (config) {
             this.mergeConfig(config);
-            this.callParent(config);
         },
 
         _buildSettingsComponent: function (type, label) {
