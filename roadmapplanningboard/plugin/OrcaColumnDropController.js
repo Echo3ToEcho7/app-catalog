@@ -127,7 +127,8 @@
       });
       return Ext.Ajax.request({
         method: 'POST',
-        url: 'https://bld-orcafe-01.f4tech.com/planning-service/api/plan/' + options.sourceColumn.planRecord.getId() + '/features/to/' + options.destinationColumn.planRecord.getId(),
+        withCredentials: true,
+        url: this._constructUrl(options.sourceColumn.planRecord.getId(), options.destinationColumn.planRecord.getId()),
         jsonData: {
           data: [
             {
@@ -149,6 +150,10 @@
           return _this._onDropSaveFailure(options.destinationColumn, options.sourceColumn, record, options.card, sourceIndex, response);
         }
       });
+    },
+
+    _constructUrl: function(sourceId, destinationId) {
+        return Rally.environment.getContext().context.services.planning_service_url + '/api/plan/' + sourceId + '/features/to/' + destinationId;
     },
 
     _onDropSaveSuccess: function(column, sourceColumn, card, updatedRecord, type) {

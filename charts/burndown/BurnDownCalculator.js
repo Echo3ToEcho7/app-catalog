@@ -85,7 +85,11 @@
                     "f": function (row, index, summaryMetrics, seriesData) {
                         var max = summaryMetrics.Scope_max,
                             increments = seriesData.length - 1,
-                            incrementAmount = max / increments;
+                            incrementAmount;
+                        if(increments === 0) {
+                            return max;
+                        }
+                        incrementAmount = max / increments;
                         return Math.floor(100 * (max - index * incrementAmount)) / 100;
                     },
                     "display": "line"
@@ -102,7 +106,13 @@
         },
 
         getProjectionsConfig: function () {
+            var days = (this.scopeEndDate.getTime() -
+                Rally.util.DateTime.fromIsoString(this.startDate).getTime()) / (24*1000*60*60);
+            var doubleTimeboxEnd = Ext.Date.add(Rally.util.DateTime.fromIsoString(this.startDate), Ext.Date.DAY, (Math.floor(days) * 2) - 1);
+            var timeboxEnd = Ext.Date.add(this.scopeEndDate, Ext.Date.DAY, -1);
             return {
+                doubleTimeboxEnd: doubleTimeboxEnd,
+                timeboxEnd: timeboxEnd,
                 series: [
                     {
                         "as": "Prediction",
@@ -110,7 +120,9 @@
                     }
                 ],
                 continueWhile: function (point) {
-                    return point.Prediction > 0;
+                    var dt = Rally.util.DateTime.fromIsoString(point.tick);
+                    var end = (this.series[0].slope >= 0) ? this.timeboxEnd : this.doubleTimeboxEnd;
+                    return point.Prediction > 0 && dt < end;
                 }
             };
         },
@@ -119,24 +131,65 @@
             var chartData = this.callParent(arguments),
                 todayIndex;
 
-            todayIndex = this._indexOfToday(chartData);
-
-            if(todayIndex > 0) {
-                this._removeFutureSeries(chartData, 0, todayIndex);
-                this._removeFutureSeries(chartData, 1, todayIndex);
-            }
-
-            if (this.enableProjections && this._projectionsSlopePositive(chartData)) {
-                this._removeProjectionSeries(chartData);
+            if(new Date() < this.scopeEndDate) {
+                this._recomputeIdeal(chartData, this.scopeEndDate);
             }
 
             return chartData;
         },
 
-        _indexOfToday: function(chartData) {
-             var today = Ext.Date.format(new Date(), 'Y-m-d'),
-                 index = chartData.categories.indexOf(today);
-             return index;
+        _recomputeIdeal: function(chartData, endDate) {
+             var index;
+             if(chartData.categories.length < 1) {
+                return;
+             }
+             if(this.workDays.length < 1) {
+                return;
+             }
+
+             var lastDate = Ext.Date.parse(chartData.categories[chartData.categories.length - 1], 'Y-m-d');
+             if(endDate > lastDate) {
+                // the scopeEndDate date wasn't found in the current categories...we need to extend categories to include it
+                // (honoring "workDays").
+
+                index = chartData.categories.length;
+                var dt = Ext.Date.add(lastDate, Ext.Date.DAY, 1);
+                while (dt < endDate) {
+                    while (this.workDays.indexOf(Ext.Date.format(dt, 'l')) === -1) {
+                        dt = Ext.Date.add(dt, Ext.Date.DAY, 1);
+                    }
+                    if (dt < endDate) {
+                        chartData.categories[index++] = Ext.Date.format(dt, 'Y-m-d');
+                    }
+                    dt = Ext.Date.add(dt, Ext.Date.DAY, 1);
+                }
+                index = chartData.categories.length - 1;
+             } else {
+                 // it is in "scope"...set index to the index of the last workday in scope
+                 index = this._indexOfDate(chartData, endDate);
+                 if(index === -1) {
+                    // it's in "scope", but falls on a non-workday...back up to the previous workday
+                    while (this.workDays.indexOf(Ext.Date.format(endDate, 'l')) == -1) {
+                        endDate = Ext.Date.add(endDate, Ext.Date.DAY, -1);
+                        index = this._indexOfDate(chartData, endDate);
+                    }
+                 }
+             }
+             if(index < 0) {
+                return;
+             }
+             // set first and last point, and let connectNulls fill in the rest
+             var i;
+             var seriesData = chartData.series[2].data;
+             for (i=1;i<index;i++) {
+                seriesData[i] = null;
+             }
+             seriesData[index] = 0;
+        },
+
+        _indexOfDate: function(chartData, date) {
+             var dateStr = Ext.Date.format(date, 'Y-m-d');
+             return chartData.categories.indexOf(dateStr);
         },
 
         _removeFutureSeries: function (chartData, seriesIndex, dayIndex) {
@@ -153,24 +206,6 @@
             }
 
             return true;
-        },
-
-        _removeProjectionSeries: function (chartData) {
-            var series = chartData.series,
-                categories = chartData.categories;
-
-            var endDate = this.endDate.split("T")[0],
-                endDateIndex = categories.indexOf(endDate);
-
-            _.each(series, function (seriesData) {
-                seriesData.data = _.first(seriesData.data, endDateIndex + 1);
-            });
-
-            chartData.series = _.filter(series, function (seriesData) {
-                return seriesData.name != "Prediction";
-            });
-
-            chartData.categories = _.first(categories, endDateIndex + 1);
         }
     });
 }());

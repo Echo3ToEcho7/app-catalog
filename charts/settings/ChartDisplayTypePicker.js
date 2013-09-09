@@ -24,10 +24,10 @@
             return {
                 xtype: "radiogroup",
                 name: this.settingName,
-                columns: [100, 100],
+                columns: [160, 100],
                 vertical: false,
                 items: [
-                    { boxLabel: "Line", name: this.settingName, inputValue: "line" },
+                    { boxLabel: "Line", name: this.settingName, inputValue: "line", checked: true },
                     { boxLabel: "Column", name: this.settingName, inputValue: "column" }
                 ],
                 listeners: {

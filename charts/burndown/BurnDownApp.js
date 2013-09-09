@@ -33,6 +33,8 @@
         },
 
         scopeObject: undefined,
+        
+        customScheduleStates: ['Accepted'],	// a reasonable default
 
         getSettingsFields: function () {
             this.chartSettings = this.chartSettings || Ext.create('Rally.apps.charts.burndown.BurnDownSettings', {
@@ -57,7 +59,7 @@
             }
 
             this._addHelpComponent();
-
+            this._loadUserStoryModel();
             this._saveScopeType();
             this.callParent(arguments);
 
@@ -226,13 +228,21 @@
 
         _addDateBoundsToCalculator: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
+            var endDate = this._getScopeObjectEndDate();
+            var now = new Date();
             calcConfig.startDate = Rally.util.DateTime.toIsoString(this._getScopeObjectStartDate(), true);
-            calcConfig.endDate = Rally.util.DateTime.toIsoString(this._getScopeObjectEndDate(), true);
-
-            // S53625: If the time-box has ended, disable the projection line
-            if (new Date() > this._getScopeObjectEndDate()) {
-                calcConfig.enableProjections = false;
+            if(now > this._getScopeObjectStartDate() && now < this._getScopeObjectEndDate()) {
+                endDate = now;
             }
+            calcConfig.endDate = Rally.util.DateTime.toIsoString(endDate, true);
+            // S53625: If the time-box has ended, disable the projection line
+            if (now > this._getScopeObjectEndDate()) {
+                calcConfig.enableProjections = false;
+            } else {
+                calcConfig.enableProjections = true;
+            }
+            // add scopeEndDate, which may or may not be the same as endDate
+            calcConfig.scopeEndDate = this._getScopeObjectEndDate();
         },
 
         _addAggregationTypeToCalculator: function () {
@@ -242,7 +252,7 @@
 
         _updateCompletedScheduleStates: function () {
             var calcConfig = this.chartComponentConfig.calculatorConfig;
-            calcConfig.completedScheduleStateNames = this._getCompletedScheduleStates();
+            calcConfig.completedScheduleStateNames = this.customScheduleStates;
         },
 
         _loadScopeObject: function (scopeRef) {
@@ -312,13 +322,11 @@
         _getPlotBand: function (categories, iteration, shouldColorize) {
             var startDate = this.dateStringToObject(iteration.StartDate);
             var endDate = this.dateStringToObject(iteration.EndDate);
-            var startDateStr = Ext.Date.format(startDate, 'Y-m-d');
-            var endDateStr = Ext.Date.format(endDate, 'Y-m-d');
 
             return {
                 color: shouldColorize ? '#F2FAFF' : '#FFFFFF',
-                from: categories.indexOf(startDateStr),
-                to: categories.indexOf(endDateStr),
+                from: this._getNearestWorkday(categories, startDate),
+                to: this._getNearestWorkday(categories, endDate),
                 label: {
                     text: iteration.Name,
                     align: 'center',
@@ -328,9 +336,26 @@
             };
         },
 
+        _getNearestWorkday: function(categories, date) {
+            var dateStr = Ext.Date.format(date, 'Y-m-d');
+            var index = categories.indexOf(dateStr);
+            if(index === -1) {
+                var workdays = this._getWorkspaceConfiguredWorkdays();
+                if(workdays.length < 1) {
+                    return -1;
+                }
+                // date not in categories (probably) means it falls on a non-workday...back up to the next previous workday
+                while (workdays.indexOf(Ext.Date.format(date, 'l')) == -1 && date > this._getScopeObjectStartDate()) {
+                    date = Ext.Date.add(date, Ext.Date.DAY, -1);
+                    dateStr = Ext.Date.format(date, 'Y-m-d');
+                    index = categories.indexOf(dateStr);
+                }
+            }
+            return index;
+        },
+
         _getPlotLine: function (categories, iteration, lastLine) {
             var dateObj;
-            var dateStr;
             var dateIndex;
 
             if (lastLine) {
@@ -339,8 +364,7 @@
                 dateObj = this.dateStringToObject(iteration.StartDate);
             }
 
-            dateStr = Ext.Date.format(dateObj, 'Y-m-d');
-            dateIndex = categories.indexOf(dateStr);
+            dateIndex = this._getNearestWorkday(categories, dateObj);
 
             return {
                 color: '#BBBBBB',
@@ -352,16 +376,18 @@
         },
 
         _addChart: function () {
-            this.chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
             this._updateChartConfigDateFormat();
+            this._updateChartConfigWorkdays();
+            var chartComponentConfig = Ext.Object.merge({}, this.chartComponentConfig);
 
-            this.add(this.chartComponentConfig);
+
+            this.add(chartComponentConfig);
             this.down('rallychart').on('snapshotsAggregated', this._onSnapshotDataReady, this);
         },
 
         _onSnapshotDataReady: function (chart) {
             this._updateDisplayType(chart);
-            this._updateXAxisLabelSpacing(chart);
+            this._updateXAxis(chart);
         },
 
         _updateDisplayType: function (chart) {
@@ -404,11 +430,22 @@
             };
         },
 
-        _updateXAxisLabelSpacing: function (chart) {
+        _updateXAxis: function (chart) {
             if(this.container.dom.offsetWidth < 1000) {
                 chart.chartConfig.xAxis.labels.staggerLines = 2;
             }
             chart.chartConfig.xAxis.labels.step = Math.round( chart.chartData.categories.length / 100 );
+            var calcConfig = this.chartComponentConfig.calculatorConfig;
+
+            chart.chartConfig.xAxis.tickInterval = this._configureChartTicks(chart.chartData.categories.length);
+        },
+
+        _configureChartTicks: function (days) {
+            var pixelTickWidth = 125,
+                appWidth = this.getWidth(),
+                ticks = Math.floor(appWidth / pixelTickWidth);
+
+            return Math.ceil(days / ticks);
         },
 
         _getAxisTitleBasedOnAggregationType: function () {
@@ -426,6 +463,10 @@
             this.chartComponentConfig.chartConfig.xAxis.labels.formatter = function () {
                 return self._formatDate(self.dateStringToObject(this.value));
             };
+        },
+
+        _updateChartConfigWorkdays: function () {
+            this.chartComponentConfig.calculatorConfig.workDays = this._getWorkspaceConfiguredWorkdays().split(',');
         },
 
         _parseRallyDateFormatToHighchartsDateFormat: function () {
@@ -450,9 +491,13 @@
             return this.getContext().getUser().UserProfile.DateFormat;
         },
 
-         _getWorkspaceConfiguredDateFormat: function () {
+        _getWorkspaceConfiguredDateFormat: function () {
             return this.getContext().getWorkspace().WorkspaceConfiguration.DateFormat;
-         },
+        },
+
+        _getWorkspaceConfiguredWorkdays: function () {
+            return this.getContext().getWorkspace().WorkspaceConfiguration.WorkDays;
+        },
 
         _updateChartTitle: function () {
             var chartConfig = this.chartComponentConfig.chartConfig;
@@ -488,19 +533,14 @@
         _settingsInvalid: function () {
             var chartAggregationType = this.getSetting('chartAggregationType'),
                 chartDisplayType = this.getSetting('chartDisplayType'),
-                chartTimebox = this.getSetting('chartTimebox'),
-                chartScheduleStates = this.getSetting('customScheduleStates');
+                chartTimebox = this.getSetting('chartTimebox');
 
             var invalid = function (value) {
                 return !value || value === 'undefined';
             };
 
             return invalid(chartAggregationType) || invalid(chartDisplayType) ||
-                this._chartTimeboxInvalid(chartTimebox) || this._chartScheduleStatesInvalid(chartScheduleStates);
-        },
-
-         _chartScheduleStatesInvalid: function (chartScheduleStates) {
-            return !chartScheduleStates || chartScheduleStates === 'undefined' || chartScheduleStates.length === 0;
+                this._chartTimeboxInvalid(chartTimebox);
         },
 
         _chartTimeboxInvalid: function (chartTimebox) {
@@ -590,15 +630,62 @@
             }
         },
 
-        _getCompletedScheduleStates: function () {
-            var states = this.getSetting('customScheduleStates');
-            if(_.isString(states)) {
-                return states.split(',');
-            }
+        _loadUserStoryModel: function() {
+            Rally.data.ModelFactory.getModel({
+                type: "UserStory",
+                context: this._getContext(),
+                success: function(model) {
+                    this._getScheduleStateValues(model);
+                },
+                scope: this
+            });
+        },
 
-            // return a reasonable default in case they somehow managed to select no states...(which shouldn't happen)
-            return ['Accepted'];
+        _getContext: function() {
+            return {
+                workspace: this.context.getWorkspaceRef(),
+                project: null
+            };
+        },
+
+        _getScheduleStateValues: function (model) {
+            if(model) {
+                model.getField("ScheduleState").getAllowedValueStore().load({
+                    callback: function(records, operation, success) {
+                        var scheduleStates = _.collect(records, function(obj) {
+                            return obj.raw;
+                        });
+
+                        var store = this._wrapRecords(scheduleStates);
+                        var	values = [];
+
+                        var acceptedSeen = false;
+                        values = [];
+                        for(var i = 0; i < store.data.items.length; i++) {
+                            if(store.data.items[i].data.StringValue == 'Accepted') {
+                                acceptedSeen = true;
+                            }
+                            if(acceptedSeen) {
+                                values.push(store.data.items[i].data.StringValue);
+                            }
+                        }
+
+                        if(values.length > 0) {
+                            this.customScheduleStates = values;
+                        }
+                    },
+                    scope: this
+                });
+            }
+        },
+        
+        _wrapRecords: function(records) {
+            return Ext.create("Ext.data.JsonStore", {
+                fields: ["_ref", "StringValue"],
+                data: records
+            });
         }
+
 
     });
 }());
