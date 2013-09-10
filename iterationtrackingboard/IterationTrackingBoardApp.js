@@ -14,7 +14,6 @@
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
-            'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
         ],
@@ -65,21 +64,17 @@
 
         _addGridBoard: function() {
             var plugins = [
-                'rallygridboardaddnew',
                 {
                     ptype: 'rallygridboardfilterinfo',
                     isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
                     stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
                 },
+                'rallygridboardaddnew',
                 'rallygridboardownerfilter'
             ];
 
-            if (this.getContext().isFeatureEnabled('SHOW_COLUMN_CHOOSER_ON_ITERATION_TRACKING_BOARD')) {
-                plugins.push('rallygridboardfieldpicker');
-            }
-
             if (this.getContext().isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS')) {
-                plugins.push({
+                plugins.splice(2, 0, {
                     ptype: 'rallygridboardartifacttypechooser',
                     artifactTypePreferenceKey: 'artifact-types',
                     showAgreements: true
@@ -117,10 +112,10 @@
                         'Name',
                         'ScheduleState',
                         'Blocked',
-                        'PlanEstimate',
+                        {text: 'Plan Est', dataIndex: 'PlanEstimate'},
                         'TaskStatus',
-                        'TaskEstimateTotal',
-                        'TaskRemainingTotal',
+                        {text: 'Task Est', dataIndex: 'TaskEstimateTotal'},
+                        {text: 'To Do',  dataIndex: 'TaskRemainingTotal'},
                         'Owner',
                         'DefectStatus',
                         'Discussion']
