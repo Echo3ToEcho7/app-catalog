@@ -122,11 +122,19 @@
                     var i = 1;
         
                     rally.forEach(iterations, function(value) {
-                        if (i === 1) {                               // first iteration
+                        /* The first row shows the first iteration of the release.
+                         And because what's shown on each row is the state of the
+                         release at the BEGINNING of that row's iteration, both
+                         the planned burndown and the actual burndown are set to
+                         the total release plan estimate. */
+                        if (i === 1) {
                             actualBurndown = releasePlanEstimate;
                             plannedBurndown = releasePlanEstimate;
                             future = value.EndDate >= today;
-                        } else if (value.Name === "Release") {       //release row
+
+                        /* The final row shows the state of the release after the
+                         completion of the last iteration. */
+                        } else if (value.Name === "Release") {
                             if (future) {
                                 actualBurndown -= lastPlannedVelocity;
                                 plannedBurndown -= lastPlannedVelocity;
@@ -134,15 +142,27 @@
                                 actualBurndown -= lastActualVelocity;
                                 plannedBurndown -= lastPlannedVelocity;
                             }
-                        } else if (value.EndDate >= today) {         // future iteration
+
+                        /* if the PREVIOUS iteration has NOT been completed,
+                         use the -planned- velocity of that iteration
+                         to compute the point on the burndown where the
+                         CURRENT iteration would start */
+                        } else if (future) {
                             actualBurndown -= lastPlannedVelocity;
                             plannedBurndown -= lastPlannedVelocity;
                             future = true;
-                        } else if (value.EndDate < today) {         // past iteration
+
+                        /* if the PREVIOUS iteration HAS been completed,
+                         use the -actual- velocity of that iteration
+                         to compute the point on the burndown where the
+                         CURRENT iteration would start */
+                        } else {         // past iteration
                             actualBurndown -= lastActualVelocity;
                             plannedBurndown -= lastPlannedVelocity;
                             future = false;
                         }
+
+                        future = value.EndDate >= today;
                         lastPlannedVelocity = value.Resources;
                         lastActualVelocity = value.ActualVelocity;
         
