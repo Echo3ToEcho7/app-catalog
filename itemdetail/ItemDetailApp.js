@@ -27,7 +27,7 @@
                     return;
                 }
 
-                if (record.get('ObjectID') == (this.detailView.getRecord() && this.detailView.getRecord().get('ObjectID'))) {
+                if (record.getId() == (this.detailView.getRecord() && this.detailView.getRecord().getId())) {
                     return;
                 }
 
@@ -36,13 +36,13 @@
             }, this);
 
             this.subscribe(this, Rally.Message.objectUpdate, function(record) {
-                if (record.get('ObjectID') == (this.detailView.getRecord() && this.detailView.getRecord().get('ObjectID'))) {
+                if (record.getId() == (this.detailView.getRecord() && this.detailView.getRecord().getId())) {
                     this.loadRecord(record);
                 }
             }, this);
 
             this.subscribe(this, Rally.Message.objectDestroy, function(record) {
-                if (record.get('ObjectID') == (this.detailView.getRecord() && this.detailView.getRecord().get('ObjectID'))) {
+                if (record.getId() == (this.detailView.getRecord() && this.detailView.getRecord().getId())) {
                     this.detailView.switchToDeleteView();
                 }
             }, this);
@@ -50,7 +50,7 @@
 
         loadRecord: function(record){
             //record not guaranteed to be fully hydrated, need to get the full object.
-            record.self.load(record.get('ObjectID'), {
+            record.self.load(record.getId(), {
                 success: function(fullRecord){
                     this.detailView.redraw({
                         record: fullRecord,
