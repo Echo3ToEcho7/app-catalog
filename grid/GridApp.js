@@ -8,13 +8,9 @@
         layout: 'fit',
         
         requires: [
-            'Rally.ui.menu.item.Edit',
-            'Rally.ui.menu.item.Copy',
-            'Rally.ui.menu.item.Delete',
-            'Rally.ui.grid.Grid',
-            'Rally.ui.grid.RowActionColumn',
             'Rally.data.util.Sorter',
             'Rally.data.QueryFilter',
+            'Rally.ui.grid.Grid',
             'Rally.ui.grid.plugin.PercentDonePopoverPlugin'
         ],
 
@@ -87,34 +83,10 @@
         },
 
         _getColumns: function(fetch){
-            var defaultColumns = [
-                {
-                    xtype: 'rallyrowactioncolumn',
-                    rowActionsFn: function(record) {
-                        return [
-                            {
-                                xtype: 'rallyrecordmenuitemedit',
-                                record: record
-                            },
-                            {
-                                xtype: 'rallyrecordmenuitemcopy',
-                                record: record
-                            },
-                            {
-                                xtype: 'rallyrecordmenuitemdelete',
-                                record: record
-                            }
-                        ];
-                    }
-                }
-            ];
-
             if (fetch) {
-                var columnsFromFetch = Ext.Array.difference(fetch.split(','), this._getFetchOnlyFields());
-                return defaultColumns.concat(columnsFromFetch);
-            } else {
-                return defaultColumns;
+                return Ext.Array.difference(fetch.split(','), this._getFetchOnlyFields());
             }
+            return [];
 
         },
 

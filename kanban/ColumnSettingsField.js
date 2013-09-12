@@ -63,6 +63,8 @@
                 renderTo: this.inputEl,
                 columnCfgs: this._getColumnCfgs(),
                 showPagingToolbar: false,
+                showRowActionsColumn: false,
+                enableRanking: false,
                 store: this._store,
                 editingConfig: {
                     publishMessages: false

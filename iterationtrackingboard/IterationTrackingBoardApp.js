@@ -14,6 +14,7 @@
             'Rally.ui.gridboard.plugin.GridBoardOwnerFilter',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
+            'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
             'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
         ],
@@ -57,6 +58,10 @@
         },
 
         launch: function() {
+            //  When deleting this toggle, also remove the alwaysSelectBlockedReason param from CardFieldSelectable
+            //  and make it behave so that the BlockedReason is always selected.
+            this.alwaysSelectBlockedReason = this.getContext().isFeatureEnabled('F929_ENABLE_BLOCKED_REASON_PROMPT_ON_BOARDS');
+
             this.showFieldPicker = this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS');
             this.showCardAgeEnabled = this.getContext().isFeatureEnabled('SHOW_CARD_AGE_IN_ITERATION_BOARD_SETTINGS');
             this.callParent(arguments);
@@ -64,17 +69,21 @@
 
         _addGridBoard: function() {
             var plugins = [
+                'rallygridboardaddnew',
                 {
                     ptype: 'rallygridboardfilterinfo',
                     isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
                     stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
                 },
-                'rallygridboardaddnew',
                 'rallygridboardownerfilter'
             ];
 
+            if (this.getContext().isFeatureEnabled('SHOW_COLUMN_CHOOSER_ON_ITERATION_TRACKING_BOARD')) {
+                plugins.push('rallygridboardfieldpicker');
+            }
+
             if (this.getContext().isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS')) {
-                plugins.splice(2, 0, {
+                plugins.push({
                     ptype: 'rallygridboardartifacttypechooser',
                     artifactTypePreferenceKey: 'artifact-types',
                     showAgreements: true
@@ -112,10 +121,10 @@
                         'Name',
                         'ScheduleState',
                         'Blocked',
-                        {text: 'Plan Est', dataIndex: 'PlanEstimate'},
+                        'PlanEstimate',
                         'TaskStatus',
-                        {text: 'Task Est', dataIndex: 'TaskEstimateTotal'},
-                        {text: 'To Do',  dataIndex: 'TaskRemainingTotal'},
+                        'TaskEstimateTotal',
+                        'TaskRemainingTotal',
                         'Owner',
                         'DefectStatus',
                         'Discussion']
