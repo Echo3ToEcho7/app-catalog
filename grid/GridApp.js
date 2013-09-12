@@ -41,6 +41,7 @@
                 columnCfgs: columns,
                 enableColumnHide: false,
                 enableRanking: true,
+                enableBulkEdit: Rally.environment.getContext().isFeatureEnabled("EXT4_GRID_BULK_EDIT"),
                 autoScroll: gridAutoScroll,
                 plugins: this._getPlugins(columns),
                 storeConfig: {
