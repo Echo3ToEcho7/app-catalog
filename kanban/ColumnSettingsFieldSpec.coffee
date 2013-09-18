@@ -125,7 +125,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       fieldValue = 'AcceptedDate'
       @_setupWithTwoColumnsShown(fieldValue)
       @waitForCallback(@readyCallback).then =>
-        gridHelper = new Helpers.Grid(@field._grid)
+        gridHelper = new Helpers.Grid(@field._grid, this)
         gridHelper.startEditingCell('', 'cardFields').then (inlineEditor) =>
           @click(css: '.' + inlineEditor.editor.field.rightCls.replace(' ', '.')).then =>
             expect(@field._grid.store.getAt(0).get('cardFields')).toBe 'AcceptedDate'
@@ -135,7 +135,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       fieldValue = 'AcceptedDate'
       @_setupWithTwoColumnsShown(fieldValue)
       @waitForCallback(@readyCallback).then =>
-        gridHelper = new Helpers.Grid(@field._grid)
+        gridHelper = new Helpers.Grid(@field._grid, this)
         gridHelper.startEditingCell('', 'cardFields').then (inlineEditor) =>
           field = inlineEditor.editor.field
           fieldRightClsSelector = '.' + field.rightCls.replace(' ', '.')
