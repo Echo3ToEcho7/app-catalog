@@ -1,13 +1,15 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
+
+    singleton: true
   
-    require: [
+    requires: [
         'Rally.test.mock.data.WsapiModelFactory'
+        'Rally.apps.roadmapplanningboard.AppModelFactory'
     ]
 
     getRoadmapStoreFixture: ->
-        return @roadmapStoreFixture if @roadmapStoreFixture
 
         @roadmapStoreFixture = Ext.create 'Ext.data.Store',
             model: Rally.apps.roadmapplanningboard.AppModelFactory.getRoadmapModel()
@@ -50,7 +52,6 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
         @roadmapStoreFixture
 
     getPlanStoreFixture: ->
-        return @planStoreFixture if @planStoreFixture
         
         @planStoreFixture = Ext.create 'Ext.data.Store',
             model: Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel()

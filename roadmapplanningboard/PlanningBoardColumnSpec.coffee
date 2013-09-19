@@ -1,9 +1,13 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.apps.roadmapplanningboard.PlanningBoardColumn'
+  'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
+]
+
 describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
   beforeEach ->
-    deps = Ext.create 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
-    deps.loadDependencies()
+    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
 
     target = Ext.getBody()
     @column = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',

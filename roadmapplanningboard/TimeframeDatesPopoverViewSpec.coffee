@@ -1,5 +1,10 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
+  'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView'
+]
+
 describe 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', ->
   helpers
     getDateGreaterThan: (date, incr = 1) ->
@@ -22,8 +27,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', ->
       expect(picker.value.getTime()).toEqual(dateField.value.getTime())
 
   beforeEach ->
-    deps = Ext.create 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
-    deps.loadDependencies()
+    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
 
     model = Deft.Injector.resolve('timeframeStore').model
 

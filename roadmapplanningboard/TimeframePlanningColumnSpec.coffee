@@ -1,140 +1,135 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
+  'Rally.apps.roadmapplanningboard.TimeframePlanningColumn'
+]
+
 describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
 
   helpers
-    getDefaultColumn: (timeboxRecord, planRecord, isRightmostColumn = false) ->
-      Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
-        renderTo: Ext.getBody()
-        contentCell: Ext.getBody()
-        headerCell: Ext.getBody()
-        displayValue: 'My column'
-        headerTemplate: Ext.create 'Ext.XTemplate'
-        timeboxRecord: timeboxRecord
-        stores: [@featureStoreFixture]
-        getStores: -> @stores
-        planRecord: planRecord
-        isRightmostColumn: isRightmostColumn
-        columnHeaderConfig:
-          editable: true
-          record: timeboxRecord
-          fieldToDisplay: 'name'
+    createColumn: (config) ->
+      @column = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
+        _.extend
+          contentCell: 'testDiv'
+          headerCell: 'testDiv'
+          displayValue: 'My column'
+          headerTemplate: Ext.create 'Ext.XTemplate'
+          timeframeRecord: @timeframeRecord
+          stores: [@featureStoreFixture]
+          getStores: -> @stores
+          planRecord: @planRecord
+          ownerCardboard:
+            showTheme: true
+          columnHeaderConfig:
+            editable: true
+            record: @timeframeRecord
+            fieldToDisplay: 'name'
+          renderTo: 'testDiv'
+        , config
 
-    getDefaultPlanRecord: ->
-      Ext.create @appModelFactory.getPlanModel(),
-        id: 'Foo',
-        name: 'Q1',
-        theme: 'Take over the world!'
-        lowCapacity: 0
-        highCapacity: 0
+    createPlanRecord: (config) ->
+      @planRecord = Ext.create Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel(),
+        _.extend
+          id: 'Foo',
+          name: 'Q1',
+          theme: 'Take over the world!'
+          lowCapacity: 0
+          highCapacity: 0
+        , config
+
+    createTimeframeRecord: (config) ->
+      @timeframeRecord = Ext.create Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel(),
+        _.extend
+          name: 'Q1'
+          start: new Date('04/01/2013')
+          end: new Date('06/30/2013')
+        , config
 
   beforeEach ->
-    deps = Ext.create 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
-    deps.loadDependencies()
-
-    @appModelFactory = Deft.Injector.resolve 'appModelFactory'
+    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
     @featureStoreFixture = Deft.Injector.resolve 'featureStore'
-
     @title = "Bogus Title for Test"
-    @timeboxRecord = Ext.create @appModelFactory.getTimeframeModel(),
-      name: 'Q1'
-      start: new Date('04/01/2013')
-      end: new Date('06/30/2013')
-    planRecord = Ext.create @appModelFactory.getPlanModel(),
-      lowCapacity: 22
-      highCapacity: 42
-    @column = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
-      renderTo: Ext.getBody()
-      contentCell: Ext.getBody()
-      headerCell: Ext.getBody()
-      timeboxRecord: @timeboxRecord
-      stores: [@featureStoreFixture]
-      getStores: -> @stores
-      planRecord: planRecord
 
   afterEach ->
     Deft.Injector.reset()
-    @column.destroy()
 
-  it 'should have a timeframe added to the header template', ->
-    headerTplData = @column.getDateHeaderTplData()
+  describe 'timeframe column', ->
+    beforeEach ->
 
-    expect(headerTplData['formattedDate']).toEqual 'Apr 1 - Jun 30'
+      @createTimeframeRecord()
+      @createPlanRecord
+        lowCapacity: 22
+        highCapacity: 42
 
-  it 'should render a thermometer in the header template (unfiltered data)', ->
-    @column.isMatchingRecord = ->
-      true
+    afterEach ->
+      @column.destroy()
 
-    @column.refresh()
+    it 'should have a timeframe added to the header template', ->
+      @createColumn()
+      headerTplData = @column.getDateHeaderTplData()
 
-    headerTplData = @column.getHeaderTplData()
+      expect(headerTplData['formattedDate']).toEqual 'Apr 1 - Jun 30'
 
-    expect(headerTplData['progressBarHtml']).toContain '72 of 42'
+    it 'should render a thermometer in the header template (unfiltered data)', ->
+      @createColumn()
+      @column.isMatchingRecord = ->
+        true
 
-  it 'should render a thermometer in the header template (filtered data)', ->
-    @column.isMatchingRecord = (record) ->
-      record.data.Name.indexOf('Android') > -1 || record.data.Name.indexOf('iOS') > -1
+      @column.refresh()
 
-    @column.refresh()
+      headerTplData = @column.getHeaderTplData()
 
-    headerTplData = @column.getHeaderTplData()
+      expect(headerTplData['progressBarHtml']).toContain '72 of 42'
 
-    expect(headerTplData['progressBarHtml']).toContain '6 of 42'
+    it 'should render a thermometer in the header template (filtered data)', ->
+      @createColumn()
+      @column.isMatchingRecord = (record) ->
+        record.data.Name.indexOf('Android') > -1 || record.data.Name.indexOf('iOS') > -1
 
-  it 'should handle empty values as spaces', ->
-    @timeboxRecord = Ext.create @appModelFactory.getTimeframeModel(),
-      start: null
-      end: null
-    column = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
-      timeboxRecord: @timeboxRecord
-      stores: [@featureStoreFixture]
-      planRecord: Ext.create @appModelFactory.getPlanModel(),
+      @column.refresh()
+
+      headerTplData = @column.getHeaderTplData()
+
+      expect(headerTplData['progressBarHtml']).toContain '6 of 42'
+
+    it 'should handle empty values as spaces', ->
+      @createTimeframeRecord
+        start: null
+        end: null
+      @createPlanRecord
         lowCapacity: 0
         highCapacity: 0
 
-    column.isMatchingRecord = ->
-      true
+      @createColumn()
 
-    column.refresh()
+      @column.refresh()
 
-    headerTplData = column.getHeaderTplData()
+      headerTplData = @column.getHeaderTplData()
 
-    expect(headerTplData['formattedStartDate']).toEqual(undefined)
-    expect(headerTplData['formattedEndDate']).toEqual(undefined)
-    expect(headerTplData['formattedPercent']).toEqual("0%")
-    expect(headerTplData['progressBarHtml']).toBeTruthy()
+      expect(headerTplData['formattedStartDate']).toEqual(undefined)
+      expect(headerTplData['formattedEndDate']).toEqual(undefined)
+      expect(headerTplData['formattedPercent']).toEqual("0%")
+      expect(headerTplData['progressBarHtml']).toBeTruthy()
 
-    column.destroy()
-
-  describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn rendered', ->
+  describe 'when rendered', ->
     beforeEach ->
-      @renderedColumn = @getDefaultColumn(@timeboxRecord, @getDefaultPlanRecord())
+      @createTimeframeRecord()
+      @createPlanRecord()
 
     afterEach ->
-      @renderedColumn.destroy()
+      @column.destroy()
 
     it 'should have a themeHeader', ->
-      expect(@renderedColumn.getColumnHeader().query('roadmapthemeheader').length).toBe 1
-
-    it "should set themeheader's showToggle true when isRightmost true", ->
-      customColumn = @getDefaultColumn(@timeboxRecord, @getDefaultPlanRecord(), true)
-      expect(customColumn.getColumnHeader().query('roadmapthemeheader')[0].showToggle).toBeTruthy()
-      customColumn.destroy()
-
-    it "should set themeheader's showToggle false when isRightmost false", ->
-      expect(@renderedColumn.getColumnHeader().query('roadmapthemeheader')[0].showToggle).toBeFalsy()
-
-    it "should display a toggle when showToggle is true", ->
-      customColumn = @getDefaultColumn(@timeboxRecord, @getDefaultPlanRecord(), true)
-      themeHeader = customColumn.getColumnHeader().query('roadmapthemeheader')[0]
-      expect(themeHeader.query('roadmapthemetogglebuttonview').length).toBe 1
-      customColumn.destroy()
+      @createColumn()
+      expect(@column.getColumnHeader().query('roadmapthemeheader').length).toBe 1
 
     it 'should allow click to edit and blur to save changes on column Title', ->
-      @stub @timeboxRecord, 'save', (options) ->
+      @createColumn()
+      @stub @timeframeRecord, 'save', (options) ->
         options.success.call(options.scope)
 
-      titleContainer = @renderedColumn.getColumnHeader().getHeaderTitle().query('rallydetailfieldcontainer')[0]
+      titleContainer = @column.getColumnHeader().getHeaderTitle().query('rallydetailfieldcontainer')[0]
       newName = 'QNew'
 
       expect(titleContainer.getEditMode()).toBe false
@@ -149,16 +144,17 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
         condition: ->
           titleContainer.getEditMode() is false
       ).then =>
-        expect(@timeboxRecord.get('name')).toBe newName
-        expect(@timeboxRecord.save.callCount).toEqual 1
+        expect(@timeframeRecord.get('name')).toBe newName
+        expect(@timeframeRecord.save.callCount).toEqual 1
 
-  describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn rendered not destroyed', ->
+  describe 'when rendered not destroyed', ->
     it 'should click to edit', ->
-      @planRecord = @getDefaultPlanRecord()
-      @renderedColumn = @getDefaultColumn(@timeboxRecord, @planRecord)
+      @createPlanRecord()
+      @createTimeframeRecord()
+      @createColumn()
 
       @planRecord.save = sinon.stub()
-      themeContainer = @renderedColumn.getColumnHeader()
+      themeContainer = @column.getColumnHeader()
         .query('roadmapthemeheader')[0]
         .query('rallydetailfieldcontainer')[0]
       newTheme = 'Krendick'
@@ -177,5 +173,3 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       ).then =>
         expect(@planRecord.get('theme')).toBe newTheme
         expect(@planRecord.save.callCount).toEqual 1
-        @renderedColumn.destroy()
-

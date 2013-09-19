@@ -1,12 +1,27 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
+  'Rally.apps.roadmapplanningboard.ThemeHeader'
+  'Rally.apps.roadmapplanningboard.PlanningBoard'
+]
+
 describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
+  helpers
+    createCardboard: (config) ->
+      @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
+        roadmapId: '413617ecef8623df1391fabc'
+        _retrieveLowestLevelPI: (callback) -> callback.call(@, Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
+        renderTo: 'testDiv'
+
+      @waitForComponentReady @cardboard
+      
   beforeEach ->
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith([])
-    Ext.create('Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper').loadDependencies()
+    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
 
   afterEach ->
-    @board?.destroy()
+    @cardboard?.destroy()
     Deft.Injector.reset()
     @themeHeader?.destroy()
 
@@ -65,33 +80,18 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
 
   it 'should find containing cardboard with getCardboardComponent', ->
 
-    @board = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
-      roadmapId: '413617ecef8623df1391fabc'
-      _retrieveLowestLevelPI: (callback) -> callback(Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
-
-    @board.render Ext.getBody()
-    deferred = Ext.create 'Deft.Deferred'
-    @board.on 'load', =>
-      themeHeader = @board.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
-      expect(themeHeader.getCardboardComponent()).toBe(@board)
-      deferred.resolve()
-
-    deferred.promise
+    @createCardboard().then =>
+      themeHeader = @cardboard.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
+      expect(themeHeader.getCardboardComponent()).toBe(@cardboard)
 
   it 'should fire headersizechanged when edit mode textarea resizes based on content', ->
-    @board = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
-      roadmapId: '413617ecef8623df1391fabc'
-      _retrieveLowestLevelPI: (callback) -> callback(Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
-      renderTo: Ext.getBody()
+    @createCardboard().then =>
 
-    # Allows us to verify whether headersizechanged was fired
-    resizeStub = sinon.stub()
-    @board.on 'headersizechanged', resizeStub
-
-    deferred = Ext.create 'Deft.Deferred'
-
-    @board.on 'load', =>
-      themeHeader = @board.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
+      # Allows us to verify whether headersizechanged was fired
+      resizeStub = sinon.stub()
+      @cardboard.on 'headersizechanged', resizeStub
+      
+      themeHeader = @cardboard.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
       themeHeader.themeContainer.goToEditMode()
 
       resizeStub.reset()
@@ -106,64 +106,53 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
       textField.setValue('One line\nAnd another')
 
       expect(resizeStub).toHaveBeenCalledOnce()
-      deferred.resolve()
-
-    deferred.promise
 
   it 'should fire headersizechanged when editor mode switches back to view mode',  ->
-    board = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
-      roadmapId: '413617ecef8623df1391fabc'
-      _retrieveLowestLevelPI: (callback) -> callback(Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
-      renderTo: Ext.getBody()
+    @createCardboard().then =>
+      # TODO - srly, wtf?
+      themeHeader = @cardboard.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
+      themeHeader.themeContainer.goToEditMode()
+      textField = themeHeader.themeContainer.down('textareafield')
+      textField.setValue 'Updated theme'
 
-    themeHeader = board.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
-    themeHeader.themeContainer.goToEditMode()
-    textField = themeHeader.themeContainer.down('textareafield')
-    textField.setValue 'Updated theme'
+      # Allows us to verify whether headersizechanged was fired
+      resizeStub = sinon.stub()
+      @cardboard.on 'headersizechanged', resizeStub
 
-    # Allows us to verify whether headersizechanged was fired
-    resizeStub = sinon.stub()
-    board.on 'headersizechanged', resizeStub
+      # fieldContainer's refresh uses a defer - use afterDraw stub to push our checks and cleanup past the defer
+      afterDrawStub = sinon.stub()
+      themeHeader.themeContainer.afterDraw = afterDrawStub
 
-    # fieldContainer's refresh uses a defer - use afterDraw stub to push our checks and cleanup past the defer
-    afterDrawStub = sinon.stub()
-    themeHeader.themeContainer.afterDraw = afterDrawStub
+      textField.blur()
 
-    textField.blur()
-
-    @once(
-      condition: ->
-        afterDrawStub.called
-    ).then =>
-      # In IE8, resizeStub may have been called 1 or 2 times (timing-dependent), so just verify it was called
-      expect(resizeStub.called).toBeTruthy()
-
-      board.destroy()
+      @once(
+        condition: ->
+          afterDrawStub.called
+      ).then =>
+        # In IE8, resizeStub may have been called 1 or 2 times (timing-dependent), so just verify it was called
+        expect(resizeStub.called).toBeTruthy()
 
   it 'should not fire headersizechanged until editor has been deleted', ->
-    board = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
-      roadmapId: '413617ecef8623df1391fabc'
-      _retrieveLowestLevelPI: (callback) -> callback(Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
-      renderTo: Ext.getBody()
+    @createCardboard().then =>
 
-    themeHeader = board.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
+      themeHeader = @cardboard.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
 
-    themeHeader.themeContainer.goToEditMode()
-    textField = themeHeader.themeContainer.down('textareafield')
-    textField.setValue 'Updated theme'
+      themeHeader.themeContainer.goToEditMode()
+      textField = themeHeader.themeContainer.down('textareafield')
+      textField.setValue 'Updated theme'
 
-    # Sorry! -- expectation lexically ordered before action so that we can verify precise timing of setEditMode() and headersizechanged
-    board.on 'headersizechanged', ->
-      expect(themeHeader.themeContainer.getEditMode()).toBeFalsy()
+      # Sorry! -- expectation lexically ordered before action so that we can verify precise timing of setEditMode() and headersizechanged
+      @cardboard.on 'headersizechanged', ->
+        expect(themeHeader.themeContainer.getEditMode()).toBeFalsy()
 
-    # fieldContainer's refresh uses a defer - use afterDraw stub to push our checks and cleanup past the defer
-    afterDrawStub = sinon.stub()
-    themeHeader.themeContainer.afterDraw = afterDrawStub
+      # fieldContainer's refresh uses a defer - use afterDraw stub to push our checks and cleanup past the defer
+      afterDrawStub = sinon.stub()
+      themeHeader.themeContainer.afterDraw = afterDrawStub
 
-    textField.blur()
+      textField.blur()
 
-    @once(
-      condition: ->
-        afterDrawStub.called
-    ).then =>
-      board.destroy()
+      @once(
+        condition: ->
+          afterDrawStub.called
+      ).then =>
+        @cardboard.destroy()

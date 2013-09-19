@@ -1,9 +1,46 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
+  'Rally.apps.roadmapplanningboard.PlanningBoard'
+]
+
 describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
+
+  helpers
+    createCardboard: (config) ->
+      @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
+        _.extend
+          roadmapId: '413617ecef8623df1391fabc'
+          _retrieveLowestLevelPI: (callback) -> callback.call(@, Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
+          slideDuration: 10
+          renderTo: 'testDiv'
+        , config
+
+      @waitForComponentReady(@cardboard)
+
+    clickCollapse: ->
+      collapseStub = @stub()
+      @cardboard.on 'headersizechanged', collapseStub
+      @click(css: '.themeButtonCollapse').then =>
+        @once
+          condition: ->
+            collapseStub.called
+
+    clickExpand: ->
+      expandStub = @stub()
+      @cardboard.on 'headersizechanged', expandStub
+      @click(css: '.themeButtonExpand').then =>
+        @once
+          condition: ->
+            expandStub.called
+
+    getThemeElements: ->
+      _.map(@cardboard.getEl().query('.theme_container'), Ext.get)
+
+
   beforeEach ->
-    deps = Ext.create 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
-    deps.loadDependencies()
+    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
 
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith([
                         {
@@ -77,95 +114,73 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
                             "subscriptionId": "2"
                         }
                     ])
-    @board = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
-      roadmapId: '413617ecef8623df1391fabc'
-      _retrieveLowestLevelPI: (callback) -> callback(Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
-
   afterEach ->
-    @board.destroy()
+    @cardboard.destroy()
     Deft.Injector.reset()
 
-
   it 'should render with a backlog column', ->
-    @board.render('testDiv')
-    @waitForComponentReady(@board).then =>
-      backlogColumn = @board.getColumns()[0]
+    @createCardboard().then =>
+      backlogColumn = @cardboard.getColumns()[0]
 
-      expect(backlogColumn).toBeTruthy()
       expect(backlogColumn.getColumnHeader().getHeaderValue()).toBe "Backlog"
 
   it 'should have three visible planning columns', ->
-    @board.render('testDiv')
-    @waitForComponentReady(@board).then =>
+    @createCardboard().then =>
 
-      expect(@board.getColumns()[1].getColumnHeader().getHeaderValue()).toBe "Q1"
-      expect(@board.getColumns()[2].getColumnHeader().getHeaderValue()).toBe "Q2"
-      expect(@board.getColumns()[3].getColumnHeader().getHeaderValue()).toBe "Future Planning Period"
+      expect(@cardboard.getColumns()[1].getColumnHeader().getHeaderValue()).toBe "Q1"
+      expect(@cardboard.getColumns()[2].getColumnHeader().getHeaderValue()).toBe "Q2"
+      expect(@cardboard.getColumns()[3].getColumnHeader().getHeaderValue()).toBe "Future Planning Period"
 
   it 'should have features in the appropriate columns', ->
-    @board.render('testDiv')
-    @waitForComponentReady(@board).then =>
-
-      expect(this.board.getColumns()[1].getCards().length).toBe 3
-      expect(this.board.getColumns()[2].getCards().length).toBe 1
-      expect(this.board.getColumns()[3].getCards().length).toBe 0
-      expect(this.board.getColumns().length).toBe(4)
-
-  # 3 + backlog
+    @createCardboard().then =>
+      expect(@cardboard.getColumns()[1].getCards().length).toBe 3
+      expect(@cardboard.getColumns()[2].getCards().length).toBe 1
+      expect(@cardboard.getColumns()[3].getCards().length).toBe 0
+      expect(@cardboard.getColumns().length).toBe(5)
 
   it 'should be correctly configured with stores from deft', ->
-    expect(@board.timeframeStore).toBeTruthy()
-    expect(@board.planStore).toBeTruthy()
+    @createCardboard().then =>
+      expect(@cardboard.timeframeStore).toBeTruthy()
+      expect(@cardboard.planStore).toBeTruthy()
 
   it 'should have appropriate plan capacity range', ->
-    @board.render('testDiv')
-    @waitForComponentReady(@board).then =>
-      expect(this.board.getColumns()[1].getPlanRecord().get('lowCapacity')).toBe 2
-      expect(this.board.getColumns()[1].getPlanRecord().get('highCapacity')).toBe 8
-      expect(this.board.getColumns()[2].getPlanRecord().get('lowCapacity')).toBe 3
-      expect(this.board.getColumns()[2].getPlanRecord().get('highCapacity')).toBe 30
-      expect(this.board.getColumns()[3].getPlanRecord().get('lowCapacity')).toBe 15
-      expect(this.board.getColumns()[3].getPlanRecord().get('highCapacity')).toBe 25
-
-  # it 'should have a blank roadmap with 3 plans', ->
-  #   newboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
-  #     roadmapId: null
-
-  #   newboard.render(Ext.getBody())
-
-  #   deferred = Ext.create 'Deft.Deferred'
-  #   newboard.on 'load', ->
-  #     expect(newboard.getColumns().length).toBe(1)
-  #     backlogColumn = newboard.getColumns()[0]
-  #     expect(backlogColumn).toBeTruthy()
-  #     expect(backlogColumn.getColumnHeader().getHeaderValue()).toBe "Backlog"
-  #     deferred.resolve()
-    
-  #   deferred.promise.then newboard.destroy()
-    
-  # it 'should not throw an error if no plan in the roadmap exists in the plans list', ->
-  #   testBoard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
-  #     roadmapId: '77'
-
-  #   testBoard.render(Ext.getBody())
-
-  #   expect(testBoard.getColumns()[1].getColumnHeader().getHeaderValue()).toBe ""
-  #   expect(testBoard.getColumns()[1].getCards().length).toBe 0
-  #   expect(testBoard.getColumns().length).toBe(2)
-  #   # just backlog and the one valid plan
-
-  #   testBoard.destroy()
-
-  it 'should set isRightmostColumn flag in last column only', ->
-    @board.render('testDiv')
-    @waitForComponentReady(@board).then =>
-
-      expect(@board.getColumns()[0].isRightmostColumn).not.toBeTruthy()
-      expect(@board.getColumns()[1].isRightmostColumn).not.toBeTruthy()
-      expect(@board.getColumns()[2].isRightmostColumn).not.toBeTruthy()
-      expect(@board.getColumns()[3].isRightmostColumn).toBeTruthy()
+    @createCardboard().then =>
+      expect(@cardboard.getColumns()[1].getPlanRecord().get('lowCapacity')).toBe 2
+      expect(@cardboard.getColumns()[1].getPlanRecord().get('highCapacity')).toBe 8
+      expect(@cardboard.getColumns()[2].getPlanRecord().get('lowCapacity')).toBe 3
+      expect(@cardboard.getColumns()[2].getPlanRecord().get('highCapacity')).toBe 30
+      expect(@cardboard.getColumns()[3].getPlanRecord().get('lowCapacity')).toBe 15
+      expect(@cardboard.getColumns()[3].getPlanRecord().get('highCapacity')).toBe 25
 
   it 'attribute should be set to empty', ->
-    @board.render('testDiv')
-    @waitForComponentReady(@board).then =>
-      expect(@board.attribute == '').toBeTruthy()
+    @createCardboard().then =>
+      expect(@cardboard.attribute == '').toBeTruthy()
+
+  describe 'theme container interactions', ->
+
+    it 'should show expanded themes when the board is created', ->
+      @createCardboard().then =>
+        _.each @getThemeElements(), (element) =>
+          expect(element.isVisible()).toBe true
+
+    it 'should collapse themes when the theme collapse button is clicked', ->
+      @createCardboard().then =>
+        @clickCollapse().then =>
+          _.each @getThemeElements(), (element) =>
+            expect(element.isVisible()).toBe false
+
+    it 'should expand themes when the theme expand button is clicked', ->
+      @createCardboard(showTheme: false).then =>
+        @clickExpand().then =>
+          _.each @getThemeElements(), (element) =>
+            expect(element.isVisible()).toBe true
+
+    it 'should return client metrics message when collapse button is clicked', ->
+      @createCardboard().then =>
+        @clickCollapse().then =>
+          expect(@cardboard._getClickAction()).toEqual("Themes toggled from [true] to [false]")
+
+    it 'should return client metrics message when expand button is clicked', ->
+      @createCardboard(showTheme: false).then =>
+        @clickExpand().then =>
+          expect(@cardboard._getClickAction()).toEqual("Themes toggled from [false] to [true]")

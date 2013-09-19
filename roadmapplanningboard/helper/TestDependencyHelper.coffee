@@ -2,14 +2,18 @@ Ext = window.Ext4 || window.Ext
 
 Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
 
+  singleton: true
+
+  requires: [
+    'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory'
+  ]
+
   loadDependencies: ->
 
-    Rally.test.mock.env.Global.setupEnvironment({
-      services: {
-        planning_service_url: 'http://localhost:9999',
+    Rally.test.mock.env.Global.setupEnvironment
+      services:
+        planning_service_url: 'http://localhost:9999'
         timeline_service_url: 'http://localhost:8888'
-      }
-    });
 
     Deft.Injector.configure
       appModelFactory:
@@ -17,23 +21,22 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
 
       featureStore:
         fn: ->
-          storeFixtureFactory.getFeatureStoreFixture()
+          Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getFeatureStoreFixture()
 
       secondFeatureStore:
         fn: ->
-          storeFixtureFactory.getSecondFeatureStoreFixture()
+          Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getSecondFeatureStoreFixture()
 
       planStore:
         fn: ->
-          storeFixtureFactory.getPlanStoreFixture()
+          Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getPlanStoreFixture()
 
       timeframeStore:
         fn: ->
-          storeFixtureFactory.getTimeframeStoreFixture()
+          Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getTimeframeStoreFixture()
 
       roadmapStore:
         fn: ->
-          storeFixtureFactory.getRoadmapStoreFixture()
+          Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getRoadmapStoreFixture()
 
-    storeFixtureFactory = Ext.create 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory'
 

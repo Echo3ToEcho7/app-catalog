@@ -1,16 +1,23 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.require [
+  'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
+  'Rally.apps.roadmapplanningboard.TimeframePlanningColumn'
+  'Rally.apps.roadmapplanningboard.BacklogBoardColumn'
+  'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController'
+  'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory'
+]
+
 describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
   beforeEach ->
-    deps = Ext.create 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
-    deps.loadDependencies()
+    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
 
-    target = Ext.getBody()
-    @storeFixtureFactory = Ext.create 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory'
-    planStore = Deft.Injector.resolve('planStore')
-    timeframeStore = Deft.Injector.resolve('timeframeStore')
-    featureStore = Deft.Injector.resolve('featureStore')
-    secondFeatureStore = Deft.Injector.resolve('secondFeatureStore')
+    target = 'testDiv'
+
+    planStore = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getPlanStoreFixture()
+    timeframeStore = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getTimeframeStoreFixture()
+    featureStore = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getFeatureStoreFixture()
+    secondFeatureStore = Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getSecondFeatureStoreFixture()
 
     @leftColumnPlan = planStore.getById('513617ecef8623df1391fefc')
     leftColumnTimeframe = timeframeStore.getById(@leftColumnPlan.get('timeframe').id)
@@ -51,7 +58,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       getStores: -> @stores
       lowestPIType: 'PortfolioItem/Feature'
       planRecord: @leftColumnPlan
-      timeboxRecord: leftColumnTimeframe
+      timeframeRecord: leftColumnTimeframe
+      ownerCardboard: {}
       renderTo: target
       contentCell: target
       headerCell: target
@@ -82,7 +90,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       getStores: -> @stores
       planRecord: @rightColumnPlan
       lowestPIType: 'PortfolioItem/Feature'
-      timeboxRecord: rightColumnTimeframe
+      timeframeRecord: rightColumnTimeframe
+      ownerCardboard: {}
       renderTo: target
       contentCell: target
       headerCell: target
