@@ -140,11 +140,13 @@
                     {
                         name: 'start',
                         type: 'date',
+                        dateFormat: 'Y-m-d\\TH:i:s\\Z',
                         convert: this._normalizeDate
                     },
                     {
                         name: 'end',
                         type: 'date',
+                        dateFormat: 'Y-m-d\\TH:i:s\\Z',
                         convert: this._normalizeDate
                     },
                     {
