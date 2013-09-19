@@ -1,9 +1,6 @@
 (function () {
-    var DROP_CLASS, Ext;
-
-    Ext = window.Ext4 || window.Ext;
-
-    DROP_CLASS = "dnd-over";
+    var Ext = window.Ext4 || window.Ext;
+    var DROP_CLASS = "dnd-over";
 
     Ext.define('Rally.apps.roadmapplanningboard.OrcaColumnDropTarget', {
         extend: 'Ext.dd.DropTarget',
@@ -16,8 +13,7 @@
         constructor: function (dropEl, config) {
             this.mergeConfig(config);
             this.callParent([dropEl, this.config]);
-            this.dropIndicator = Ext.get('column_drop_indicator') || Ext.getBody().createChild({
-                id: 'column_drop_indicator',
+            this.dropIndicator = Ext.getBody().createChild({
                 cls: 'rally-drop-indicator',
                 style: {
                     height: '2px',
@@ -170,4 +166,4 @@
         }
     });
 
-}).call(this);
+})();

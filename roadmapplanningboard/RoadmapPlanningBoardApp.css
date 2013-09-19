@@ -1,4 +1,4 @@
-.roadmapPlanningBoardApp .no-drag-select {
+.roadmap-board .no-drag-select {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -7,14 +7,14 @@
     user-select: none;
 }
 
-.roadmapPlanningBoardApp .progress-bar-container .progress-bar-label {
+.roadmap-board .progress-bar-container .progress-bar-label {
     color: #262626;
     font-size: 12px;
     font-weight: bold;
     cursor: pointer;
 }
 
-.roadmapPlanningBoardApp .progress-bar-percent-done {
+.roadmap-board .progress-bar-percent-done {
     color: white;
     vertical-align: middle;
     display: inline-block;
@@ -23,83 +23,83 @@
     right: 5%;
 }
 
-.roadmapPlanningBoardApp.planning-board {
+.roadmap-board {
     height: 100%;
 }
 
-.roadmapPlanningBoardApp.planning-board > .rui-gridboard {
+.roadmap-board > .rui-gridboard {
     height: 100%;
     overflow-y: hidden;
 }
 
-.roadmapPlanningBoardApp.planning-board > .rui-gridboard > .rui-leftright {
+.roadmap-board > .rui-gridboard > .rui-leftright {
     display: none;
 }
 
-.roadmapPlanningBoardApp.planning-board .no-timebox .columns tr td.blank-slate-column {
+.roadmap-board .no-timebox .columns tr td.blank-slate-column {
     width: 66%;
     text-align: center;
     vertical-align: top;
 }
 
-.roadmapPlanningBoardApp.planning-board .show-label {
+.roadmap-board .show-label {
     float: right;
     margin-top: 3px;
 }
 
-.roadmapPlanningBoardApp.planning-board .header {
+.roadmap-board .header {
     padding: 5px 5px 5px 10px;
 }
 
-.roadmapPlanningBoardApp.planning-board .header .add-new {
+.roadmap-board .header .add-new {
     float: left;
 }
 
-.roadmapPlanningBoardApp.planning-board .add-new label {
+.roadmap-board .add-new label {
     padding-top: 0;
 }
 
-.roadmapPlanningBoardApp.planning-board .add-new .new {
+.roadmap-board .add-new .new {
     margin-left: 0;
 }
 
-.roadmapPlanningBoardApp.planning-board .manage-iterations {
+.roadmap-board .manage-iterations {
     float: right;
     margin: 3px 10px 0 0;
 }
 
-.roadmapPlanningBoardApp.planning-board .type-checkbox {
+.roadmap-board .type-checkbox {
     float: right;
     margin: 5px;
 }
 
-.roadmapPlanningBoardApp.planning-board .type-checkbox label {
+.roadmap-board .type-checkbox label {
     position: relative;
     top: 1px;
 }
 
-.roadmapPlanningBoardApp .progress-bar-container.field-percentDone {
+.roadmap-board .progress-bar-container.field-percentDone {
     margin: 0;
     display: inline-block;
 }
 
-.roadmapPlanningBoardApp .backlog {
+.roadmap-board .backlog {
     border-right: none;
 }
 
-.roadmapPlanningBoardApp .planning-column {
+.roadmap-board .planning-column {
     background-color: #f5f5f5;
 }
 
-.roadmapPlanningBoardApp .planning-column .search {
+.roadmap-board .planning-column .search {
     margin: 5px 30px 0 30px;
 }
 
-.roadmapPlanningBoardApp .planning-column .search > div {
+.roadmap-board .planning-column .search > div {
     overflow-x: hidden;
 }
 
-.roadmapPlanningBoardApp .planning-column .search-button {
+.roadmap-board .planning-column .search-button {
     background: transparent url('search-button.gif');
     width: 15px;
     height: 15px;
@@ -108,13 +108,13 @@
     cursor: pointer;
 }
 
-.roadmapPlanningBoardApp .planning-column .columnTitle {
+.roadmap-board .planning-column .columnTitle {
     font-size: 18px;
     font-weight: bold;
     color: #262626;
 }
 
-.roadmapPlanningBoardApp .planning-column .columnTitle .fieldContainerView {
+.roadmap-board .planning-column .columnTitle .fieldContainerView {
     font-size: 18px;
     font-weight: bold;
     font-family: 'Open Sans', sans-serif;
@@ -125,30 +125,30 @@
     text-overflow: ellipsis;
 }
 
-.roadmapPlanningBoardApp .planning-column .columnTitle input {
+.roadmap-board .planning-column .columnTitle input {
     font-size: 18px;
     font-weight: bold;
     font-family: 'Open Sans', sans-serif;
 }
 
-.roadmapPlanningBoardApp .planning-column .columnTitle > table {
+.roadmap-board .planning-column .columnTitle > table {
     margin: 0;
 }
 
-.roadmapPlanningBoardApp .planning-column .columnTitle > table input {
+.roadmap-board .planning-column .columnTitle > table input {
     line-height: 20px;
 }
 
-.roadmapPlanningBoardApp .planning-column .column-header {
+.roadmap-board .planning-column .column-header {
     margin: 0 0 0 0;
     text-align: center;
 }
 
-.roadmapPlanningBoardApp .planning-column .column-header .editableField {
+.roadmap-board .planning-column .column-header .editableField {
     min-height: 20px;
 }
 
-.roadmapPlanningBoardApp .planning-column .timeboxDates {
+.roadmap-board .planning-column .timeboxDates {
     font-size: 12px;
     font-weight: bold;
     color: #8f8f8f;
@@ -158,16 +158,16 @@
     border: 3px solid transparent;
 }
 
-.roadmapPlanningBoardApp .planning-column .timeboxDates:hover {
+.roadmap-board .planning-column .timeboxDates:hover {
     border: 1px solid #3197c6 !important;
     padding: 2px 0px;
 }
 
-.roadmapPlanningBoardApp .first-card-column {
+.roadmap-board .first-card-column {
     border-left: 1px solid #c0c0c0;
 }
 
-.roadmapPlanningBoardApp .progress-bar-background {
+.roadmap-board .progress-bar-background {
     background-color: #424242;
     left: 0;
     right: 0;
@@ -177,65 +177,65 @@
     position: relative;
 }
 
-.roadmapPlanningBoardApp {
+.roadmap-board {
     overflow-y: hidden !important;
 }
 
-.roadmapPlanningBoardApp table.column-container {
+.roadmap-board table.column-container {
     width: 100%;
 }
 
-.roadmapPlanningBoardApp .planning-column.current-timebox {
+.roadmap-board .planning-column.current-timebox {
     background-color: #8f8f8f;
 }
 
-.roadmapPlanningBoardApp .planning-column.current-timebox .columnContent {
+.roadmap-board .planning-column.current-timebox .columnContent {
     background-color: #c6c6c6;
     margin: 2px 2px 0 2px;
     border: none;
 }
 
-.roadmapPlanningBoardApp .planning-column.current-timebox .column-header {
+.roadmap-board .planning-column.current-timebox .column-header {
     background: #ffffff url('currentIterationColumnHeader.png') repeat-x bottom;
     margin: 2px 2px 0 2px;
 }
 
-.roadmapPlanningBoardApp .cardboard {
+.roadmap-board {
     font-family: 'Open Sans', sans-serif;
 }
 
-.roadmapPlanningBoardApp .cardboard .column-container .fixed-header-card-board-header-container {
+.roadmap-board .column-container .fixed-header-card-board-header-container {
     border-bottom: 1px dotted #c0c0c0;
 }
 
-.roadmapPlanningBoardApp .fixed-header-card-board-body-container > table {
+.roadmap-board .fixed-header-card-board-body-container > table {
     height: 100%;
 }
 
-.roadmapPlanningBoardApp .cardboard .theHeader .card-column {
+.roadmap-board .theHeader .card-column {
     background-color: #FFF;
 }
 
-.roadmapPlanningBoardApp .cardboard .column-container .column-header {
+.roadmap-board .column-container .column-header {
     font-size: 10pt;
 }
 
-.roadmapPlanningBoardApp .cardboard .column-container .column-header .columnTpl{
+.roadmap-board .column-container .column-header .columnTpl{
     font-size: 18px;
     font-weight: bold;
     font-family: 'Open Sans', sans-serif;
     color: rgb(0, 0, 0);
 }
 
-.roadmapPlanningBoardApp .cardboard .column-container .column-header .editableField {
+.roadmap-board .column-container .column-header .editableField {
     padding: 0px;
 }
 
-.roadmapPlanningBoardApp .cardboard .column-container .column-header .editableField:hover {
+.roadmap-board .column-container .column-header .editableField:hover {
     border: 1px solid #3197c6 !important;
 }
 
-.roadmapPlanningBoardApp .cardboard .column-container .column-header .editableField textarea {
+.roadmap-board .column-container .column-header .editableField textarea {
     text-align: left;
     font-weight: 300;
     font-size: 9pt;
@@ -245,34 +245,39 @@
     line-height: 1.5;
 }
 
-.roadmapPlanningBoardApp .cardboard .column-container .column-header .editableField .setTheme {
+.roadmap-board .column-container .column-header .editableField .setTheme {
     color: #262626;
     font-weight: 600;
 }
 
-.roadmapPlanningBoardApp .cardboard .column-container .column-header .column-header-title {
+.roadmap-board .column-container .column-header .column-header-title {
     padding: 15px 8px 0 8px;
 }
 
-.roadmapPlanningBoardApp .cardboard .column-container .planning-column {
+.roadmap-board .column-container .planning-column {
     border-top: 1px solid transparent;
     border-right: 1px dotted #c0c0c0;
     vertical-align: top;
 }
 
-.roadmapPlanningBoardApp .cardboard .column-container .last-card-column {
+.roadmap-board .column-container .last-card-column {
     border-right: 1px solid #c0c0c0;
 }
 
-.roadmapPlanningBoardApp .cardboard .column-container td.card-column {
+.roadmap-board .column-container td.card-column {
     border-top-style: none;
 }
 
-.roadmapPlanningBoardApp .cardboard .column {
+.roadmap-board .column {
     border-right: none;
 }
 
-.roadmapPlanningBoardApp .theme_container {
+.roadmap-board .field_container {
+    float: left;
+    width: 90%;
+}
+
+.roadmap-board .theme_container {
     text-align: left;
     font-weight: 300;
     font-size: 9pt;
@@ -280,20 +285,20 @@
     padding: 8px;
 }
 
-.roadmapPlanningBoardApp .theme_container .fieldContainerView {
+.roadmap-board .theme_container .fieldContainerView {
     white-space: pre-wrap;
     max-height: 205px;
     overflow: auto;
 }
 
-.roadmapPlanningBoardApp a.themeButton {
+.roadmap-board a.themeButton {
     background-repeat: no-repeat;
     display: inline-block;
     float: right;
     z-index: 100;
 }
 
-.roadmapPlanningBoardApp a.themeButtonCollapse {
+.roadmap-board a.themeButtonCollapse {
     height: 25px;
     padding-right: 25px;
     margin-right: -9px;
@@ -302,24 +307,24 @@
 }
 
 @media all and (-webkit-min-device-pixel-ratio: 1.5) {
-    .roadmapPlanningBoardApp a.themeButtonCollapse {
+    .roadmap-board a.themeButtonCollapse {
         background-image: url('smChev_up@2x.png');
         background-size: 12px 8px;
     }
 }
 
-.roadmapPlanningBoardApp a.themeButtonCollapse:hover {
+.roadmap-board a.themeButtonCollapse:hover {
     background-image: url('smChev_up_over.png');
 }
 
 @media all and (-webkit-min-device-pixel-ratio: 1.5) {
-    .roadmapPlanningBoardApp a.themeButtonCollapse:hover {
+    .roadmap-board a.themeButtonCollapse:hover {
         background-image: url('smChev_up_over@2x.png');
         background-size: 12px 8px;
     }
 }
 
-.roadmapPlanningBoardApp a.themeButtonExpand {
+.roadmap-board a.themeButtonExpand {
     position: absolute;
     bottom: -12px;
     right: 0px;
@@ -332,24 +337,24 @@
 }
 
 @media all and (-webkit-min-device-pixel-ratio: 1.5) {
-    .roadmapPlanningBoardApp a.themeButtonExpand {
+    .roadmap-board a.themeButtonExpand {
         background-image: url('smChev_down@2x.png');
         background-size: 12px 8px;
     }
 }
 
-.roadmapPlanningBoardApp a.themeButtonExpand:hover {
+.roadmap-board a.themeButtonExpand:hover {
     background-image: url('smChev_down_over.png');
 }
 
 @media all and (-webkit-min-device-pixel-ratio: 1.5) {
-    .roadmapPlanningBoardApp a.themeButtonExpand:hover {
+    .roadmap-board a.themeButtonExpand:hover {
         background-image: url('smChev_down_over@2x.png');
         background-size: 12px 8px;
     }
 }
 
-.roadmapPlanningBoardApp .no-drag-select {
+.roadmap-board .no-drag-select {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -641,7 +646,7 @@
     line-height: 1px;
 }
 
-.roadmapPlanningBoardApp .no-drag-select {
+.roadmap-board .no-drag-select {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -650,7 +655,7 @@
     user-select: none;
 }
 
-.roadmapPlanningBoardApp .no-drag-select {
+.roadmap-board .no-drag-select {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -803,12 +808,12 @@
     }
 }
 
-.roadmapPlanningBoardApp a.themeButtonExpand:hover {
+.roadmap-board a.themeButtonExpand:hover {
     background-image: url('smChev_down_over.png');
 }
 
 @media all and (-webkit-min-device-pixel-ratio: 1.5) {
-    .roadmapPlanningBoardApp a.themeButtonExpand:hover {
+    .roadmap-board a.themeButtonExpand:hover {
         background-image: url('smChev_down_over@2x.png');
         background-size: 12px 8px;
     }

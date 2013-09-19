@@ -1,7 +1,5 @@
 (function () {
-    var Ext;
-
-    Ext = window.Ext4 || window.Ext;
+    var Ext = window.Ext4 || window.Ext;
 
     Ext.define('Rally.apps.roadmapplanningboard.PlanningBoardColumn', {
         extend: 'Rally.ui.cardboard.Column',
@@ -18,7 +16,6 @@
         
         config: {
             stores: [],
-            lowestPIType: undefined,
             storeConfig: {
                 fetch: ['Value', 'FormattedID', 'Owner','Name', 'PreliminaryEstimate', 'DisplayColor']
             },
@@ -50,32 +47,6 @@
             }, this, {
                 single: true
             });
-        },
-
-        getStores: function () {
-
-            if (!this.planRecord || !this.planRecord.data.features.length) {
-                return [];
-            }
-
-            var filters = [];
-
-            _.each(this.planRecord.data.features, function(feature) {
-                filters.push({
-                    property: 'ObjectID',
-                    operator: '=',
-                    value: feature.id
-                });
-            });
-
-            return [
-                Ext.create('Rally.data.WsapiDataStore', {
-                    model: this.lowestPIType,
-                    autoLoad: true,
-                    fetch: this.storeConfig.fetch,
-                    filters: Rally.data.QueryFilter.or(filters)
-                })
-            ];
         },
 
         isMatchingRecord: function () {
@@ -118,4 +89,4 @@
         }
     });
 
-}).call(this);
+})();

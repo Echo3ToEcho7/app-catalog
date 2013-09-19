@@ -5,9 +5,10 @@
         extend: 'Rally.app.App',
         requires: [
             'Rally.apps.roadmapplanningboard.PlanningGridBoard',
+            'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable',
             'Rally.apps.roadmapplanningboard.AppModelFactory'
         ],
-        cls: 'roadmapPlanningBoardApp planning-board',
+        cls: 'roadmapPlanningBoardApp',
         componentCls: 'app',
 
         constructor: function(config) {
@@ -39,14 +40,19 @@
             var _this = this;
 
             roadmapStore = Deft.Injector.resolve('roadmapStore');
-            timeframeStore = Deft.Injector.resolve('timeframeStore');
 
             roadmapStore.load(function() {
-                timeframeStore.load(function() {
-                    _this.add(Ext.create('Rally.apps.roadmapplanningboard.PlanningGridBoard', {
-                        roadmapId: roadmapStore.first() ? roadmapStore.first().getId() : undefined
-                    }));
-                });
+                _this.add(Ext.create('Rally.apps.roadmapplanningboard.PlanningBoard', {
+                    roadmapId: roadmapStore.first() ? roadmapStore.first().getId() : undefined,
+                    plugins: [
+                        {
+                            ptype: 'rallytimeframescrollablecardboard', timeframeColumnCount: 4
+                        },
+                        {
+                            ptype: 'rallyfixedheadercardboard'
+                        }
+                    ]
+                }));
             });
         }
     });

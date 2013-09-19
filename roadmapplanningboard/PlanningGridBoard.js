@@ -1,8 +1,12 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
+
     Ext.define('Rally.apps.roadmapplanningboard.PlanningGridBoard', {
         extend: 'Rally.ui.gridboard.GridBoard',
-        requires: ['Rally.apps.roadmapplanningboard.PlanningBoard'],
+        requires: [
+            'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable',
+            'Rally.apps.roadmapplanningboard.PlanningBoard'
+        ],
         config: {
             roadmapId: null
         },
@@ -12,9 +16,14 @@
                 itemId: 'gridOrBoard',
                 xtype: 'roadmapplanningboard',
                 context: this.context,
-                roadmapId: this.roadmapId
+                roadmapId: this.roadmapId,
+                plugins: [
+                    {
+                        ptype: 'rallytimeframescrollablecardboard'
+                    }
+                ]
             };
         }
     });
 
-}).call(this);
+})();

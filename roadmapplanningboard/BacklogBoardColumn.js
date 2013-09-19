@@ -1,7 +1,5 @@
 (function () {
-    var Ext;
-
-    Ext = window.Ext4 || window.Ext;
+    var Ext = window.Ext4 || window.Ext;
 
     Ext.define('Rally.apps.roadmapplanningboard.BacklogBoardColumn', {
         extend: 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
@@ -9,20 +7,13 @@
         inject: ['planStore'],
         config: {
             roadmap: null,
-            lowestPIType: undefined,
             columnHeaderConfig: {
                 headerTpl: 'Backlog'
             }
         },
 
-        getStores: function (models) {
-            return [
-                Ext.create('Rally.data.WsapiDataStore', {
-                    model: this.lowestPIType,
-                    autoLoad: true,
-                    fetch: ['Value','FormattedID', 'Owner','Name', 'PreliminaryEstimate', 'DisplayColor']
-                })
-            ];
+        getStoreFilter: function (model) {
+            return [];
         },
 
         isMatchingRecord: function (featureRecord) {
@@ -37,4 +28,4 @@
         }
     });
 
-}).call(this);
+})();

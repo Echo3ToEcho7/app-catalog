@@ -1,46 +1,21 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
+
     Ext.define('Rally.apps.roadmapplanningboard.ThemeHeader', {
         extend: 'Ext.container.Container',
         alias: 'widget.roadmapthemeheader',
         cls: 'theme_container',
-        requires: ['Rally.ui.detail.FieldContainer', 'Rally.apps.roadmapplanningboard.ThemeToggleButtonView'],
+        requires: [
+            'Rally.ui.detail.FieldContainer'
+        ],
         config: {
-            record: undefined,
-            showToggle: false
+            record: undefined
         },
         initComponent: function () {
-            var themeCollapseButton;
-
             this.callParent(arguments);
-            if (this.getShowToggle()) {
-                themeCollapseButton = Ext.create('Rally.apps.roadmapplanningboard.ThemeToggleButtonView', {
-                    cls: ['themeButton', 'themeButtonCollapse'],
-                    autoEl: {
-                        tag: 'a',
-                        href: '#',
-                        title: 'Hide themes'
-                    }
-                });
-                this.add(themeCollapseButton);
-            }
-            this.add(this._createThemeContainer());
-        },
-        beforeRender: function () {
-            var themeExpandButton;
-
-            if (this.getShowToggle()) {
-                themeExpandButton = Ext.create('Rally.apps.roadmapplanningboard.ThemeToggleButtonView', {
-                    cls: ['themeButton', 'themeButtonExpand'],
-                    hidden: true,
-                    autoEl: {
-                        tag: 'a',
-                        href: '#',
-                        title: 'Show themes'
-                    }
-                });
-                this.up().add(themeExpandButton);
-            }
+            this.on('afterrender', function () {
+                this.add(this._createThemeContainer());
+            });
         },
         getCardboardComponent: function () {
             if(this.container !== null && this.container.parent('.cardboard') !== null) {
@@ -51,7 +26,7 @@
             var field, record;
 
             record = this.record;
-            field = this.record.fields.get('theme');
+            field = this.record.getField('theme');
             this.themeContainer = Ext.create('Rally.ui.detail.FieldContainer', {
                 record: record,
                 field: field,

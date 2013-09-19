@@ -1,7 +1,5 @@
 (function () {
-    var Ext;
-
-    Ext = window.Ext4 || window.Ext;
+    var Ext = window.Ext4 || window.Ext;
 
     Ext.define('Rally.apps.roadmapplanningboard.TimeframePlanningColumn', {
         extend: 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
@@ -11,24 +9,21 @@
             'Rally.apps.roadmapplanningboard.ThemeHeader',
             'Rally.apps.roadmapplanningboard.PlanCapacityProgressBar',
             'Rally.apps.roadmapplanningboard.util.Fraction',
-            'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView',
-            'Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView'
+            'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView'
         ],
         
         config: {
             startDateField: 'start',
             endDateField: 'end',
-            timeboxRecord: undefined,
+            timeframeRecord: undefined,
             planRecord: undefined,
             dateFormat: 'M j',
             headerTemplate: undefined,
             pointField: 'PreliminaryEstimate',
-            isRightmostColumn: false,
             progressBarTitle: 'Edit Planned Capacity Range'
         },
         
         initComponent: function () {
-            var _ref, _ref1;
 
             this.callParent(arguments);
 
@@ -49,8 +44,18 @@
             this.columnHeader.getEl().on('click', this.onProgressBarClick, this, {
                 delegate: '.progress-bar-container'
             });
-            return this.columnHeader.getEl().on('click', this.onTimeboxDatesClick, this, {
-                delegate: '.timeboxDates'
+            return this.columnHeader.getEl().on('click', this.onTimeframeDatesClick, this, {
+                delegate: '.timeframeDates'
+            });
+        },
+
+        getStoreFilter: function (model) {
+            return _.each(this.planRecord.data.features, function(feature) {
+                return {
+                    property: 'ObjectID',
+                    operator: '=',
+                    value: feature.id
+                };
             });
         },
 
@@ -92,7 +97,7 @@
             return this.popover;
         },
 
-        onTimeboxDatesClick: function (event) {
+        onTimeframeDatesClick: function (event) {
             var _this = this;
 
             return Ext.create('Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', {
@@ -116,7 +121,7 @@
                     }
                 ],
                 controllerConfig: {
-                    model: this.timeboxRecord
+                    model: this.timeframeRecord
                 },
                 listeners: {
                     destroy: function () {
@@ -130,9 +135,9 @@
             if (this.dateRange) {
                 return this.dateRange.update(this.getDateHeaderTplData());
             } else {
-                this.dateRange = this.getColumnHeader().add({
+                this.dateRange = this.getHeaderTitle().add({
                     xtype: 'component',
-                    tpl: "<div class='timeboxDates'>{formattedDate}</div>",
+                    tpl: "<div class='timeframeDates'>{formattedDate}</div>",
                     data: this.getDateHeaderTplData()
                 });
             }
@@ -155,7 +160,7 @@
                 this.theme = this.getColumnHeader().add({
                     xtype: 'roadmapthemeheader',
                     record: this.planRecord,
-                    showToggle: this.isRightmostColumn
+                    hidden: !this.ownerCardboard.showTheme
                 });
             }
         },
@@ -208,7 +213,7 @@
         _getFormattedDate: function (dateField) {
             var date;
 
-            date = this.timeboxRecord.get(dateField);
+            date = this.timeframeRecord.get(dateField);
             if (date) {
                 return Ext.Date.format(date, this.dateFormat);
             }
@@ -226,4 +231,4 @@
         }
     });
 
-}).call(this);
+})();
