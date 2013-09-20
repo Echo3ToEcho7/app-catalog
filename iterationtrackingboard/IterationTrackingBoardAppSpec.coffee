@@ -1,8 +1,7 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-  'Rally.util.DateTime',
-  'Rally.alm.FeatureToggle'
+  'Rally.util.DateTime'
 ]
 
 describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
@@ -33,17 +32,41 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
       @waitForComponentReady(@app)
 
+    getIterationFilter: ->
+      iteration = @iterationData[0]
+
+      [
+        { property: 'Iteration.Name', operator: '=', value: iteration.Name },
+        { property: "Iteration.StartDate", operator: '=', value: iteration.StartDate }
+        { property: "Iteration.EndDate", operator: '=', value: iteration.EndDate }
+      ]
+
+    stubRequests: ->
+      userstoryStub = @ajax.whenReading('userstory').respondWith()
+      defectStub = @ajax.whenQuerying('defect').respondWith()
+      defectsuiteStub = @ajax.whenQuerying('defectsuite').respondWith()
+      testsetStub = @ajax.whenQuerying('testset').respondWith()
+      @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(["Defined", "In-Progress", "Completed", "Accepted"]);
+
+      [userstoryStub, defectStub, defectsuiteStub, testsetStub]
+
+    toggleToGridOrBoard: (view) ->
+      toggler = @app.gridboard.down('rallygridboardtoggle')
+      toggler.fireEvent 'toggle', view
+
+    toggleToBoard: ->
+      @toggleToGridOrBoard('board')
+
+    toggleToGrid: ->
+      @toggleToGridOrBoard('grid')
+
   beforeEach ->
     @ajax.whenReading('project').respondWith {
       TeamMembers: []
       Editors: []
     }
 
-    @ajax.whenQuerying('userstory').respondWith()
-    @ajax.whenQuerying('defect').respondWith()
-    @ajax.whenQuerying('defectsuite').respondWith()
-    @ajax.whenQuerying('testset').respondWith()
-    @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(["Defined", "In-Progress", "Completed", "Accepted"]);
+    @stubRequests()
 
     @tooltipHelper = new Helpers.TooltipHelper this
 
@@ -96,3 +119,21 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @createApp(isShowingBlankSlate: -> true).then =>
         @app.showFieldPicker = true
         expect(Ext.isEmpty(_.find(@app.getSettingsFields(), name: 'cardFields'))).toBe true
+
+  it 'should filter the grid to the currently selected iteration', ->
+    @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('ITERATION_TRACKING_BOARD_GRID_TOGGLE').returns(true)
+    requests = @stubRequests()
+
+    @createApp().then =>
+      @toggleToGrid()
+
+      expect(request).toBeWsapiRequestWith(filters: @getIterationFilter()) for request in requests
+
+  it 'should filter the board to the currently selected iteration', ->
+    @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('ITERATION_TRACKING_BOARD_GRID_TOGGLE').returns(true)
+    requests = @stubRequests()
+
+    @createApp().then =>
+      @toggleToBoard()
+
+      expect(request).toBeWsapiRequestWith(filters: @getIterationFilter()) for request in requests
