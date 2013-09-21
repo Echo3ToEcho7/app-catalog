@@ -294,6 +294,7 @@
                     workspace: this.getContext().getWorkspaceRef(),
                     project: this.getContext().getProjectRef()
                 },
+                fetch: ['Name','StartDate','EndDate'],
                 limit: Infinity
             });
 
@@ -301,21 +302,42 @@
             store.load();
         },
 
+        _areIterationsEqual: function (iteration1, iteration2) {
+            return iteration1.Name === iteration2.Name &&
+                   iteration1.StartDate === iteration2.StartDate &&
+                   iteration1.EndDate === iteration2.EndDate;
+        },
+
         _addIterationLines: function (chart) {
             var axis = chart.chartConfig.xAxis;
             var categories = chart.chartData.categories;
-            var i;
+            var i, j;
+            var uniqueIterations = [];
+            var unique;
 
             axis.plotLines = [];
             axis.plotBands = [];
 
             for (i = 0; i < this.iterations.length; i++) {
-                axis.plotLines.push(this._getPlotLine(categories, this.iterations[i], false));
-                axis.plotBands.push(this._getPlotBand(categories, this.iterations[i], i % 2 !== 0));
+                unique = true;
+                for (j = 0; j < uniqueIterations.length; j++) {
+                    if(this._areIterationsEqual(uniqueIterations[j], this.iterations[i])) {
+                        unique = false;
+                        break;
+                    }
+                }
+                if(unique === true) {
+                    uniqueIterations.push(this.iterations[i]);
+                }
             }
 
-            if (this.iterations.length > 0) {
-                axis.plotLines.push(this._getPlotLine(categories, this.iterations[this.iterations.length - 1], true));
+            for (i = 0; i < uniqueIterations.length; i++) {
+                axis.plotLines.push(this._getPlotLine(categories, uniqueIterations[i], false));
+                axis.plotBands.push(this._getPlotBand(categories, uniqueIterations[i], i % 2 !== 0));
+            }
+
+            if (uniqueIterations.length > 0) {
+                axis.plotLines.push(this._getPlotLine(categories, uniqueIterations[uniqueIterations.length - 1], true));
             }
         },
 
