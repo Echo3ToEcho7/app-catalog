@@ -1,103 +1,50 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    var TIME_PERIOD_IN_MONTHS = 2;
-    var TIME_PERIOD_IN_MILLIS = 1000 * 60 * 60 * 24 * 30 * TIME_PERIOD_IN_MONTHS;
+    var TIME_PERIOD_IN_MILLIS = 7776000000; // 3 months in milliseconds
+    //var TIME_PERIOD_IN_MILLIS = 5184000000; // 2 months in milliseconds
+    //var TIME_PERIOD_IN_MILLIS = 2592000000; // 1 month in milliseconds
 
     Ext.define("ProjectCFDCalculator", {
         extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
 
-        getDerivedFieldsOnInput: function () {
-            return [
-                {
-                    as: "Idea",
-                    f: function (snapshot) {
-                        return snapshot.ScheduleState === "Idea" ? 1 : 0;
-                    }
-                },
-                {
-                    as: "Defined",
-                    f: function (snapshot) {
-                        return snapshot.ScheduleState === "Defined" ? 1 : 0;
-                    }
-                },
-                {
-                    as: "In-Progress",
-                    f: function (snapshot) {
-                        return snapshot.ScheduleState === "In-Progress" ? 1 : 0;
-                    }
-                },
-                {
-                    as: "Completed",
-                    f: function (snapshot) {
-                        return snapshot.ScheduleState === "Completed" ? 1 : 0;
-                    }
-                },
-                {
-                    as: "Accepted",
-                    f: function (snapshot) {
-                        return snapshot.ScheduleState === "Accepted" ? 1 : 0;
-                    }
-                },
-                {
-                    as: "Released",
-                    f: function (snapshot) {
-                        return snapshot.ScheduleState === "Released" ? 1 : 0;
-                    }
-                }
-            ];
-        },
+        getMetrics: function() {
+            var stateFieldName = this.stateFieldName;
+            var stateFieldValues = this.stateFieldValues.split(',');
 
-        getMetrics: function () {
-            return [
-                {
-                    field: "Idea",
-                    as: "Idea",
-                    f: "sum",
-                    display: "area"
-                },
-                {
-                    field: "Defined",
-                    as: "Defined",
-                    f: "sum",
-                    display: "area"
-                },
-                {
-                    field: "In-Progress",
-                    as: "In-Progress",
-                    f: "sum",
-                    display: "area"
-                },
-                {
-                    field: "Completed",
-                    as: "Completed",
-                    f: "sum",
-                    display: "area"
-                },
-                {
-                    field: "Accepted",
-                    as: "Accepted",
-                    f: "sum",
-                    display: "area"
-                },
-                {
-                    field: "Released",
-                    as: "Released",
-                    f: "sum",
-                    display: "area"
-                }
+            var metrics = [
+                {f: 'groupByCount', groupByField: stateFieldName, allowedValues: stateFieldValues}
             ];
+
+            for (var i = 0; i < stateFieldValues.length; ++i) {
+                metrics.push(
+                    {as: stateFieldValues[i], field: stateFieldValues[i], f: 'sum', display: 'area'}
+                );
+            }
+            return metrics;
         }
     });
 
     Ext.define("Rally.apps.charts.magic.cfd.CumulativeFlowChartApp", {
+        name: 'chartapp',
+        alias: 'widget.charts_magic_cfd_cumulativeflowchartapp',
         extend: "Rally.app.App",
         settingsScope: "workspace",
         componentCls: 'app',
 
         requires: [
-            "Rally.apps.charts.magic.ChartSettings"
+            'Rally.ui.chart.Chart',
+            'Rally.apps.charts.magic.ChartSettings'
         ],
+
+        config: {
+            defaultSettings: {
+                stateFieldName: 'ScheduleState',
+                stateFieldValues: 'Idea,Defined,In-Progress,Completed,Accepted,Released'
+            }
+        },
+
+        chartSettings: undefined, // ChartSettings object
 
         items: [
             {
@@ -108,72 +55,124 @@
         ],
 
         getSettingsFields: function () {
-            return Rally.apps.charts.magic.ChartSettings.getFields();
+            if (!this.chartSettings) {
+                this.chartSettings = Ext.create('Rally.apps.charts.magic.ChartSettings', {
+                    app: this
+                });
+            }
+            return this.chartSettings.getFields();
         },
 
         launch: function() {
-            this.callParent(arguments);
-            var today = new Date();
-            var timePeriod = new Date(today - TIME_PERIOD_IN_MILLIS);
-
-            this.chartConfig.storeConfig.find.Project = this.getContext().getProject().ObjectID;
-            this.chartConfig.storeConfig.find._ValidFrom = {
-                "$gt": timePeriod.toISOString()
-            };
-            this.chartConfig.chartConfig.title = {
-                text: this.getContext().getProject().Name + " Cumulative Flow Diagram"
-            };
-
-            this.add(this.chartConfig);
+            this.add(this._getChartAppConfig());
+            this._publishComponentReady();
         },
 
-        chartConfig: {
-            xtype: 'rallychart',
+        _getChartAppConfig: function() {
+            return {
+                xtype: 'rallychart',
 
-            storeConfig: {
-                find: {
-                    '_TypeHierarchy': 'HierarchicalRequirement',
-                    'Children': null
-                },
-                fetch: ['ScheduleState', 'PlanEstimate'],
-                hydrate: ['ScheduleState']
-            },
+                storeConfig: this._getChartStoreConfig(),
+                calculatorType: 'ProjectCFDCalculator',
+                calculatorConfig: this._getChartCalculatorConfig(),
 
-            calculatorType: 'ProjectCFDCalculator',
-            calculatorConfig: {
-            },
-
-            chartConfig: {
-                chart: {
-                    zoomType: 'xy'
-                },
-                title: {
-                    text: 'Cumulative Flow Diagram'
-                },
-                xAxis: {
-                    tickmarkPlacement: 'on',
-                    tickInterval: 20,
-                    title: {
-                        text: 'Days'
-                    }
-                },
-                yAxis: [
-                    {
-                        title: {
-                            text: 'Count'
-                        }
-                    }
+                chartColors: [  // RGB values obtained from here: http://ux-blog.rallydev.com/?cat=23
+                    "#C0C0C0",  // $grey4
+                    "#FF8200",  // $orange
+                    "#F6A900",  // $gold
+                    "#FAD200",  // $yellow
+                    "#8DC63F",  // $lime
+                    "#1E7C00",  // $green_dk
+                    "#337EC6",  // $blue_link
+                    "#005EB8",  // $blue
+                    "#7832A5",  // $purple
+                    "#DA1884"   // $pink
                 ],
-                plotOptions: {
-                    series: {
-                        marker: {
-                            enabled: false
+
+                listeners: {
+                    chartRendered: this._publishComponentReady,
+                    scope: this
+                },
+
+                chartConfig: {
+                    chart: {
+                        zoomType: 'xy'
+                    },
+                    title: {
+                        text: this.getContext().getProject().Name + ' Cumulative Flow Diagram'
+                    },
+                    xAxis: {
+                        tickmarkPlacement: 'on',
+                        tickInterval: 20,
+                        title: {
+                            text: 'Days'
                         }
                     },
-                    area: {
-                        stacking: 'normal'
+                    yAxis: [
+                        {
+                            title: {
+                                text: 'Count'
+                            }
+                        }
+                    ],
+                    plotOptions: {
+                        series: {
+                            marker: {
+                                enabled: false
+                            }
+                        },
+                        area: {
+                            stacking: 'normal'
+                        }
                     }
                 }
+            };
+        },
+
+        _getChartStoreConfig: function() {
+            return {
+                find: {
+                    'Project': this.getContext().getProject().ObjectID,
+                    '_TypeHierarchy': 'HierarchicalRequirement',
+                    'Children': null,
+                    '_ValidFrom': {
+                        "$gt": this._getChartStoreConfigValidFrom()
+                    }
+                },
+                fetch: this._getChartStoreConfigFetch(),
+                hydrate: this._getChartStoreConfigHydrate()
+            };
+        },
+
+        _getChartStoreConfigValidFrom: function() {
+            var today = new Date();
+            var timePeriod = new Date(today - TIME_PERIOD_IN_MILLIS);
+            return timePeriod.toISOString();
+        },
+
+        _getChartStoreConfigFetch: function() {
+            var stateFieldName = this.getSetting('stateFieldName');
+            return [stateFieldName, 'PlanEstimate'];
+        },
+
+        _getChartStoreConfigHydrate: function() {
+            var stateFieldName = this.getSetting('stateFieldName');
+            return [stateFieldName];
+        },
+
+        _getChartCalculatorConfig: function() {
+            var stateFieldName = this.getSetting('stateFieldName');
+            var stateFieldValues = this.getSetting('stateFieldValues');
+
+            return {
+                stateFieldName: stateFieldName,
+                stateFieldValues: stateFieldValues
+            };
+        },
+
+        _publishComponentReady: function() {
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
             }
         }
 
