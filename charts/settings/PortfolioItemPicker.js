@@ -41,7 +41,7 @@
                         xtype: 'rallybutton',
                         text: 'Choose',
                         itemId: 'portfolioItemButton',
-                        cls: 'piButton'
+                        cls: 'piButton primary small'
                     },
                     {
                         xtype: 'container',
