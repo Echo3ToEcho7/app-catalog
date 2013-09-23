@@ -70,7 +70,7 @@
                     fieldLabel: 'Card Fields',
                     xtype: 'rallyfieldpicker',
                     modelTypes: ['userstory', 'defect'],
-                    fieldBlackList: ['DefectStatus', 'TaskStatus', 'DisplayColor'],
+                    fieldBlackList: ['DefectStatus', 'TaskStatus', 'DisplayColor', 'DragAndDropRank', 'Rank'],
                     alwaysSelectedValues: alwaysSelectedValues,
                     listeners: {
                         selectionchange: function(picker) {
