@@ -1,4 +1,4 @@
-(function() {
+(function () {
     var Ext = window.Ext4 || window.Ext;
 
     var TIME_PERIOD_IN_MONTHS = 2;
@@ -120,24 +120,73 @@
             return Rally.apps.charts.magic.ChartSettings.getFields();
         },
 
-        launch: function() {
+        launch: function () {
             this.callParent(arguments);
-            var project = this.getContext().getProject();
+            var projectSetting = this.getSetting("project");
+
+            if (Ext.isEmpty(projectSetting)) {
+                var context = this.getContext();
+                this.projectScopeDown = context.getProjectScopeDown();
+                this.project = context.getProject();
+                this.workspace = context.getWorkspace();
+                this.configureChart();
+            } else {
+                this.projectScopeDown = this.getSetting("projectScopeDown");
+                this.loadModelInstanceByRefUri(projectSetting,
+                    function (record) {
+                        this.project = record.data;
+                        this.workspace = record.data.Workspace;
+                        this.configureChart();
+                    },
+                    function () {
+                        throw new Error("Failed to load project '" + projectSetting + "' from WSAPI.");
+                    }
+                );
+            }
+        },
+
+        configureChart: function () {
             var today = new Date();
             var timeFrame = this.getSetting("timeFrame");
-            if( ! timeFrame ) {
+            if (!timeFrame) {
                 timeFrame = this.config.defaultSettings;
             }
-            var validFromDate = Rally.util.DateTime.add( today, timeFrame.timeFrameUnit, - timeFrame.timeFrameQuantity );
+            var validFromDate = Rally.util.DateTime.add(today, timeFrame.timeFrameUnit, -timeFrame.timeFrameQuantity);
             var validFromStr = validFromDate.toISOString();
-
-            this.chartConfig.storeConfig.find.Project = project.ObjectID;
             this.chartConfig.storeConfig.find._ValidFrom = { "$gt": validFromStr };
-            this.chartConfig.chartConfig.title = { text: project.Name + " Cumulative Flow Diagram" };
 
+            this.chartConfig.chartConfig.title = { text: this.project.Name + " Cumulative Flow Diagram" };
+
+            this.setProjectScoping();
             this.add(this.chartConfig);
         },
 
+        setProjectScoping: function () {
+            this.chartConfig.storeConfig.context = { workspace: this.workspace._ref };
+            if (this.projectScopeDown) {
+                this.chartConfig.storeConfig.find._ProjectHierarchy = this.project.ObjectID;
+                delete this.chartConfig.storeConfig.find.Project;
+            } else {
+                this.chartConfig.storeConfig.find.Project = this.project.ObjectID;
+                delete this.chartConfig.storeConfig.find._ProjectHierarchy;
+            }
+        },
+
+        loadModelInstanceByRefUri: function (refUri, success, failure) {
+            var ref = Rally.util.Ref.getRefObject(refUri);
+            Rally.data.ModelFactory.getModel({
+                type: ref.getType(),
+                scope: this,
+                success: function (model) {
+                    model.load(ref.getOid(), {
+                        scope: this,
+                        fetch: ['Name', 'ObjectID', 'Workspace'],
+                        success: success,
+                        failure: failure
+                    });
+                }
+            });
+        },
 
         chartConfig: {
             xtype: 'rallychart',
