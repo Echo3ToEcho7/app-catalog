@@ -16,7 +16,9 @@
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
-            'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
+            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
+            'Rally.alm.ui.dialog.IterationTrackingSplashDialog',
+            'Rally.data.PreferenceManager'
         ],
         mixins: ['Rally.app.CardFieldSelectable'],
         componentCls: 'iterationtrackingboard',
