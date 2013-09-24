@@ -1,7 +1,8 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-  'Rally.util.DateTime'
+  'Rally.util.DateTime',
+  'Rally.alm.ui.dialog.IterationTrackingSplashDialog'
 ]
 
 describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
@@ -27,7 +28,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
             project:
               _ref: @projectRef
         ),
-        renderTo: 'testDiv'
+        renderTo: 'testDiv',
+      #this keeps the splash screen from popping up
+#        _loadSplashScreen: Ext.emptyFn
       , config))
 
       @waitForComponentReady(@app)
@@ -48,6 +51,11 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       testsetStub = @ajax.whenQuerying('testset').respondWith()
       @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(["Defined", "In-Progress", "Completed", "Accepted"]);
 
+      @ajax.whenReading('project').respondWith {
+        TeamMembers: []
+        Editors: []
+      }
+
       [userstoryStub, defectStub, defectsuiteStub, testsetStub]
 
     toggleToGridOrBoard: (view) ->
@@ -61,11 +69,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @toggleToGridOrBoard('grid')
 
   beforeEach ->
-    @ajax.whenReading('project').respondWith {
-      TeamMembers: []
-      Editors: []
-    }
-
     @stubRequests()
 
     @tooltipHelper = new Helpers.TooltipHelper this
