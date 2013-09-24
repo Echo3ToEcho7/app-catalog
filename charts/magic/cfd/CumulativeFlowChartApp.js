@@ -93,10 +93,12 @@
     Ext.define("Rally.apps.charts.magic.cfd.CumulativeFlowChartApp", {
         extend: "Rally.app.App",
         settingsScope: "workspace",
-        componentCls: 'app',
+        componentCls: 'cfd-app',
 
         requires: [
-            "Rally.apps.charts.magic.ChartSettings"
+            "Rally.apps.charts.magic.ChartSettings",
+            "Rally.ui.chart.Chart",
+            "Rally.util.DateTime"
         ],
 
         items: [
@@ -107,25 +109,35 @@
             }
         ],
 
+        config: {
+            defaultSettings: {
+                timeFrameQuantity: 90,
+                timeFrameUnit: 'day'
+            }
+        },
+
         getSettingsFields: function () {
             return Rally.apps.charts.magic.ChartSettings.getFields();
         },
 
         launch: function() {
             this.callParent(arguments);
+            var project = this.getContext().getProject();
             var today = new Date();
-            var timePeriod = new Date(today - TIME_PERIOD_IN_MILLIS);
+            var timeFrame = this.getSetting("timeFrame");
+            if( ! timeFrame ) {
+                timeFrame = this.config.defaultSettings;
+            }
+            var validFromDate = Rally.util.DateTime.add( today, timeFrame.timeFrameUnit, - timeFrame.timeFrameQuantity );
+            var validFromStr = validFromDate.toISOString();
 
-            this.chartConfig.storeConfig.find.Project = this.getContext().getProject().ObjectID;
-            this.chartConfig.storeConfig.find._ValidFrom = {
-                "$gt": timePeriod.toISOString()
-            };
-            this.chartConfig.chartConfig.title = {
-                text: this.getContext().getProject().Name + " Cumulative Flow Diagram"
-            };
+            this.chartConfig.storeConfig.find.Project = project.ObjectID;
+            this.chartConfig.storeConfig.find._ValidFrom = { "$gt": validFromStr };
+            this.chartConfig.chartConfig.title = { text: project.Name + " Cumulative Flow Diagram" };
 
             this.add(this.chartConfig);
         },
+
 
         chartConfig: {
             xtype: 'rallychart',

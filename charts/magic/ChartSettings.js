@@ -1,4 +1,4 @@
-(function() {
+(function () {
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define("Rally.apps.charts.magic.ChartSettings", {
@@ -7,18 +7,19 @@
         requires: [
             "Rally.apps.charts.settings.GroupByState",
             "Rally.apps.charts.settings.ProjectPicker",
-            "Rally.apps.charts.settings.DatePicker"
+            "Rally.ui.datetime.TimeFrame"
         ],
 
-        _getDatePicker: function() {
+        _getTimeFrame: function () {
             return {
-                xtype: "chartdatepicker",
-                name: "date",
-                label: "Date Picker Label"
+                xtype: "rallytimeframe",
+                name: "timeFrame",
+                label: "Time Frame",
+                mapsToMultiplePreferenceKeys: [ "timeFrameQuantity", "timeFrameUnit" ]
             };
         },
 
-        _getStatePicker: function() {
+        _getStatePicker: function () {
             return {
                 xtype: "chartgroupbystate",
                 name: "groupBy",
@@ -26,7 +27,7 @@
             };
         },
 
-        _getProjectPicker: function() {
+        _getProjectPicker: function () {
             return {
                 type: "project",
                 name: "project",
@@ -34,10 +35,10 @@
             };
         },
 
-        getFields: function() {
+        getFields: function () {
             return [
                 this._getStatePicker(),
-                this._getDatePicker(),
+                this._getTimeFrame(),
                 this._getProjectPicker()
             ];
         }
