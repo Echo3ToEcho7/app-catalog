@@ -1,9 +1,11 @@
-(function() {
+(function () {
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define("Rally.apps.charts.magic.ChartSettings", {
         requires: [
-            "Rally.apps.charts.settings.StateFieldPicker"
+            "Rally.apps.charts.settings.StateFieldPicker",
+            "Rally.apps.charts.settings.ProjectPicker",
+            "Rally.ui.datetime.TimeFrame"
         ],
 
         app: undefined, // Parent RallyApp instance
@@ -23,36 +25,16 @@
             this.app = arguments[0].app;
         },
 
-        _buildSettingsComponent: function (type, label) {
-            var self = this;
+        _getTimeFrame: function () {
             return {
-                xtype: type,
-                label: label,
-                listeners: {
-                    added: function (cmp) {
-                        this.settingsParent = this.settingsParent || self;
-                    }
-                }
+                xtype: "rallytimeframe",
+                name: "timeFrame",
+                label: "Time Frame",
+                mapsToMultiplePreferenceKeys: [ "timeFrameQuantity", "timeFrameUnit" ]
             };
         },
 
-        _getDatePicker: function() {
-            return {
-                xtype: "chartdatepicker",
-                name: "date",
-                label: "Date Picker Label"
-            };
-        },
-
-        _getProjectPicker: function() {
-            return {
-                type: "project",
-                name: "project",
-                label: "Project"
-            };
-        },
-
-        _getGroupByStatePicker: function() {
+        _getStatePicker: function () {
             return {
                 xtype: 'charts_settings_statefieldpicker',
                 name: 'stateField',
@@ -60,9 +42,20 @@
             };
         },
 
-        getFields: function() {
-            return [this._getGroupByStatePicker()];
-        }
+        _getProjectPicker: function () {
+            return {
+                type: "project",
+                name: "project",
+                label: "Project"
+            };
+        },
 
+        getFields: function () {
+            return [
+                this._getStatePicker(),
+                this._getTimeFrame(),
+                this._getProjectPicker()
+            ];
+        }
     });
 }());

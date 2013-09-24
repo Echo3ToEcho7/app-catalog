@@ -1,10 +1,6 @@
 (function() {
     var Ext = window.Ext4 || window.Ext;
 
-    var TIME_PERIOD_IN_MILLIS = 7776000000; // 3 months in milliseconds
-    //var TIME_PERIOD_IN_MILLIS = 5184000000; // 2 months in milliseconds
-    //var TIME_PERIOD_IN_MILLIS = 2592000000; // 1 month in milliseconds
-
     Ext.define("ProjectCFDCalculator", {
         extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
 
@@ -30,7 +26,7 @@
         alias: 'widget.charts_magic_cfd_cumulativeflowchartapp',
         extend: "Rally.app.App",
         settingsScope: "workspace",
-        componentCls: 'app',
+        componentCls: 'cfd-app',
 
         requires: [
             'Rally.ui.chart.Chart',
@@ -40,7 +36,10 @@
         config: {
             defaultSettings: {
                 stateFieldName: 'ScheduleState',
-                stateFieldValues: 'Idea,Defined,In-Progress,Completed,Accepted,Released'
+                stateFieldValues: 'Idea,Defined,In-Progress,Completed,Accepted,Released',
+                // TODO: this may not work
+                timeFrameQuantity: 90,
+                timeFrameUnit: 'day'
             }
         },
 
@@ -54,6 +53,12 @@
             }
         ],
 
+        config: {
+            defaultSettings: {
+
+            }
+        },
+
         getSettingsFields: function () {
             if (!this.chartSettings) {
                 this.chartSettings = Ext.create('Rally.apps.charts.magic.ChartSettings', {
@@ -64,6 +69,47 @@
         },
 
         launch: function() {
+            this.callParent(arguments);
+            var projectSetting = this.getSetting("project");
+
+            if (Ext.isEmpty(projectSetting)) {
+                var context = this.getContext();
+                this.projectScopeDown = context.getProjectScopeDown();
+                this.project = context.getProject();
+                this.workspace = context.getWorkspace();
+                this.loadChart();
+            } else {
+                this.projectScopeDown = this.getSetting("projectScopeDown");
+                this.loadModelInstanceByRefUri(projectSetting,
+                    function (record) {
+                        this.project = record.data;
+                        this.workspace = record.data.Workspace;
+                        this.loadChart();
+                    },
+                    function () {
+                        throw new Error("Failed to load project '" + projectSetting + "' from WSAPI.");
+                    }
+                );
+            }
+        },
+
+        loadModelInstanceByRefUri: function (refUri, success, failure) {
+            var ref = Rally.util.Ref.getRefObject(refUri);
+            Rally.data.ModelFactory.getModel({
+                type: ref.getType(),
+                scope: this,
+                success: function (model) {
+                    model.load(ref.getOid(), {
+                        scope: this,
+                        fetch: ['Name', 'ObjectID', 'Workspace'],
+                        success: success,
+                        failure: failure
+                    });
+                }
+            });
+        },
+
+        loadChart: function() {
             this.add(this._getChartAppConfig());
             this._publishComponentReady();
         },
@@ -99,7 +145,7 @@
                         zoomType: 'xy'
                     },
                     title: {
-                        text: this.getContext().getProject().Name + ' Cumulative Flow Diagram'
+                        text: this.project.Name + " Cumulative Flow Diagram"
                     },
                     xAxis: {
                         tickmarkPlacement: 'on',
@@ -131,23 +177,40 @@
 
         _getChartStoreConfig: function() {
             return {
-                find: {
-                    'Project': this.getContext().getProject().ObjectID,
-                    '_TypeHierarchy': 'HierarchicalRequirement',
-                    'Children': null,
-                    '_ValidFrom': {
-                        "$gt": this._getChartStoreConfigValidFrom()
-                    }
-                },
+                context: { workspace: this.workspace._ref },
+                find: this._getChartStoreConfigFind(),
                 fetch: this._getChartStoreConfigFetch(),
                 hydrate: this._getChartStoreConfigHydrate()
             };
         },
 
+        _getChartStoreConfigFind: function() {
+            var find = {
+                '_TypeHierarchy': 'HierarchicalRequirement',
+                'Children': null,
+                '_ValidFrom': {
+                    "$gt": this._getChartStoreConfigValidFrom()
+                }
+            };
+
+            if (this.projectScopeDown) {
+                find._ProjectHierarchy = this.project.ObjectID;
+            } else {
+                find.Project = this.project.ObjectID;
+            }
+
+            return find;
+        },
+
         _getChartStoreConfigValidFrom: function() {
             var today = new Date();
-            var timePeriod = new Date(today - TIME_PERIOD_IN_MILLIS);
-            return timePeriod.toISOString();
+            // TODO: this may not work
+            var timeFrame = this.getSetting("timeFrame");
+            if (!timeFrame) {
+                timeFrame = this.config.defaultSettings;
+            }
+            var validFromDate = Rally.util.DateTime.add(today, timeFrame.timeFrameUnit, -timeFrame.timeFrameQuantity);
+            return validFromDate.toISOString();
         },
 
         _getChartStoreConfigFetch: function() {
