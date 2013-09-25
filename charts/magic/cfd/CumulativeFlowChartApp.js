@@ -1,4 +1,4 @@
-(function() {
+(function () {
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define("ProjectCFDCalculator", {
@@ -61,7 +61,7 @@
             return this.chartSettings.getFields();
         },
 
-        launch: function() {
+        launch: function () {
             this.callParent(arguments);
             var projectSetting = this.getSetting("project");
 
