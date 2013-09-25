@@ -441,24 +441,24 @@ function initTaskboard() {
 
             var tasks = [];
             tasks.push(function (callback) {
-                me.getEditors(item, editors, START_OFFSET, function () {
-                    callback(null);
-                });
+                me.getEditors(item, editors, START_OFFSET, callback);
             });
 
             tasks.push(function (callback) {
-                me.getTeamMembers(item, teamMembers, START_OFFSET, function () {
-                    callback(null);
-                });
+                me.getTeamMembers(item, teamMembers, START_OFFSET, callback);
+            });
+
+            tasks.push(function(callback) {
+                me.getMe(item, callback);
             });
 
             async.parallel(tasks, function () {
                 var sortedEditors = me.sortUsers(editors);
                 var sortedTeamMembers = me.sortUsers(teamMembers);
-                var currentUserOptionName = me.getCurrentUserOptionName();
+                var currentUserOptionName = me.getOptionNameForUser(me._me);
 
                 if (item.Owner) {
-                    var itemOwnerOptionName = me.getOptionNameForUser(item.Owner)
+                    var itemOwnerOptionName = me.getOptionNameForUser(item.Owner);
                     if (currentUserOptionName != itemOwnerOptionName &&
                             me.indexOfOwner(sortedEditors, item.Owner) < 0 &&
                             me.indexOfOwner(sortedTeamMembers, item.Owner) < 0) {
@@ -481,7 +481,7 @@ function initTaskboard() {
         },
 
         getOptionNameForUser: function (user) {
-            return user.DisplayName || user.LoginName.split('@')[0];
+            return user._refObjectName || user.DisplayName || user.LoginName.split('@')[0];
         },
 
         createOwnerOptionData: function (editors, teamMembers) {
@@ -546,10 +546,6 @@ function initTaskboard() {
             this.editor.display(item, schema, editorConfig);
         },
 
-        getCurrentUserOptionName: function() {
-            return top.document.getElementById("options").getElementsByTagName("a")[0].text;
-        },
-
         excludeUser: function(usersArray, userNameToExclude) {
             for (var i = 0; i < usersArray.length; i++) {
                 var user = usersArray[i];
@@ -564,9 +560,7 @@ function initTaskboard() {
         getEditors: function (item, options, currentOffset, callback) {
             var project = item.WorkProduct.Project;
             var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
-            var me = this;
             var editorUrl = baseUrl + "/project/" + project.ObjectID + "/Editors.js?fetch=DisplayName,EmailAddress,UserName&pagesize=200&start=" + currentOffset;
-            var owners = [];
             YAHOO.util.Connect.asyncRequest('GET', editorUrl, {success: this.handleOwnersResponse(item, options, currentOffset, this.getEditors, callback), failure: function () {
             }, scope: this}, null);
         },
@@ -574,11 +568,29 @@ function initTaskboard() {
         getTeamMembers: function (item, options, currentOffset, callback) {
             var project = item.WorkProduct.Project;
             var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
-            var me = this;
             var editorUrl = baseUrl + "/project/" + project.ObjectID + "/TeamMembers.js?fetch=DisplayName,EmailAddress,UserName&pagesize=200&start=" + currentOffset;
-            var owners = [];
             YAHOO.util.Connect.asyncRequest('GET', editorUrl, {success: this.handleOwnersResponse(item, options, currentOffset, this.getTeamMembers, callback), failure: function () {
             }, scope: this}, null);
+        },
+
+        getMe: function(item, callback) {
+            var me = this;
+            if(!me._me) {
+                var project = item.WorkProduct.Project;
+                var baseUrl = project._ref.replace(/webservice\/\d.\d\d.*/, 'webservice/x');
+                var userUrl = baseUrl + '/user.js';
+                YAHOO.util.Connect.asyncRequest('GET', userUrl, {
+                    success: function(response) {
+                        var json = JSON.parse(response.responseText);
+                        me._me = json.User;
+                        callback();
+                    },
+                    failure: function() {},
+                    scope: this
+                }, null);
+            } else {
+                callback();
+            }
         },
 
         handleOwnersResponse: function (item, options, currentOffset, nextFunction, callback) {
