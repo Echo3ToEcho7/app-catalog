@@ -51,7 +51,7 @@ describe 'Rally.apps.charts.magic.cfd.CumulativeFlowChartApp', ->
 
   it 'has key chartAppConfig elements in the right places', ->
     @createApp().then =>
-      config = @app._getChartAppConfig()
+      config = @app._buildChartAppConfig()
       expect(config).not.toBeNull()
       expect(config.storeConfig).not.toBeNull() # tested elsewhere
       expect(config.calculatorType).toBe 'ProjectCFDCalculator'
@@ -61,7 +61,7 @@ describe 'Rally.apps.charts.magic.cfd.CumulativeFlowChartApp', ->
 
   it 'has correct chartStore', ->
     @createApp().then =>
-      storeConfig = @app._getChartStoreConfig()
+      storeConfig = @app._buildChartStoreConfig()
       expect(storeConfig).not.toBeNull()
       expect(storeConfig.find.Project).toBe @project.ObjectID
 
@@ -71,9 +71,22 @@ describe 'Rally.apps.charts.magic.cfd.CumulativeFlowChartApp', ->
       stateFieldValues: 'val1,val2,val3'
     }
     @createApp(settings).then =>
-      calcConfig = @app._getChartCalculatorConfig()
+      calcConfig = @app._buildChartCalculatorConfig()
       expect(calcConfig.stateFieldName).toBe settings.stateFieldName
       expect(calcConfig.stateFieldValues).toBe settings.stateFieldValues
+
+  it 'has correct chartStoreConfig ValidFrom date', ->
+    settings = {
+      timeFrameQuantity: '30',
+      timeFrameUnit: 'day'
+    }
+
+    @createApp(settings).then =>
+      testToday = new Date(2013, 3, 1, 0, 0, 0, 0) # April 1
+      @app._getNow = () -> testToday
+      validFrom = @app._buildChartStoreConfigValidFrom()
+      fromDate = Rally.util.DateTime.add(testToday, settings.timeFrameUnit, -settings.timeFrameQuantity);
+      expect(validFrom).toBe(fromDate.toISOString())
 
   helpers
     getContext: (initialValues) ->
