@@ -77,7 +77,6 @@
         },
 
         _publishComponentReady: function() {
-            console.log('StateFieldPicker::_publishComponentReady');
             if (Rally.BrowserTest) {
                 Rally.BrowserTest.publishComponentReady(this);
             }

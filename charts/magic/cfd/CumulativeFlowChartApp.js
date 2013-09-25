@@ -37,7 +37,6 @@
             defaultSettings: {
                 stateFieldName: 'ScheduleState',
                 stateFieldValues: 'Idea,Defined,In-Progress,Completed,Accepted,Released',
-                // TODO: this may not work
                 timeFrameQuantity: 90,
                 timeFrameUnit: 'day'
             }
@@ -197,14 +196,15 @@
         },
 
         _getChartStoreConfigValidFrom: function() {
-            var today = new Date();
-            // TODO: this may not work
-            var timeFrame = this.getSetting("timeFrame");
-            if (!timeFrame) {
-                timeFrame = this.config.defaultSettings;
-            }
-            var validFromDate = Rally.util.DateTime.add(today, timeFrame.timeFrameUnit, -timeFrame.timeFrameQuantity);
+            var today = this._getNow();
+            var timeFrameUnit = this.getSetting("timeFrameUnit");
+            var timeFrameQuantity = this.getSetting("timeFrameQuantity");
+            var validFromDate = Rally.util.DateTime.add(today, timeFrameUnit, -timeFrameQuantity);
             return validFromDate.toISOString();
+        },
+
+        _getNow: function() {
+            return new Date();
         },
 
         _getChartStoreConfigFetch: function() {
