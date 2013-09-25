@@ -103,17 +103,17 @@
         },
 
         loadChart: function() {
-            this.add(this._getChartAppConfig());
+            this.add(this._buildChartAppConfig());
             this._publishComponentReady();
         },
 
-        _getChartAppConfig: function() {
+        _buildChartAppConfig: function() {
             return {
                 xtype: 'rallychart',
 
-                storeConfig: this._getChartStoreConfig(),
+                storeConfig: this._buildChartStoreConfig(),
                 calculatorType: 'ProjectCFDCalculator',
-                calculatorConfig: this._getChartCalculatorConfig(),
+                calculatorConfig: this._buildChartCalculatorConfig(),
 
                 chartColors: [  // RGB values obtained from here: http://ux-blog.rallydev.com/?cat=23
                     "#C0C0C0",  // $grey4
@@ -168,21 +168,21 @@
             };
         },
 
-        _getChartStoreConfig: function() {
+        _buildChartStoreConfig: function() {
             return {
                 context: { workspace: this.workspace._ref },
-                find: this._getChartStoreConfigFind(),
-                fetch: this._getChartStoreConfigFetch(),
-                hydrate: this._getChartStoreConfigHydrate()
+                find: this._buildChartStoreConfigFind(),
+                fetch: this._buildChartStoreConfigFetch(),
+                hydrate: this._buildChartStoreConfigHydrate()
             };
         },
 
-        _getChartStoreConfigFind: function() {
+        _buildChartStoreConfigFind: function() {
             var find = {
                 '_TypeHierarchy': 'HierarchicalRequirement',
                 'Children': null,
                 '_ValidFrom': {
-                    "$gt": this._getChartStoreConfigValidFrom()
+                    "$gt": this._buildChartStoreConfigValidFrom()
                 }
             };
 
@@ -195,7 +195,7 @@
             return find;
         },
 
-        _getChartStoreConfigValidFrom: function() {
+        _buildChartStoreConfigValidFrom: function() {
             var today = this._getNow();
             var timeFrameUnit = this.getSetting("timeFrameUnit");
             var timeFrameQuantity = this.getSetting("timeFrameQuantity");
@@ -207,17 +207,17 @@
             return new Date();
         },
 
-        _getChartStoreConfigFetch: function() {
+        _buildChartStoreConfigFetch: function() {
             var stateFieldName = this.getSetting('stateFieldName');
             return [stateFieldName, 'PlanEstimate'];
         },
 
-        _getChartStoreConfigHydrate: function() {
+        _buildChartStoreConfigHydrate: function() {
             var stateFieldName = this.getSetting('stateFieldName');
             return [stateFieldName];
         },
 
-        _getChartCalculatorConfig: function() {
+        _buildChartCalculatorConfig: function() {
             var stateFieldName = this.getSetting('stateFieldName');
             var stateFieldValues = this.getSetting('stateFieldValues');
 
