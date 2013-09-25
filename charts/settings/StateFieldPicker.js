@@ -29,7 +29,7 @@
         },
 
         _parseConstructorParams: function() {
-            var args
+            var args;
             if (Ext.isObject(arguments)) {
                 args = arguments;
             } else {
