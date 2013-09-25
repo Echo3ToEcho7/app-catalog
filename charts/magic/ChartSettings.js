@@ -11,14 +11,11 @@
         app: undefined, // Parent RallyApp instance
 
         constructor: function () {
-            this._parseConstructorParams(arguments);
+            this._parseConstructorParams.apply(this, arguments);
             this.callParent(arguments);
         },
 
         _parseConstructorParams: function() {
-            if (arguments.length > 1) {
-                throw 'ChartSettings constructor takes a map';
-            }
             if (!arguments[0].app) {
                 throw 'Missing parent application in ChartSettings';
             }
@@ -36,7 +33,7 @@
 
         _getStatePicker: function () {
             return {
-                xtype: 'charts_settings_statefieldpicker',
+                xtype: 'rallychartssettingsstatefieldpicker',
                 name: 'stateField',
                 settings: this.app.getSettings()
             };

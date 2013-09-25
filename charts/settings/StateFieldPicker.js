@@ -3,7 +3,7 @@
 
     Ext.define("Rally.apps.charts.settings.StateFieldPicker", {
         extend: 'Ext.form.FieldSet',
-        alias: 'widget.charts_settings_statefieldpicker',
+        alias: 'widget.rallychartssettingsstatefieldpicker',
 
         requires: [
             'Rally.ui.combobox.FieldComboBox',
@@ -24,15 +24,22 @@
         settings: undefined, // Map of initial settings values
 
         constructor: function() {
-            this._parseConstructorParams(arguments);
+            this._parseConstructorParams.apply(this, arguments);
             this.callParent();
         },
 
         _parseConstructorParams: function() {
-            if (!arguments[0].settings) {
+            var args
+            if (Ext.isObject(arguments)) {
+                args = arguments;
+            } else {
+                // This happens in unit tests
+                args = arguments[0];
+            }
+            if (!args.settings) {
                 throw 'Missing initial settings in GroupBySettings';
             }
-            this.settings = arguments[0].settings;
+            this.settings = args.settings;
         },
 
         initComponent: function() {
@@ -64,6 +71,15 @@
                 var values = [];
                 values = this.settings.stateFieldValues.split(',');
                 combo.setValue(values);
+            }
+
+            this._publishComponentReady();
+        },
+
+        _publishComponentReady: function() {
+            console.log('StateFieldPicker::_publishComponentReady');
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
             }
         },
 

@@ -23,7 +23,7 @@
 
     Ext.define("Rally.apps.charts.magic.cfd.CumulativeFlowChartApp", {
         name: 'chartapp',
-        alias: 'widget.charts_magic_cfd_cumulativeflowchartapp',
+        alias: 'widget.chartsmagiccfdcumulativeflowchartapp',
         extend: "Rally.app.App",
         settingsScope: "workspace",
         componentCls: 'cfd-app',
@@ -52,12 +52,6 @@
                 cls: 'header'
             }
         ],
-
-        config: {
-            defaultSettings: {
-
-            }
-        },
 
         getSettingsFields: function () {
             if (!this.chartSettings) {
