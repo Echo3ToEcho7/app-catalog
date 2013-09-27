@@ -27,10 +27,13 @@
         extend: "Rally.app.App",
         settingsScope: "workspace",
         componentCls: 'cfd-app',
+        cls: 'chart-app',
 
         requires: [
             'Rally.ui.chart.Chart',
-            'Rally.apps.charts.magic.ChartSettings'
+            'Rally.apps.charts.magic.ChartSettings',
+            'Rally.util.Help',
+            'Rally.util.Test'
         ],
 
         config: {
@@ -52,6 +55,11 @@
             }
         ],
 
+        help: {
+            // TODO: Need a help id for this topic
+            id: 0
+        },
+
         getSettingsFields: function () {
             if (!this.chartSettings) {
                 this.chartSettings = Ext.create('Rally.apps.charts.magic.ChartSettings', {
@@ -64,6 +72,8 @@
         launch: function () {
             this.callParent(arguments);
             var projectSetting = this.getSetting("project");
+
+            this.down('#header').add(this._buildHelpComponent());
 
             if (Ext.isEmpty(projectSetting)) {
                 var context = this.getContext();
@@ -84,6 +94,14 @@
                     }
                 );
             }
+        },
+
+        _buildHelpComponent: function () {
+            return Ext.create('Ext.Component', {
+                renderTpl: Rally.util.Help.getIcon({
+                    id: this.help.id
+                })
+            });
         },
 
         loadModelInstanceByRefUri: function (refUri, success, failure) {
@@ -110,7 +128,6 @@
         _buildChartAppConfig: function() {
             return {
                 xtype: 'rallychart',
-
                 storeConfig: this._buildChartStoreConfig(),
                 calculatorType: 'ProjectCFDCalculator',
                 calculatorConfig: this._buildChartCalculatorConfig(),

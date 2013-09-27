@@ -24,7 +24,8 @@
 
 .portfolio-cfd-app .rally-help-icon,
 .burndown-app .rally-help-icon,
-.portfolio-burnup-app .rally-help-icon {
+.portfolio-burnup-app .rally-help-icon,
+.chart-app .rally-help-icon {
     float: right;
 }
 
