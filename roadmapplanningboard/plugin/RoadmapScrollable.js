@@ -39,9 +39,10 @@
 
         _getPresentColumns: function (columns) {
             var now = new Date();
+            var format = 'Y-m-d';
 
             this.presentColumns = this.presentColumns || _.filter(columns, function (column) {
-                return column.timeframeRecord.get('end') >= now;
+                return Ext.Date.format(column.timeframeRecord.get('end'), format) >= Ext.Date.format(now, format);
             }, this);
 
             return this.presentColumns;
