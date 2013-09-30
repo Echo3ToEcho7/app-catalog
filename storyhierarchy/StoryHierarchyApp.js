@@ -14,6 +14,8 @@
             'Rally.util.Test'
         ],
 
+        alias: 'widget.storyhierarchyapp',
+
         layout: 'auto',
 
         appName: 'Story Hierarchy',
@@ -60,10 +62,20 @@
                             workspace: me.getContext().getDataContext().workspace
                         }
                     };
+                },
+                listeners: {
+                    initialload: this._onTreeInitialLoad,
+                    scope: this
                 }
             });
 
             this._drawHeader();
+        },
+
+        _onTreeInitialLoad: function() {
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
+            }
         },
 
         _buildQueryFilter: function(model) {
