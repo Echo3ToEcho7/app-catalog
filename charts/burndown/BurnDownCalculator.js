@@ -128,8 +128,7 @@
         },
 
         runCalculation: function (snapshots) {
-            var chartData = this.callParent(arguments),
-                todayIndex;
+            var chartData = this.callParent(arguments);
 
             if(new Date() < this.scopeEndDate) {
                 this._recomputeIdeal(chartData, this.scopeEndDate);
@@ -169,7 +168,7 @@
                  index = this._indexOfDate(chartData, endDate);
                  if(index === -1) {
                     // it's in "scope", but falls on a non-workday...back up to the previous workday
-                    while (this.workDays.indexOf(Ext.Date.format(endDate, 'l')) == -1) {
+                    while (this.workDays.indexOf(Ext.Date.format(endDate, 'l')) === -1) {
                         endDate = Ext.Date.add(endDate, Ext.Date.DAY, -1);
                         index = this._indexOfDate(chartData, endDate);
                     }

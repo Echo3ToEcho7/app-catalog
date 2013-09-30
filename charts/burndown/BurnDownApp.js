@@ -367,7 +367,7 @@
                     return -1;
                 }
                 // date not in categories (probably) means it falls on a non-workday...back up to the next previous workday
-                while (workdays.indexOf(Ext.Date.format(date, 'l')) == -1 && date > this._getScopeObjectStartDate()) {
+                while (workdays.indexOf(Ext.Date.format(date, 'l')) === -1 && date > this._getScopeObjectStartDate()) {
                     date = Ext.Date.add(date, Ext.Date.DAY, -1);
                     dateStr = Ext.Date.format(date, 'Y-m-d');
                     index = categories.indexOf(dateStr);
@@ -457,8 +457,6 @@
                 chart.chartConfig.xAxis.labels.staggerLines = 2;
             }
             chart.chartConfig.xAxis.labels.step = Math.round( chart.chartData.categories.length / 100 );
-            var calcConfig = this.chartComponentConfig.calculatorConfig;
-
             chart.chartConfig.xAxis.tickInterval = this._configureChartTicks(chart.chartData.categories.length);
         },
 
@@ -574,7 +572,6 @@
         },
 
         _saveScopeType: function () {
-            var context = this.getContext();
             this.scopeType = this._getScopeType();
         },
 
@@ -680,11 +677,9 @@
 
                         var store = this._wrapRecords(scheduleStates);
                         var	values = [];
-
                         var acceptedSeen = false;
-                        values = [];
                         for(var i = 0; i < store.data.items.length; i++) {
-                            if(store.data.items[i].data.StringValue == 'Accepted') {
+                            if(store.data.items[i].data.StringValue === 'Accepted') {
                                 acceptedSeen = true;
                             }
                             if(acceptedSeen) {

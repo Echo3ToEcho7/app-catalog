@@ -51,8 +51,6 @@
         ],
 
         constructor: function(config) {
-            console.log(config);
-
             this._addPortfolioItemChooser(config);
 
             this.callParent(arguments);
@@ -80,8 +78,6 @@
         },
 
         _getCombobox: function() {
-            var self = this;
-
             return {
                 xtype: "rallycombobox",
                 name: "chartScope",

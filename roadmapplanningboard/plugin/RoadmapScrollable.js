@@ -49,8 +49,6 @@
         },
 
         _getPastColumns: function (columns) {
-            var now = new Date();
-
             this.presentColumns = this.presentColumns || this._getPresentColumns(columns);
             this.pastColumns = this.pastColumns || _.difference(columns, this.presentColumns);
 

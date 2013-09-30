@@ -78,6 +78,15 @@
             }
         },
 
+        onDestroy: function() {
+            if(this._percentDonePopover) {
+                this._percentDonePopover.destroy();
+                delete this._percentDonePopover;
+            }
+
+            this.callParent(arguments);
+        },
+
         _drawHeader: function () {
             var header = this.down('#header');
 
@@ -318,15 +327,21 @@
                     var cardEl = el.up('.rui-card');
                     var card = Ext.getCmp(cardEl.id);
                     var record = card.getRecord();
-                    Ext4.create('Rally.ui.popover.PercentDonePopover', {
+                    this._percentDonePopover = Ext.create('Rally.ui.popover.PercentDonePopover', {
                         target: el,
                         targetSelector: '#' + cardEl.id + ' .progress-bar-container',
                         percentDoneData: record.data,
                         percentDoneName: 'PercentDoneByStoryCount',
-                        piRef: record.data._ref
+                        piRef: record.data._ref,
+                        listeners: {
+                            destroy: function() {
+                                delete this._percentDonePopover;
+                            },
+                            scope: this
+                        }
                     });
-                });
-            });
+                }, this);
+            }, this);
         },
 
         _renderPolicies: function () {

@@ -20,7 +20,7 @@
             var self = this;
 
             var componentAdded = function (cmp) {
-	                this.settingsParent = this.settingsParent || self;
+                this.settingsParent = this.settingsParent || self;
             };
 
             return {

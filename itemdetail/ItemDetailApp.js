@@ -27,7 +27,7 @@
                     return;
                 }
 
-                if (record.getId() == (this.detailView.getRecord() && this.detailView.getRecord().getId())) {
+                if (record.getId() === (this.detailView.getRecord() && this.detailView.getRecord().getId())) {
                     return;
                 }
 
@@ -36,13 +36,13 @@
             }, this);
 
             this.subscribe(this, Rally.Message.objectUpdate, function(record) {
-                if (record.getId() == (this.detailView.getRecord() && this.detailView.getRecord().getId())) {
+                if (record.getId() === (this.detailView.getRecord() && this.detailView.getRecord().getId())) {
                     this.loadRecord(record);
                 }
             }, this);
 
             this.subscribe(this, Rally.Message.objectDestroy, function(record) {
-                if (record.getId() == (this.detailView.getRecord() && this.detailView.getRecord().getId())) {
+                if (record.getId() === (this.detailView.getRecord() && this.detailView.getRecord().getId())) {
                     this.detailView.switchToDeleteView();
                 }
             }, this);

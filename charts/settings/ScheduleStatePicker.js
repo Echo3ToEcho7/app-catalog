@@ -74,8 +74,8 @@
                     cls: "schedule-state-selector",
                     tpl: Ext.create('Ext.XTemplate',
                         '<tpl for=".">',
-                            '<li role="option" class="x4-boundlist-item">',
-                                '<input type="button" class="x4-form-checkbox" /> &nbsp;',
+                            '<li role="option" class="' + Ext.baseCSSPrefix + 'boundlist-item">',
+                                '<input type="button" class="' + Ext.baseCSSPrefix + 'form-checkbox" /> &nbsp;',
                                 '{StringValue}',
                             '</li>',
                         '</tpl>'

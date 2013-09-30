@@ -82,7 +82,7 @@
         },
 
         _onSearchTextSpecialKey: function(searchTextField, e) {
-            if (e.getKey() == e.ENTER) {
+            if (e.getKey() === e.ENTER) {
                 this._refreshColumn();
             }
         },

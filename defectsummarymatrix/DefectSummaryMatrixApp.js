@@ -166,7 +166,6 @@
         _createPriorityRecords: function(defectRecords) {
             var currentRecord,
                 rowTotal,
-                numDefects,
                 colTotals = new Array(this.states);
             this.priorityRecords = [];
 

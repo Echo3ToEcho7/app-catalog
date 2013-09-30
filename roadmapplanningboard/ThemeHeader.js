@@ -105,8 +105,6 @@
                     grow: true
                 });
                 this.editor.on('autosize', function () {
-                    var _ref;
-
                     if (themeHeader.getCardboardComponent()) {
                         themeHeader.getCardboardComponent().fireEvent('headersizechanged');
                     }
