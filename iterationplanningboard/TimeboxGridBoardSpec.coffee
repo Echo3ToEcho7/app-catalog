@@ -11,7 +11,6 @@ describe 'Rally.apps.iterationplanningboard.TimeboxGridBoard', ->
         initialValues:
           project:
             _ref: '/project/1'
-          featureToggles: Rally.alm.FeatureToggle
           subscription: Rally.environment.getContext().getSubscription()
       @gridBoard = Ext.create 'Rally.apps.iterationplanningboard.TimeboxGridBoard',
         renderTo: 'testDiv'

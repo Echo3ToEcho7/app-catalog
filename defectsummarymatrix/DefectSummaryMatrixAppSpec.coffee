@@ -46,7 +46,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
       @getCellInMatrixGrid(rowNumber, colNumber).getHTML()
 
     getStateNameForColumn: (colNumber) ->
-      @app.down('rallygrid').getEl().down('div.x4-column-header:nth-child(' + colNumber + ') span').getHTML()
+      @app.down('rallygrid').getEl().down("div.#{Ext.baseCSSPrefix}column-header:nth-child(#{colNumber}) span").getHTML()
 
     getPriorityNameForRow: (rowNumber) ->
       @app.down('rallygrid').getEl().down('table tr:nth-child(' + rowNumber + ') td div').getHTML()
@@ -197,7 +197,7 @@ describe 'Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp', ->
         once
           condition: =>
             grid = @app.defectGrid
-            grid && grid.getEl().down('.x4-grid-view-empty')
+            grid && grid.getEl().down(".#{Ext.baseCSSPrefix}grid-view-empty")
           description: 'The empty table message is shown'
 
   describe 'once both tables are shown', ->

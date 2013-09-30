@@ -20,7 +20,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
     @refreshField()
 
     @waitForCallback(@readyCallback).then =>
-      firstCells = Ext.dom.Query.select('.x4-grid-cell-first > .x4-grid-cell-inner')
+      firstCells = Ext.dom.Query.select(".#{Ext.baseCSSPrefix}grid-cell-first > .#{Ext.baseCSSPrefix}grid-cell-inner")
       expect(firstCells.length).toBe 2
       expect(html).toBe @allowedValues[i] for html, i in Ext.Array.pluck(firstCells, 'innerHTML')
 
@@ -178,7 +178,7 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
 
       @field.setValue(@value)
       @waitForCallback(@readyCallback).then =>
-        cells = Ext.dom.Query.select('.x4-grid-cell > .x4-grid-cell-inner')
+        cells = Ext.dom.Query.select(".#{Ext.baseCSSPrefix}grid-cell > .#{Ext.baseCSSPrefix}grid-cell-inner")
         expect(html).toBe options.expectedValues[i] for html, i in Ext.Array.pluck(cells, 'innerHTML')
 
     refreshField: (@allowedValues = ["Defined", "In-Progress"]) ->

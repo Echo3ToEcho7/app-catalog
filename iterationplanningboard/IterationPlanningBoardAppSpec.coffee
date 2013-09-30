@@ -3,13 +3,11 @@ Ext = window.Ext4 || window.Ext
 Ext.require [
   'Rally.ui.cardboard.CardBoard'
   'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser'
-  'Rally.alm.FeatureToggle'
   'Rally.util.Array'
   'Rally.util.DateTime'
 ]
 
 describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
-
   helpers
     cardSelector: '.rui-card'
 
@@ -23,7 +21,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
           initialValues:
             project:
               _ref: '/project/1'
-            featureToggles: Rally.alm.FeatureToggle
             subscription: Rally.environment.getContext().getSubscription()
             workspace: Rally.environment.getContext().getWorkspace()
         ),
@@ -93,7 +90,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     getProgressBarHtml: (columnIndex) ->
       @getColumns()[columnIndex].getProgressBar().getEl().select('.progress-bar-label').item(0).getHTML()
 
-    # could not get actionsequence mouseMove to work in FF
+  # could not get actionsequence mouseMove to work in FF
     simulateMouseEnterFormattedID: () ->
       Rally.test.fireEvent(Ext.query("#{@cardSelector} .id")[0], 'mouseenter')
       once(
@@ -101,7 +98,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
         description: 'description popover to show'
       )
 
-    # could not get actionsequence mouseMove to work in FF
+  # could not get actionsequence mouseMove to work in FF
     simulateMouseLeaveFormattedID: () ->
       Rally.test.fireEvent(Ext.query("#{@cardSelector} .id")[0], 'mouseleave')
       once(
@@ -343,10 +340,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
     @stub(Rally.auth.UserPermissions.prototype, 'isProjectEditor').returns true
     @createApp().then =>
 
-      @stub(Rally, 'getScope').returns
-        projectOid: 431439,
-        scopeUp: false
-        scopeDown: true
       editorOpenedStub = @stub(Rally.nav.Manager, 'create')
 
       addNewHelper = new Helpers.AddNewHelper '.planning-board'
@@ -438,9 +431,9 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
   it 'should include filtered cards when calculating fullness of the iteration', ->
     options =
-     values:
-       Iteration: @getIteration1()
-       PlanEstimate: 2
+      values:
+        Iteration: @getIteration1()
+        PlanEstimate: 2
     @ajax.whenQuerying('userstory').respondWith(@mom.getData('userstory', options))
     @ajax.whenQuerying('defect').respondWith(@mom.getData('defect', options))
 
@@ -490,4 +483,3 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
   it 'should have a default card fields setting', ->
     @createApp().then =>
       expect(@app.getSetting('cardFields')).toBe 'Parent,Tasks,Defects,Discussion,PlanEstimate'
-

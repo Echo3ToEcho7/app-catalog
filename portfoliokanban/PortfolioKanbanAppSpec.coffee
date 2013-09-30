@@ -1,9 +1,5 @@
 Ext = window.Ext4 || window.Ext
 
-Ext.require [
-  'Rally.alm.FeatureToggle'
-]
-
 describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
 
   helpers
@@ -89,7 +85,6 @@ describe 'Rally.apps.portfoliokanban.PortfolioKanbanApp', ->
     @_createAppAndWaitForVisible =>
       @_clickAndWaitForVisible('PercentDoneByStoryCount').then =>
         expect(Ext.select('.percentDonePopover').elements.length).toEqual(1)
-        @click(css: '.popover-chevron')
 
   it 'loads type with ordinal of 1 if no type setting is provided', ->
 

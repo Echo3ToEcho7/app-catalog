@@ -306,8 +306,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
       timeboxRecords: timeboxRecords
       ,
       context: Ext.create('Rally.app.Context',
-        initialValues:
-          featureToggles: Rally.alm.FeatureToggle
+        initialValues: {}
       )
 
     expect(@column.config.columnHeaderConfig).toBeDefined()
@@ -344,8 +343,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
           editable: true
         ,
         context: Ext.create('Rally.app.Context',
-          initialValues:
-            featureToggles: Rally.alm.FeatureToggle
+          initialValues: {}
         )
 
       @column.getProgressBar()?.update()

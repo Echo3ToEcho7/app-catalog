@@ -768,7 +768,7 @@ describe 'Rally.apps.iterationsummary.IterationSummaryApp', ->
     @prepareTestSetData(Pass: 2, Fail: 1, Inconclusive: 1)
     @createApp({}).then (app) =>
       @waitForVisible(
-        css: '.x4-component.header.testsPassing'
+        css: ".#{Ext.baseCSSPrefix}component.header.testsPassing"
         text: "50% Tests Passing"
       )
 

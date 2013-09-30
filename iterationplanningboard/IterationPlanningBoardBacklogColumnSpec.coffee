@@ -121,7 +121,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardBacklogColumn'
         statusCell: Ext.get('testDiv').createChild()
         context: Ext.create('Rally.app.Context',
           initialValues:
-            featureToggles: Rally.alm.FeatureToggle
             subscription: Rally.environment.getContext().getSubscription()
         )
       )
