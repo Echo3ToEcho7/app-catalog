@@ -249,6 +249,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
           @scrollBackwards().then =>
             _.each @getThemeElements(), (element) =>
               expect(element.isVisible()).toBe true
+              expect(element.query('.field_container').length).toBe 1
 
       it 'should collapse themes when the theme collapse button is clicked', ->
         @createCardboard().then =>
@@ -263,6 +264,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
             @clickExpand().then =>
               _.each @getThemeElements(), (element) =>
                 expect(element.isVisible()).toBe true
+                expect(element.query('.field_container').length).toBe 1
 
     describe 'when scrolling forward', ->
 
@@ -271,6 +273,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
           @scrollForwards().then =>
             _.each @getThemeElements(), (element) =>
               expect(element.isVisible()).toBe true
+              expect(element.query('.field_container').length).toBe 1
 
       it 'should collapse themes when the theme collapse button is clicked', ->
         @createCardboard().then =>
@@ -285,3 +288,4 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
             @clickExpand().then =>
               _.each @getThemeElements(), (element) =>
                 expect(element.isVisible()).toBe true
+                expect(element.query('.field_container').length).toBe 1

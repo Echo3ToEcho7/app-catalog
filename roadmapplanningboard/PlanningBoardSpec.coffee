@@ -162,6 +162,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       @createCardboard().then =>
         _.each @getThemeElements(), (element) =>
           expect(element.isVisible()).toBe true
+          expect(element.query('.field_container').length).toBe 1
 
     it 'should collapse themes when the theme collapse button is clicked', ->
       @createCardboard().then =>
@@ -174,6 +175,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
         @clickExpand().then =>
           _.each @getThemeElements(), (element) =>
             expect(element.isVisible()).toBe true
+            expect(element.query('.field_container').length).toBe 1
 
     it 'should return client metrics message when collapse button is clicked', ->
       @createCardboard().then =>
