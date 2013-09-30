@@ -160,7 +160,9 @@
                 this.theme = this.getColumnHeader().add({
                     xtype: 'roadmapthemeheader',
                     record: this.planRecord,
-                    hidden: !this.ownerCardboard.showTheme
+                    style: {
+                        display: this.ownerCardboard.showTheme ? '': 'none' // DE18305 - using style.display instead of hidden because Ext won't render children that are hidden
+                    }
                 });
             }
         },
