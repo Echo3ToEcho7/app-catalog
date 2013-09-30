@@ -74,12 +74,12 @@
             var newlyVisibleColumn = this.scrollableColumns[_.indexOf(scrollableColumnRecords, insertNextToColumn.timeframeRecord) + (forwards ? 1 : -1)];
 
             var indexOfNewColumn = _.indexOf(this.cmp.getColumns(), insertNextToColumn);
+            var columnEls = this.cmp.createColumnElements(forwards ? 'after' : 'before', insertNextToColumn);
             this.cmp.destroyColumn(this._getColumnToRemove(forwards));
 
             var column = this.cmp.addColumn(newlyVisibleColumn, indexOfNewColumn);
             column.on('ready', this._onNewlyAddedColumnReady, this, {single: true});
 
-            var columnEls = this.cmp.createColumnElements(forwards ? 'after' : 'before', insertNextToColumn);
             this.cmp.renderColumn(column, columnEls);
 
             this.cmp.drawThemeToggle();
