@@ -13,12 +13,12 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     createBacklogColumn: (id) ->
       xtype: 'backlogplanningcolumn', testId: "#{id}"
 
-    createColumn: (id, date = new Date()) ->
+    createColumn: (id, date = new Date(), offset = 0) ->
       timeframeRecord = Ext.create Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel(),
         id: "#{id}"
         name: "#{id}"
-        start: date
-        end: date
+        start: Ext.Date.add(date, Ext.Date.MONTH, offset-1)
+        end: Ext.Date.add(Ext.Date.add(date, Ext.Date.MONTH, offset), Ext.Date.DAY, -1)
       planRecord = Ext.create Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel(),
         id: "#{id}"
         name: "#{id}"
@@ -43,16 +43,15 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       , config
 
       id = 0
-      pastDate = new Date '2012-01-01'
-      presentDate = Ext.Date.add(new Date(), Ext.Date.DAY, 1)
+      date = config.date || new Date(Ext.Date.format(new Date(), 'Y-m-d'))
 
       columns = [
         @createBacklogColumn(id++)
       ]
 
-      columns = columns.concat (@createColumn(num, pastDate) for num in [id...id+(config.pastColumnCount or 0)])
+      columns = columns.concat (@createColumn(num, date, num-config.pastColumnCount) for num in [id...id+(config.pastColumnCount or 0)])
       id += config.pastColumnCount
-      columns = columns.concat (@createColumn(num, presentDate) for num in [id...id+(config.presentColumnCount or 0)])
+      columns = columns.concat (@createColumn(num, date, num-config.pastColumnCount) for num in [id...id+(config.presentColumnCount or 0)])
 
       @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
         _.extend
@@ -133,6 +132,11 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     it 'should not show past timeframes', ->
       @createCardboard(pastColumnCount: 4, presentColumnCount: 4, timeframeColumnCount: 4).then =>
         expect(@plugin.getFirstVisibleScrollableColumn().testId).toEqual '5'
+
+    it 'should show current timeframe if the timeframe ends today', ->
+      tomorrow = Ext.Date.add(new Date(), Ext.Date.DAY, 1) # This will actually move a past column to the present columns
+      @createCardboard(pastColumnCount: 4, presentColumnCount: 4, date: tomorrow).then =>
+        expect(@plugin.getFirstVisibleScrollableColumn().testId).toEqual '4'
 
     it 'should show a left scroll arrow for past timeframes', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 4, timeframeColumnCount: 4).then =>
