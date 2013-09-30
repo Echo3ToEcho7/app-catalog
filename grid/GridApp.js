@@ -77,9 +77,10 @@
                 grid.el.setHeight('auto');
                 grid.body.setHeight('auto');
                 grid.view.el.setHeight('auto');
-                this.appContainer.setSize({height: grid.getHeight() + _.reduce(grid.getDockedItems(), function(acc, item) {
+                this.setSize({height: grid.getHeight() + _.reduce(grid.getDockedItems(), function(acc, item) {
                     return acc + item.getHeight() + item.el.getMargin('tb');
                 }, 0)});
+                this.appContainer.setPanelHeightToAppHeight();
             }
         },
 
