@@ -195,6 +195,11 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         @scrollBackwards().then =>
           expect(filterSpy.callCount).toBe 1
 
+    it 'should handle only 1 column', ->
+      @createCardboard(pastColumnCount: 1, presentColumnCount: 1, timeframeColumnCount: 1).then =>
+        @scrollBackwards().then =>
+          expect(@plugin.getFirstVisibleScrollableColumn().timeframeRecord.getId()).toEqual '1'
+
   describe 'when forward scroll button is clicked', ->
     it 'should scroll forward', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
@@ -239,6 +244,11 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
         filterSpy = @spy @cardboard, 'applyLocalFilters'
         @scrollForwards().then =>
           expect(filterSpy.callCount).toBe 1
+
+    it 'should handle only 1 column', ->
+      @createCardboard(pastColumnCount: 0, presentColumnCount: 2, timeframeColumnCount: 1).then =>
+        @scrollForwards().then =>
+          expect(@plugin.getFirstVisibleScrollableColumn().timeframeRecord.getId()).toEqual '2'
 
   describe 'theme container interactions', ->
 
