@@ -11,7 +11,8 @@
             'Rally.data.util.Sorter',
             'Rally.data.QueryFilter',
             'Rally.ui.grid.Grid',
-            'Rally.ui.grid.plugin.PercentDonePopoverPlugin'
+            'Rally.ui.grid.plugin.PercentDonePopoverPlugin',
+            'Rally.ui.grid.plugin.BlockedReasonPopoverPlugin'
         ],
 
         autoScroll: appAutoScroll,
@@ -42,6 +43,7 @@
                 enableColumnHide: false,
                 enableRanking: true,
                 enableBulkEdit: Rally.environment.getContext().isFeatureEnabled("EXT4_GRID_BULK_EDIT"),
+                disableBlockedEdit: Rally.environment.getContext().isFeatureEnabled("F929_ENABLE_BLOCKED_REASON_PROMPT_ON_EXT_GRIDS"),
                 autoScroll: gridAutoScroll,
                 plugins: this._getPlugins(columns),
                 storeConfig: {
@@ -97,6 +99,10 @@
 
             if (Ext.Array.intersect(columns, ['PercentDoneByStoryPlanEstimate','PercentDoneByStoryCount']).length > 0) {
                 plugins.push('rallypercentdonepopoverplugin');
+            }
+
+            if (Rally.environment.getContext().isFeatureEnabled("F929_ENABLE_BLOCKED_REASON_PROMPT_ON_EXT_GRIDS") && Ext.Array.contains(columns, 'Blocked')) {
+                plugins.push('rallyblockedreasonpopoverplugin');
             }
 
             return plugins;
