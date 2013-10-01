@@ -117,7 +117,6 @@
 .roadmap-board .planning-column .columnTitle .fieldContainerView {
     font-size: 18px;
     font-weight: bold;
-    font-family: 'Open Sans', sans-serif;
     white-space: nowrap;
     width: 95%;
     overflow: hidden;
@@ -128,7 +127,6 @@
 .roadmap-board .planning-column .columnTitle input {
     font-size: 18px;
     font-weight: bold;
-    font-family: 'Open Sans', sans-serif;
 }
 
 .roadmap-board .planning-column .columnTitle > table {
@@ -200,10 +198,6 @@
     margin: 2px 2px 0 2px;
 }
 
-.roadmap-board {
-    font-family: 'Open Sans', sans-serif;
-}
-
 .roadmap-board .column-container .fixed-header-card-board-header-container {
     border-bottom: 1px dotted #c0c0c0;
 }
@@ -223,7 +217,6 @@
 .roadmap-board .column-container .column-header .columnTpl{
     font-size: 18px;
     font-weight: bold;
-    font-family: 'Open Sans', sans-serif;
     color: rgb(0, 0, 0);
 }
 
@@ -236,18 +229,19 @@
 }
 
 .roadmap-board .column-container .column-header .editableField textarea {
-    text-align: left;
-    font-weight: 300;
     font-size: 9pt;
     color: #262626;
     padding: 0;
     border-width: 0;
-    line-height: 1.5;
+    line-height: normal;
 }
 
-.roadmap-board .column-container .column-header .editableField .setTheme {
+.yes-harmonized .roadmap-board .theme_container {
+    font-family: NotoSans, Helvetica, Arial;
+}
+
+.roadmap-board .editableField .setTheme {
     color: #262626;
-    font-weight: 600;
 }
 
 .roadmap-board .column-container .column-header .column-header-title {
@@ -677,7 +671,6 @@
     -ms-user-select: none;
     user-select: none;
     overflow: visible;
-    font-family: 'Open Sans', sans-serif;
     font-size: 14px;
     font-weight: 400;
 }
@@ -751,7 +744,6 @@
     border-radius: 3px;
     font-size: 12px;
     font-weight: 300;
-    font-family: 'Open Sans', sans-serif;
 }
 
 .roadmap-planning-popover .popover-label {

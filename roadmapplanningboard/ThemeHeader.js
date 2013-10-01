@@ -102,9 +102,11 @@
                     value: record.get(field.name),
                     emptyText: '+ Add theme',
                     width: '100%',
-                    grow: true
+                    grow: true,
+                    growMin: 20
                 });
                 this.editor.on('autosize', function () {
+
                     if (themeHeader.getCardboardComponent()) {
                         themeHeader.getCardboardComponent().fireEvent('headersizechanged');
                     }
