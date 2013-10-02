@@ -2,7 +2,7 @@
    "name": "Tip of the Day",
    "className": "Rally.apps.tipoftheday.TipOfTheDayApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "2.0rc1",
+   "sdk": "x",
    "javascript": [
       "TipOfTheDayApp.js"
    ],

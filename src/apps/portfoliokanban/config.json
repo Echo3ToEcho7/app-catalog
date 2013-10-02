@@ -2,7 +2,7 @@
    "name": "Portfolio Kanban Board",
    "className": "Rally.apps.portfoliokanban.PortfolioKanbanApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "2.0rc1",
+   "sdk": "x",
    "javascript": [
       "PortfolioKanbanCard.js",
       "PortfolioKanbanPolicy.js",

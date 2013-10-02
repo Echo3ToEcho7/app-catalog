@@ -2,7 +2,7 @@
    "name": "Custom Grid",
    "className": "Rally.apps.grid.GridApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "2.0rc1",
+   "sdk": "x",
    "javascript": [
       "GridApp.js"
    ],
