@@ -1,0 +1,17 @@
+.team-board-app .rui-card .rui-card-content .card-header {
+    margin-bottom: 3px;
+    margin-left: 2px;
+}
+
+.team-board-app .rui-card .rui-card-content .card-header td {
+    vertical-align: middle;
+}
+
+.team-board-app .rui-card .rui-card-content .card-header .card-header-spacer {
+    width: 8px;
+}
+
+.team-board-app .rui-card .rui-card-content .card-header .card-header-user-info .team-member-name {
+    font-size: 15px;
+    font-weight: bold;
+}

@@ -1,0 +1,24 @@
+.story-hierarchy-app {
+    width: 100% !important;
+}
+
+.story-hierarchy-app .rallytree {
+    padding: 5px 0 20px 0;
+}
+
+.story-hierarchy-app .header {
+    border-bottom: 1px dotted #c6c6c6;
+}
+
+.story-hierarchy-app .filterInfo {
+    float: right;
+    padding-right: 1px;
+    border-right: 1px solid #CCC;
+    margin-right: 5px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.story-hierarchy-app .rally-help-icon {
+    float: right;
+}

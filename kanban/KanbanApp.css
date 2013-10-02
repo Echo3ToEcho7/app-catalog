@@ -1,0 +1,34 @@
+.kanban .rui-notification {
+    float: none;
+    position: absolute;
+    left: 50%;
+    margin-left: -200px;
+    width: 400px;
+}
+
+.ext-ie .kanban .right .filterInfo {
+    width: 25px;
+}
+
+.ext-ie .kanban .right .artifact-type-chooser {
+    width: 265px;
+}
+
+.cardboard .status-content > .status-field.RevisionHistory {
+    line-height: 18px;
+    cursor: default;
+}
+
+.column-settings .settings-grid {
+    border: 1px solid #FFF;
+}
+
+.column-settings .settings-grid.rally-invalid-field {
+    border: 1px solid #F00;
+}
+
+.rui-picker-right-action {
+  display: inline;
+  float: right;
+  padding-right: 4px;
+}

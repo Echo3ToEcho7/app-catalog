@@ -1,0 +1,67 @@
+.iteration-summary-app {
+    padding: 10px;
+    width: 100% !important;
+}
+
+.iteration-summary-app .daysRemaining {
+    font-weight: bold;
+}
+
+.iteration-summary-app .dates {
+    font-size: 12px;
+}
+
+.iteration-summary-app .message {
+    padding-top: 10px;
+    font-size: 14px;
+}
+
+.iteration-summary-app .state {
+    padding-top: 5px;
+    font-style: italic;
+}
+
+.iteration-summary-app .edit {
+    font-size: 11px;
+    padding-top: 10px;
+}
+
+.iteration-summary-app .timeboxStatusRow {
+    margin-top: 10px;
+    padding-left: 5px;
+}
+
+.iteration-summary-app .timeboxStatusRow.success {
+    background-color: #6ab17d;
+}
+
+.iteration-summary-app .timeboxStatusRow.warn {
+    background-color: #d9af4b;
+}
+
+.iteration-summary-app .timeboxStatusRow.error {
+    background-color: #f47168;
+}
+
+.iteration-summary-app .timeboxStatusRow.pending {
+    background-color: #c6c6c6;
+}
+
+.iteration-summary-app .timeboxStatusRow .timeboxStatusDetails {
+    background-color: #ffffff;
+    padding-left: 5px;
+}
+
+.iteration-summary-app .timeboxStatusRow .timeboxStatusDetails .header {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.iteration-summary-app .timeboxStatusRow .timeboxStatusDetails .subtitle {
+    font-weight: normal;
+    padding-left: 5px;
+}
+
+.iteration-summary-app .timeboxStatusRow .timeboxStatusDetails .details {
+    font-size: 11px;
+}

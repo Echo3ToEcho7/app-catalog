@@ -1,0 +1,16 @@
+.tip-of-the-day-app {
+    font-family: "Trebuchet MS", arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+}
+
+.tip-of-the-day-app .tipheader {
+    font-size: 12pt;
+    color: #666;
+    padding-top: 25px;
+    padding-bottom: 25px;
+}
+
+.tip-of-the-day-app .tipcontent {
+    font-size: 16pt;
+}

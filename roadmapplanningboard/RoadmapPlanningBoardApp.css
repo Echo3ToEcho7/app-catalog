@@ -1,0 +1,812 @@
+.roadmap-board .no-drag-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.roadmap-board .progress-bar-container .progress-bar-label {
+    color: #262626;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.roadmap-board .progress-bar-percent-done {
+    color: white;
+    vertical-align: middle;
+    display: inline-block;
+    position: absolute;
+    top: 9px;
+    right: 5%;
+}
+
+.roadmap-board {
+    height: 100%;
+}
+
+.roadmap-board > .rui-gridboard {
+    height: 100%;
+    overflow-y: hidden;
+}
+
+.roadmap-board > .rui-gridboard > .rui-leftright {
+    display: none;
+}
+
+.roadmap-board .no-timebox .columns tr td.blank-slate-column {
+    width: 66%;
+    text-align: center;
+    vertical-align: top;
+}
+
+.roadmap-board .show-label {
+    float: right;
+    margin-top: 3px;
+}
+
+.roadmap-board .header {
+    padding: 5px 5px 5px 10px;
+}
+
+.roadmap-board .header .add-new {
+    float: left;
+}
+
+.roadmap-board .add-new label {
+    padding-top: 0;
+}
+
+.roadmap-board .add-new .new {
+    margin-left: 0;
+}
+
+.roadmap-board .manage-iterations {
+    float: right;
+    margin: 3px 10px 0 0;
+}
+
+.roadmap-board .type-checkbox {
+    float: right;
+    margin: 5px;
+}
+
+.roadmap-board .type-checkbox label {
+    position: relative;
+    top: 1px;
+}
+
+.roadmap-board .progress-bar-container.field-percentDone {
+    margin: 0;
+    display: inline-block;
+}
+
+.roadmap-board .backlog {
+    border-right: none;
+}
+
+.roadmap-board .planning-column {
+    background-color: #f5f5f5;
+}
+
+.roadmap-board .planning-column .search {
+    margin: 5px 30px 0 30px;
+}
+
+.roadmap-board .planning-column .search > div {
+    overflow-x: hidden;
+}
+
+.roadmap-board .planning-column .search-button {
+    background: transparent url('search-button.gif');
+    width: 15px;
+    height: 15px;
+    background-size: 15px 15px;
+    margin-top: 4px;
+    cursor: pointer;
+}
+
+.roadmap-board .planning-column .columnTitle {
+    font-size: 18px;
+    font-weight: bold;
+    color: #262626;
+}
+
+.roadmap-board .planning-column .columnTitle .fieldContainerView {
+    font-size: 18px;
+    font-weight: bold;
+    white-space: nowrap;
+    width: 95%;
+    overflow: hidden;
+    margin: 0 auto;
+    text-overflow: ellipsis;
+}
+
+.roadmap-board .planning-column .columnTitle input {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.roadmap-board .planning-column .columnTitle > table {
+    margin: 0;
+}
+
+.roadmap-board .planning-column .columnTitle > table input {
+    line-height: 20px;
+}
+
+.roadmap-board .planning-column .column-header {
+    margin: 0 0 0 0;
+    text-align: center;
+}
+
+.roadmap-board .planning-column .column-header .editableField {
+    min-height: 20px;
+}
+
+.roadmap-board .planning-column .timeboxDates {
+    font-size: 12px;
+    font-weight: bold;
+    color: #8f8f8f;
+    margin: 0 auto;
+    margin-bottom: 1px;
+    width: 125px;
+    border: 3px solid transparent;
+}
+
+.roadmap-board .planning-column .timeboxDates:hover {
+    border: 1px solid #3197c6 !important;
+    padding: 2px 0px;
+}
+
+.roadmap-board .first-card-column {
+    border-left: 1px solid #c0c0c0;
+}
+
+.roadmap-board .progress-bar-background {
+    background-color: #424242;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px 5px;
+    height: 36px;
+    position: relative;
+}
+
+.roadmap-board {
+    overflow-y: hidden !important;
+}
+
+.roadmap-board table.column-container {
+    width: 100%;
+}
+
+.roadmap-board .planning-column.current-timebox {
+    background-color: #8f8f8f;
+}
+
+.roadmap-board .planning-column.current-timebox .columnContent {
+    background-color: #c6c6c6;
+    margin: 2px 2px 0 2px;
+    border: none;
+}
+
+.roadmap-board .planning-column.current-timebox .column-header {
+    background: #ffffff url('currentIterationColumnHeader.png') repeat-x bottom;
+    margin: 2px 2px 0 2px;
+}
+
+.roadmap-board .column-container .fixed-header-card-board-header-container {
+    border-bottom: 1px dotted #c0c0c0;
+}
+
+.roadmap-board .fixed-header-card-board-body-container > table {
+    height: 100%;
+}
+
+.roadmap-board .theHeader .card-column {
+    background-color: #FFF;
+}
+
+.roadmap-board .column-container .column-header {
+    font-size: 10pt;
+}
+
+.roadmap-board .column-container .column-header .columnTpl{
+    font-size: 18px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+}
+
+.roadmap-board .column-container .column-header .editableField {
+    padding: 0px;
+}
+
+.roadmap-board .column-container .column-header .editableField:hover {
+    border: 1px solid #3197c6 !important;
+}
+
+.roadmap-board .column-container .column-header .editableField textarea {
+    font-size: 9pt;
+    color: #262626;
+    padding: 0;
+    border-width: 0;
+    line-height: normal;
+}
+
+.yes-harmonized .roadmap-board .theme_container {
+    font-family: NotoSans, Helvetica, Arial;
+}
+
+.roadmap-board .editableField .setTheme {
+    color: #262626;
+}
+
+.roadmap-board .column-container .column-header .column-header-title {
+    padding: 15px 8px 0 8px;
+}
+
+.roadmap-board .column-container .planning-column {
+    border-top: 1px solid transparent;
+    border-right: 1px dotted #c0c0c0;
+    vertical-align: top;
+}
+
+.roadmap-board .column-container .last-card-column {
+    border-right: 1px solid #c0c0c0;
+}
+
+.roadmap-board .column-container td.card-column {
+    border-top-style: none;
+}
+
+.roadmap-board .column {
+    border-right: none;
+}
+
+.roadmap-board .field_container {
+    float: left;
+    width: 90%;
+}
+
+.roadmap-board .theme_container {
+    text-align: left;
+    font-weight: 300;
+    font-size: 9pt;
+    color: #a9a9a9;
+    padding: 8px;
+}
+
+.roadmap-board .theme_container .fieldContainerView {
+    white-space: pre-wrap;
+    max-height: 205px;
+    overflow: auto;
+}
+
+.roadmap-board a.themeButton {
+    background-repeat: no-repeat;
+    display: inline-block;
+    float: right;
+    z-index: 100;
+}
+
+.roadmap-board a.themeButtonCollapse {
+    height: 25px;
+    padding-right: 25px;
+    margin-right: -9px;
+    background-position: center;
+    background-image: url('smChev_up.png');
+}
+
+@media all and (-webkit-min-device-pixel-ratio: 1.5) {
+    .roadmap-board a.themeButtonCollapse {
+        background-image: url('smChev_up@2x.png');
+        background-size: 12px 8px;
+    }
+}
+
+.roadmap-board a.themeButtonCollapse:hover {
+    background-image: url('smChev_up_over.png');
+}
+
+@media all and (-webkit-min-device-pixel-ratio: 1.5) {
+    .roadmap-board a.themeButtonCollapse:hover {
+        background-image: url('smChev_up_over@2x.png');
+        background-size: 12px 8px;
+    }
+}
+
+.roadmap-board a.themeButtonExpand {
+    position: absolute;
+    bottom: -12px;
+    right: 0px;
+    background-color: #424242;
+    height: 12px;
+    width: 30px;
+    background-position: 9px 2px;
+    border-radius: 0 0 0 5px;
+    background-image: url('smChev_down.png');
+}
+
+@media all and (-webkit-min-device-pixel-ratio: 1.5) {
+    .roadmap-board a.themeButtonExpand {
+        background-image: url('smChev_down@2x.png');
+        background-size: 12px 8px;
+    }
+}
+
+.roadmap-board a.themeButtonExpand:hover {
+    background-image: url('smChev_down_over.png');
+}
+
+@media all and (-webkit-min-device-pixel-ratio: 1.5) {
+    .roadmap-board a.themeButtonExpand:hover {
+        background-image: url('smChev_down_over@2x.png');
+        background-size: 12px 8px;
+    }
+}
+
+.roadmap-board .no-drag-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.roadmap-planning-popover .month-triangles {
+    background-image: none;
+    color: #424242 !important;
+    font-size: 48px;
+    line-height: 23px;
+    margin-bottom: 3px;
+    margin-top: -1px;
+    padding: 0px;
+}
+
+.roadmap-planning-popover .month-selection-common-attrs {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    width: 28px;
+    height: 28px;
+    border-bottom: 1px solid #c0c0c0;
+    background-color: #e6e6e6;
+}
+
+.roadmap-planning-popover .dateField .x4-trigger-cell {
+    width: 20px;
+    height: 30px;
+    background-color: #ffffff;
+    border-radius: 0 3px 3px 0;
+    border-left: none;
+}
+
+.roadmap-planning-popover .dateField .en-calendar {
+    font-size: 27px;
+}
+
+.roadmap-planning-popover .dateField.triggerSelected input,
+.roadmap-planning-popover .dateField.triggerSelected .x4-form-trigger {
+    background-color: #cceef9;
+}
+
+.roadmap-planning-popover .dateField.transition-bg-color input,
+.roadmap-planning-popover .dateField.transition-bg-color .x4-form-trigger {
+    transition: background-color 2s;
+}
+
+.roadmap-planning-popover .dateField.dateSelected input,
+.roadmap-planning-popover .dateField.dateSelected .x4-form-trigger {
+    background-color: #cadda3;
+    transition: background-color 0s;
+}
+
+.roadmap-planning-popover .dateField .x4-form-trigger-wrap .x4-form-field {
+    width: 70px;
+    border-radius: 3px 0 0 3px;
+    border-right: none;
+}
+
+.roadmap-planning-popover .dateField .x4-form-trigger {
+    height: 30px;
+    border-left: none;
+    border-radius: 0 3px 3px 0;
+    background-position: 2px 8.5px;
+    background-image: none;
+}
+
+.roadmap-planning-popover .x4-datepicker-month .x4-btn-split-right {
+    background-image: none !important;
+}
+
+.roadmap-planning-popover .x4-datepicker {
+    width: 211px !important;
+    font-size: 12px;
+    font-weight: 300;
+    font-color: black !important;
+    font-family: san-serif;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-month {
+    padding: 3px 0;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-month .x4-btn-center {
+    overflow: visible;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-month .x4-btn-center .x4-btn-inner {
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-month .en-triangle-down {
+    color: #424242 !important;
+    font-size: 27px;
+    line-height: 7px;
+    margin-bottom: 3px;
+    margin-top: -1px;
+    padding: 0px;
+    width: 5px;
+    position: absolute;
+    top: 3px;
+    right: -6px;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header {
+    background-color: #c0c0c0;
+    padding: 0;
+    height: auto;
+    width: auto;
+    font-size: 11px;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-prev {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    width: 28px;
+    height: 28px;
+    border-bottom: 1px solid #c0c0c0;
+    background-color: #e6e6e6;
+    left: 0;
+    padding: 3px 0px 0px 2px;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-prev .en-triangle-left {
+    background-image: none;
+    color: #424242 !important;
+    font-size: 48px;
+    line-height: 23px;
+    margin-bottom: 3px;
+    margin-top: -1px;
+    padding: 0px;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-prev .en-triangle-left:hover {
+    background-color: transparent;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-next {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    width: 28px;
+    height: 28px;
+    border-bottom: 1px solid #c0c0c0;
+    background-color: #e6e6e6;
+    right: 0;
+    padding: 3px 0px 0px 4px;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-next .en-triangle-right {
+    background-image: none;
+    color: #424242 !important;
+    font-size: 48px;
+    line-height: 23px;
+    margin-bottom: 3px;
+    margin-top: -1px;
+    padding: 0px;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-header .x4-datepicker-next .en-triangle-right:hover {
+    background-color: transparent;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr:first-child td {
+    padding-top: 10px;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr:last-child td {
+    padding-bottom: 5px;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td.x4-datepicker-disabled a span,
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td.x4-datepicker-active a span,
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td.x4-datepicker-prevday a span {
+    font-size: 10px;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td.x4-datepicker-prevday a span {
+    color: #d6d6d6;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner tbody tr td .x4-datepicker-date {
+    font-size: 10px;
+    padding: 0;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner .x4-datepicker-selected a {
+    background-color: #929292;
+    border: none;
+    color: #ffffff !important;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner .x4-datepicker-today a {
+    border: none;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner .x4-datepicker-today a span {
+    font-weight: bolder;
+    color: black;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner a {
+    font-size: 11px;
+    color: black !important;
+    text-align: center;
+    padding: 4px;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner a:hover {
+    background-color: #35B2E4;
+    border: none;
+    color: #ffffff !important;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner th {
+    background-color: #e6e6e6;
+    color: black;
+    padding: 4px 0px;
+    border-bottom-color: #d6d6d6;
+    text-align: center;
+    width: auto;
+}
+
+.roadmap-planning-popover .x4-datepicker table.x4-datepicker-inner th span {
+    font-size: 11px;
+    padding-right: 0;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-btn-default-small-over {
+    background-color: #ffffff;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-btn-default-small .x4-btn-inner {
+    font-weight: 300;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-footer {
+    border-top: 1px solid #e6e6e6;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-footer .x4-btn,
+.roadmap-planning-popover .x4-datepicker .x4-datepicker-footer .x4-monthpicker-buttons .x4-btn {
+    background-color: #35B2E4;
+    border: transparent;
+    color: #ffffff;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-monthpicker .x4-monthpicker-item {
+    text-align: center;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-monthpicker a {
+    font-weight: 300;
+    font-size: 11px;
+    color: black !important;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-monthpicker a:hover {
+    background-color: #35B2E4;
+    border: none;
+    color: #ffffff !important;
+}
+
+.roadmap-planning-popover .x4-datepicker .x4-monthpicker .x4-monthpicker-selected {
+    background-color: #ffffff;
+    font-weight: 700;
+    color: black;
+    border: none;
+}
+
+.roadmap-planning-popover .x4-ie .dateField .en-calendar {
+    line-height: 15px;
+}
+
+.roadmap-planning-popover .x4-ie .x4-datepicker .x4-datepicker-header .x4-datepicker-prev .en-triangle-left {
+    line-height: 1px;
+}
+
+.roadmap-planning-popover .x4-ie .x4-datepicker .x4-datepicker-header .x4-datepicker-next .en-triangle-right {
+    line-height: 1px;
+}
+
+.roadmap-planning-popover .x4-ie .x4-datepicker .x4-datepicker-month .en-triangle-down {
+    line-height: 1px;
+}
+
+.roadmap-board .no-drag-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.roadmap-board .no-drag-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.roadmap-planning-popover {
+    text-align: center;
+    background-color: #424242 !important;
+    box-shadow: 2px 2px 3px #CCC;
+    border-radius: 3px;
+    padding: 20px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    overflow: visible;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.roadmap-planning-popover td {
+    vertical-align: middle;
+}
+
+.roadmap-planning-popover .popoverDateRangeText {
+    text-align: left;
+    color: #ffffff;
+    font-weight: 300;
+    font-size: 14px;
+    margin-bottom: 7px;
+}
+
+.roadmap-planning-popover .popoverToText {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 300;
+    padding: 0 10px;
+}
+
+.roadmap-planning-popover .popoverDateText {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 300;
+    padding: 10px 0;
+    color: #ffffff;
+}
+
+.roadmap-planning-popover .x4-panel {
+    border-color: transparent;
+}
+
+.roadmap-planning-popover .x4-panel-body {
+    background-color: #424242 !important;
+    border-color: transparent;
+}
+
+.roadmap-planning-popover.menu {
+    font-weight: 300;
+}
+
+.roadmap-planning-popover .x4-window-body {
+    background-color: #424242 !important;
+    overflow: visible;
+}
+
+.roadmap-planning-popover a {
+    color: #ffffff !important;
+    margin: 2px;
+    display: block;
+    border-radius: 3px;
+    font-size: 14px;
+    padding: 4px 8px;
+}
+
+.roadmap-planning-popover a.active {
+    background-color: #262626 !important;
+}
+
+.roadmap-planning-popover a:hover {
+    background-color: #35b2e4;
+}
+
+.roadmap-planning-popover .x4-form-item-label {
+    color: #ffffff !important;
+    margin: 2px;
+    display: block;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 300;
+}
+
+.roadmap-planning-popover .popover-label {
+    color: #ffffff !important;
+    margin: 2px;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+    padding-bottom: 10px;
+    padding-top: 3px;
+    margin-top: -3px;
+}
+
+.roadmap-planning-popover .x4-form-field {
+    height: 30px;
+    text-align: center;
+    width: 37px;
+}
+
+.roadmap-planning-popover .x-form-invalid-field {
+    background-color: #F2D3D0;
+    border-color: #B81B10;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.roadmap-planning-popover .x-form-error-msg {
+    padding: 5px;
+    color: white;
+    background-color: #B81B10;
+    font-size: 12px;
+    font-weight: 400;
+    font-family: arial, helevetica;
+}
+
+.roadmap-planning-popover .form-error-msg-field {
+    left: 40px;
+}
+
+.roadmap-planning-popover #capacity-validation-error li {
+    font-size: 12px;
+    font-weight: 400;
+    font-family: arial, helvetica;
+}
+
+.roadmap-planning-popover-chevron.popover-chevron.up {
+    background-image: url('chevron_up.png');
+}
+
+@media all and (-webkit-min-device-pixel-ratio: 1.5) {
+    .roadmap-planning-popover.popover-chevron.up {
+        background-image: url('chevron_up@2x.png');
+        background-size: 28px 19px;
+    }
+}
+
+.roadmap-board a.themeButtonExpand:hover {
+    background-image: url('smChev_down_over.png');
+}
+
+@media all and (-webkit-min-device-pixel-ratio: 1.5) {
+    .roadmap-board a.themeButtonExpand:hover {
+        background-image: url('smChev_down_over@2x.png');
+        background-size: 12px 8px;
+    }
+}
