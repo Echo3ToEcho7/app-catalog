@@ -191,6 +191,15 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     expect(saveStub.callCount).toBe 1
     expect(@leftColumn.getCards().length).toBe leftColumnCardCountBefore + 1
 
+  it 'should allow a card to be dragged within the backlog column and persist', ->
+    [firstCard, secondCard] = @backlogColumn.getCards()
+    dragData = { card: this.backlogColumn.getCards()[1], column: this.backlogColumn }
+    @backlogColumnDropController.onCardDropped(dragData, 0)
+
+    expect(@backlogColumn.getCards().length).toBe 2
+    expect(@backlogColumn.getCards()[0]).toBe secondCard
+    expect(@backlogColumn.getCards()[1]).toBe firstCard
+
   it 'should allow a card to be dropped into another column and persist feature to plan relationship', ->
     ajaxRequest = @stub Ext.Ajax, 'request', (options) ->
       options.success()
@@ -227,3 +236,16 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     @rightColumnDropController.onCardDropped(dragData, 0)
 
     expect(ajaxRequest.args[0][0].url).toBe "http://localhost:9999/api/plan/#{@leftColumn.planRecord.get('id')}/features/to/#{@rightColumn.planRecord.get('id')}"
+
+    # S54311
+#  it 'should place card in correct position when dragged between columns', ->
+#    secondCardInLeftColumn = @leftColumn.getCards()[1]
+#    firstCardInRightColumn = @rightColumn.getCards()[0]
+#
+#    # Move second card in left column to first position in right column:
+#    dragData = { card: secondCardInLeftColumn, column: @leftColumn }
+#    @rightColumnDropController.onCardDropped(dragData, 0)
+#
+#    expect(@rightColumn.getCards().length).toBe 2
+#    expect(@rightColumn.getCards()[0]).toBe secondCardInLeftColumn
+#    expect(@rightColumn.getCards()[1]).toBe firstCardInRightColumn

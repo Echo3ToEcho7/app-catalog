@@ -24,13 +24,20 @@
         },
 
         onCardDropped: function (dragData, index) {
-            var card, column, record, records, relativeRank, relativeRecord, sourceColumn, type;
+            var relativeRank, relativeRecord, type;
 
-            card = dragData.card;
-            record = card.getRecord();
-            sourceColumn = dragData.column;
-            column = this.cmp;
-            records = column.getRecords();
+            var card = dragData.card;
+            var sourceColumn = dragData.column;
+            var column = this.cmp;
+            var records = column.getRecords();
+            var backlogColumn = (!sourceColumn.planRecord && !column.planRecord);
+
+            // Do default action if this is a backlog column
+            if (backlogColumn) {
+                this.callParent(arguments);
+                return;
+            }
+
             if (column.mayRank() && isNaN(index)) {
                 index = records.length;
             }
