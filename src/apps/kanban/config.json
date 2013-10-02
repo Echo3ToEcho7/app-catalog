@@ -1,0 +1,17 @@
+{
+   "name": "Kanban Board",
+   "className": "Rally.apps.kanban.KanbanApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "2.0rc1",
+   "javascript": [
+      "ColumnCardFieldPicker.js",
+      "ColumnSettingsField.js",
+      "CardAgeSettingsField.js",
+      "Settings.js",
+      "Column.js",
+      "KanbanApp.js"
+   ],
+   "css": [
+      "KanbanApp.css"
+   ]
+}

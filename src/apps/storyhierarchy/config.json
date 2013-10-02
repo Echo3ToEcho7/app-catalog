@@ -1,0 +1,12 @@
+{
+   "name": "Story Hierarchy",
+   "className": "Rally.apps.storyhierarchy.StoryHierarchyApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "2.0rc1",
+   "javascript": [
+      "StoryHierarchyApp.js"
+   ],
+   "css": [
+      "StoryHierarchyApp.css"
+   ]
+}

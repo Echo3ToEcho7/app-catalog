@@ -1,0 +1,12 @@
+{
+   "name": "Iteration Tracking Board",
+   "className": "Rally.apps.iterationtrackingboard.IterationTrackingBoardApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "2.0rc1",
+   "javascript": [
+      "IterationTrackingBoardApp.js"
+   ],
+   "css": [
+      "IterationTrackingBoardApp.css"
+   ]
+}

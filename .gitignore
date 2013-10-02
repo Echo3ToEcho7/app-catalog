@@ -1,0 +1,12 @@
+.DS_Store
+node_modules/
+lib/
+gen/
+*.iml
+*.ipr
+*.iws
+bin/sencha/
+build/
+target/
+.grunt/
+_SpecRunner.html

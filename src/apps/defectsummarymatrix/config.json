@@ -1,0 +1,10 @@
+{
+   "name": "Defect Summary Matrix",
+   "className": "Rally.apps.defectsummarymatrix.DefectSummaryMatrixApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "2.0rc1",
+   "javascript": [
+      "DefectSummaryMatrixApp.js"
+   ],
+   "css": []
+}
