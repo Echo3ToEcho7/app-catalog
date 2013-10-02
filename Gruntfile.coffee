@@ -25,13 +25,13 @@ module.exports = (grunt) ->
   grunt.registerTask 'nexus:deploy', 'Deploys to nexus', ['build', 'nexus:__createartifact__']
 
   grunt.registerTask 'check', 'Run convention tests on all files', ['regex-check']
-  grunt.registerTask 'ci', 'Does a full build an deploys to nexus', ['build', 'test', 'nexus:__createartifact__']
+  grunt.registerTask 'ci', 'Does a full build, runs tests and deploys to nexus', ['build', 'test:chrome', 'test:firefox', 'nexus:__createartifact__']
 
   grunt.registerTask 'test:__buildjasmineconf__', 'Internal task to build and alter the jasmine conf', ['jasmine:apps:build', 'replace:jasmine']
   grunt.registerTask 'test:conf', 'Fetches the deps, compiles coffee and css files, runs jshint and builds the jasmine test config', ['nexus:deps', 'clean:test', 'coffee', 'css', 'test:__buildjasmineconf__']
   grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser.', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:apps']
-  grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['test:conf', 'webdriver_jasmine_runner:chrome']
-  grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['test:conf', 'webdriver_jasmine_runner:firefox']
+  grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:chrome']
+  grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:firefox']
   grunt.registerTask 'test:server', 'Starts a Jasmine server at localhost:8890', ['express:server', 'express-keepalive']
 
   spec = (grunt.option('spec') || grunt.option('jsspec') || '*').replace(/(Spec|Test)$/, '')
