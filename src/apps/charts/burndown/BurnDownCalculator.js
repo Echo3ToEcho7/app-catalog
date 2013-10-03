@@ -3,7 +3,6 @@
 
     Ext.define("Rally.apps.charts.burndown.BurnDownCalculator", {
         extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
-
         mixins: [
             "Rally.apps.charts.DateMixin"
         ],
@@ -110,25 +109,81 @@
                 Rally.util.DateTime.fromIsoString(this.startDate).getTime()) / (24*1000*60*60);
             var doubleTimeboxEnd = Ext.Date.add(Rally.util.DateTime.fromIsoString(this.startDate), Ext.Date.DAY, (Math.floor(days) * 2) - 1);
             var timeboxEnd = Ext.Date.add(this.scopeEndDate, Ext.Date.DAY, -1);
-            return {
-                doubleTimeboxEnd: doubleTimeboxEnd,
-                timeboxEnd: timeboxEnd,
-                series: [
-                    {
-                        "as": "Prediction",
-                        "field": "To Do"
+            if(this.projectionsConfig === undefined) {
+                this.projectionsConfig = {
+                    doubleTimeboxEnd: doubleTimeboxEnd,
+                    timeboxEnd: timeboxEnd,
+
+                    series: [
+                        {
+                            "as": "Prediction",
+                            "field": "To Do"
+                        }
+                    ],
+                    continueWhile: function (point) {
+                        var dt = Rally.util.DateTime.fromIsoString(point.tick);
+                        var end = (this.series[0].slope >= 0) ? this.timeboxEnd : this.doubleTimeboxEnd;
+                        return point.Prediction > 0 && dt < end;
                     }
-                ],
-                continueWhile: function (point) {
-                    var dt = Rally.util.DateTime.fromIsoString(point.tick);
-                    var end = (this.series[0].slope >= 0) ? this.timeboxEnd : this.doubleTimeboxEnd;
-                    return point.Prediction > 0 && dt < end;
+                };
+            }
+            return this.projectionsConfig;
+        },
+
+        _firstNonZero: function(data) {
+             var i;
+             for(i=0;i<data.length;i++) {
+                if(data[i] > 0) {
+                    return i;
                 }
-            };
+             }
+             return 0;
+        },
+
+        _leastSquares: function(todoValues, firstIndex, lastIndex) {
+            var n = (lastIndex + 1) - firstIndex;
+            var i;
+            var sumx = 0.0, sumx2 = 0.0, sumy = 0.0, sumy2 = 0.0, sumxy = 0.0;
+            var sxx, syy, sxy, xmean, ymean, slope, yintercept;
+
+            //Compute sums of x, x^2, y, y^2, and xy
+            for (i = firstIndex; i <= lastIndex; i++) {
+                sumx  = sumx  + i;
+                sumx2 = sumx2 + i * i;
+                sumy  = sumy  + todoValues[i];
+                sumy2 = sumy2 + todoValues[i] * todoValues[i];
+                sumxy = sumxy + i * todoValues[i];
+            }
+            slope = (n * sumxy - sumx * sumy) / (n * sumx2 - sumx * sumx);
+            yintercept = (sumy * sumx2 - sumx * sumxy) / (n * sumx2 - sumx * sumx);
+
+            return {slope: slope, yintercept: yintercept};
         },
 
         runCalculation: function (snapshots) {
             var chartData = this.callParent(arguments);
+
+            if(chartData && chartData.projections && chartData.projections.series[0].slope > 0) {
+            // if the slope is positive, try using least squares.  If that's also positive, then use the first result
+                var todoData = chartData.series[0].data;
+                var firstTodoIndex = this._firstNonZero(todoData),
+                    lastTodoIndex = (todoData.length - 1) - chartData.projections.pointsAddedCount;
+
+                var results = this._leastSquares(todoData, firstTodoIndex, lastTodoIndex);
+
+                // override the prediction line only if least squares says the slope isn't positive
+                if(results.slope <= 0) {
+                    this.projectionsConfig.series[0].slope = results.slope;
+
+                    chartData = this.callParent(arguments);
+
+                    // project the plot back to the first todo value
+                    chartData.series[3].data[firstTodoIndex] = ((results.slope * firstTodoIndex) + results.yintercept) + (chartData.series[3].data[lastTodoIndex] - ((results.slope * lastTodoIndex) + results.yintercept));
+                    chartData.series[3].connectNulls = true;
+                    this.projectionsConfig = undefined;
+                }
+
+            }
 
             if(new Date() < this.scopeEndDate) {
                 this._recomputeIdeal(chartData, this.scopeEndDate);
