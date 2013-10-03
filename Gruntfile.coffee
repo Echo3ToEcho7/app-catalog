@@ -211,6 +211,8 @@ module.exports = (grunt) ->
       test:
         files: 'test/spec/**/*.coffee'
         tasks: ['coffee']
+        options:
+          spawn: false
       src:
         files: 'src/apps/**/*.js'
         tasks: ['jshint']
@@ -254,3 +256,20 @@ module.exports = (grunt) ->
     assemble:
       options:
         apps: 'src/apps/**/config.json'
+
+  # Only recompile changed coffee files
+  changedFiles = Object.create null
+
+  onChange = grunt.util._.debounce ->
+    grunt.config ['coffee', 'test'],
+      expand: true
+      cwd: 'test/spec'
+      src: grunt.util._.map(Object.keys(changedFiles), (filepath) -> filepath.replace('test/spec/', ''))
+      dest: 'test/gen'
+      ext: '.js'
+    changedFiles = Object.create null
+  , 200
+
+  grunt.event.on 'watch', (action, filepath) ->
+    changedFiles[filepath] = action
+    onChange()
