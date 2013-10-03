@@ -1,0 +1,9 @@
+{
+    "name": "Release Dependencies",
+    "description": "The Release Dependencies App displays a table of stories scheduled for the selected release that either has a predecessor or a successor.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Release Management"
+    ],
+    "src": "ReleaseDependenciesApp.html"
+}

@@ -1,0 +1,9 @@
+{
+    "name": "Traceability Matrix",
+    "description": "The Traceability Matrix App allows you to show traceability from product requirements to the test cases that prove their implementation and the corresponding results.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Compliance and Regulatory Templates"
+    ],
+    "src": "TraceabilityMatrixApp.html"
+}

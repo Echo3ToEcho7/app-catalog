@@ -1,0 +1,9 @@
+{
+    "name": "Super Customizable Program Chart",
+    "description": "When creating application releases from a set of component releases, view a burndown chart for the application release.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Component Management"
+    ],
+    "src": "SuperCustomizableProgramChart.html"
+}

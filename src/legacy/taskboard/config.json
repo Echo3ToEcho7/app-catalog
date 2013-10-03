@@ -1,0 +1,10 @@
+{
+    "name": "Task Board",
+    "description": "Rally's visual task board gives your team a quick and concise view of your iteration, just as if you were looking at a whiteboard and sticky notes.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Boards",
+        "Iteration Management"
+    ],
+    "src": "TaskBoard.html"
+}

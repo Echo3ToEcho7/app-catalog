@@ -1,0 +1,9 @@
+{
+    "name": "Open Defect Age",
+    "description": "Track the mean age of open defects in order to help focus your team on the oldest and highest priority defects.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Quality"
+    ],
+    "src": "OpenDefectAge.html"
+}

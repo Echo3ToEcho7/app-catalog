@@ -1,0 +1,9 @@
+{
+    "name": "Agile EVM",
+    "description": "This report displays Earned Value Management metrics for the Rally current release.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Portfolio/Program Management"
+    ],
+    "src": "AgileEVM.html"
+}

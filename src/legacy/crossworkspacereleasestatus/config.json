@@ -1,0 +1,9 @@
+{
+    "name": "Cross Workspace Release Status",
+    "description": "Shows an overview of work products assigned to a release across multiple workspaces that share the same release schedule.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Release Management"
+    ],
+    "src": "CrossWsReleaseStatusMashup.html"
+}

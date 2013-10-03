@@ -1,0 +1,9 @@
+{
+    "name": "Iteration Dashboard",
+    "description": "Shows a graphical summary of scheduled work, test cases, defects, and a burndown chart with a visual indicator of iteration health.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Iteration Management"
+    ],
+    "src": "IterationDashboardMashup.html"
+}

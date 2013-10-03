@@ -1,0 +1,9 @@
+{
+    "name": "Enhanced Burndown Chart",
+    "description": "The enhanced burndown chart shows work added to a release along with trend lines for burndown and added work to project an expected release date.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Release Management"
+    ],
+    "src": "EnhancedBurnDown.html"
+}

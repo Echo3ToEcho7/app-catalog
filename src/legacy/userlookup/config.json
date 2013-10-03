@@ -1,0 +1,9 @@
+{
+    "name": "User Lookup",
+    "description": "Provides the ability to easily filter, search, and edit users.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Utilities"
+    ],
+    "src": "UserLookup.html"
+}

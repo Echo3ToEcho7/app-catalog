@@ -1,0 +1,9 @@
+{
+    "name": "Dependency Status Dashboard",
+    "description": "Show cross-project dependencies between stories in upcoming iterations.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Planning & Estimation"
+    ],
+    "src": "DependencyStatusApp.html"
+}

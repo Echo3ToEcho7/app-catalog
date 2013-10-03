@@ -1,0 +1,10 @@
+{
+    "name": "Enhanced Velocity Chart",
+    "description": "Displays velocity, work accepted after the iteration, unaccepted work, and a trend line.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Planning & Estimation",
+        "Iteration Management"
+    ],
+    "src": "EnhancedVelocityChartMashup.html"
+}

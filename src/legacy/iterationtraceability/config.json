@@ -1,0 +1,9 @@
+{
+    "name": "Iteration Traceability",
+    "description": "For an iteration, show basic information and relationships between user stories and their related tasks, test cases and defects.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Iteration Management"
+    ],
+    "src": "IterationTraceability.html"
+}

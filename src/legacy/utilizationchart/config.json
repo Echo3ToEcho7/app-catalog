@@ -1,0 +1,9 @@
+{
+    "name": "Utilization Chart",
+    "description": "See how well your team is managing their workload through capacity planning and task estimation from iteration to iteration.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Planning & Estimation"
+    ],
+    "src": "UtilizationChartApp.html"
+}

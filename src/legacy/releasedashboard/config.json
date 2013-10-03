@@ -1,0 +1,9 @@
+{
+    "name": "Release Management",
+    "description": "Shows a graphical summary of scheduled work, test cases, defects, and a burndown chart with a visual indicator of release health.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Release Management"
+    ],
+    "src": "ReleaseDashboardMashup.html"
+}

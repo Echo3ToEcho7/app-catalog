@@ -1,0 +1,9 @@
+{
+    "name": "Super Customizable Iteration Chart",
+    "description": "Customize your iteration burndown data with many chart types, trend & ideal displays, and color options.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Iteration Management"
+    ],
+    "src": "SuperCustomizableIterationChart.html"
+}

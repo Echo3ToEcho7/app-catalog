@@ -1,0 +1,9 @@
+{
+    "name": "Productivity Chart",
+    "description": "The Productivity Chart tracks a measurement of the team’s productivity as a function of points per hour. The productivity rate is calculated by dividing the total points accepted for an iteration by the total number of productive hours for the team.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Planning & Estimation"
+    ],
+    "src": "ProductivityChart.html"
+}

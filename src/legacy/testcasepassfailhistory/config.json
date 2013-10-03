@@ -1,0 +1,9 @@
+{
+    "name": "Test Case Pass/Fail History",
+    "description": "Show test cases and recent test case results within a single screen.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Quality"
+    ],
+    "src": "TestCasePassFailHistoryApp.html"
+}

@@ -1,0 +1,9 @@
+{
+    "name": "Recently Changed",
+    "description": "The Recently Changed App displays tasks, user stories, and defects that were modified for the team as of the last work date.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Iteration Management"
+    ],
+    "src": "RecentlyChangedApp.html"
+}

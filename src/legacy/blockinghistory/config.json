@@ -1,0 +1,9 @@
+{
+    "name": "Blocking History",
+    "description": "See when User Stories and Tasks were blocked and/or unblocked.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Compliance and Regulatory Templates"
+    ],
+    "src": "BlockingHistoryApp.html"
+}

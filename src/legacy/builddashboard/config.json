@@ -1,0 +1,9 @@
+{
+    "name": "Build Dashboard",
+    "description": "Report on build success and daily build statistics if you have integrated Rally with your build system.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Developer Tools"
+    ],
+    "src": "BuildDashboardApp.html"
+}

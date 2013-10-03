@@ -1,0 +1,9 @@
+{
+    "name": "Completed Stories and Defects per Iteration",
+    "description": "Allows user to view all completed stories and defects that are assigned to them.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Personal Work"
+    ],
+    "src": "CompletedStoriesAndDefectsApp.html"
+}

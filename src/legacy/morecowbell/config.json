@@ -1,0 +1,9 @@
+{
+    "name": "More Cowbell",
+    "description": "The More Cowbell mashup allows those who want to see More Cowbell, more often - even while in Rally.",
+    "screenshot": "preview.png",
+    "categories": [
+        "General"
+    ],
+    "src": "MoreCowbell.html"
+}

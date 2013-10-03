@@ -1,0 +1,9 @@
+{
+    "name": "Story Map",
+    "description": "A Story Map helps you build a backlog of work based on the activities your users need to accomplish using two dimensions.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Planning & Estimation"
+    ],
+    "src": "StoryMapApp.html"
+}

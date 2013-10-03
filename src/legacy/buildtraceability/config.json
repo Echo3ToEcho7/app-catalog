@@ -1,0 +1,9 @@
+{
+    "name": "Build Traceability",
+    "description": "Provides traceability on which Rally artifacts (Defects, Stories and/or Tasks) are related to a particular build.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Developer Tools"
+    ],
+    "src": "BuildTraceabilityApp.html"
+}

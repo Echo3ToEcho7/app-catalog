@@ -1,0 +1,10 @@
+{
+    "name": "Estimation Board",
+    "description": "The Estimation Board provides a view of unaccepted stories, defects and defect suites organized by plan estimate sizes.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Boards",
+        "Planning & Estimation"
+    ],
+    "src": "EstimationBoardApp.html"
+}

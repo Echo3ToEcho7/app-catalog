@@ -1,0 +1,10 @@
+{
+    "name": "Stories By Creator",
+    "description": "View the stories in a selected release by the story creator.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Release Management",
+        "Planning & Estimation"
+    ],
+    "src": "StoriesByCreatorApp.html"
+}

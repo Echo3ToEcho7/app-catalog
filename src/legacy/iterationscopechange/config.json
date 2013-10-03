@@ -1,0 +1,10 @@
+{
+    "name": "Iteration Scope Change",
+    "description": "Provides visibility into scope changes after the team has committed to an Iteration.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Iteration Management",
+        "Planning & Estimation"
+    ],
+    "src": "IterationScopeChangeApp.html"
+}

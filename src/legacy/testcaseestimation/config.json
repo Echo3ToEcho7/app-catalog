@@ -1,0 +1,9 @@
+{
+    "name": "Test Case Estimation",
+    "description": "Track your team's effectiveness at estimating the amount of effort by test case.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Quality"
+    ],
+    "src": "TestCaseEstimation.html"
+}

@@ -1,0 +1,9 @@
+{
+    "name": "System Requirements Validation Document",
+    "description": "The System Requirements Validation Document App shows how functional and nonfunctional requirements are implemented by generating a printable report.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Compliance and Regulatory Templates"
+    ],
+    "src": "SystemRequirementValidationDocumentApp.html"
+}

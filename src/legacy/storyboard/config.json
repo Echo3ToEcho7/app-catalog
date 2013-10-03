@@ -1,0 +1,10 @@
+{
+    "name": "Story Board",
+    "description": "The story board provides your team a view of the work items within your iteration organized by state, as if you were looking at a whiteboard.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Iteration Management",
+        "Boards"
+    ],
+    "src": "StoryBoardApp.html"
+}

@@ -1,0 +1,9 @@
+{
+    "name": "Story Deep Copy",
+    "description": "Makes a deep copy of a story that contains copies of all its children and tasks.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Utilities"
+    ],
+    "src": "StoryDeepCopyApp.html"
+}

@@ -1,0 +1,10 @@
+{
+    "name": "Planned vs. Actual Burndown",
+    "description": "The Planned vs. Actual Burndown App captures a release’s burndown progress. It gives you a chart overview with a table to view the data.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Planning & Estimation",
+        "Release Management"
+    ],
+    "src": "PlannedVsActualBurndownApp.html"
+}

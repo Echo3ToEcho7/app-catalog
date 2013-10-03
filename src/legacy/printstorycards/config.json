@@ -1,0 +1,9 @@
+{
+    "name": "Print Story Cards",
+    "description": "Formats select story info onto cards that can be used on a physical scrum wall.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Utilities"
+    ],
+    "src": "PrintStoryCardsApp.html"
+}

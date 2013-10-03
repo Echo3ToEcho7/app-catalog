@@ -1,0 +1,9 @@
+{
+    "name": "Super Customizable Release Chart",
+    "description": "Customize your release burndown data with many chart types, trend & ideal displays, and color options.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Release Management"
+    ],
+    "src": "SuperCustomizableReleaseChart.html"
+}

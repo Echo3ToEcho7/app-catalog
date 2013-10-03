@@ -19,9 +19,9 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'default', ['build']
   grunt.registerTask 'css', ['less', 'copy:images', 'replace:imagepaths']
-  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'nexus:deps', 'coffee', 'regex-check', 'jshint', 'css', 'sencha', 'assemble', 'copy:apphtml']
+  grunt.registerTask 'build', 'Builds the catalog', ['clean:build', 'clean:src', 'nexus:deps', 'regex-check', 'jshint', 'css', 'sencha', 'assemble', 'copy:apphtml', 'manifest']
 
-  grunt.registerTask 'nexus:__createartifact__', 'Internal task to create and publish the nexus artifact', ['version', 'nexus:push:publish', 'clean:target']
+  grunt.registerTask 'nexus:__createartifact__', 'Internal task to create and publish the nexus artifact', ['version', 'clean:src', 'nexus:push:publish', 'clean:target']
   grunt.registerTask 'nexus:deploy', 'Deploys to nexus', ['build', 'nexus:__createartifact__']
 
   grunt.registerTask 'check', 'Run convention tests on all files', ['regex-check']
@@ -48,7 +48,8 @@ module.exports = (grunt) ->
     buildVersion: version
 
     clean:
-      build: ['build/', 'src/apps/**/*.html']
+      src: ['src/apps/**/*.html']
+      build: ['build/']
       test: ['test/gen', '_SpecRunner.html', '.webdriver']
       dependencies: ['lib/', 'bin/sencha/']
       target: ['target/']
@@ -197,7 +198,7 @@ module.exports = (grunt) ->
       apphtml:
         files: [
           { expand: true, src: ['apps/**/deploy/*.html'], cwd: 'src', dest: 'build/html/', rename: (dest, src) -> "#{dest}#{src.replace('deploy/', '').replace('apps/', '')}" }
-          { expand: true, src: ['src/legacy/*.html'], dest: 'build/html/legacy/', flatten: true }
+          { expand: true, src: ['legacy/**/*.html', 'legacy/**/*.png'], cwd: 'src', dest: 'build/html/' }
         ]
 
     coffee:
@@ -258,6 +259,16 @@ module.exports = (grunt) ->
       options:
         apps: 'src/apps/**/config.json'
 
+    manifest:
+      options:
+        dest: 'build/catalog-all.json'
+        apps:
+          files: 'src/apps/**/config.json'
+          srcRoot: 'build/html'
+        legacy:
+          srcRoot: 'build/html/legacy'
+          files: 'src/legacy/**/config.json'        
+          
   # Only recompile changed coffee files
   changedFiles = Object.create null
 

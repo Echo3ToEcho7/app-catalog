@@ -1,0 +1,9 @@
+{
+    "name": "Source Code Check-In",
+    "description": "See a list of the recent check-ins from Rally's Subversion, Perforce, Git, or TFS Source Code Management Connectors.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Developer Tools"
+    ],
+    "src": "SourceCodeCheckinApp.html"
+}

@@ -1,0 +1,9 @@
+{
+    "name": "Defects by Package",
+    "description": "A basic report of all of my Defects, grouped by Package.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Quality"
+    ],
+    "src": "DefectsByPackage.html"
+}

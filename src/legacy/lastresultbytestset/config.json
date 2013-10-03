@@ -1,0 +1,9 @@
+{
+    "name": "Last Result by TestSet",
+    "description": "View the last test case result for test cases in each test set associated with an iteration.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Quality"
+    ],
+    "src": "LastResultByTestSetApp.html"
+}

@@ -1,0 +1,9 @@
+{
+    "name": "Epic Progress",
+    "description": "Track progress of user stories associated with epic stories in a release",
+    "screenshot": "preview.png",
+    "categories": [
+        "Release Management"
+    ],
+    "src": "EpicProgressApp.html"
+}

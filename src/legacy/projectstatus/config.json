@@ -1,0 +1,9 @@
+{
+    "name": "Project Status",
+    "description": "Display high-level charts showing Story, Task, Test Case, and Defect status.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Release Management"
+    ],
+    "src": "ProjectStatusApp.html"
+}

@@ -1,0 +1,9 @@
+{
+    "name": "Defects By Closer",
+    "description": "Returns defects within a selected release along with the details on who closed the defect and when it closed.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Quality"
+    ],
+    "src": "DefectsByCloserApp.html"
+}

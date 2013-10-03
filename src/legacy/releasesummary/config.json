@@ -1,0 +1,9 @@
+{
+    "name": "Release Summary",
+    "description": "The Release Summary App provides a succinct view of the stories and defects accepted in a release.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Release Management"
+    ],
+    "src": "ReleaseSummaryApp.html"
+}

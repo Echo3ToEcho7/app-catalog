@@ -1,0 +1,10 @@
+{
+    "name": "Open Stories, Defects and Tasks",
+    "description": "Allows user to view all unfinished stories, defects and tasks that are assigned to them. In most cases, unfinished is equivalent to artifact states not being 'Completed' or 'Accepted'.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Personal Work",
+        "Planning & Estimation"
+    ],
+    "src": "OpenStoriesTasksDefectsApp.html"
+}

@@ -1,0 +1,9 @@
+{
+    "name": "Weekly Actuals Report",
+    "description": "This app displays tasks worked on by a team of people during the last <n> weeks.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Planning & Estimation"
+    ],
+    "src": "WeeklyActualsApp.html"
+}

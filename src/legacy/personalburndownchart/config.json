@@ -1,0 +1,10 @@
+{
+    "name": "Personal Burndown Chart",
+    "description": "The Personal Burndown chart shows a chart of your To Do progress, the ideal burndown rate, and a list of the tasks assigned to you in the selected iteration.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Personal Work",
+        "Iteration Management"
+    ],
+    "src": "PersonalBurndownChart.html"
+}

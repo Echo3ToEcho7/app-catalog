@@ -1,0 +1,9 @@
+{
+    "name": "Release Traceability",
+    "description": "For a release, show basic information and relationships between user stories and their related tasks, test cases and defects.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Release Management"
+    ],
+    "src": "ReleaseTraceability.html"
+}

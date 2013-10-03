@@ -1,0 +1,9 @@
+{
+    "name": "Active Defect Charts",
+    "description": "See the currently active defects using two pie charts.",
+    "screenshot": "preview.png",
+    "categories": [
+        "Quality"
+    ],
+    "src": "ActiveDefectCharts.html"
+}
