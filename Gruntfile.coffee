@@ -34,6 +34,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:firefox']
   grunt.registerTask 'test:server', 'Starts a Jasmine server at localhost:8890', ['express:server', 'express-keepalive']
 
+  _ = grunt.util._
   spec = (grunt.option('spec') || grunt.option('jsspec') || '*').replace(/(Spec|Test)$/, '')
   debug = grunt.option 'verbose' || false
   version = grunt.option 'version' || 'dev'
@@ -54,7 +55,6 @@ module.exports = (grunt) ->
       target: ['target/']
 
     jshint:
-      files: ['grunt/**/*.js', 'src/apps/**/*.js']
       options:
         bitwise: true
         curly: true
@@ -70,6 +70,12 @@ module.exports = (grunt) ->
         unused: 'vars'
         es3: true
         laxbreak: true
+      tasks:
+        files:
+          src: ['grunt/**/*.js']
+      apps:
+        files:
+          src: ['src/apps/**/*.js']
 
     "regex-check":
       x4:
@@ -214,9 +220,16 @@ module.exports = (grunt) ->
         tasks: ['coffee']
         options:
           spawn: false
-      src:
+      apps:
         files: 'src/apps/**/*.js'
-        tasks: ['jshint']
+        tasks: ['jshint:apps']
+        options:
+          spawn: false
+      tasks:
+        files: 'grunt/tasks/**/*.js'
+        tasks: ['jshint:tasks']
+        options:
+          spawn: false
       styles:
         files: 'src/apps/**/*.css'
         tasks: ['css']
@@ -261,13 +274,20 @@ module.exports = (grunt) ->
   # Only recompile changed coffee files
   changedFiles = Object.create null
 
-  onChange = grunt.util._.debounce ->
-    grunt.config ['coffee', 'test'],
-      expand: true
-      cwd: 'test/spec'
-      src: grunt.util._.map(Object.keys(changedFiles), (filepath) -> filepath.replace('test/spec/', ''))
-      dest: 'test/gen'
-      ext: '.js'
+  onChange = _.debounce ->
+    specFiles = []
+    taskFiles = []
+    appsFiles = []
+
+    _.each Object.keys(changedFiles), (filepath) ->
+      specFiles.push(filepath) if _.contains(filepath, 'spec')
+      taskFiles.push(filepath) if _.contains(filepath, 'tasks')
+      appsFiles.push(filepath) if _.contains(filepath, 'apps')
+
+    grunt.config ['coffee', 'test', 'src'], specFiles
+    grunt.config ['jshint', 'tasks', 'files', 'src'], taskFiles
+    grunt.config ['jshint', 'apps', 'files', 'src'], appsFiles
+
     changedFiles = Object.create null
   , 200
 
