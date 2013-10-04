@@ -810,3 +810,11 @@
         background-size: 12px 8px;
     }
 }
+
+.roadmap-service-unavailable-error div {
+    background-image: none;
+    padding: 5px 10px 5px 10px;
+    font-size: 12px;
+    background-color: #F66349;
+    font-weight: normal;
+}

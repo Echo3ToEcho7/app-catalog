@@ -53,8 +53,7 @@
 
         cls: 'roadmap-board cardboard',
 
-        _retrieveModels: function (success) {
-            var _this = this;
+        _retrieveModels: function (callback) {
             if (this.columns && this.columns.length > 0) {
                 success.call(this);
             } else {
@@ -65,12 +64,24 @@
                         types: [record.get('TypePath')],
                         context: this.context,
                         success: function(models) {
-                            _this.models = _.values(models);
-                            _this.planStore.load(function() {
-                                _this.timeframeStore.load(function() {
-                                    _this.buildColumnsFromStore(_this.timeframeStore);
-                                    success.call(_this);
-                                });
+                            this.models = _.values(models);
+                            this.planStore.load({
+                                callback: function(records, operation, success) {
+                                    if (success) {
+                                        this.timeframeStore.load({
+                                            callback: function(records, operation, success) {
+                                                if (success) {
+                                                    this.buildColumnsFromStore(this.timeframeStore);
+                                                    callback.call(this);
+                                                }
+                                            },
+                                            requester: this,
+                                            scope: this
+                                        });
+                                    }
+                                },
+                                reqester: this,
+                                scope: this
                             });
                         },
                         scope: this
