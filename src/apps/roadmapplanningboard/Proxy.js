@@ -14,7 +14,8 @@
 
         writer: {
             type: 'json',
-            root: 'data'
+            root: 'data',
+            writeAllFields: false
         },
 
         buildRequest: function(operation) {

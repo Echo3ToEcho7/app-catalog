@@ -76,60 +76,66 @@
         },
 
         _moveIntoBacklog: function (options) {
-            var record,
-                _this = this;
 
-            record = options.card.getRecord();
-            options.sourceColumn.planRecord.set('features', Ext.Array.filter(options.sourceColumn.planRecord.get('features'), function (obj) {
-                return obj.id !== '' + record.getId();
+            var record = options.card.getRecord();
+            var planRecord = options.sourceColumn.planRecord;
+
+            planRecord.set('features', _.filter(planRecord.get('features'), function (feature) {
+                return feature.id !== '' + record.getId();
             }));
-            return options.sourceColumn.planRecord.save({
+
+            planRecord.save({
                 success: function () {
-                    return _this._onDropSaveSuccess(options.destinationColumn, options.sourceColumn, options.card, record, "move");
+                    return this._onDropSaveSuccess(options.destinationColumn, options.sourceColumn, options.card, record, "move");
                 },
                 failure: function (response, opts) {
                     var sourceIndex;
 
                     sourceIndex = options.sourceColumn.findCardInfo(record) && options.sourceColumn.findCardInfo(record).index;
-                    return _this._onDropSaveFailure(options.destinationColumn, options.sourceColumn, record, options.card, sourceIndex, response);
-                }
+                    return this._onDropSaveFailure(options.destinationColumn, options.sourceColumn, record, options.card, sourceIndex, response);
+                },
+                scope: this
             });
         },
 
         _moveOutOfBacklog: function (options) {
-            var record,
-                _this = this;
 
-            record = options.card.getRecord();
-            options.destinationColumn.planRecord.get('features').push({
+            var record = options.card.getRecord();
+            var planRecord = options.destinationColumn.planRecord;
+
+            planRecord.set('features', planRecord.get('features').concat({
                 id: record.getId().toString(),
                 ref: record.get('_ref')
-            });
-            return options.destinationColumn.planRecord.save({
+            }));
+
+            planRecord.save({
                 success: function () {
-                    return _this._onDropSaveSuccess(options.destinationColumn, null, options.card, record, "move");
+                    return this._onDropSaveSuccess(options.destinationColumn, null, options.card, record, "move");
                 },
                 failure: function (response, opts) {
                     var sourceIndex;
 
                     sourceIndex = options.sourceColumn.findCardInfo(record) && options.sourceColumn.findCardInfo(record).index;
-                    return _this._onDropSaveFailure(options.destinationColumn, options.sourceColumn, record, options.card, sourceIndex, response);
-                }
+                    return this._onDropSaveFailure(options.destinationColumn, options.sourceColumn, record, options.card, sourceIndex, response);
+                },
+                scope: this
             });
         },
 
         _moveFromColumnToColumn: function (options) {
-            var record,
-                _this = this;
 
-            record = options.card.getRecord();
-            options.sourceColumn.planRecord.set('features', Ext.Array.filter(options.sourceColumn.planRecord.get('features'), function (obj) {
-                return obj.id !== '' + record.getId();
+            var record = options.card.getRecord();
+            var srcPlanRecord = options.sourceColumn.planRecord;
+            var destPlanRecord = options.destinationColumn.planRecord;
+
+            srcPlanRecord.set('features', _.filter(srcPlanRecord.get('features'), function (feature) {
+                return feature.id !== '' + record.getId();
             }));
-            options.destinationColumn.planRecord.get('features').push({
+            destPlanRecord.get('features').push({
                 id: record.getId().toString(),
                 ref: record.get('_ref')
             });
+
             return Ext.Ajax.request({
                 method: 'POST',
                 withCredentials: true,
@@ -146,14 +152,15 @@
                     var type;
 
                     type = options.sourceColumn === options.column ? "reorder" : "move";
-                    return _this._onDropSaveSuccess(options.destinationColumn, options.sourceColumn, options.card, record, type);
+                    return this._onDropSaveSuccess(options.destinationColumn, options.sourceColumn, options.card, record, type);
                 },
                 failure: function (response, opts) {
                     var sourceIndex;
 
                     sourceIndex = options.sourceColumn.findCardInfo(record) && options.sourceColumn.findCardInfo(record).index;
-                    return _this._onDropSaveFailure(options.destinationColumn, options.sourceColumn, record, options.card, sourceIndex, response);
-                }
+                    return this._onDropSaveFailure(options.destinationColumn, options.sourceColumn, record, options.card, sourceIndex, response);
+                },
+                scope: this
             });
         },
 
