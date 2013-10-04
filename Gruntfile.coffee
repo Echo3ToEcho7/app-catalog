@@ -37,6 +37,7 @@ module.exports = (grunt) ->
   spec = (grunt.option('spec') || grunt.option('jsspec') || '*').replace(/(Spec|Test)$/, '')
   debug = grunt.option 'verbose' || false
   version = grunt.option 'version' || 'dev'
+  appsdk_src_version = process.env.APPSDK_SRC_VERSION || '253-6005bbf'
 
   appFiles = 'src/apps/**/*.js'
   specFiles = 'test/spec/**/*Spec.coffee'
@@ -230,7 +231,7 @@ module.exports = (grunt) ->
             { id: 'com.rallydev.sencha:sencha-cmd:tgz:3.0.0.250', path: 'bin/sencha' }
             { id: 'com.rallydev.js:ext:tgz:4.1.1a', path: 'lib/ext/4.1.1a' }
             { id: 'com.rallydev.js:webdriver:tgz:2.35.0-rally', path: 'lib/webdriver' }
-            { id: 'com.rallydev.js:appsdk-src:tgz:253-6005bbf', path: 'lib/sdk' }
+            { id: 'com.rallydev.js:appsdk-src:tgz:<%= appsdk_src_version %>', path: 'lib/sdk' }
           ]
       push:
         files: [
