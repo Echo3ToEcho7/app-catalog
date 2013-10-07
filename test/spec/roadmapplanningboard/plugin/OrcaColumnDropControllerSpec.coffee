@@ -122,7 +122,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
   it 'should allow a card to be dropped in the same column and reorder the cards', ->
     ajaxRequest = @stub Ext.Ajax, 'request', (options) ->
-      options.success()
+      options.success.call(options.scope)
 
     cardCountBefore = @leftColumn.getCards().length
     card = @leftColumn.getCards()[2]
@@ -139,7 +139,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
   it 'should allow a card to be dropped into another column', ->
     ajaxRequest = @stub Ext.Ajax, 'request', (options) ->
-      options.success()
+      options.success.call(options.scope)
 
     leftColumnCardCountBefore = @leftColumn.getCards().length
     rightColumnCardCountBefore = @rightColumn.getCards().length
@@ -158,7 +158,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
   it 'should allow a card to be dropped into a backlog column and persist', ->
     saveStub = @stub @leftColumn.planRecord, 'save', (options) ->
-      options.success()
+      expect(@dirty).toBe true
+      options.success.call(options.scope)
 
     leftColumnCardCountBefore = @leftColumn.getCards().length
     card = @leftColumn.getCards()[2]
@@ -176,7 +177,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
   it 'should allow a card to be moved out of a backlog column and persist', ->
     saveStub = @stub @leftColumn.planRecord, 'save', (options) ->
-      options.success()
+      expect(@dirty).toBe true
+      options.success.call(options.scope)
 
     leftColumnCardCountBefore = @leftColumn.getCards().length
     card = @backlogColumn.getCards()[0]
@@ -202,7 +204,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
   it 'should allow a card to be dropped into another column and persist feature to plan relationship', ->
     ajaxRequest = @stub Ext.Ajax, 'request', (options) ->
-      options.success()
+      options.success.call(options.scope)
 
     leftColumnCardCountBefore = @leftColumn.getCards().length
     rightColumnCardCountBefore = @rightColumn.getCards().length
@@ -228,7 +230,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
 
   it 'should construct correct url when dragging card from plan to plan', ->
     ajaxRequest = @stub Ext.Ajax, 'request', (options) ->
-      options.success()
+      options.success.call(options.scope)
 
     card = @leftColumn.getCards()[2]
 
