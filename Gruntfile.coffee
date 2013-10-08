@@ -38,7 +38,12 @@ module.exports = (grunt) ->
   spec = (grunt.option('spec') || grunt.option('jsspec') || '*').replace(/(Spec|Test)$/, '')
   debug = grunt.option 'verbose' || false
   version = grunt.option 'version' || 'dev'
-  appsdk_src_version = process.env.APPSDK_SRC_VERSION || '253-6005bbf'
+  appsdk_src_version = process.env.APPSDK_SRC_VERSION || '288-56e4d01'
+  appsdk_path = 'lib/sdk'
+  served_paths = [path.resolve(__dirname)]
+  if process.env.APPSDK_PATH
+    appsdk_path = path.join process.env.APPSDK_PATH, 'rui'
+    served_paths.unshift path.join(appsdk_path, '../..')
 
   appFiles = 'src/apps/**/*.js'
   specFiles = 'test/spec/**/*Spec.coffee'
@@ -93,9 +98,7 @@ module.exports = (grunt) ->
 
     express:
       options:
-        bases: [
-          path.resolve(__dirname)
-        ]
+        bases: served_paths
         server: path.resolve(__dirname, 'test', 'server.js')
         debug: debug
       server:
@@ -124,50 +127,50 @@ module.exports = (grunt) ->
             "test/gen/**/#{spec}Spec.js"
           ]
           helpers: [
-            'lib/sdk/test/javascripts/helpers/**/*.js'
+            "#{appsdk_path}/test/javascripts/helpers/**/*.js"
           ]
           vendor: [
-            'lib/sdk/builds/sdk-debug.js'
-            'lib/sdk/builds/lib/analytics/analytics-all.js'
-            'lib/sdk/builds/lib/closure/closure-all.js'
+            "#{appsdk_path}/builds/sdk-debug.js"
+            "#{appsdk_path}/builds/lib/analytics/analytics-all.js"
+            "#{appsdk_path}/builds/lib/closure/closure-all.js"
 
             # Enable Ext Loader
             'test/support/ExtLoader.js'
 
             # 3rd party libraries & customizations
-            'lib/sdk/test/support/sinon/sinon-1.6.0.js'
-            'lib/sdk/test/support/sinon/jasmine-sinon.js'
-            'lib/sdk/test/support/sinon/rally-sinon-config.js'
+            "#{appsdk_path}/test/support/sinon/sinon-1.6.0.js"
+            "#{appsdk_path}/test/support/sinon/jasmine-sinon.js"
+            "#{appsdk_path}/test/support/sinon/rally-sinon-config.js"
 
             # Setup
             'lib/webdriver/webdriver.js'
-            'lib/sdk/test/support/webdriver/error.js'
+            "#{appsdk_path}/test/support/webdriver/error.js"
 
             # Asserts
-            'lib/sdk/test/support/helpers/asserts/rally-asserts.js'
-            'lib/sdk/test/support/helpers/asserts/rally-custom-asserts.js'
+            "#{appsdk_path}/test/support/helpers/asserts/rally-asserts.js"
+            "#{appsdk_path}/test/support/helpers/asserts/rally-custom-asserts.js"
 
             # Mocks and helpers
-            'lib/sdk/test/support/helpers/helpers.js'
-            'lib/sdk/test/support/helpers/ext4-mocking.js'
-            'lib/sdk/test/support/helpers/ext4-sinon.js'
-
-            'lib/sdk/test/javascripts/support/helpers/CardBoard.js'
-            'lib/sdk/test/javascripts/support/helpers/DetailController.js'
+            "#{appsdk_path}/test/support/helpers/helpers.js"
+            "#{appsdk_path}/test/support/helpers/ext4-mocking.js"
+            "#{appsdk_path}/test/support/helpers/ext4-sinon.js"
+            "#{appsdk_path}/test/javascripts/support/helpers/**/*.js"
+            "#{appsdk_path}/test/javascripts/support/mock/**/*.js"
+            "#{appsdk_path}/test/support/data/types/**/*.js"
 
             # 'btid' CSS classes for Testing
-            'lib/sdk/browsertest/Test.js'
-            'lib/sdk/browsertest/Overrides.js'
+            "#{appsdk_path}/browsertest/Test.js"
+            "#{appsdk_path}/browsertest/Overrides.js"
 
             # Jasmine overrides
-            'lib/sdk/test/support/jasmine/jasmine-html-overrides.js'
+            "#{appsdk_path}/test/support/jasmine/jasmine-html-overrides.js"
           ]
           styles: [
-            'lib/sdk/test/support/jasmine/rally-jasmine.css'
-            'lib/sdk/builds/rui/resources/css/rui.css'
-            'lib/sdk/builds/rui/resources/css/rui-fonts.css'
-            'lib/sdk/builds/lib/closure/closure-20130117-r2446.css'
-            'lib/sdk/builds/rui/resources/css/lib-closure.css'
+            "#{appsdk_path}/test/support/jasmine/rally-jasmine.css"
+            "#{appsdk_path}/builds/rui/resources/css/rui.css"
+            "#{appsdk_path}/builds/rui/resources/css/rui-fonts.css"
+            "#{appsdk_path}/builds/lib/closure/closure-20130117-r2446.css"
+            "#{appsdk_path}/builds/rui/resources/css/lib-closure.css"
             'build/resources/css/catalog-all.css'
           ]
           host: 'http://127.0.0.1:8891/'
