@@ -144,7 +144,7 @@
             var n = (lastIndex + 1) - firstIndex;
             var i;
             var sumx = 0.0, sumx2 = 0.0, sumy = 0.0, sumy2 = 0.0, sumxy = 0.0;
-            var sxx, syy, sxy, xmean, ymean, slope, yintercept;
+            var slope, yintercept;
 
             //Compute sums of x, x^2, y, y^2, and xy
             for (i = firstIndex; i <= lastIndex; i++) {
