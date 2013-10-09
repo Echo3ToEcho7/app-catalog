@@ -129,42 +129,52 @@ module.exports = (grunt) ->
           helpers: [
             "#{appsdk_path}/test/javascripts/helpers/**/*.js"
           ]
-          vendor: [
-            "#{appsdk_path}/builds/sdk-debug.js"
-            "#{appsdk_path}/builds/lib/analytics/analytics-all.js"
-            "#{appsdk_path}/builds/lib/closure/closure-all.js"
+          vendor: (->
+            if process.env.APPSDK_PATH?
+              vendorPaths = [
+                "lib/ext/4.1.1a/ext-all-debug.js"
+                "#{appsdk_path}/builds/sdk-dependencies.js"
+                "#{appsdk_path}/src/Ext-more.js"
+              ]
+            else
+              vendorPaths = ["#{appsdk_path}/builds/sdk.js"]
 
-            # Enable Ext Loader
-            'test/support/ExtLoader.js'
+            vendorPaths.concat [
+              "#{appsdk_path}/builds/lib/analytics/analytics-all.js"
+              "#{appsdk_path}/builds/lib/closure/closure-all.js"
 
-            # 3rd party libraries & customizations
-            "#{appsdk_path}/test/support/sinon/sinon-1.6.0.js"
-            "#{appsdk_path}/test/support/sinon/jasmine-sinon.js"
-            "#{appsdk_path}/test/support/sinon/rally-sinon-config.js"
+              # Enable Ext Loader
+              'test/support/ExtLoader.js'
 
-            # Setup
-            'lib/webdriver/webdriver.js'
-            "#{appsdk_path}/test/support/webdriver/error.js"
+              # 3rd party libraries & customizations
+              "#{appsdk_path}/test/support/sinon/sinon-1.6.0.js"
+              "#{appsdk_path}/test/support/sinon/jasmine-sinon.js"
+              "#{appsdk_path}/test/support/sinon/rally-sinon-config.js"
 
-            # Asserts
-            "#{appsdk_path}/test/support/helpers/asserts/rally-asserts.js"
-            "#{appsdk_path}/test/support/helpers/asserts/rally-custom-asserts.js"
+              # Setup
+              'lib/webdriver/webdriver.js'
+              "#{appsdk_path}/test/support/webdriver/error.js"
 
-            # Mocks and helpers
-            "#{appsdk_path}/test/support/helpers/helpers.js"
-            "#{appsdk_path}/test/support/helpers/ext4-mocking.js"
-            "#{appsdk_path}/test/support/helpers/ext4-sinon.js"
-            "#{appsdk_path}/test/javascripts/support/helpers/**/*.js"
-            "#{appsdk_path}/test/javascripts/support/mock/**/*.js"
-            "#{appsdk_path}/test/support/data/types/**/*.js"
+              # Asserts
+              "#{appsdk_path}/test/support/helpers/asserts/rally-asserts.js"
+              "#{appsdk_path}/test/support/helpers/asserts/rally-custom-asserts.js"
 
-            # 'btid' CSS classes for Testing
-            "#{appsdk_path}/browsertest/Test.js"
-            "#{appsdk_path}/browsertest/Overrides.js"
+              # Mocks and helpers
+              "#{appsdk_path}/test/support/helpers/helpers.js"
+              "#{appsdk_path}/test/support/helpers/ext4-mocking.js"
+              "#{appsdk_path}/test/support/helpers/ext4-sinon.js"
+              "#{appsdk_path}/test/javascripts/support/helpers/**/*.js"
+              "#{appsdk_path}/test/javascripts/support/mock/**/*.js"
+              "#{appsdk_path}/test/support/data/types/**/*.js"
 
-            # Jasmine overrides
-            "#{appsdk_path}/test/support/jasmine/jasmine-html-overrides.js"
-          ]
+              # 'btid' CSS classes for Testing
+              "#{appsdk_path}/browsertest/Test.js"
+              "#{appsdk_path}/browsertest/Overrides.js"
+
+              # Jasmine overrides
+              "#{appsdk_path}/test/support/jasmine/jasmine-html-overrides.js"
+            ]
+          )()
           styles: [
             "#{appsdk_path}/test/support/jasmine/rally-jasmine.css"
             "#{appsdk_path}/builds/rui/resources/css/rui.css"
