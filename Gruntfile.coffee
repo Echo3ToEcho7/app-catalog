@@ -38,7 +38,7 @@ module.exports = (grunt) ->
   spec = (grunt.option('spec') || grunt.option('jsspec') || '*').replace(/(Spec|Test)$/, '')
   debug = grunt.option 'verbose' || false
   version = grunt.option 'version' || 'dev'
-  appsdk_src_version = process.env.APPSDK_SRC_VERSION || '288-56e4d01'
+  appsdk_src_version = process.env.APPSDK_SRC_VERSION || '294-3ca4122'
   appsdk_path = 'lib/sdk'
   served_paths = [path.resolve(__dirname)]
   if process.env.APPSDK_PATH

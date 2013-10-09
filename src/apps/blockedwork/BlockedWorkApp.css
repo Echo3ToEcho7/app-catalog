@@ -1,0 +1,77 @@
+.blocked-work-app {
+    font-size: 110%;
+}
+
+.blocked-work-app ul.list {
+    list-style-type: none;
+    margin: 5px 5px 25px 5px;
+    padding: 0;
+}
+
+.blocked-work-app li.list-item {
+    list-style-type: none;
+    padding-top: 5px;
+    padding-left: 6px;
+    color: #333;
+    font-weight: bold;
+    border-top: 1px solid #c6c6c6;
+    clear: left;
+}
+
+.blocked-work-app li.first {
+    border: none;
+}
+
+.blocked-work-app .name {
+    padding-left: 0.5em;
+}
+
+.blocked-work-app .list-item-details {
+    padding-left: 60px;
+}
+
+.blocked-work-app .list-item-info {
+    margin: 8px 0 0 0;
+    font-weight: normal;
+}
+
+.blocked-work-app .list-item-info .inactive {
+    color: gray;
+}
+
+.blocked-work-app .list-item-user {
+    width: 60px !important;
+    height: 60px;
+    margin-right: -5px;
+    float: left;
+}
+
+.blocked-work-app .list-item-user img.profile {
+    border: 1px solid #CCC;
+    width: 50px;
+    height: 50px;
+    margin-right: -10px;
+    float: left;
+}
+
+.blocked-work-app .list-item-details .detail-text {
+    background-image: url('blocked-icon.png');
+    background-repeat: no-repeat;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    word-wrap: break-word;
+    padding-left: 20px;
+}
+
+.blocked-work-app .list-item-details .status {
+    color: #8f8f8f;
+}
+
+.blocked-work-app li.list-item .profileLink {
+    font-weight: bold;
+}
+
+.blocked-work-app .show-more-ct {
+    border-top: 1px solid #c6c6c6;
+    padding: 10px 0 5px 10px
+}
