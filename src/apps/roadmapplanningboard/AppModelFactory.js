@@ -116,7 +116,7 @@
          * @private
          */
         _normalizeDate: function (value) {
-            var date = new Date(value);
+            var date = Ext.Date.parse(value, 'c');
             if (date.getTime()) {
                 return Ext.Date.clearTime(Ext.Date.add(date, Ext.Date.MINUTE, date.getTimezoneOffset()));
             }
