@@ -16,8 +16,7 @@
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
-            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
-            'Rally.data.PreferenceManager'
+            'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
         ],
         mixins: ['Rally.app.CardFieldSelectable'],
         componentCls: 'iterationtrackingboard',
@@ -44,13 +43,18 @@
 
             if (!this.isShowingBlankSlate()) {
                 this.appendCardFieldPickerSetting(fields);
+                if (this.showGridSettings) {
+                    fields.push({settingsType: 'grid', html: 'no grid settings'});
+                }
             }
 
             if(this.showCardAgeEnabled)  {
                 fields.push({
                     type: 'cardage',
+                    settingsType: 'board',
                     config: {
-                        margin: '0 0 0 80'
+                        margin: '0 0 0 80',
+                        width: 300
                     }
                 });
             }
@@ -65,6 +69,7 @@
 
             this.showFieldPicker = this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS');
             this.showCardAgeEnabled = this.getContext().isFeatureEnabled('SHOW_CARD_AGE_IN_ITERATION_BOARD_SETTINGS');
+            this.showGridSettings = this.getContext().isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE');
             this.callParent(arguments);
         },
 
@@ -161,11 +166,11 @@
         },
 
         _onBoardFilter: function() {
-           this.setLoading(true);
+            this.setLoading(true);
         },
 
         _onBoardFilterComplete: function() {
-           this.setLoading(false);
+            this.setLoading(false);
         },
 
         _publishContentUpdated: function() {

@@ -1,11 +1,12 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-  'Rally.util.DateTime'
+  'Rally.util.DateTime',
+  'Rally.app.Context'
 ]
 
 describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
-  
+
   helpers
     createApp: (config)->
       now = new Date()
@@ -19,7 +20,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
       @IterationModel = Rally.test.mock.data.WsapiModelFactory.getIterationModel()
       @iterationRecord = new @IterationModel @iterationData[0]
-      
+
       @app = Ext.create('Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', Ext.apply(
         context: Ext.create('Rally.app.Context',
           initialValues:
@@ -27,9 +28,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
             project:
               _ref: @projectRef
         ),
-        renderTo: 'testDiv',
-      #this keeps the splash screen from popping up
-#        _loadSplashScreen: Ext.emptyFn
+        renderTo: 'testDiv'
       , config))
 
       @waitForComponentReady(@app)
@@ -44,21 +43,26 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       ]
 
     stubRequests: ->
-      userstoryStub = @ajax.whenReading('userstory').respondWith()
-      defectStub = @ajax.whenQuerying('defect').respondWith()
+      userstoryStub = @ajax.whenQuerying('userstory').respondWith([{
+        RevisionHistory: {
+          _ref: '/revisionhistory/1'
+        }
+      }])
+
+      defectStub = @ajax.whenQuerying('defect').respondWith([{
+        RevisionHistory: {
+          _ref: '/revisionhistory/1'
+        }
+      }])
       defectsuiteStub = @ajax.whenQuerying('defectsuite').respondWith()
       testsetStub = @ajax.whenQuerying('testset').respondWith()
       @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(["Defined", "In-Progress", "Completed", "Accepted"]);
-
-      @ajax.whenReading('project').respondWith {
-        TeamMembers: []
-        Editors: []
-      }
 
       [userstoryStub, defectStub, defectsuiteStub, testsetStub]
 
     toggleToGridOrBoard: (view) ->
       toggler = @app.gridboard.down('rallygridboardtoggle')
+      toggler.applyState toggle: view
       toggler.fireEvent 'toggle', view
 
     toggleToBoard: ->
@@ -67,13 +71,35 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     toggleToGrid: ->
       @toggleToGridOrBoard('grid')
 
+    stubFeatureToggle: (toggles) ->
+      stub = @stub(Rally.app.Context.prototype, 'isFeatureEnabled');
+      stub.withArgs(toggle).returns(true) for toggle in toggles
+      stub
+
   beforeEach ->
+    @ajax.whenReading('project').respondWith {
+      TeamMembers: []
+      Editors: []
+    }
+
     @stubRequests()
 
     @tooltipHelper = new Helpers.TooltipHelper this
 
   afterEach ->
     @app?.destroy()
+
+  describe 'when blank slate is not shown', ->
+    it 'should show field picker in settings ', ->
+      @createApp(isShowingBlankSlate: -> false).then =>
+        @app.showFieldPicker = true
+        expect(Ext.isObject(_.find(@app.getSettingsFields(), name: 'cardFields'))).toBe true
+
+  describe 'when blank slate is shown', ->
+    it 'should not show field picker in settings ', ->
+      @createApp(isShowingBlankSlate: -> true).then =>
+        @app.showFieldPicker = true
+        expect(Ext.isEmpty(_.find(@app.getSettingsFields(), name: 'cardFields'))).toBe true
 
   it 'resets view on scope change', ->
     @createApp().then =>
@@ -110,20 +136,8 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     @createApp().then =>
       expect(@app.getSetting('cardFields')).toBe 'Parent,Tasks,Defects,Discussion,PlanEstimate'
 
-  describe 'when blank slate is not shown', ->
-    it 'should show field picker in settings ', ->
-      @createApp(isShowingBlankSlate: -> false).then =>
-        @app.showFieldPicker = true
-        expect(Ext.isObject(_.find(@app.getSettingsFields(), name: 'cardFields'))).toBe true
-
-  describe 'when blank slate is shown', ->
-    it 'should not show field picker in settings ', ->
-      @createApp(isShowingBlankSlate: -> true).then =>
-        @app.showFieldPicker = true
-        expect(Ext.isEmpty(_.find(@app.getSettingsFields(), name: 'cardFields'))).toBe true
-
   it 'should filter the grid to the currently selected iteration', ->
-    @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('ITERATION_TRACKING_BOARD_GRID_TOGGLE').returns(true)
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
     requests = @stubRequests()
 
     @createApp().then =>
@@ -132,10 +146,34 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(request).toBeWsapiRequestWith(filters: @getIterationFilter()) for request in requests
 
   it 'should filter the board to the currently selected iteration', ->
-    @stub(Rally.app.Context.prototype, 'isFeatureEnabled').withArgs('ITERATION_TRACKING_BOARD_GRID_TOGGLE').returns(true)
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
     requests = @stubRequests()
 
     @createApp().then =>
       @toggleToBoard()
 
       expect(request).toBeWsapiRequestWith(filters: @getIterationFilter()) for request in requests
+
+  describe '#getSettingsFields', ->
+
+    describe 'when user is opted into beta tracking experience', ->
+
+      it 'should have grid and board fields', ->
+        @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'SHOW_CARD_AGE_IN_ITERATION_BOARD_SETTINGS']
+
+        @createApp().then =>
+          settingsFields = @app.getSettingsFields()
+
+          expect(_.find(settingsFields, {settingsType: 'grid'})).toBeTruthy()
+          expect(_.find(settingsFields, {settingsType: 'board'})).toBeTruthy()
+
+    describe 'when user is NOT opted into beta tracking experience', ->
+
+      it 'should not have grid and board fields when BETA_TRACKING_EXPERIENCE is disabled', ->
+        @stubFeatureToggle ['SHOW_CARD_AGE_IN_ITERATION_BOARD_SETTINGS']
+
+        @createApp().then =>
+          settingsFields = @app.getSettingsFields()
+
+          expect(_.find(settingsFields, {settingsType: 'grid'})).toBeFalsy()
+          expect(_.find(settingsFields, {settingsType: 'board'})).toBeTruthy()
