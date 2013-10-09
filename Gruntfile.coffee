@@ -220,7 +220,7 @@ module.exports = (grunt) ->
     watch:
       test:
         files: 'test/spec/**/*.coffee'
-        tasks: ['coffee']
+        tasks: ['coffee:test']
         options:
           spawn: false
       apps:
@@ -275,23 +275,23 @@ module.exports = (grunt) ->
         apps: 'src/apps/**/config.json'
 
   # Only recompile changed coffee files
-  changedFiles = Object.create null
+  changedFiles = {}
 
   onChange = _.debounce ->
     specFiles = []
     taskFiles = []
     appsFiles = []
 
-    _.each Object.keys(changedFiles), (filepath) ->
+    _.each changedFiles, (action, filepath) ->
       specFiles.push(filepath) if _.contains(filepath, 'spec')
       taskFiles.push(filepath) if _.contains(filepath, 'tasks')
       appsFiles.push(filepath) if _.contains(filepath, 'apps')
 
-    grunt.config ['coffee', 'test', 'src'], specFiles
-    grunt.config ['jshint', 'tasks', 'files', 'src'], taskFiles
-    grunt.config ['jshint', 'apps', 'files', 'src'], appsFiles
+    grunt.config 'coffee.test.src', _.map specFiles, (path) -> path.replace('test/spec/', '')
+    grunt.config 'jshint.tasks.files.src', taskFiles
+    grunt.config 'jshint.apps.files.src', appsFiles
 
-    changedFiles = Object.create null
+    changedFiles = {}
   , 200
 
   grunt.event.on 'watch', (action, filepath) ->
