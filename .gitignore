@@ -9,4 +9,5 @@ bin/sencha/
 build/
 target/
 .grunt/
+.idea
 _SpecRunner.html

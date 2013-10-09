@@ -116,7 +116,7 @@
             tips.push('Explore the apps - they are very powerful.');
             tips.push('Delete Recycle Bin items every few days.');
             tips.push('Use Test Folders to organize regression tests. (Rally Quality Manager)');
-            tips.push('Use Test Sets to to organize regression tests for acceptance testing. (Rally Quality Manager)');
+            tips.push('Use Test Sets to organize regression tests for acceptance testing. (Rally Quality Manager)');
             tips.push('Organize iteration tests in test sets on the Iteration Test Status page. (Rally Quality Manager)');
             tips.push('Action items won\'t get done without someone tracking them and following up.');
             tips.push('Rat Hole Alert!  Watch for rat holes. Help each other!');
