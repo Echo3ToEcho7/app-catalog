@@ -98,6 +98,7 @@ APPSDK_PATH=~/projects/appsdk grunt test:conf [--spec={FileNameSpec}]
 Start the server:
 ```
 APPSDK_PATH=~/projects/appsdk grunt test:server
+```
 
 Now that you have all these services running you can go to [http://localhost:5445/wd/hub/](http://localhost:5445/wd/hub/). You will be presented with a list of browser sessions. You can create a new session - once loaded click on the `Load Script` button and type in `localhost:8890/`. This should point the browser instance to the Jasmine test suite you previously set up. You can now debug and refresh.
 
