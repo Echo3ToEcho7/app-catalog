@@ -1,7 +1,7 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define("Rally.apps.charts.magic.ChartSettings", {
+    Ext.define("Rally.apps.charts.cfd.project.ProjectCFDSettings", {
         requires: [
             "Rally.apps.charts.settings.StateFieldPicker",
             "Rally.apps.charts.settings.ProjectPicker",

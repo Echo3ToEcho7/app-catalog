@@ -21,9 +21,8 @@
         }
     });
 
-    Ext.define("Rally.apps.charts.magic.cfd.CumulativeFlowChartApp", {
+    Ext.define("Rally.apps.charts.cfd.project.ProjectCFDApp", {
         name: 'chartapp',
-        alias: 'widget.chartsmagiccfdcumulativeflowchartapp',
         extend: "Rally.app.App",
         settingsScope: "workspace",
         componentCls: 'cfd-app',
@@ -31,7 +30,7 @@
 
         requires: [
             'Rally.ui.chart.Chart',
-            'Rally.apps.charts.magic.ChartSettings',
+            'Rally.apps.charts.cfd.project.ProjectCFDSettings',
             'Rally.util.Help',
             'Rally.util.Test'
         ],
@@ -45,7 +44,7 @@
             }
         },
 
-        chartSettings: undefined, // ChartSettings object
+        chartSettings: undefined, // ProjectCFDChartSettings object
 
         items: [
             {
@@ -62,7 +61,7 @@
 
         getSettingsFields: function () {
             if (!this.chartSettings) {
-                this.chartSettings = Ext.create('Rally.apps.charts.magic.ChartSettings', {
+                this.chartSettings = Ext.create('Rally.apps.charts.cfd.project.ProjectCFDSettings', {
                     app: this
                 });
             }
