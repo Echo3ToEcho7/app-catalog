@@ -110,7 +110,7 @@
             data.userName = user._refObjectName;
             data.user_URL = Rally.nav.Manager.getDetailUrl(user._ref);
             data.image_URL = Rally.util.User.getProfileImageUrl(this.profileImageSize, user._ref);
-            data.blockedReason = artifact.BlockedReason !== null ? "Reason: " + artifact.BlockedReason : "&nbsp;";
+            data.blockedReason = artifact.BlockedReason !== null ? artifact.BlockedReason : "&nbsp;";
             data.userCls = user.Disabled ? 'inactive' : '';
 
             return data;

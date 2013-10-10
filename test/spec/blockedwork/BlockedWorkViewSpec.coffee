@@ -81,7 +81,7 @@ describe 'Rally.apps.blockedwork.BlockedWorkView', ->
     @createView().then (view) =>
       detailEls = Ext.query ".detail-text"
       expect(detailEls.length).toEqual 1
-      expect(detailEls[0].innerHTML.trim()).toBe('Reason: ' + blockedReason)
+      expect(detailEls[0].innerHTML.trim()).toBe(blockedReason)
 
   it 'renders a non breaking space if no blocked reason', ->
     data = @getBlockedWorkProductData()
