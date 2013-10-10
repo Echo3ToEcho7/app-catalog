@@ -123,7 +123,7 @@ grunt nexus:deploy
 ```
 **NOTE: This task requires gnutar since Darwin tar command is broken**
 
-**NOTE: This task pushes a version based on your commit hash. If you don't commit a local version, you could get collisions in nexus. Also, setting the BUILD_NUMER ENV variable sets a prefix which can help avoid collisions and later identify deploys made from your machine.**
+**NOTE: This task pushes a version based on your commit hash. If you don't commit a local version, you could get collisions in nexus. Also, setting the BUILD_NUMBER ENV variable sets a prefix which can help avoid collisions and later identify deploys made from your machine.**
 
 This task allows you to push a dev version of the `app-catalog` artifact to nexus to reference later. The task will give you the nexus artifact ID string. The last part is the nexus version. You will use this later.
 

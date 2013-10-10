@@ -1,10 +1,10 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
-  'Rally.apps.charts.magic.cfd.CumulativeFlowChartApp'
+  'Rally.apps.charts.cfd.project.ProjectCFDApp'
 ]
 
-describe 'Rally.apps.charts.magic.cfd.CumulativeFlowChartApp', ->
+describe 'Rally.apps.charts.cfd.project.ProjectCFDApp', ->
 
   beforeEach ->
     @lumenize = Rally.data.lookback.Lumenize
@@ -41,7 +41,7 @@ describe 'Rally.apps.charts.magic.cfd.CumulativeFlowChartApp', ->
 
   afterEach ->
     @app?.destroy()
-    Rally.test.destroyComponentsOfQuery 'cumulativeflowchartapp'
+    Rally.test.destroyComponentsOfQuery 'projectcfdapp'
 
   it 'has the correct default settings', ->
     @createApp().then =>
@@ -88,6 +88,11 @@ describe 'Rally.apps.charts.magic.cfd.CumulativeFlowChartApp', ->
       fromDate = Rally.util.DateTime.add(testToday, settings.timeFrameUnit, -settings.timeFrameQuantity);
       expect(validFrom).toBe(fromDate.toISOString())
 
+  it 'loads the correct chart settings class', ->
+    @createApp().then =>
+      settingsFields = @app.getSettingsFields()
+      expect(Ext.getClass(@app.chartSettings).getName()).toBe('Rally.apps.charts.cfd.project.ProjectCFDSettings')
+
   helpers
     getContext: (initialValues) ->
       globalContext = Rally.environment.getContext()
@@ -101,7 +106,7 @@ describe 'Rally.apps.charts.magic.cfd.CumulativeFlowChartApp', ->
         , initialValues)
 
     createApp: (settings = {}) ->
-      @app = Ext.create('Rally.apps.charts.magic.cfd.CumulativeFlowChartApp',
+      @app = Ext.create('Rally.apps.charts.cfd.project.ProjectCFDApp',
         context: @getContext(),
         settings: settings,
         renderTo: 'testDiv'
