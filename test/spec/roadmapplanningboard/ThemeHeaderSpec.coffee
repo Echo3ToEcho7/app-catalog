@@ -15,7 +15,7 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
         renderTo: 'testDiv'
 
       @waitForComponentReady @cardboard
-      
+
   beforeEach ->
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith([])
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
@@ -90,7 +90,7 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
       # Allows us to verify whether headersizechanged was fired
       resizeStub = sinon.stub()
       @cardboard.on 'headersizechanged', resizeStub
-      
+
       themeHeader = @cardboard.getColumns()[1].getColumnHeader().query('roadmapthemeheader')[0]
       themeHeader.themeContainer.goToEditMode()
 
@@ -106,6 +106,21 @@ describe 'Rally.apps.roadmapplanningboard.ThemeHeader', ->
       textField.setValue('One line\nAnd another')
 
       expect(resizeStub).toHaveBeenCalledOnce()
+
+  it 'should save the theme when the theme is changed', ->
+    @createCardboard().then =>
+
+      themeHeader = @cardboard.getColumns()[1].getColumnHeader().down('roadmapthemeheader').down('rallydetailfieldcontainer')
+      record = themeHeader.record
+      @saveStub = @stub record, 'save'
+
+      themeHeader.goToEditMode()
+      themeHeader.editor.setValue 'My Theme'
+      themeHeader.editor.blur()
+      themeHeader.goToViewMode()
+
+      expect(@saveStub).toHaveBeenCalledOnce()
+      expect(record.get('theme')).toBe 'My Theme'
 
   it 'should fire headersizechanged when editor mode switches back to view mode',  ->
     @createCardboard().then =>

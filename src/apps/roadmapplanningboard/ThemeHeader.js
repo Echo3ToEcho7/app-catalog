@@ -36,8 +36,8 @@
                 autoDestroy: true,
                 listeners: {
                     fieldupdated: function (options) {
-                        if (options.field.value !== record.get('theme')) {
-                            record.set('theme', options.field.value);
+                        if (options.field.getValue() !== record.get('theme')) {
+                            record.set('theme', options.field.getValue());
                             record.save();
                         }
                         return this.refresh(record);
