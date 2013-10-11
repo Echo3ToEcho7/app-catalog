@@ -15,7 +15,7 @@
             storeType: "Rally.data.lookback.SnapshotStore",
             storeConfig: {
                 find: {
-                    "_TypeHierarchy": -51038,
+                    "_TypeHierarchy": { '$in' : [ -51038, -51006 ] },
                     "Children": null
                 },
                 fetch: ["ScheduleState", "PlanEstimate", "ObjectId", "_ValidFrom", "_ValidTo"],
