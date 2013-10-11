@@ -281,7 +281,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
     settings[settingsKey] = policy
 
     @createApp(settings).then =>
-      @assertPolicyCmpConfig('c_' + settingsKey, policy)  
+      @assertPolicyCmpConfig('c_' + settingsKey, policy)
 
   it 'should be able to scroll forwards', ->
     @createApp({},
@@ -305,13 +305,13 @@ describe 'Rally.apps.kanban.KanbanApp', ->
           expect(columnToShow.hidden).toBe false
 
   it 'should show warning message when workspace DnD ranking disabled', ->
+    warningStub = @stub(Rally.ui.notify.Notifier, 'showWarning')
     @createApp({},
       DragDropRankingEnabled: false
-      renderTo: @createSmallContainer()
     ).then =>
-      notification = @app.down('.rallynotification')
-      @waitForVisible(notification.getEl().dom).then =>
-        expect(@app.down('.rallynotification').message).toEqual 'Drag and drop re-ranking is disabled for Manual Rank Workspaces.'
+      expect(warningStub).toHaveBeenCalledOnce()
+      args = warningStub.getCall(0).args[0]
+      expect(args.message).toBe Rally.ui.gridboard.plugin.GridBoardDnDWarning.DRAG_AND_DROP_DISABLED_WARNING
 
   it 'should show a warning message when an invalid filter was specified', ->
     notificationStub = @stub(Rally.ui.notify.Notifier, 'showError')
