@@ -520,8 +520,7 @@
         },
 
         _updateChartTitle: function () {
-            var chartConfig = this.chartComponentConfig.chartConfig;
-            chartConfig.title = this._buildChartTitle();
+            this.chartComponentConfig.chartConfig.title = this._buildChartTitle();
         },
 
         _buildChartTitle: function () {
