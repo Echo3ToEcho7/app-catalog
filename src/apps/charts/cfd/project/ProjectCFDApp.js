@@ -55,8 +55,7 @@
         ],
 
         help: {
-            // TODO: Need a help id for this topic
-            id: 0
+            id: 279
         },
 
         getSettingsFields: function () {
