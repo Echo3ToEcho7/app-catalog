@@ -1,8 +1,8 @@
 def appSdkSrcVersion = build.buildVariables.APPSDK_SRC_VERSION
 def env = build.characteristicEnvVars
 
-def jsDep = new hudson.FilePath(build.workspace, 'Gruntfile.coffee').readToString()
-def prevSdkVersionMatcher = jsDep =~ /process\.env\.APPSDK_SRC_VERSION \|\| '(\d+)-/
+def jsDep = new hudson.FilePath(build.workspace, 'js_dependencies.json').readToString()
+def prevSdkVersionMatcher = jsDep =~ /appsdk-src:tgz:(\d+)/
 def prevSdkBuildNumber = prevSdkVersionMatcher[0][1] as int
 
 def upstreamProject = build.parent.upstreamProjects.first()
