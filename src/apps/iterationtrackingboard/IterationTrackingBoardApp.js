@@ -63,10 +63,6 @@
         },
 
         launch: function() {
-            //  When deleting this toggle, also remove the alwaysSelectBlockedReason param from CardFieldSelectable
-            //  and make it behave so that the BlockedReason is always selected.
-            this.alwaysSelectBlockedReason = this.getContext().isFeatureEnabled('F929_ENABLE_BLOCKED_REASON_PROMPT_ON_BOARDS');
-
             this.showFieldPicker = this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS');
             this.showCardAgeEnabled = this.getContext().isFeatureEnabled('SHOW_CARD_AGE_IN_ITERATION_BOARD_SETTINGS');
             this.showGridSettings = this.getContext().isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE');
@@ -114,7 +110,7 @@
                     cardConfig: {
                         fields: this.getCardFieldNames(),
                         showAge: (this.getSetting('showCardAge') && this.showCardAgeEnabled) ? this.getSetting('cardAgeThreshold') : -1,
-                        showBlockedReason: this.getContext().isFeatureEnabled('F929_ENABLE_BLOCKED_REASON_PROMPT_ON_BOARDS')
+                        showBlockedReason: true
                     },
                     listeners: {
                         filter: this._onBoardFilter,

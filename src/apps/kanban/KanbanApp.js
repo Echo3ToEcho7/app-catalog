@@ -229,7 +229,7 @@
                     showIconMenus: true,
                     fields: (this._shouldShowColumnLevelFieldPicker()) ? [] : this.getSetting('cardFields').split(','),
                     showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1,
-                    showBlockedReason: this.getContext().isFeatureEnabled('F929_ENABLE_BLOCKED_REASON_PROMPT_ON_BOARDS')
+                    showBlockedReason: true
                 },
                 loadMask: false,
                 storeConfig: {

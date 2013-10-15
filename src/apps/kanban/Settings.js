@@ -15,10 +15,7 @@
         ],
 
         getFields: function(config) {
-            var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner'];
-            if (Rally.environment.getContext().isFeatureEnabled('F929_ENABLE_BLOCKED_REASON_PROMPT_ON_BOARDS')) {
-                alwaysSelectedValues.push('BlockedReason');
-            }
+            var alwaysSelectedValues = ['FormattedID', 'Name', 'Owner', 'BlockedReason'];
             var items = [
                 {
                     name: 'groupByField',
