@@ -30,12 +30,7 @@
 
         _parseConstructorParams: function() {
             var args;
-            if (Ext.isObject(arguments)) {
-                args = arguments;
-            } else {
-                // This happens in unit tests
-                args = arguments[0];
-            }
+            args = arguments[0];
             if (!args.settings) {
                 throw 'Missing initial settings in GroupBySettings';
             }
@@ -83,8 +78,10 @@
         },
 
         _updateStateFieldComboboxValue: function() {
-            var combo = this.down('rallyfieldcombobox');
-            combo.setValue(this.settings.stateFieldName);
+            if(this.settings) {
+                var combo = this.down('rallyfieldcombobox');
+                combo.setValue(this.settings.stateFieldName);
+            }
         },
 
         _refreshStateValuesPicker: function(fieldName) {
@@ -133,10 +130,31 @@
                 readyEvent: 'ready',
                 fieldLabel: 'Show states',
                 margin: '10px 0 0 0',
+                editable: false,
+                forceSelection: true,
                 listeners: {
                     ready: function(combo) {
                         this.fireEvent('statefieldvaluesready', this);
+                    },
+                    select: function(combo, records) {
+                        var i, j;
+                        var values=[];
+                        if(records.length > 0) {
+                            for (i=0;i<records[0].store.data.items.length;i++) {
+                                for(j=0;j<records.length;j++) {
+                                   if(records[j].data.StringValue === records[0].store.data.items[i].data.StringValue) {
+                                       values.push(records[j].data.StringValue);
+                                   }
+                                }
+                            }
+                        }
+                        combo.setValue(values);
                     }
+                },
+                listConfig: {
+                    itemTpl: Ext.create('Ext.XTemplate',
+                        '<div class="x-boundlist-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="stateFieldValue"/> &nbsp;{StringValue}</div>')
+                    //itemTpl: new Ext.XTemplate('<div class="x-boundlist-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="stateFieldValue"/> &nbsp;{StringValue}</div>')
                 },
                 bubbleEvents: ['statefieldvaluesready']
             });

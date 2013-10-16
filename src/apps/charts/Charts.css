@@ -62,3 +62,16 @@
 .schedule-state-selector .x4-boundlist-selected .x4-form-checkbox {
     background-position: 0 -13px;
 }
+
+.x4-boundlist-item img.stateFieldValue {
+    background: transparent url('../../../lib/ext/4.1.1a/resources/themes/images/default/form/checkbox.gif');
+    height: 13px;
+    width: 13px;
+}
+.x4-boundlist-selected img.stateFieldValue{
+    background: transparent url('../../../lib/ext/4.1.1a/resources/themes/images/default/form/checkbox.gif');
+    height: 13px;
+    width: 13px;
+    background-position-x: 0px;
+    background-position-y: -13px;
+}

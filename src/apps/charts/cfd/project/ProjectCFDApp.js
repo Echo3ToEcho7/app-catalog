@@ -19,6 +19,7 @@
             }
             return metrics;
         }
+
     });
 
     Ext.define("Rally.apps.charts.cfd.project.ProjectCFDApp", {
@@ -121,8 +122,13 @@
 
         loadChart: function() {
             this.add(this._buildChartAppConfig());
+            this.down('rallychart').on('snapshotsAggregated', this._onSnapshotDataReady, this);
             this._publishComponentReady();
         },
+         _onSnapshotDataReady: function (chart) {
+             //wtf
+             chart.chartData.series.splice(0,1);
+         },
 
         _buildChartAppConfig: function() {
             return {
