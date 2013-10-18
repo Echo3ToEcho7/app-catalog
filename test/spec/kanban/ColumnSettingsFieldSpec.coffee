@@ -194,6 +194,6 @@ describe 'Rally.apps.kanban.ColumnSettingsField', ->
       @refreshField()
       value = Ext.JSON.encode(
         Defined: {wip: 2, scheduleStateMapping: "Defined", cardFields: cardFieldForFirstColumn}
-        "In-Progress": {wip: 2, scheduleStateMapping: "In-Progress"}
+        "In-Progress": {wip: 2, scheduleStateMapping: "Defined"}
       )
       @field.setValue(value)
