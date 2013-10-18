@@ -33,11 +33,12 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       userStoryRecord = @createUserStoryRecord
         Name: 'A User Story'
         Iteration: null
+      @ajax.whenQuerying('userstory').respondWith([userStoryRecord.data])
 
       defectRecord = @createDefectRecord
         Name: 'A Defect'
         Iteration: null
-      @ajax.whenQuerying('artifact').respondWith([userStoryRecord.data, defectRecord.data])
+      @ajax.whenQuerying('defect').respondWith([defectRecord.data])
 
       @createApp()
 
@@ -123,7 +124,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
   beforeEach ->
     @ajax.whenQuerying('userstory').respondWith()
     @ajax.whenQuerying('defect').respondWith()
-    @ajax.whenQuerying('artifact').respondWith()
     @ajax.whenQuerying('preference').respondWith({})
     @stub(Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser.prototype, '_saveArtifactTypePreference')
 
@@ -240,8 +240,10 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
   it 'should hide only user stories when user story type checkbox is unchecked', ->
     userStoryRecord = @createUserStoryRecord Iteration: null
+    @ajax.whenQuerying('userstory').respondWith([userStoryRecord.data])
+
     defectRecord = @createDefectRecord Iteration: null
-    @ajax.whenQuerying('artifact').respondWith([userStoryRecord.data, defectRecord.data])
+    @ajax.whenQuerying('defect').respondWith([defectRecord.data])
 
     @createApp().then =>
       expect(@getVisibleCards('defect').length).toBe 1
@@ -252,10 +254,13 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
   it 'should hide only defects when defect type checkbox is unchecked', ->
     userStoryRecord = @createUserStoryRecord Iteration: null
+    @ajax.whenQuerying('userstory').respondWith([userStoryRecord.data])
+
     defectRecord = @createDefectRecord Iteration: null
-    @ajax.whenQuerying('artifact').respondWith([userStoryRecord.data, defectRecord.data])
+    @ajax.whenQuerying('defect').respondWith([defectRecord.data])
 
     @createApp().then =>
+
       expect(@getVisibleCards('defect').length).toBe 1
       expect(@getVisibleCards('hierarchicalrequirement').length).toBe 1
 
@@ -324,9 +329,8 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
         Name: 'Story 3'
         ObjectID: 3
 
-      @ajax.whenCreating('userstory').respondWith([storyData])
-      @ajax.whenQuerying('artifact').respondWith([storyData])
-      @ajax.whenQuerying('hierarchicalrequirement').respondWith([storyData])
+      @ajax.whenCreating('userstory').respondWith(storyData)
+      @ajax.whenQuerying('userstory').respondWith([storyData])
 
       addNewHelper = new Helpers.AddNewHelper '.planning-board'
       addNewHelper.inlineAdd('Story 3').then =>
@@ -352,7 +356,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       Name: firstStoryName
       ObjectID: 1,
       Rank: storyRank
-    @ajax.whenQuerying('artifact').respondWith(userStory1)
+    @ajax.whenQuerying('userstory').respondWith(userStory1)
     @createApp().then =>
 
       secondStoryName = 'Story ranked lower than 1'
@@ -364,9 +368,12 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
         ObjectID: 2,
         Rank: storyRank + 1
 
-      @ajax.whenQuerying('artifact').respondWith([userStory1, userStory2])
-      @ajax.whenQuerying('hierarchicalrequirement').respondWith(userStory2)
-      Rally.environment.getMessageBus().publish Rally.Message.objectCreate, [@createUserStoryRecord userStory2]
+      records = [
+        @createUserStoryRecord userStory2
+      ]
+      @ajax.whenQuerying('userstory').respondWith(userStory2)
+
+      Rally.environment.getMessageBus().publish Rally.Message.objectCreate, records
 
       cards = @getVisibleCardNames()
       expect(cards[0].innerHTML).toContain firstStoryName
@@ -414,6 +421,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
 
   it 'should correctly clean up deactivated cards', ->
     @createAppWithBacklogData().then =>
+      @ajax.whenQuerying('defect').respondWith([])
       columns = @getColumns()
 
       @filterByType('defect').then =>
@@ -426,22 +434,8 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       values:
         Iteration: @getIteration1()
         PlanEstimate: 2
-    @ajax.whenQuerying('artifact').respondWith [
-      {
-        Iteration: @getIteration1(),
-        PlanEstimate: 2,
-        _ref: '/hierarchicalrequirement/1'
-        _refObjectName: 'story 1'
-        ObjectID: 1,
-      },
-      {
-        Iteration: @getIteration1(),
-        PlanEstimate: 2,
-        _ref: '/defect/2'
-        _refObjectName: 'defect 1'
-        ObjectID: 2,
-      }
-    ]
+    @ajax.whenQuerying('userstory').respondWith(@mom.getData('userstory', options))
+    @ajax.whenQuerying('defect').respondWith(@mom.getData('defect', options))
 
     @createApp(plannedVelocity: 10).then =>
       expect(@getProgressBarHtml(1)).toBe '4 of 10'
@@ -461,7 +455,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       FormattedID: 'S12345'
       Name: 'Hello Kitty Story'
       Description: 'foo bunny'
-    @ajax.whenQuerying('artifact').respondWith([userStoryRecord.data])
+    @ajax.whenQuerying('userstory').respondWith([userStoryRecord.data])
     @createApp().then =>
       cardFormattedID = Ext.query("#{@cardSelector} .id")[0]
 

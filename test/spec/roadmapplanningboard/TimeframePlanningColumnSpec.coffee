@@ -16,7 +16,8 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
           displayValue: 'My column'
           headerTemplate: Ext.create 'Ext.XTemplate'
           timeframeRecord: @timeframeRecord
-          store: @featureStoreFixture
+          stores: [@featureStoreFixture]
+          getStores: -> @stores
           planRecord: @planRecord
           ownerCardboard:
             showTheme: true
