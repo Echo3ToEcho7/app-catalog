@@ -79,6 +79,10 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     scrollForwards: ->
       @click(className: 'scroll-forwards')
 
+    getForwardsButton: -> @cardboard.forwardsButton
+
+    getBackwardsButton: -> @cardboard.backwardsButton
+
     getColumnHeaderCells: ->
       @cardboard.getEl().query('th.card-column')
 
@@ -140,26 +144,26 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
 
     it 'should show a left scroll arrow for past timeframes', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 4, timeframeColumnCount: 4).then =>
-        expect(@plugin.backwardsButton.hidden).toBe false
+        expect(@getBackwardsButton().hidden).toBe false
 
     it 'should show a right scroll arrow for extra future timeframes', ->
       @createCardboard(pastColumnCount: 0, presentColumnCount: 5, timeframeColumnCount: 4).then =>
-        expect(@plugin.forwardsButton.hidden).toBe false
+        expect(@getForwardsButton().hidden).toBe false
 
     it 'should not show a left scroll arrow if there are no past timeframes', ->
       @createCardboard(pastColumnCount: 0, presentColumnCount: 4, timeframeColumnCount: 4).then =>
-        expect(@plugin.backwardsButton.hidden).toBe true
+        expect(@getBackwardsButton().hidden).toBe true
 
     it 'should not show a right scroll arrow if there are no extra future timeframes', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 4, timeframeColumnCount: 4).then =>
-        expect(@plugin.forwardsButton.hidden).toBe true
+        expect(@getForwardsButton().hidden).toBe true
 
   describe 'when back scroll button is clicked', ->
     it 'should scroll backward', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 4, timeframeColumnCount: 4).then =>
         @scrollBackwards().then =>
           expect(@plugin.getFirstVisibleScrollableColumn().timeframeRecord.getId()).toEqual '1'
-          expect(@plugin.backwardsButton.hidden).toBe true
+          expect(@getBackwardsButton().hidden).toBe true
 
     it 'should contain the same number of columns', ->
       @createCardboard(pastColumnCount: 4, presentColumnCount: 4, timeframeColumnCount: 4).then =>
@@ -185,8 +189,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     it 'should re-render scroll buttons', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
         @scrollBackwards().then =>
-          @assertButtonIsInColumnHeader @plugin.forwardsButton, @plugin.getLastVisibleScrollableColumn()
-          @assertButtonIsInColumnHeader @plugin.backwardsButton, @plugin.getFirstVisibleScrollableColumn()
+          @assertButtonIsInColumnHeader @getForwardsButton(), @plugin.getLastVisibleScrollableColumn()
+          @assertButtonIsInColumnHeader @getBackwardsButton(), @plugin.getFirstVisibleScrollableColumn()
 
     it 'should destroy old scroll buttons', ->
       @createCardboard(pastColumnCount: 2, presentColumnCount: 6, timeframeColumnCount: 4).then =>
@@ -209,7 +213,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
         @scrollForwards().then =>
           expect(@plugin.getFirstVisibleScrollableColumn().timeframeRecord.getId()).toEqual '3'
-          expect(@plugin.forwardsButton.hidden).toBe true
+          expect(@getForwardsButton().hidden).toBe true
 
     it 'should contain the same number of columns', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
@@ -235,8 +239,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.RoadmapScrollable', ->
     it 'should re-render scroll buttons', ->
       @createCardboard(pastColumnCount: 1, presentColumnCount: 5, timeframeColumnCount: 4).then =>
         @scrollForwards().then =>
-          @assertButtonIsInColumnHeader @plugin.forwardsButton, @plugin.getLastVisibleScrollableColumn()
-          @assertButtonIsInColumnHeader @plugin.backwardsButton, @plugin.getFirstVisibleScrollableColumn()
+          @assertButtonIsInColumnHeader @getForwardsButton(), @plugin.getLastVisibleScrollableColumn()
+          @assertButtonIsInColumnHeader @getBackwardsButton(), @plugin.getFirstVisibleScrollableColumn()
 
     it 'should destroy old scroll buttons', ->
       @createCardboard(pastColumnCount: 2, presentColumnCount: 6, timeframeColumnCount: 4).then =>
