@@ -9,12 +9,10 @@
             var stateFieldValues = this.stateFieldValues.split(',');
 
             var metrics = [
-            //    {f: 'groupByCount', groupByField: stateFieldName, allowedValues: stateFieldValues}
             ];
 
             for (var i = 0; i < stateFieldValues.length; ++i) {
                 metrics.push(
-                   // {as: stateFieldValues[i], field: stateFieldValues[i], f: 'sum', display: 'area'}
                     {as: stateFieldValues[i], groupByField: stateFieldName, allowedValues: [stateFieldValues[i]], f: 'groupByCount', display: 'area'}
                 );
             }
@@ -123,13 +121,8 @@
 
         loadChart: function() {
             this.add(this._buildChartAppConfig());
-            //this.down('rallychart').on('snapshotsAggregated', this._onSnapshotDataReady, this);
             this._publishComponentReady();
         },
-         _onSnapshotDataReady: function (chart) {
-             //wtf
-             //chart.chartData.series.splice(0,1);
-         },
 
         _buildChartAppConfig: function() {
             return {
