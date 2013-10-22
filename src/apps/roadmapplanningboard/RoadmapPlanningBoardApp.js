@@ -42,7 +42,8 @@
         },
 
         onRequestException: function(connection, response, requestOptions) {
-            if (requestOptions.operation.requester === this || requestOptions.operation.requester.up('rallyapp')) {
+            var requester = requestOptions.operation.requester;
+            if (requester && (requester === this || requester.up('rallyapp'))) {
                 this.getEl().mask('Roadmap planning is <strong>temporarily unavailable</strong>, please try again in a few minutes.', "roadmap-service-unavailable-error");
             }
          },

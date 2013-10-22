@@ -67,6 +67,7 @@
             }
             this.popover = Ext.create('Rally.apps.roadmapplanningboard.PlanningCapacityPopoverView', {
                 target: Ext.get(event.target),
+                owner: this,
                 offsetFromTarget: [
                     {
                         x: 0,

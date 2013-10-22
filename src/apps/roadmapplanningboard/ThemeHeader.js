@@ -38,7 +38,9 @@
                     fieldupdated: function (options) {
                         if (options.field.getValue() !== record.get('theme')) {
                             record.set('theme', options.field.getValue());
-                            record.save();
+                            record.save({
+                                requester: this
+                            });
                         }
                         return this.refresh(record);
                     }

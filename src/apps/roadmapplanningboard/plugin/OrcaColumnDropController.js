@@ -94,6 +94,7 @@
                     sourceIndex = options.sourceColumn.findCardInfo(record) && options.sourceColumn.findCardInfo(record).index;
                     return this._onDropSaveFailure(options.destinationColumn, options.sourceColumn, record, options.card, sourceIndex, response);
                 },
+                requester: this,
                 scope: this
             });
         },
@@ -118,6 +119,7 @@
                     sourceIndex = options.sourceColumn.findCardInfo(record) && options.sourceColumn.findCardInfo(record).index;
                     return this._onDropSaveFailure(options.destinationColumn, options.sourceColumn, record, options.card, sourceIndex, response);
                 },
+                requester: this,
                 scope: this
             });
         },

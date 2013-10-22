@@ -70,6 +70,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverController', ->
       beginEdit: ->
       endEdit: ->
       set: setStub
+      save: ->
 
     @controller.persistIfStoreAvailable 4, 5
     expect(setStub).toHaveBeenCalledTwice()
@@ -95,8 +96,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverController', ->
     highValueSpy = @spy highValueFunction
 
     @controller.model =
-      get: ->
-        ''
+      get: -> ''
+      save: ->
 
     @fakeView '', '', true, true, lowValueSpy, highValueSpy
 
@@ -116,8 +117,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningCapacityPopoverController', ->
     highValueSpy = @spy highValueFunction
 
     @controller.model =
-      get: ->
-        ''
+      get: -> ''
+      save: ->
 
     @fakeView null, null, true, true, lowValueSpy, highValueSpy
 

@@ -62,11 +62,18 @@
             return true;
         },
         persistIfStoreAvailable: function (lowValue, highValue) {
+            var requester;
             this.model.beginEdit();
             this.model.set('lowCapacity', lowValue);
             this.model.set('highCapacity', highValue);
             this.model.endEdit();
-            return this.model.store && this.model.store.sync();
+
+            if (this.view && this.view.owner && this.view.owner.ownerCardboard) {
+                requester = this.view.owner.ownerCardboard;
+            }
+            return this.model.save({
+                requester: requester
+            });
         },
         onValidityChange: function () {
             var highField, lowField;

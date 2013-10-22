@@ -112,7 +112,9 @@
             }
         },
         _saveModel: function () {
-            return this.model.save();
+            return this.model.save({
+                requester: this.view
+            });
         },
         _datesUpdatedAction: function () {
             return "Timeframe dates changed -  start: [" + (this._formattedDate(this.getStartDate())) + "], end: [" + (this._formattedDate(this.getEndDate())) + "]";
