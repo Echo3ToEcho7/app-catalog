@@ -11,8 +11,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
 
     target = Ext.getBody()
     @column = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
-      stores: [Deft.Injector.resolve('featureStore')]
-      getStores: -> @stores
+      store: Deft.Injector.resolve('featureStore')
       renderTo: target
       contentCell: target
       headerCell: target
@@ -39,20 +38,3 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoardColumn', ->
   it 'should have the planning-column css class on header and content', ->
     expect(@column.getContentCell().hasCls 'planning-column').toBeTruthy()
     expect(@column.getColumnHeaderCell().hasCls 'planning-column').toBeTruthy()
-
-  it 'should fire ready when the column has no stores', ->
-    isReady = false
-    blankColumn = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoardColumn',
-      stores: []
-      renderTo: Ext.getBody()
-      contentCell: Ext.getBody()
-      headerCell: Ext.getBody()
-      listeners:
-        ready:
-          fn: ->
-            isReady = true
-
-
-    expect(isReady).toBeTruthy()
-
-    blankColumn.destroy()

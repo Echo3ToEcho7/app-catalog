@@ -105,7 +105,6 @@
                 modelNames: this.modelNames,
                 cardBoardConfig: {
                     columnConfig: {
-                        useArtifactStore: this.getContext().isFeatureEnabled('USE_ARTIFACT_STORE_ON_KANBAN_APP'),
                         additionalFetchFields: ['PortfolioItem'],
                         plugins: [{
                             ptype: 'rallycolumnpolicy',
