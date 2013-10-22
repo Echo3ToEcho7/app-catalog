@@ -15,7 +15,6 @@
         ],
         
         config: {
-            stores: [],
             storeConfig: {
                 fetch: ['Value', 'FormattedID', 'Owner','Name', 'PreliminaryEstimate', 'DisplayColor']
             },

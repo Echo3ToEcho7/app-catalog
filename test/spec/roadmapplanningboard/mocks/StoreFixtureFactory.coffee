@@ -57,7 +57,6 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
             model: Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel()
             proxy:
                 type: 'memory'
-
             data: [
                 {
                     "id": "513617ecef8623df1391fefc",
