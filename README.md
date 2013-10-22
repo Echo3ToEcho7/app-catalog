@@ -1,5 +1,9 @@
 # App Catalog
 
+## License
+
+Copyright (c) Rally Software Development Corp. 2013 Distributed under the MIT License.
+
 ## Tasks
 The App Catalog builds with Node and Grunt. To install them and the App Catalog NPM modules, enter:
 
