@@ -197,10 +197,14 @@
             var find = {
                 '_TypeHierarchy': 'HierarchicalRequirement',
                 'Children': null,
-                '_ValidFrom': {
-                    "$gt": this._buildChartStoreConfigValidFrom()
-                }
+                "$or" :
+			        [
+                		{ '_ValidFrom': { "$gt": this._buildChartStoreConfigValidFrom() } },
+                		{ '_ValidTo'  : { "$gt" : this._buildChartStoreConfigValidFrom(),"$lt": "9999-01-01T00:00:00.000Z" },
+                		  '_ValidFrom': { "$lt": this._buildChartStoreConfigValidFrom() } }
+			        ]
             };
+            find['$or'][1][this.getSetting('stateFieldName')] = { "$ne": this.getSetting('stateFieldValues').split(',').pop() } ;
 
             if (this.projectScopeDown) {
                 find._ProjectHierarchy = this.project.ObjectID;
@@ -236,10 +240,11 @@
         _buildChartCalculatorConfig: function() {
             var stateFieldName = this.getSetting('stateFieldName');
             var stateFieldValues = this.getSetting('stateFieldValues');
-
+            var startDate = this._buildChartStoreConfigValidFrom();
             return {
                 stateFieldName: stateFieldName,
-                stateFieldValues: stateFieldValues
+                stateFieldValues: stateFieldValues,
+                startDate: startDate
             };
         },
 
