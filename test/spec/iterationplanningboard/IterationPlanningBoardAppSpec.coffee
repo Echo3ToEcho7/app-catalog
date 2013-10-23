@@ -92,7 +92,6 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
   # could not get actionsequence mouseMove to work in FF
     simulateMouseEnterFormattedID: () ->
       Rally.test.fireEvent(Ext.query("#{@cardSelector} .id")[0], 'mouseenter')
-      debugger;
       once(
         condition: => Ext.query('.description-popover .description').length is 1
         description: 'description popover to show'
@@ -462,8 +461,10 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardApp', ->
       FormattedID: 'S12345'
       Name: 'Hello Kitty Story'
       Description: 'foo bunny'
+      ObjectID: 789
 
     @ajax.whenQuerying('artifact').respondWith([userStoryRecord.data])
+    @ajax.whenQuerying('hierarchicalrequirement').respondWith(userStoryRecord.data)
 
     @createApp().then =>
       cardFormattedID = Ext.query("#{@cardSelector} .id")[0]
