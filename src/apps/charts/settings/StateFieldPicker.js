@@ -166,7 +166,12 @@
                 },
                 listConfig: {
                     itemTpl: Ext.create('Ext.XTemplate',
-                        '<div class="x-boundlist-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="stateFieldValue"/> &nbsp;{StringValue}</div>')
+                        '<div class="x-boundlist-item"><img src="' + Ext.BLANK_IMAGE_URL + '" class="stateFieldValue"/> &nbsp;{StringValue}</div>'),
+                    listeners:{
+                        afterrender: function(){
+                            this.selectedItemCls = 'x4-boundlist-selected x-boundlist-selected';
+                        }
+                    }
                 },
                 bubbleEvents: ['statefieldvaluesready', 'statefieldvalueschanged']
             });
