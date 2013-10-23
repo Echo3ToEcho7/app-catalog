@@ -156,6 +156,7 @@
                 margin: '10px 0 0 0',
                 width: 400,
                 forceSelection: true,
+                allowBlank: false,
                 listeners: {
                     ready: function(combo) {
                         this.fireEvent('statefieldvaluesready', this);
