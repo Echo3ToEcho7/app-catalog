@@ -14,7 +14,7 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
       renderTo: @target
       contentCell: @target
       headerCell: @target
-      store: Deft.Injector.resolve('featureStore')
+      getStores: -> [Deft.Injector.resolve('featureStore')]
       lowestPIType: 'PortfolioItem/Feature'
       roadmap: Deft.Injector.resolve('roadmapStore').getById('413617ecef8623df1391fabc')
 
@@ -41,7 +41,7 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
       contentCell: Ext.getBody()
       headerCell: Ext.getBody()
       roadmap: roadMapModel
-      store: Deft.Injector.resolve('featureStore')
+      getStores: -> [Deft.Injector.resolve('featureStore')]
       lowestPIType: 'feature'
 
     expect(column.getCards().length).toBe(10)

@@ -23,38 +23,39 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     leftColumnTimeframe = timeframeStore.getById(@leftColumnPlan.get('timeframe').id)
 
     @leftColumn = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
-      store: Ext.create 'Ext.data.Store',
-        extend: 'Ext.data.Store'
-        model: Rally.test.mock.data.WsapiModelFactory.getModel 'PortfolioItem/Feature'
-        proxy:
-            type: 'memory'
-        data: Rally.test.mock.ModelObjectMother.getRecords('PortfolioItemFeature',
-            {
-                values: [
-                    {
-                        "ObjectID": "1000",
-                        "_ref": '/portfolioitem/feature/1000',
-                        "Name": "Android Support",
-                        "PreliminaryEstimate": {"Value": 4},
-                        "subscriptionId": "1"
-                    },
-                    {
-                        "ObjectID": "1001",
-                        "_ref": '/portfolioitem/feature/1001',
-                        "Name": "iOS Support",
-                        "PreliminaryEstimate": {"Value": 2},
-                        "subscriptionId": "1"
-                    },
-                    {
-                        "ObjectID": "1002",
-                        "_ref": '/portfolioitem/feature/1002',
-                        "Name": "HTML 5 Webapp",
-                        "PreliminaryEstimate": {"Value": 3},
-                        "subscriptionId": "1"
-                    }
-                ]
-            }
-        )
+      stores: [Ext.create 'Ext.data.Store',
+            extend: 'Ext.data.Store'
+            model: Rally.test.mock.data.WsapiModelFactory.getModel 'PortfolioItem/Feature'
+            proxy:
+                type: 'memory'
+            data: Rally.test.mock.ModelObjectMother.getRecords('PortfolioItemFeature',
+                {
+                    values: [
+                        {
+                            "ObjectID": "1000",
+                            "_ref": '/portfolioitem/feature/1000',
+                            "Name": "Android Support",
+                            "PreliminaryEstimate": {"Value": 4},
+                            "subscriptionId": "1"
+                        },
+                        {
+                            "ObjectID": "1001",
+                            "_ref": '/portfolioitem/feature/1001',
+                            "Name": "iOS Support",
+                            "PreliminaryEstimate": {"Value": 2},
+                            "subscriptionId": "1"
+                        },
+                        {
+                            "ObjectID": "1002",
+                            "_ref": '/portfolioitem/feature/1002',
+                            "Name": "HTML 5 Webapp",
+                            "PreliminaryEstimate": {"Value": 3},
+                            "subscriptionId": "1"
+                        }
+                    ]
+                }
+            )]
+      getStores: -> @stores
       lowestPIType: 'PortfolioItem/Feature'
       planRecord: @leftColumnPlan
       timeframeRecord: leftColumnTimeframe
@@ -67,7 +68,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     rightColumnTimeframe = timeframeStore.getById(@rightColumnPlan.get('timeframe').id)
 
     @rightColumn = Ext.create 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn',
-      store: Ext.create 'Ext.data.Store',
+      stores: [Ext.create 'Ext.data.Store',
             extend: 'Ext.data.Store'
             model: Rally.test.mock.data.WsapiModelFactory.getModel 'PortfolioItem/Feature'
             proxy:
@@ -85,7 +86,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
                         }
                     ]
                 }
-            )
+            )]
+      getStores: -> @stores
       planRecord: @rightColumnPlan
       lowestPIType: 'PortfolioItem/Feature'
       timeframeRecord: rightColumnTimeframe
@@ -95,7 +97,8 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
       headerCell: target
 
     @backlogColumn = Ext.create 'Rally.apps.roadmapplanningboard.BacklogBoardColumn',
-      store: secondFeatureStore
+      getStores: -> @stores
+      stores: [secondFeatureStore]
       lowestPIType: 'PortfolioItem/Feature'
       renderTo: target
       contentCell: target

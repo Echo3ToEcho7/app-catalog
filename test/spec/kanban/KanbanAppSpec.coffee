@@ -12,12 +12,14 @@ Ext.require [
 describe 'Rally.apps.kanban.KanbanApp', ->
 
   beforeEach ->
-    @ajax.whenQuerying('artifact').respondWithCount(1, {
+    @ajax.whenQuerying('userstory').respondWithCount(1, {
       values: [{
         ScheduleState: 'In-Progress'
       }]
       createImmediateSubObjects: true
     })
+
+    @ajax.whenQuerying('defect').respondWith()
 
     @projectRef = Rally.environment.getContext().getProject()._ref
     @projectName = 'Project 1'
@@ -310,6 +312,13 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(warningStub).toHaveBeenCalledOnce()
       args = warningStub.getCall(0).args[0]
       expect(args.message).toBe Rally.ui.gridboard.plugin.GridBoardDnDWarning.DRAG_AND_DROP_DISABLED_WARNING
+
+  it 'should show a warning message when an invalid filter was specified', ->
+    notificationStub = @stub(Rally.ui.notify.Notifier, 'showError')
+    @createApp(query: '(Foo = Bar)').then =>
+      expect(notificationStub).toHaveBeenCalled()
+      args = notificationStub.getCall(0).args[0]
+      expect(args.message).toBe 'Invalid query: (Foo = Bar)'
 
   it 'should have correct icons on cards', ->
     @createApp().then =>

@@ -43,13 +43,22 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       ]
 
     stubRequests: ->
-      @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(["Defined", "In-Progress", "Completed", "Accepted"]);
-
-      @ajax.whenQuerying('artifact').respondWith [{
+      userstoryStub = @ajax.whenQuerying('userstory').respondWith([{
         RevisionHistory: {
           _ref: '/revisionhistory/1'
         }
-      }]
+      }])
+
+      defectStub = @ajax.whenQuerying('defect').respondWith([{
+        RevisionHistory: {
+          _ref: '/revisionhistory/1'
+        }
+      }])
+      defectsuiteStub = @ajax.whenQuerying('defectsuite').respondWith()
+      testsetStub = @ajax.whenQuerying('testset').respondWith()
+      @ajax.whenQueryingAllowedValues('userstory', 'ScheduleState').respondWith(["Defined", "In-Progress", "Completed", "Accepted"]);
+
+      [userstoryStub, defectStub, defectsuiteStub, testsetStub]
 
     toggleToGridOrBoard: (view) ->
       toggler = @app.gridboard.down('rallygridboardtoggle')
@@ -129,12 +138,12 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
   it 'should filter the grid to the currently selected iteration', ->
     @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
-    requestStub = @stubRequests()
+    requests = @stubRequests()
 
     @createApp().then =>
       @toggleToGrid()
 
-      expect(requestStub).toBeWsapiRequestWith filters: @getIterationFilter()
+      expect(request).toBeWsapiRequestWith(filters: @getIterationFilter()) for request in requests
 
   it 'should filter the board to the currently selected iteration', ->
     @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']

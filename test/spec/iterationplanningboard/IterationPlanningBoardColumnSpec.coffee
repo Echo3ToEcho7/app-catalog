@@ -6,7 +6,7 @@ Ext.require [
 
 describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
   beforeEach ->
-    queryStub = @ajax.whenQuerying('artifact').respondWith()
+    queryStub = @ajax.whenQuerying('HierarchicalRequirement').respondWith()
     @colors = Rally.ui.renderer.template.progressbar.TimeboxProgressBarTemplate.percentFullColors
 
   afterEach ->
@@ -297,7 +297,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
         PlannedVelocity: 0
       )
     @column = Ext.create 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn',
-      model: Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
+      types: ['HierarchicalRequirement']
       renderTo: 'testDiv'
       headerCell: Ext.get 'testDiv'
       statusCell: Ext.get 'testDiv'
@@ -330,7 +330,7 @@ describe 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn', ->
         )
 
       @column = Ext.create 'Rally.apps.iterationplanningboard.IterationPlanningBoardColumn',
-        model: Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
+        types: ['HierarchicalRequirement']
         renderTo: 'testDiv'
         headerCell: Ext.get('testDiv').createChild()
         statusCell: Ext.get('testDiv').createChild()
