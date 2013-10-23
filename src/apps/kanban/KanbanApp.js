@@ -151,7 +151,6 @@
             Ext.Object.each(columnSetting, function(column, values) {
                 var columnConfig = {
                     xtype: 'kanbancolumn',
-                    useArtifactStore: this.getContext().isFeatureEnabled('USE_ARTIFACT_STORE_ON_KANBAN_APP'),
                     enableWipLimit: true,
                     wipLimit: values.wip,
                     plugins: [{
