@@ -1,4 +1,7 @@
 module.exports = (grunt) ->
+  serverPort = grunt.option('port') || 8890
+  inlinePort = grunt.option('port') || 8891
+
   path = require 'path'
 
   grunt.loadNpmTasks 'grunt-contrib-coffee'
@@ -29,10 +32,10 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'test:__buildjasmineconf__', 'Internal task to build and alter the jasmine conf', ['jasmine:apps:build', 'replace:jasmine']
   grunt.registerTask 'test:conf', 'Fetches the deps, compiles coffee and css files, runs jshint and builds the jasmine test config', ['nexus:deps', 'clean:test', 'coffee', 'css', 'test:__buildjasmineconf__']
-  grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser.', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:apps']
+  grunt.registerTask 'test', 'Sets up and runs the tests in the default browser. Use --browser=<other> to run in a different browser, and --port=<port> for a different port.', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:apps']
   grunt.registerTask 'test:chrome', 'Sets up and runs the tests in Chrome', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:chrome']
   grunt.registerTask 'test:firefox', 'Sets up and runs the tests in Firefox', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:firefox']
-  grunt.registerTask 'test:server', 'Starts a Jasmine server at localhost:8890', ['express:server', 'express-keepalive']
+  grunt.registerTask 'test:server', "Starts a Jasmine server at localhost:#{serverPort}, specify a different port with --port=<port>", ['express:server', 'express-keepalive']
   grunt.registerTask 'test:ci', 'Runs the tests in both firefox and chrome', ['test:conf', 'express:inline', 'webdriver_jasmine_runner:chrome', 'webdriver_jasmine_runner:firefox']
 
   _ = grunt.util._
@@ -104,15 +107,15 @@ module.exports = (grunt) ->
         debug: debug
       server:
         options:
-          port: grunt.option('port') || 8890
+          port: serverPort
       inline:
         options:
-          port: grunt.option('port') || 8891
+          port: inlinePort
 
     webdriver_jasmine_runner:
       options:
         seleniumServerArgs: ['-Xmx256M']
-        testServerPort: 8891
+        testServerPort: inlinePort
       apps: {}
       chrome:
         options:
@@ -184,7 +187,7 @@ module.exports = (grunt) ->
             "#{appsdk_path}/builds/rui/resources/css/lib-closure.css"
             'build/resources/css/catalog-all.css'
           ]
-          host: 'http://127.0.0.1:8891/'
+          host: "http://127.0.0.1:#{inlinePort}/"
 
     replace:
       jasmine:
