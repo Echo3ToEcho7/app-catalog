@@ -99,6 +99,14 @@ module.exports = (grunt) ->
         src: [appFiles, specFiles]
         options:
           pattern: /Ext4\./g
+      consolelogs:
+        src: [appFiles, specFiles]
+        options:
+          pattern: /console\.log/g
+      debuggerstatements:
+        src: [appFiles, specFiles]
+        options:
+          pattern: /debugger/g
 
     express:
       options:

@@ -10,7 +10,7 @@
             return this.picker;
         },
         onTriggerClick: function () {
-            return console.log('clicked the trigger!!');
+            return console.info('clicked the trigger!!');
         }
     });
 
