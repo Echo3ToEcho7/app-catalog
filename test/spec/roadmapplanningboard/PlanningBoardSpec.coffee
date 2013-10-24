@@ -12,7 +12,6 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
       @cardboard = Ext.create 'Rally.apps.roadmapplanningboard.PlanningBoard',
         _.extend
           roadmapId: '413617ecef8623df1391fabc'
-          _retrieveLowestLevelPI: (callback) -> callback.call(@, Rally.test.mock.ModelObjectMother.getRecord('typedefinition',  {values: { TypePath : 'PortfolioItem/Feature' }}))
           slideDuration: 10
           renderTo: 'testDiv'
         , config
@@ -41,6 +40,8 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
 
   beforeEach ->
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
+
+    @ajax.whenQuerying('TypeDefinition').respondWith Rally.test.mock.data.WsapiModelFactory.getModelDefinition('PortfolioItemFeature')
 
     @ajax.whenQuerying('PortfolioItem/Feature').respondWith([
                         {

@@ -48,13 +48,6 @@
             return this.presentColumns;
         },
 
-        _getPastColumns: function (columns) {
-            this.presentColumns = this.presentColumns || this._getPresentColumns(columns);
-            this.pastColumns = this.pastColumns || _.difference(columns, this.presentColumns);
-
-            return this.pastColumns;
-        },
-
         _getVisibleColumns: function (presentColumns) {
             return _.first(presentColumns, this.timeframeColumnCount);
         },

@@ -49,8 +49,7 @@
          },
 
         launch: function () {
-
-            roadmapStore = Deft.Injector.resolve('roadmapStore');
+            var roadmapStore = Deft.Injector.resolve('roadmapStore');
 
             roadmapStore.load({
                 callback: function(records, operation, success) {
@@ -64,7 +63,11 @@
                                 {
                                     ptype: 'rallyfixedheadercardboard'
                                 }
-                            ]
+                            ],
+                            listeners: {
+                                load: this._onCardBoardLoad,
+                                scope: this
+                            }
                         });
                         this.add(this.cardboard);
                     }
@@ -72,7 +75,13 @@
                 requester: this,
                 scope: this
             });
+        },
+
+        _onCardBoardLoad: function() {
+            if (Rally.BrowserTest) {
+                Rally.BrowserTest.publishComponentReady(this);
+            }
         }
     });
 
-}).call(this);
+})();
