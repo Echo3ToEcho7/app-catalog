@@ -51,9 +51,7 @@
             }
         ],
 
-        afterRender: function () {
-            this.callParent(arguments);
-
+        launch: function () {
             if (Rally.environment.getContext().getSubscription().isModuleEnabled('Rally Portfolio Manager')) {
 
                 Rally.data.util.PortfolioItemHelper.loadTypeOrDefault({
