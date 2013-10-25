@@ -64,12 +64,12 @@
 }
 
 .x-boundlist-item img.stateFieldValue {
-    background: transparent url('../../../lib/ext/4.1.1a/resources/themes/images/default/form/checkbox.gif');
+    background: transparent url('checkbox.gif');
     height: 13px;
     width: 13px;
 }
 .x-boundlist-selected img.stateFieldValue{
-    background: transparent url('../../../lib/ext/4.1.1a/resources/themes/images/default/form/checkbox.gif');
+    background: transparent url('checkbox.gif');
     height: 13px;
     width: 13px;
     background-position-x: 0px;
