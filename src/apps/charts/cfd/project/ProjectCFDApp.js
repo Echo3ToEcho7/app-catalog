@@ -9,16 +9,16 @@
             var stateFieldValues = this.stateFieldValues.split(',');
 
             var metrics = [
-                {f: 'groupByCount', groupByField: stateFieldName, allowedValues: stateFieldValues}
             ];
 
             for (var i = 0; i < stateFieldValues.length; ++i) {
                 metrics.push(
-                    {as: stateFieldValues[i], field: stateFieldValues[i], f: 'sum', display: 'area'}
+                    {as: stateFieldValues[i], groupByField: stateFieldName, allowedValues: [stateFieldValues[i]], f: 'groupByCount', display: 'area'}
                 );
             }
             return metrics;
         }
+
     });
 
     Ext.define("Rally.apps.charts.cfd.project.ProjectCFDApp", {
