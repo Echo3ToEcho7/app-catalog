@@ -197,21 +197,10 @@
             var find = {
                 '_TypeHierarchy': 'HierarchicalRequirement',
                 'Children': null,
-                "$or" :
-			        [
-                		{ '_ValidFrom': { "$gt": this._buildChartStoreConfigValidFrom() } },
-                		{
-                		  '_ValidTo'  : { "$gt" : this._buildChartStoreConfigValidFrom() },
-                		  '_ValidFrom': { "$lt": this._buildChartStoreConfigValidFrom() }
-                		}
-			        ]
+                '_ValidFrom': {
+                    "$gt": this._buildChartStoreConfigValidFrom()
+                }
             };
-            var stateField = this.getSetting('stateFieldName');
-            if(stateField === 'ScheduleState') {
-                find['$or'][1][stateField] = { "$lt": "Accepted" } ;
-            } else {
-                find['$or'][1][stateField] = { "$ne": this.getSetting('stateFieldValues').split(',').pop() } ;
-            }
 
             if (this.projectScopeDown) {
                 find._ProjectHierarchy = this.project.ObjectID;
@@ -247,11 +236,10 @@
         _buildChartCalculatorConfig: function() {
             var stateFieldName = this.getSetting('stateFieldName');
             var stateFieldValues = this.getSetting('stateFieldValues');
-            var startDate = this._buildChartStoreConfigValidFrom();
+
             return {
                 stateFieldName: stateFieldName,
-                stateFieldValues: stateFieldValues,
-                startDate: startDate
+                stateFieldValues: stateFieldValues
             };
         },
 
