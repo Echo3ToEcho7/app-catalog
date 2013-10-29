@@ -23,7 +23,7 @@
         "grunt-contrib-jshint": "~0.6.2",
         "grunt-nexus-artifact": "~0.3.0",
         "grunt-contrib-jasmine": "~0.5.1",
-        "grunt-webdriver-jasmine-runner": "~0.1.7",
+        "grunt-webdriver-jasmine-runner": "~0.1.8",
         "grunt-contrib-less": "~0.6.4",
         "rally-app-builder": "~0.7.2",
         "async": "~0.2.9",
