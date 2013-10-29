@@ -13,7 +13,7 @@
         cardboard: null,
 
         constructor: function(config) {
-            if (!config.settings.test) { // For now we have app-level Deft.Injector.configure
+            if (!config.test) { // For now we have app-level Deft.Injector.configure
                 Deft.Injector.configure({
                     timeframeStore: {
                         className: 'Ext.data.Store',

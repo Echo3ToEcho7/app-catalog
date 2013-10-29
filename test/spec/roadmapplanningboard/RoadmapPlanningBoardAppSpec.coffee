@@ -17,10 +17,10 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
           user: Rally.environment.getContext().getUser()
           subscription: Rally.environment.getContext().getSubscription()
 
+
       @app = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp',
         context: context
-        settings:
-          test: true
+        test: true
         renderTo: 'testDiv'
 
       @waitForComponentReady @app
