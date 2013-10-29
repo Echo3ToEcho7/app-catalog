@@ -48,23 +48,19 @@
                 }
             }
 
-            if(this.showCardAgeEnabled)  {
-                fields.push({
-                    type: 'cardage',
-                    settingsType: 'board',
-                    config: {
-                        margin: '0 0 0 80',
-                        width: 300
-                    }
-                });
-            }
+            fields.push({
+                type: 'cardage',
+                settingsType: 'board',
+                config: {
+                    margin: '0 0 0 80',
+                    width: 300
+                }
+            });
 
             return fields;
         },
 
         launch: function() {
-            this.showFieldPicker = this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS');
-            this.showCardAgeEnabled = this.getContext().isFeatureEnabled('SHOW_CARD_AGE_IN_ITERATION_BOARD_SETTINGS');
             this.showGridSettings = this.getContext().isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE');
             this.callParent(arguments);
         },
@@ -77,12 +73,9 @@
                     isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
                     stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
                 },
-                'rallygridboardownerfilter'
+                'rallygridboardownerfilter',
+                'rallygridboardfieldpicker'
             ];
-
-            if (this.getContext().isFeatureEnabled('SHOW_COLUMN_CHOOSER_ON_ITERATION_TRACKING_BOARD')) {
-                plugins.push('rallygridboardfieldpicker');
-            }
 
             if (this.getContext().isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS')) {
                 plugins.push({
@@ -109,7 +102,7 @@
                     },
                     cardConfig: {
                         fields: this.getCardFieldNames(),
-                        showAge: (this.getSetting('showCardAge') && this.showCardAgeEnabled) ? this.getSetting('cardAgeThreshold') : -1,
+                        showAge: this.getSetting('showCardAge') ? this.getSetting('cardAgeThreshold') : -1,
                         showBlockedReason: true
                     },
                     listeners: {

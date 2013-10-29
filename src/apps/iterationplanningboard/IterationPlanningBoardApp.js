@@ -28,7 +28,6 @@
         },
 
         launch: function() {
-            this.showFieldPicker = this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS');
             this._showBoard();
         },
 
@@ -111,7 +110,7 @@
         },
 
         _getCardFields: function() {
-            if (this.getContext().isFeatureEnabled('SHOW_FIELD_PICKER_IN_ITERATION_BOARD_SETTINGS')) {
+            if (this.showFieldPicker) {
                 var fieldString = this.getSetting('cardFields') || '';
                 return fieldString.split(',');
             }

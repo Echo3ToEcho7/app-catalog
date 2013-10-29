@@ -150,7 +150,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     describe 'when user is opted into beta tracking experience', ->
 
       it 'should have grid and board fields', ->
-        @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'SHOW_CARD_AGE_IN_ITERATION_BOARD_SETTINGS']
+        @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
 
         @createApp().then =>
           settingsFields = @app.getSettingsFields()
@@ -161,8 +161,6 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
     describe 'when user is NOT opted into beta tracking experience', ->
 
       it 'should not have grid and board fields when BETA_TRACKING_EXPERIENCE is disabled', ->
-        @stubFeatureToggle ['SHOW_CARD_AGE_IN_ITERATION_BOARD_SETTINGS']
-
         @createApp().then =>
           settingsFields = @app.getSettingsFields()
 
