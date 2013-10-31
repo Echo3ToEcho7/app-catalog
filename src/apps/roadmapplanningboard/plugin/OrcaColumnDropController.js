@@ -94,7 +94,7 @@
                     sourceIndex = options.sourceColumn.findCardInfo(record) && options.sourceColumn.findCardInfo(record).index;
                     return this._onDropSaveFailure(options.destinationColumn, options.sourceColumn, record, options.card, sourceIndex, response);
                 },
-                requester: this,
+                requester: options.card,
                 scope: this
             });
         },
@@ -119,7 +119,7 @@
                     sourceIndex = options.sourceColumn.findCardInfo(record) && options.sourceColumn.findCardInfo(record).index;
                     return this._onDropSaveFailure(options.destinationColumn, options.sourceColumn, record, options.card, sourceIndex, response);
                 },
-                requester: this,
+                requester: options.card,
                 scope: this
             });
         },
@@ -154,6 +154,7 @@
                     var type;
 
                     type = options.sourceColumn === options.column ? "reorder" : "move";
+                    srcPlanRecord.dirty = false; // Make sure the record is clean
                     return this._onDropSaveSuccess(options.destinationColumn, options.sourceColumn, options.card, record, type);
                 },
                 failure: function (response, opts) {

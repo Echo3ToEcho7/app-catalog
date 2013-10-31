@@ -6,6 +6,7 @@
         alias: 'widget.timeframeplanningcolumn',
         
         requires: [
+            'Rally.data.QueryFilter',
             'Rally.apps.roadmapplanningboard.ThemeHeader',
             'Rally.apps.roadmapplanningboard.PlanCapacityProgressBar',
             'Rally.apps.roadmapplanningboard.util.Fraction',
@@ -50,13 +51,18 @@
         },
 
         getStoreFilter: function (model) {
-            return _.each(this.planRecord.data.features, function(feature) {
-                return {
+            return _.reduce(this.planRecord.data.features, function(result, feature) {
+                var filter = Ext.create('Rally.data.QueryFilter', {
                     property: 'ObjectID',
                     operator: '=',
                     value: feature.id
-                };
-            });
+                });
+                if (!result) {
+                    return filter;
+                } else {
+                    return result.or(filter);
+                }
+            }, null);
         },
 
         onProgressBarClick: function (event) {

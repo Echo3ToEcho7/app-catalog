@@ -2,9 +2,16 @@
 
     var Ext = window.Ext4 || window.Ext;
 
+    /**
+     * @private
+     * Proxy to talk to Rally REST JSON API services
+     */
     Ext.define('Rally.apps.roadmapplanningboard.Proxy', {
         extend: 'Ext.data.proxy.Rest',
-        requires: ['Rally.data.Proxy'],
+        requires: [
+            'Rally.data.Proxy',
+            'Rally.apps.roadmapplanningboard.Writer'
+        ],
         alias: 'proxy.roadmap',
 
         reader: {
@@ -13,9 +20,7 @@
         },
 
         writer: {
-            type: 'json',
-            root: 'data',
-            writeAllFields: false
+            type: 'roadmap'
         },
 
         buildRequest: function(operation) {

@@ -1,5 +1,7 @@
 Ext = window.Ext4 || window.Ext
 
+Ext.define 'Rally.apps.roadmapplanningboard.DeftInjector', {}
+
 Ext.require [
   'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
   'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp'
@@ -20,7 +22,6 @@ describe 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp', ->
 
       @app = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapPlanningBoardApp',
         context: context
-        test: true
         renderTo: 'testDiv'
 
       @waitForComponentReady @app

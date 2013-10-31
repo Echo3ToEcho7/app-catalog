@@ -35,6 +35,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
           theme: 'Take over the world!'
           lowCapacity: 0
           highCapacity: 0
+          features: []
         , config
 
     createTimeframeRecord: (config) ->
@@ -110,6 +111,20 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       expect(headerTplData['formattedEndDate']).toEqual(undefined)
       expect(headerTplData['formattedPercent']).toEqual("0%")
       expect(headerTplData['progressBarHtml']).toBeTruthy()
+
+  describe 'store filter', ->
+
+    beforeEach ->
+      @createTimeframeRecord()
+
+    afterEach ->
+      @column.destroy()
+
+    it 'should return an array of store filters if there are no features', ->
+      @createPlanRecord()
+      @createColumn()
+
+      debugger
 
   describe 'when rendered', ->
     beforeEach ->

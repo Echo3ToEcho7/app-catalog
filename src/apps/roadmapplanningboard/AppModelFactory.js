@@ -29,11 +29,17 @@
                 return this.planModel;
             }
             this.planModel = Ext.define('Rally.apps.roadmapplanningboard.PlanModel', {
-                extend: 'Rally.data.Model',
+                extend: 'Rally.apps.roadmapplanningboard.Model',
                 fields: [
                     {
                         name: 'id',
-                        type: 'string'
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'ref',
+                        type: 'string',
+                        persist: false
                     },
                     {
                         name: 'name',
@@ -55,7 +61,8 @@
                         name: 'timeframe'
                     },
                     {
-                        name: 'features'
+                        name: 'features',
+                        type: 'collection'
                     },
                     {
                         name: 'updatable',
@@ -83,7 +90,13 @@
                 fields: [
                     {
                         name: 'id',
-                        type: 'string'
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'ref',
+                        type: 'string',
+                        persist: false
                     },
                     {
                         name: 'name',
@@ -131,7 +144,13 @@
                 fields: [
                     {
                         name: 'id',
-                        type: 'string'
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'ref',
+                        type: 'string',
+                        persist: false
                     },
                     {
                         name: 'name',
