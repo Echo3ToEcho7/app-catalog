@@ -11,3 +11,4 @@ target/
 .grunt/
 .idea
 _SpecRunner.html
+appcatalog.version

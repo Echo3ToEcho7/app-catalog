@@ -20,7 +20,7 @@ module.exports = function(grunt) {
         return "" + counter + "-" + (revision.substr(0, 7)) + '-sdk-' + getSdkVersion();
     };
 
-    grunt.registerTask('version', 'Compute the build version for rally builds', function() {
+    var version = function() {
         var done = this.async(), setVersion = function (revision) {
             grunt.config(['buildVersion'], getBuildVersion(revision));
             done();
@@ -38,5 +38,13 @@ module.exports = function(grunt) {
                 setVersion(stdout.toString());
             });
         }
+    };
+
+    grunt.registerTask('version', 'Compute the build version for rally builds', version);
+
+    grunt.registerTask('writeVersion', 'Write the build version to appsdk.version', function() {
+        version.call(this);
+        grunt.file.write('appcatalog.version', grunt.config('buildVersion'));
     });
+
 };
