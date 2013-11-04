@@ -20,6 +20,7 @@
          },
 
         launch: function () {
+            Rally.apps.roadmapplanningboard.DeftInjector.init();
             var roadmapStore = Deft.Injector.resolve('roadmapStore');
 
             Ext.Ajax.on('requestexception', this.onRequestException, this);

@@ -3,29 +3,36 @@
     var Ext = window.Ext4 || window.Ext;
 
     Ext.define('Rally.apps.roadmapplanningboard.DeftInjector', {
+        singleton: true,
         requires: [
             'Rally.apps.roadmapplanningboard.AppModelFactory'
-        ]
-    }, function () {
-        Deft.Injector.configure({
-            timeframeStore: {
-                className: 'Ext.data.Store',
-                parameters: [{
-                    model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel()
-                }]
-            },
-            planStore: {
-                className: 'Ext.data.Store',
-                parameters: [{
-                    model: Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel()
-                }]
-            },
-            roadmapStore: {
-                className: 'Ext.data.Store',
-                parameters: [{
-                    model: Rally.apps.roadmapplanningboard.AppModelFactory.getRoadmapModel()
-                }]
+        ],
+        loaded: false,
+
+        init: function () {
+            if (!this.loaded) {
+                Deft.Injector.configure({
+                    timeframeStore: {
+                        className: 'Ext.data.Store',
+                        parameters: [{
+                            model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimeframeModel()
+                        }]
+                    },
+                    planStore: {
+                        className: 'Ext.data.Store',
+                        parameters: [{
+                            model: Rally.apps.roadmapplanningboard.AppModelFactory.getPlanModel()
+                        }]
+                    },
+                    roadmapStore: {
+                        className: 'Ext.data.Store',
+                        parameters: [{
+                            model: Rally.apps.roadmapplanningboard.AppModelFactory.getRoadmapModel()
+                        }]
+                    }
+                });
             }
-        });
+            this.loaded = true;
+        }
     });
 })();

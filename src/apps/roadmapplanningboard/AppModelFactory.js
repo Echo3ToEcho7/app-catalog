@@ -11,6 +11,7 @@
         
         requires: [
             'Rally.data.Model',
+            'Rally.apps.roadmapplanningboard.Model',
             'Rally.apps.roadmapplanningboard.Proxy'
         ],
 
