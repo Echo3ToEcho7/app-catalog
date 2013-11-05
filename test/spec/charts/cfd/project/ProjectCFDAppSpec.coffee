@@ -86,7 +86,7 @@ describe 'Rally.apps.charts.cfd.project.ProjectCFDApp', ->
       @app._getNow = () -> testToday
       validFrom = @app._buildChartStoreConfigValidFrom()
       fromDate = Rally.util.DateTime.add(testToday, settings.timeFrameUnit, -settings.timeFrameQuantity);
-      expect(validFrom).toBe(fromDate.toISOString())
+      expect(validFrom).toBe(Rally.util.DateTime.toIsoString(fromDate, true))
 
   it 'loads the correct chart settings class', ->
     @createApp().then =>
