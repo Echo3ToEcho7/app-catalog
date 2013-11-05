@@ -278,6 +278,18 @@ describe 'Rally.apps.kanban.KanbanApp', ->
     settings.groupByField = groupByField
     settings[settingsKey] = policy
 
+    field =
+      name: groupByField
+
+    try
+      userstory_model = Rally.test.mock.data.WsapiModelFactory.getUserStoryModel()
+      userstory_model.addField field
+      defect_model = Rally.test.mock.data.WsapiModelFactory.getDefectModel()
+      defect_model.addField field
+    finally
+      @removeField(userstory_model, field)
+      @removeField(defect_model, field)
+
     @createApp(settings).then =>
       @assertPolicyCmpConfig('c_' + settingsKey, policy)
 
@@ -353,3 +365,7 @@ describe 'Rally.apps.kanban.KanbanApp', ->
       expect(Ext.Object.getKeys(prefConfigSettings)[0]).toBe settingsKey
       expect(prefConfigSettings[settingsKey]).toBe policy
       expect(plugin.policyCmpConfig.policies).toBe policy
+
+    removeField: (model, field) ->
+      model.prototype.fields.remove field
+      expect(model.getField(field.name)).toBeUndefined
