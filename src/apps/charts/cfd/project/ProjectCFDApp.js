@@ -188,13 +188,14 @@
                 context: { workspace: this.workspace._ref },
                 find: this._buildChartStoreConfigFind(),
                 fetch: this._buildChartStoreConfigFetch(),
-                hydrate: this._buildChartStoreConfigHydrate()
+                hydrate: this._buildChartStoreConfigHydrate(),
+                compress: true
             };
         },
 
         _buildChartStoreConfigFind: function() {
             var find = {
-                '_TypeHierarchy': 'HierarchicalRequirement',
+                '_TypeHierarchy': { '$in' : [ -51038, -51006 ] },
                 'Children': null,
                 "$or" :
                     [
@@ -227,7 +228,7 @@
             var timeFrameUnit = this.getSetting("timeFrameUnit");
             var timeFrameQuantity = this.getSetting("timeFrameQuantity");
             var validFromDate = Rally.util.DateTime.add(today, timeFrameUnit, -timeFrameQuantity);
-            return validFromDate.toISOString();
+            return Rally.util.DateTime.toIsoString(validFromDate, true);
         },
 
         _getNow: function() {
