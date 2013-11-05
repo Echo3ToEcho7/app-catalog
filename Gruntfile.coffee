@@ -261,7 +261,7 @@ module.exports = (grunt) ->
             js_dependencies = grunt.file.readJSON 'js_dependencies.json'
             sdk_dependency = _.filter(js_dependencies, (dep) -> dep.id.indexOf('com.rallydev.js:appsdk-src') is 0)[0]
             if sdk_dependency and process.env.APPSDK_SRC_VERSION
-              sdk_dependency.id = sdk_dependency.id.replace(/:[\w]+?$/, ":#{process.env.APPSDK_SRC_VERSION}")
+              sdk_dependency.id = sdk_dependency.id.replace(/:[^:]+$/, ":#{process.env.APPSDK_SRC_VERSION}")
             js_dependencies
           )()
       push:
