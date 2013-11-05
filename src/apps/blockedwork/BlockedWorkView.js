@@ -81,7 +81,7 @@
         },
 
         _createStore: function() {
-            return Ext.create('Rally.data.WsapiDataStore', Ext.apply({
+            return Ext.create('Rally.data.wsapi.Store', Ext.apply({
                 limit: this.showMoreCount,
                 pageSize: this.showMoreCount,
                 autoLoad: true,

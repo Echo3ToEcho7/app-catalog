@@ -119,7 +119,7 @@
          * @param options.scope the scope to call success with
          */
         _loadStates: function (options) {
-            Ext.create('Rally.data.WsapiDataStore', {
+            Ext.create('Rally.data.wsapi.Store', {
                 model: 'State',
                 context: this.getContext().getDataContext(),
                 autoLoad: true,

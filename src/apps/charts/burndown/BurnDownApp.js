@@ -8,7 +8,7 @@
 
         requires: [
             'Rally.apps.charts.burndown.BurnDownSettings',
-            'Rally.data.WsapiDataStore',
+            'Rally.data.wsapi.Store',
             'Rally.ui.combobox.IterationComboBox',
             'Rally.ui.combobox.ReleaseComboBox'
         ],
@@ -137,7 +137,7 @@
         },
 
         _loadTimeboxes: function() {
-            var timeboxStore = Ext.create('Rally.data.WsapiDataStore', {
+            var timeboxStore = Ext.create('Rally.data.wsapi.Store', {
                 model: this.scopeObject._type,
                 filters: [
                     {
@@ -276,7 +276,7 @@
         },
 
         _fetchIterations: function () {
-            var store = Ext.create('Rally.data.WsapiDataStore', {
+            var store = Ext.create('Rally.data.wsapi.Store', {
                 model: 'Iteration',
                 filters: [
                     {
