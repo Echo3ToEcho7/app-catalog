@@ -145,6 +145,28 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
       expect(request).toBeWsapiRequestWith(filters: @getIterationFilter()) for request in requests
 
+  it 'should show the filter control button in the board mode', ->
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F4359_FILTER']
+
+    @createApp().then =>
+      @toggleToBoard()
+      expect(@app.down('rallyfiltercontrol').isVisible()).toBeTruthy()
+
+  it 'should not show the filter control button in the board mode when feature not enabled', ->
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
+
+    @createApp().then =>
+      @toggleToBoard()
+      expect(@app.down('rallyfiltercontrol')).toBeNull()
+
+
+  it 'should not show the filter control button in the grid mode', ->
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F4359_FILTER']
+
+    @createApp().then =>
+      @toggleToGrid()
+      expect(@app.down('rallyfiltercontrol').isVisible()).toBeFalsy()
+
   describe '#getSettingsFields', ->
 
     describe 'when user is opted into beta tracking experience', ->

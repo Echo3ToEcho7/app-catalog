@@ -20,3 +20,16 @@
     padding-top: 20px;
     text-align: center;
 }
+
+.iterationtrackingboard .gridboard-filter-control {
+    height: 22px;
+    margin: 3px 0px 0px 5px;
+    padding-right: 2px !important;
+    padding-left: 2px !important;
+}
+
+.iterationtrackingboard .gridboard-filter-control .x4-btn-icon.icon-filter{
+    font-size: 14px !important;
+    padding-top: 2px;
+
+}

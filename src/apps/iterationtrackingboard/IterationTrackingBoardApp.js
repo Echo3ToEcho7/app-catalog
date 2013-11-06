@@ -16,7 +16,8 @@
             'Rally.ui.gridboard.plugin.GridBoardArtifactTypeChooser',
             'Rally.ui.gridboard.plugin.GridBoardFieldPicker',
             'Rally.ui.cardboard.plugin.ColumnPolicy',
-            'Rally.ui.gridboard.plugin.GridBoardFilterInfo'
+            'Rally.ui.gridboard.plugin.GridBoardFilterInfo',
+            'Rally.ui.gridboard.plugin.GridBoardFilterControl'
         ],
         mixins: ['Rally.app.CardFieldSelectable'],
         componentCls: 'iterationtrackingboard',
@@ -66,18 +67,28 @@
         },
 
         _addGridBoard: function() {
-            var plugins = [
-                'rallygridboardaddnew',
-                {
+            var plugins = ['rallygridboardaddnew'],
+                context = this.getContext();
+
+            if (context.isFeatureEnabled('F4359_FILTER')) {
+                plugins.push({
+                    ptype: 'rallygridboardfiltercontrol',
+                    filterControlConfig: {
+                        cls: 'primary small button picto gridboard-filter-control'
+                    }
+                });
+            }
+
+            plugins = plugins.concat([{
                     ptype: 'rallygridboardfilterinfo',
                     isGloballyScoped: Ext.isEmpty(this.getSetting('project')) ? true : false,
                     stateId: 'iteration-tracking-owner-filter-' + this.getAppId()
                 },
                 'rallygridboardownerfilter',
                 'rallygridboardfieldpicker'
-            ];
+            ]);
 
-            if (this.getContext().isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS')) {
+            if (context.isFeatureEnabled('SHOW_ARTIFACT_CHOOSER_ON_ITERATION_BOARDS')) {
                 plugins.push({
                     ptype: 'rallygridboardartifacttypechooser',
                     artifactTypePreferenceKey: 'artifact-types',
@@ -88,8 +99,8 @@
             this.gridboard = this.add({
                 itemId: 'gridBoard',
                 xtype: 'rallygridboard',
-                context: this.getContext(),
-                enableToggle: this.getContext().isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE'),
+                context: context,
+                enableToggle: context.isFeatureEnabled('ITERATION_TRACKING_BOARD_GRID_TOGGLE'),
                 plugins: plugins,
                 modelNames: this.modelNames,
                 cardBoardConfig: {
@@ -123,6 +134,11 @@
                         'Owner',
                         'DefectStatus',
                         'Discussion']
+                },
+                addNewPluginConfig: {
+                    style: {
+                        'float': 'left'
+                    }
                 },
                 listeners: {
                     load: this._onLoad,
