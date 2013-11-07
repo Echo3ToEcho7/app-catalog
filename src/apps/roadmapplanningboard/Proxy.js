@@ -20,7 +20,8 @@
         },
 
         writer: {
-            type: 'roadmap'
+            type: 'roadmap',
+            writeAllFields: false
         },
 
         buildRequest: function(operation) {

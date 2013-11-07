@@ -6,13 +6,13 @@
      * A {@link Ext.data.writer.Json} subclass that talks to a Rally REST JSON API service
      */
     Ext.define('Rally.apps.roadmapplanningboard.Writer', {
-        extend: 'Ext.data.writer.Writer',
+        extend: 'Ext.data.writer.Json',
         alias: 'writer.roadmap',
 
-        type: 'json',
         root: 'data',
 
         write: function (request) {
+            this.callParent(arguments);
 
             _.map(request.records, function (record) {
                 var fields = record.getDirtyCollectionFields();

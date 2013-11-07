@@ -31,6 +31,7 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
     @record = new @Model
       ref: 'myRef'
       collectionField: [{id: 1}, {id :2}]
+    @record.phantom = false # pretend the record is persisted
 
     @writeSpy = @spy @record.proxy.writer, 'write'
     @ajax.whenCreating('collectionField', false).respondWith({})
@@ -43,6 +44,18 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
       @record.save()
 
     expect(save).toThrow 'Cannot update other fields on a record if a collection has changed'
+
+  describe 'when changing data', ->
+
+    beforeEach ->
+      @record.set 'somefield', 'newValue'
+      @record.save()
+
+    it 'should set the action to update', ->
+      expect(@writeSpy.lastCall.returnValue.action).toBe 'update'
+
+    it 'should send the correct data', ->
+      expect(@writeSpy.lastCall.returnValue.jsonData.data).toEqual { somefield: 'newValue' }
 
   describe 'when removing from collection relationship', ->
 
@@ -66,7 +79,6 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
     it 'should throw an error if more than relationship is removed', ->
       @record.set 'collectionField', []
       expect(@save).toThrow 'Cannot delete more than one relationship at a time'
-
 
   describe 'when adding to collection relationship', ->
 
