@@ -74,7 +74,7 @@
                 plugins.push({
                     ptype: 'rallygridboardfiltercontrol',
                     filterControlConfig: {
-                        cls: 'primary small button picto gridboard-filter-control'
+                        cls: 'secondary small button picto gridboard-filter-control'
                     }
                 });
             }
