@@ -58,6 +58,10 @@
             });
         },
 
+        onTimeboxScopeChange: function (timeboxScope) {
+            
+        },
+
         getOptions: function() {
             return [
                 {
@@ -198,6 +202,27 @@
             });
         },
 
+        _getCardboardFilter: function () {
+            var filters = null;
+            var timeboxContext = this.getContext().getTimeboxScope();
+            var timeboxFilter = null;
+
+            if (timeboxContext) {
+              timeboxFilter = timeboxContext.getQueryFilter();
+            }
+
+            if (this.getSetting('query')) {
+              filters = Rally.data.QueryFilter.fromQueryString(this.getSetting('query'));
+              if (timeboxFilter) {
+                filters = filters.and(timeboxFilter);
+              }
+            } else {
+              filters = timeboxFilter;
+            }
+
+            return Ext.Array.from(filters);
+        },
+
         _getCardboardConfig: function() {
             return {
                 xtype: 'rallycardboard',
@@ -235,8 +260,7 @@
                 storeConfig: {
                     context: this.getContext().getDataContext(),
                     pageSize: this.getSetting('pageSize'),
-                    filters: this.getSetting('query') ?
-                        [Rally.data.QueryFilter.fromQueryString(this.getSetting('query'))] : []
+                    filters: this._getCardboardFilter()
                 }
             };
         },
