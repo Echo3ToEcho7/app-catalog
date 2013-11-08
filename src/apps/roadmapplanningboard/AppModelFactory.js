@@ -10,7 +10,6 @@
         singleton: true,
         
         requires: [
-            'Rally.data.Model',
             'Rally.apps.roadmapplanningboard.Model',
             'Rally.apps.roadmapplanningboard.Proxy'
         ],
@@ -87,7 +86,7 @@
                 return this.roadmapModel;
             }
             this.roadmapModel = Ext.define('Rally.apps.roadmapplanningboard.RoadmapModel', {
-                extend: 'Rally.data.Model',
+                extend: 'Rally.apps.roadmapplanningboard.Model',
                 fields: [
                     {
                         name: 'id',
@@ -141,7 +140,7 @@
                 return this.timeframeModel;
             }
             this.timeframeModel = Ext.define('Rally.apps.roadmapplanningboard.TimeframeModel', {
-                extend: 'Rally.data.Model',
+                extend: 'Rally.apps.roadmapplanningboard.Model',
                 fields: [
                     {
                         name: 'id',
