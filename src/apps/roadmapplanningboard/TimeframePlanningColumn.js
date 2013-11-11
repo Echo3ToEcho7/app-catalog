@@ -51,7 +51,7 @@
         },
 
         getStoreFilter: function (model) {
-            return _.reduce(this.planRecord.data.features, function(result, feature) {
+            var result = _.reduce(this.planRecord.data.features, function(result, feature) {
                 var filter = Ext.create('Rally.data.QueryFilter', {
                     property: 'ObjectID',
                     operator: '=',
@@ -63,6 +63,7 @@
                     return result.or(filter);
                 }
             }, null);
+            return result || [];
         },
 
         onProgressBarClick: function (event) {
