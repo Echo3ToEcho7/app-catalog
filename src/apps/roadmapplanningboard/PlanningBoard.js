@@ -260,7 +260,6 @@
 
         _getClickAction: function () {
             var themesVisible = this.showTheme;
-            console.log(themesVisible);
             var message = "Themes toggled from [" + !themesVisible + "] to [" + themesVisible + "]";
             return message;
         }

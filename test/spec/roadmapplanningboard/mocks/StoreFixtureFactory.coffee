@@ -97,6 +97,10 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory',
                         {
                             "id": "1005",
                             "ref": "http://localhost:8080/portfolio-service/feature/1005"
+                        },
+                        {
+                            "id": "1006",
+                            "ref": "http://localhost:8080/portfolio-service/feature/1006"
                         }
                     ]
                 },

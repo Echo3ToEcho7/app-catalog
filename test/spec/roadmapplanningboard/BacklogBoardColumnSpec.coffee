@@ -28,7 +28,7 @@ describe 'Rally.apps.roadmapplanningboard.BacklogBoardColumn', ->
     expect(@backlogColumn.planStore).toBeTruthy()
 
   it 'has a backlog filter', ->
-    expect(@backlogColumn.getCards().length).toBe(6)
+    expect(@backlogColumn.getCards().length).toBe(5)
 
   it 'will filter by roadmap in addition to feature and plans', ->
     roadMapModel = Ext.create 'Rally.apps.roadmapplanningboard.RoadmapModel',

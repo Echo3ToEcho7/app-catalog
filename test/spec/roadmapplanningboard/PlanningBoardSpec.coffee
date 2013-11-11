@@ -135,7 +135,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
   it 'should have features in the appropriate columns', ->
     @createCardboard().then =>
       expect(@cardboard.getColumns()[1].getCards().length).toBe 3
-      expect(@cardboard.getColumns()[2].getCards().length).toBe 1
+      expect(@cardboard.getColumns()[2].getCards().length).toBe 2
       expect(@cardboard.getColumns()[3].getCards().length).toBe 0
       expect(@cardboard.getColumns().length).toBe(5)
 
