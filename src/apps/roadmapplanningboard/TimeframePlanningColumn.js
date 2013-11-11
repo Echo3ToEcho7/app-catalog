@@ -16,6 +16,7 @@
         config: {
             startDateField: 'start',
             endDateField: 'end',
+            dateEditEnabled: false, // Note: Editing dates is disabled for alpha, to prevent problems with invalid date ranges
             timeframeRecord: undefined,
             planRecord: undefined,
             dateFormat: 'M j',
@@ -107,6 +108,11 @@
 
         onTimeframeDatesClick: function (event) {
             var _this = this;
+
+            // TODO: Remove this check or enable the flag after alpha, once we can handle changing timeframe date ranges
+            if (!this.dateEditEnabled) {
+                return;
+            }
 
             return Ext.create('Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', {
                 target: Ext.get(event.target),
