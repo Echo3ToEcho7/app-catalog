@@ -133,7 +133,9 @@
                         'TaskRemainingTotal',
                         'Owner',
                         'DefectStatus',
-                        'Discussion']
+                        'Discussion'
+                    ],
+                    enableBulkEdit: context.isFeatureEnabled('EXT4_GRID_BULK_EDIT')
                 },
                 addNewPluginConfig: {
                     style: {

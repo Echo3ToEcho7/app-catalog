@@ -128,6 +128,12 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(@app.getSetting('cardFields')).toBe 'Parent,Tasks,Defects,Discussion,PlanEstimate'
 
   it 'should filter the grid to the currently selected iteration', ->
+    @stubFeatureToggle ['EXT4_GRID_BULK_EDIT', 'ITERATION_TRACKING_BOARD_GRID_TOGGLE']
+    @createApp().then =>
+      @toggleToGrid()
+      expect(@app.down('#gridBoard').getGridOrBoard().enableBulkEdit).toBe true
+
+  it 'should filter the grid to the currently selected iteration', ->
     @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
     requestStub = @stubRequests()
 
