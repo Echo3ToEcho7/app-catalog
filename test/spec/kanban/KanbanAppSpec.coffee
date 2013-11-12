@@ -314,15 +314,6 @@ describe 'Rally.apps.kanban.KanbanApp', ->
         @click(className: 'scroll-backwards').then =>
           expect(columnToShow.hidden).toBe false
 
-  it 'should show warning message when workspace DnD ranking disabled', ->
-    warningStub = @stub(Rally.ui.notify.Notifier, 'showWarning')
-    @createApp({},
-      DragDropRankingEnabled: false
-    ).then =>
-      expect(warningStub).toHaveBeenCalledOnce()
-      args = warningStub.getCall(0).args[0]
-      expect(args.message).toBe Rally.ui.gridboard.plugin.GridBoardDnDWarning.DRAG_AND_DROP_DISABLED_WARNING
-
   it 'should have correct icons on cards', ->
     @createApp().then =>
       expect(@app.getEl().query('.rally-card-icon').length).toBe 5
