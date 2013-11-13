@@ -14,8 +14,8 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       nextDay = Rally.util.DateTime.add(tomorrow, 'day', 1)
       dayAfter = Rally.util.DateTime.add(nextDay, 'day', 1)
       @iterationData = [
-        {Name:'Iteration 1', _ref:'/iteration/0', StartDate:Rally.util.DateTime.toIsoString(now), EndDate:Rally.util.DateTime.toIsoString(tomorrow)}
-        {Name:'Iteration 2', _ref:'/iteration/2', StartDate:Rally.util.DateTime.toIsoString(nextDay), EndDate:Rally.util.DateTime.toIsoString(dayAfter)}
+        {Name:'Iteration 1', _ref:'/iteration/0', StartDate: now, EndDate: tomorrow}
+        {Name:'Iteration 2', _ref:'/iteration/2', StartDate: nextDay, EndDate: dayAfter}
       ]
 
       @IterationModel = Rally.test.mock.data.WsapiModelFactory.getIterationModel()
@@ -37,9 +37,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       iteration = @iterationData[0]
 
       [
-        { property: 'Iteration.Name', operator: '=', value: iteration.Name },
-        { property: "Iteration.StartDate", operator: '=', value: iteration.StartDate }
-        { property: "Iteration.EndDate", operator: '=', value: iteration.EndDate }
+        { property: 'Iteration.Name', operator: '=', value: iteration.Name }
+        { property: "Iteration.StartDate", operator: '=', value: Rally.util.DateTime.toIsoString(iteration.StartDate) }
+        { property: "Iteration.EndDate", operator: '=', value: Rally.util.DateTime.toIsoString(iteration.EndDate) }
       ]
 
     stubRequests: ->
