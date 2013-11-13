@@ -9,7 +9,7 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
   helpers
     createApp: (config)->
-      now = new Date()
+      now = new Date(1384305300 * 1000);
       tomorrow = Rally.util.DateTime.add(now, 'day', 1)
       nextDay = Rally.util.DateTime.add(tomorrow, 'day', 1)
       dayAfter = Rally.util.DateTime.add(nextDay, 'day', 1)
