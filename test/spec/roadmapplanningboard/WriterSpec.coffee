@@ -1,6 +1,7 @@
 Ext = window.Ext4 || window.Ext
 
 Ext.require [
+  'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper'
   'Rally.apps.roadmapplanningboard.Writer'
   'Rally.apps.roadmapplanningboard.Proxy'
   'Rally.apps.roadmapplanningboard.Model'
@@ -11,6 +12,9 @@ Ext.require [
 describe 'Rally.apps.roadmapplanningboard.Writer', ->
 
   beforeEach ->
+
+    Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
+
     @field = Ext.create 'Rally.data.Field',
         name: 'collectionField'
         type: 'collection'
@@ -37,11 +41,18 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
     @ajax.whenCreating('collectionField', false).respondWith({})
     @ajax.whenDeleting('collectionField', '1', false).respondWith({})
 
+    @writer = Ext.create('Rally.apps.roadmapplanningboard.Writer')
+    @stub @writer, 'writeRecords', (request) -> request
+
   it 'should throw an error if a collection and other fields are changed', ->
     @record.set('collectionField', [])
     @record.set('somefield', 'changedValue')
+
     save = =>
-      @record.save()
+      @writer.write
+        operation:
+          records: [@record]
+        records: [@record]
 
     expect(save).toThrow 'Cannot update other fields on a record if a collection has changed'
 
@@ -78,7 +89,14 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
 
     it 'should throw an error if more than relationship is removed', ->
       @record.set 'collectionField', []
-      expect(@save).toThrow 'Cannot delete more than one relationship at a time'
+
+      save = =>
+        @writer.write
+          operation:
+            records: [@record]
+          records: [@record]
+
+      expect(save).toThrow 'Cannot delete more than one relationship at a time'
 
   describe 'when adding to collection relationship', ->
 

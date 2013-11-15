@@ -39,4 +39,9 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
         fn: ->
           Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getRoadmapStoreFixture()
 
-
+      uuidMapper:
+        fn: ->
+          getUuid: ->
+              deferred = Ext.create('Deft.promise.Deferred')
+              deferred.resolve('12345678-1234-1234-1234-12345678')
+              deferred.promise

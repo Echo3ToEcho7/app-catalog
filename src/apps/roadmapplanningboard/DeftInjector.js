@@ -29,6 +29,9 @@
                         parameters: [{
                             model: Rally.apps.roadmapplanningboard.AppModelFactory.getRoadmapModel()
                         }]
+                    },
+                    uuidMapper: {
+                        className: 'Rally.apps.roadmapplanningboard.UuidMapper'
                     }
                 });
             }
