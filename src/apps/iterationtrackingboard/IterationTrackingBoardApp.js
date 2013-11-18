@@ -102,7 +102,6 @@
                     'FormattedID',
                     'Name',
                     'ScheduleState',
-                    'State',
                     'Blocked',
                     'PlanEstimate',
                     'TaskStatus',
