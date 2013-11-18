@@ -6,7 +6,7 @@
    "javascript": [
       "TimeboxGridBoard.js",
       "TimeboxCardBoard.js",
-      "TimeboxScrollable",
+      "TimeboxScrollable.js",
       "IterationPlanningBoardBacklogColumn.js",
       "IterationPlanningBoardColumn.js",
       "IterationPlanningBoardColumnProgressBar.js",

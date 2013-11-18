@@ -7,13 +7,11 @@ module.exports = function(grunt) {
 
         var done = this.async();
         var apps = grunt.file.expand(options.apps);
-        async.each(apps, function(app, callback) {
+        async.eachSeries(apps, function(app, callback) {
             var appPath = path.dirname(app);
+            grunt.log.writeln();
             grunt.log.writeln('Building app ' + appPath + '...');
-            //todo: rab quiet mode
-            rab.build({ path: appPath }, function(error) {
-                callback();
-            });
+            rab.build({ path: appPath }, callback);
         }, done);
     });
 };

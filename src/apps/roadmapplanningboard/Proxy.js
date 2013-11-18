@@ -52,7 +52,7 @@
          * @returns {String} url
          */
         buildUrl: function (request) {
-            var recordData = request.records && request.records[0].data || {}
+            var recordData = (request.records && request.records[0].data) || {};
             var data = _.merge({}, request.operation.params, recordData);
             return new Ext.XTemplate(this.getUrl(request)).apply(data);
         },

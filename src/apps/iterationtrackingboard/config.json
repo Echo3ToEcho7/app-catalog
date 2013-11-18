@@ -7,7 +7,6 @@
       "IterationTrackingBoardApp.js"
    ],
    "css": [
-      "IterationTrackingBoardApp.css",
-      "GridBoardFilterPopover.css"
+      "IterationTrackingBoardApp.css"
    ]
 }
