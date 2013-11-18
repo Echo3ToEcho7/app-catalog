@@ -11,6 +11,12 @@ Ext.require [
 
 describe 'Rally.apps.roadmapplanningboard.Writer', ->
 
+  helpers
+    createRequest: (records) ->
+      operation:
+        records: records
+      records: records
+
   beforeEach ->
 
     Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper.loadDependencies()
@@ -21,6 +27,10 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
     @Model = Ext.define Rally.test.generateName(),
       extend: 'Rally.apps.roadmapplanningboard.Model'
       fields: [ @field,
+        name: 'id'
+        type: 'string'
+        persist: false
+      ,
         name: 'ref'
         type: 'string'
         persist: false
@@ -30,7 +40,7 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
       ]
       proxy:
         type: 'roadmap'
-        url: ''
+        url: 'someurl'
 
     @record = new @Model
       ref: 'myRef'
@@ -49,10 +59,7 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
     @record.set('somefield', 'changedValue')
 
     save = =>
-      @writer.write
-        operation:
-          records: [@record]
-        records: [@record]
+      @writer.write @createRequest [@record]
 
     expect(save).toThrow 'Cannot update other fields on a record if a collection has changed'
 
@@ -66,7 +73,7 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
       expect(@writeSpy.lastCall.returnValue.action).toBe 'update'
 
     it 'should send the correct data', ->
-      expect(@writeSpy.lastCall.returnValue.jsonData.data).toEqual { somefield: 'newValue' }
+      expect(@writeSpy.lastCall.returnValue.jsonData).toEqual { somefield: 'newValue' }
 
   describe 'when removing from collection relationship', ->
 
@@ -85,16 +92,13 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
 
     it 'should set the url correctly', ->
       @save()
-      expect(@writeSpy.lastCall.returnValue.url).toBe 'myRef/collectionField/2'
+      expect(@writeSpy.lastCall.returnValue.url).toBe 'someurl/collectionField/2'
 
     it 'should throw an error if more than relationship is removed', ->
       @record.set 'collectionField', []
 
       save = =>
-        @writer.write
-          operation:
-            records: [@record]
-          records: [@record]
+        @writer.write @createRequest [@record]
 
       expect(save).toThrow 'Cannot delete more than one relationship at a time'
 
@@ -112,7 +116,7 @@ describe 'Rally.apps.roadmapplanningboard.Writer', ->
       expect(@writeSpy.lastCall.returnValue.action).toBe 'create'
 
     it 'should set the url correctly', ->
-      expect(@writeSpy.lastCall.returnValue.url).toBe 'myRef/collectionField'
+      expect(@writeSpy.lastCall.returnValue.url).toBe 'someurl/collectionField'
 
     it 'should send the correct data', ->
-      expect(@writeSpy.lastCall.returnValue.jsonData.data.collectionField).toEqual [{id: 3}]
+      expect(@writeSpy.lastCall.returnValue.jsonData).toEqual {id: 3}

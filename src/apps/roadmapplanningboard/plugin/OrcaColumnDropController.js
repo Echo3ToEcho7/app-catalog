@@ -149,14 +149,10 @@
             return Ext.Ajax.request({
                 method: 'POST',
                 withCredentials: true,
-                url: this._constructUrl(srcPlanRecord.getId(), destPlanRecord.getId()),
+                url: this._constructUrl(srcPlanRecord.get('roadmap'), srcPlanRecord.getId(), destPlanRecord.getId()),
                 jsonData: {
-                    data: [
-                        {
-                            id: options.record.getId() + '',
-                            ref: options.record.getUri()
-                        }
-                    ]
+                    id: options.record.getId() + '',
+                    ref: options.record.getUri()
                 },
                 success: function () {
                     var type;
@@ -173,8 +169,12 @@
             });
         },
 
-        _constructUrl: function (sourceId, destinationId) {
-            return Rally.environment.getContext().context.services.planning_service_url + '/api/plan/' + sourceId + '/features/to/' + destinationId;
+        _constructUrl: function (roadmap, sourceId, destinationId) {
+            return Ext.create('Ext.XTemplate', Rally.environment.getContext().context.services.planning_service_url + '/roadmap/{roadmap.id}/plan/{sourceId}/features/to/{destinationId}').apply({
+                sourceId: sourceId,
+                destinationId: destinationId,
+                roadmap: roadmap
+            });
         },
 
         _onDropSaveSuccess: function (column, sourceColumn, card, updatedRecord, type) {

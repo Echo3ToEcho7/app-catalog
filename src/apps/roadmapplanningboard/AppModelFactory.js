@@ -61,6 +61,9 @@
                         name: 'timeframe'
                     },
                     {
+                        name: 'roadmap'
+                    },
+                    {
                         name: 'features',
                         type: 'collection'
                     },
@@ -75,7 +78,7 @@
                 },
                 proxy: {
                     type: 'roadmap',
-                    url: Rally.environment.getContext().context.services.planning_service_url + '/api/plan'
+                    url: Rally.environment.getContext().context.services.planning_service_url + '/roadmap/{roadmap.id}/plan/{id}'
                 }
             });
             return this.planModel;
@@ -103,10 +106,6 @@
                         type: 'string'
                     },
                     {
-                        name: 'ref',
-                        type: 'string'
-                    },
-                    {
                         name: 'plans'
                     }
                 ],
@@ -116,7 +115,7 @@
                 },
                 proxy: {
                     type: 'roadmap',
-                    url: Rally.environment.getContext().context.services.planning_service_url + '/api/roadmap'
+                    url: Rally.environment.getContext().context.services.planning_service_url + '/roadmap'
                 }
             });
             return this.roadmapModel;
@@ -176,7 +175,7 @@
                 ],
                 proxy: {
                     type: 'roadmap',
-                    url: Rally.environment.getContext().context.services.timeline_service_url + '/api/timeframe'
+                    url: Rally.environment.getContext().context.services.timeline_service_url + '/timeline/{timeline.id}/timeframe'
                 },
                 belongsTo: {
                     model: 'Rally.apps.roadmapplanningboard.TimelineModel',
@@ -184,6 +183,40 @@
                 }
             });
             return this.timeframeModel;
+        },
+
+        getTimelineModel: function () {
+            if (this.timelineModel) {
+                return this.timelineModel;
+            }
+            this.timelineModel = Ext.define('Rally.apps.roadmapplanningboard.TimelineModel', {
+                extend: 'Rally.apps.roadmapplanningboard.Model',
+                fields: [
+                    {
+                        name: 'id',
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'ref',
+                        type: 'string',
+                        persist: false
+                    },
+                    {
+                        name: 'name',
+                        type: 'string'
+                    },
+                    {
+                        name: 'timeframes',
+                        type: 'collection'
+                    }
+                ],
+                proxy: {
+                    type: 'roadmap',
+                    url: Rally.environment.getContext().context.services.timeline_service_url + '/timeline'
+                }
+            });
+            return this.timelineModel;
         }
     }, function () {
         Rally.data.ModelFactory.registerTypes(this.modelTypes, this);

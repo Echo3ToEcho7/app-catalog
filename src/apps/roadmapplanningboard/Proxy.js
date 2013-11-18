@@ -13,11 +13,9 @@
         ],
         alias: 'proxy.roadmap',
 
-        inject: 'uuidMapper',
-
         reader: {
             type: 'json',
-            root: 'data.results'
+            root: 'results'
         },
 
         writer: {
@@ -31,6 +29,7 @@
          * a uuid. Note this will be deprecated when v3.0 rolls out.
          */
         doRequest: function (operation, callback, scope) {
+            var uuidMapper = Deft.Injector.resolve('uuidMapper');
 
             if (operation.params && operation.params.workspace !== undefined) {
                 return this.callParent(arguments);
@@ -39,12 +38,23 @@
             var me = this;
             var context = operation.context || Rally.environment.getContext();
 
-            this.uuidMapper.getUuid(context.getWorkspace()).then(function (uuid) {
+            uuidMapper.getUuid(context.getWorkspace()).then(function (uuid) {
                 operation.params = operation.params || {};
                 operation.params.workspace = uuid || '';
 
                 return me.doRequest(operation, callback, scope);
             });
+        },
+
+        /**
+         * This method will build the url running it through an {Ext.XTemplate} with the operation params
+         * @param {Object} request
+         * @returns {String} url
+         */
+        buildUrl: function (request) {
+            var recordData = request.records && request.records[0].data || {}
+            var data = _.merge({}, request.operation.params, recordData);
+            return new Ext.XTemplate(this.getUrl(request)).apply(data);
         },
 
         buildRequest: function(operation) {

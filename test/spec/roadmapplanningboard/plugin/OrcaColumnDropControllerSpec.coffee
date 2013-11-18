@@ -90,7 +90,6 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
             Name: "Firefox OS Application",
             PreliminaryEstimate: {"Value": 4},
             subscriptionId: "2"
-
           ]
 
       planRecord: @rightColumnPlan
@@ -227,7 +226,7 @@ describe 'Rally.apps.roadmapplanningboard.plugin.OrcaColumnDropController', ->
     dragData = { card: card, column: @leftColumn }
     @rightColumnDropController.onCardDropped(dragData, 0)
 
-    expect(@ajaxRequest.lastCall.args[0].url).toBe "http://localhost:9999/api/plan/#{@leftColumn.planRecord.get('id')}/features/to/#{@rightColumn.planRecord.get('id')}"
+    expect(@ajaxRequest.lastCall.args[0].url).toBe "http://localhost:9999/roadmap/413617ecef8623df1391fabc/plan/#{@leftColumn.planRecord.get('id')}/features/to/#{@rightColumn.planRecord.get('id')}"
 
   describe 'drag and drop ranking', ->
 

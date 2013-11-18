@@ -116,7 +116,7 @@ describe 'Rally.apps.roadmapplanningboard.PlanningBoard', ->
                         }
                     ])
   afterEach ->
-    @cardboard.destroy()
+    @cardboard?.destroy()
     Deft.Injector.reset()
 
   it 'should render with a backlog column', ->

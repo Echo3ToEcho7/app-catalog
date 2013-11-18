@@ -19,6 +19,10 @@ Ext.define 'Rally.test.apps.roadmapplanningboard.helper.TestDependencyHelper',
       appModelFactory:
         className: 'Rally.apps.roadmapplanningboard.AppModelFactory'
 
+      timelineStore:
+        fn: ->
+          Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getTimelineStoreFixture()
+
       featureStore:
         fn: ->
           Rally.test.apps.roadmapplanningboard.mocks.StoreFixtureFactory.getFeatureStoreFixture()

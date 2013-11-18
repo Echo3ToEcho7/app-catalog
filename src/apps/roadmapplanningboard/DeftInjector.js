@@ -5,13 +5,20 @@
     Ext.define('Rally.apps.roadmapplanningboard.DeftInjector', {
         singleton: true,
         requires: [
-            'Rally.apps.roadmapplanningboard.AppModelFactory'
+            'Rally.apps.roadmapplanningboard.AppModelFactory',
+            'Rally.apps.roadmapplanningboard.UuidMapper'
         ],
         loaded: false,
 
         init: function () {
             if (!this.loaded) {
                 Deft.Injector.configure({
+                    timelineStore: {
+                        className: 'Ext.data.Store',
+                        parameters: [{
+                            model: Rally.apps.roadmapplanningboard.AppModelFactory.getTimelineModel()
+                        }]
+                    },
                     timeframeStore: {
                         className: 'Ext.data.Store',
                         parameters: [{

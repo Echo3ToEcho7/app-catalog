@@ -24,7 +24,6 @@
             var roadmapStore = Deft.Injector.resolve('roadmapStore');
 
             Ext.Ajax.on('requestexception', this.onRequestException, this);
-
             roadmapStore.load({
                 callback: function(records, operation, success) {
                     if (success) {
