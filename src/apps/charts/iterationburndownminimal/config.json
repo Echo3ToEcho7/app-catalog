@@ -1,0 +1,13 @@
+{
+   "name": "Iteration Burndown Minimal",
+   "className": "Rally.apps.charts.iterationburndownminimal.IterationBurnDownMinimalApp",
+   "server": "https://rally1.rallydev.com",
+   "sdk": "x",
+   "javascript": [
+      "IterationBurnDownMinimalChart.js",
+      "IterationBurnDownMinimalApp.js"
+   ],
+   "css": [
+      "../Charts.css"
+   ]
+}

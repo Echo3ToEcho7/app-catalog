@@ -4,11 +4,11 @@
    "server": "https://rally1.rallydev.com",
    "sdk": "x",
    "javascript": [
+      "TeamBoardUtil.js",
       "TeamBoardCard.js",
       "TeamBoardColumn.js",
       "TeamBoardProjectRecordsLoader.js",
       "TeamBoardSettings.js",
-      "TeamBoardUtil.js",
       "TeamBoardApp.js"
    ],
    "css": [
