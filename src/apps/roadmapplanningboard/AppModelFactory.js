@@ -171,11 +171,14 @@
                         name: 'updatable',
                         type: 'boolean',
                         defaultValue: true
+                    },
+                    {
+                        name: 'timeline'
                     }
                 ],
                 proxy: {
                     type: 'roadmap',
-                    url: Rally.environment.getContext().context.services.timeline_service_url + '/timeline/{timeline.id}/timeframe'
+                    url: Rally.environment.getContext().context.services.timeline_service_url + '/timeline/{timeline.id}/timeframe/{id}'
                 },
                 belongsTo: {
                     model: 'Rally.apps.roadmapplanningboard.TimelineModel',
