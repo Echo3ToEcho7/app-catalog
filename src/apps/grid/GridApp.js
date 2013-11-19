@@ -33,15 +33,23 @@
             var context = this.getContext(),
                 pageSize = context.get('pageSize'),
                 fetch = context.get('fetch'),
-                columns = this._getColumns(fetch);
+                columns = this._getColumns(fetch),
+                gridContext,
+                stateEnabled = context.isFeatureEnabled("ITERATION_TRACKING_PERSISTENT_PREFERENCES");
+
+            if (stateEnabled) {
+                gridContext = context;
+            }
 
             var gridConfig = {
+                context: gridContext,
                 xtype: 'rallygrid',
                 model: model,
+                stateEnabled: stateEnabled,
                 columnCfgs: columns,
                 enableColumnHide: false,
                 enableRanking: true,
-                enableBulkEdit: Rally.environment.getContext().isFeatureEnabled("EXT4_GRID_BULK_EDIT"),
+                enableBulkEdit: context.isFeatureEnabled("EXT4_GRID_BULK_EDIT"),
                 autoScroll: gridAutoScroll,
                 plugins: this._getPlugins(columns),
                 storeConfig: {
