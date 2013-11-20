@@ -110,7 +110,7 @@
                     'Owner',
                     'DefectStatus',
                     'Discussion'
-                ],  
+                ],
                 enableBulkEdit: context.isFeatureEnabled('EXT4_GRID_BULK_EDIT')
             };
 
@@ -202,10 +202,11 @@
                     var topLevelModels = _.filter(models, function(model, key) {
                             return _.contains(topLevelTypes, key);
                         }),
-                        compositeModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(topLevelModels, this.getContext());
+                        compositeModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(topLevelModels, this.getContext()),
+                        treeGridModel;
                     this.modelNames = topLevelTypes;
                     if (this.getContext().isFeatureEnabled('F2903_USE_ITERATION_TREE_GRID')) {
-                        var treeGridModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(_.values(models), this.getContext());
+                        treeGridModel = Rally.domain.WsapiModelBuilder.buildCompositeArtifact(_.values(models), this.getContext());
                     }
                     this._addGridBoard(compositeModel, treeGridModel);
                 },
