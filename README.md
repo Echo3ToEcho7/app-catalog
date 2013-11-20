@@ -2,6 +2,8 @@
 
 A collection of extensible apps from Rally's [App Catalog](https://help.rallydev.com/app-catalog).
 
+2.0rc2 release - [Download](https://github.com/RallyApps/app-catalog/releases/download/2.0rc2/2.0rc2.zip)
+
 ## License
 
 Copyright (c) Rally Software Development Corp. 2013 Distributed under the MIT License.
@@ -9,7 +11,7 @@ Copyright (c) Rally Software Development Corp. 2013 Distributed under the MIT Li
 ## Contents
 
 ### SDK 2 Apps
-These apps are built using App SDK 2.
+These apps are built using [App SDK 2.0rc2](https://help.rallydev.com/apps/2.0rc1/doc/).
 
 * [Blocked Work](https://help.rallydev.com/blocked-work) - [[src](src/apps/blockedwork)]
 * Custom Board - [[src](src/apps/board)]
@@ -33,7 +35,7 @@ These apps are built using App SDK 2.
 * [Tip of the Day](https://help.rallydev.com/tip-day) - [[src](src/apps/tipoftheday)]
 
 ### Legacy Apps
-These apps are built using App SDK 1 and earlier technologies and are considered deprecated.  
+These apps are built using [App SDK 1](https://help.rallydev.com/app-sdk) and earlier technologies and are considered deprecated.  
 
 * [Active Defect Charts](https://help.rallydev.com/active-defect-charts) - [[src](src/legacy/ActiveDefectCharts.html)]
 * [Agile EVM](https://help.rallydev.com/agile-evm) - [[src](src/legacy/AgileEVM.html)] 
@@ -85,4 +87,12 @@ These apps are built using App SDK 1 and earlier technologies and are considered
 * [User Lookup](https://help.rallydev.com/user-lookup) - [[src](src/legacy/UserLookup.html)]
 * [Utilization Chart](https://help.rallydev.com/utilization-chart) - [[src](src/legacy/UtilizationChartApp.html)]
 * [Weekly Actuals](https://help.rallydev.com/weekly-actuals-report) - [[src](src/legacy/WeeklyActualsApp.html)]
+
+## Development
+
+The following links will be helpful when developing apps:
+
+* [Getting Started](https://help.rallydev.com/apps/2.0rc1/doc/#!/guide/getting_started)
+* [Rally App Builder](https://help.rallydev.com/apps/2.0rc1/doc/#!/guide/app_builder)
+* [App SDK 2.0rc2 API Docs](https://help.rallydev.com/apps/2.0rc1/doc/)
 
