@@ -2,7 +2,7 @@
    "name": "Team Board",
    "className": "Rally.apps.teamboard.TeamBoardApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "x",
+   "sdk": "2.0rc2",
    "javascript": [
       "TeamBoardUtil.js",
       "TeamBoardCard.js",

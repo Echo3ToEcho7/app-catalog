@@ -2,7 +2,7 @@
    "name": "Story Hierarchy",
    "className": "Rally.apps.storyhierarchy.StoryHierarchyApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "x",
+   "sdk": "2.0rc2",
    "javascript": [
       "StoryHierarchyApp.js"
    ],

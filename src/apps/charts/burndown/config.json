@@ -2,7 +2,7 @@
    "name": "Release Burndown",
    "className": "Rally.apps.charts.burndown.ReleaseBurnDownApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "x",
+   "sdk": "2.0rc2",
    "javascript": [
       "../DateMixin.js",
       "BurnDownCalculator.js",

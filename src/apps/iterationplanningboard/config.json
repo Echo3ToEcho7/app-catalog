@@ -2,7 +2,7 @@
    "name": "Iteration Planning Board",
    "className": "Rally.apps.iterationplanningboard.IterationPlanningBoardApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "x",
+   "sdk": "2.0rc2",
    "javascript": [
       "TimeboxCardBoard.js",
       "TimeboxScrollable.js",
