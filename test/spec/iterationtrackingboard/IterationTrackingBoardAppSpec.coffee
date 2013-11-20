@@ -173,6 +173,22 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @toggleToGrid()
       expect(@app.down('rallyfiltercontrol').isVisible()).toBeFalsy()
 
+  it 'should show a treegrid when treegrid toggled on', ->
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
+
+    @createApp().then =>
+      @toggleToGrid()
+      expect(@app.down('rallytreegrid')).not.toBeNull()
+      expect(@app.down('rallygrid')).toBeNull()
+
+  it 'should show a regular grid when treegrid toggled off', ->
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
+
+    @createApp().then =>
+      @toggleToGrid()
+      expect(@app.down('rallygrid')).not.toBeNull()
+      expect(@app.down('rallytreegrid')).toBeNull()
+
   describe '#getSettingsFields', ->
 
     describe 'when user is opted into beta tracking experience', ->
