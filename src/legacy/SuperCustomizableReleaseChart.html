@@ -1632,7 +1632,7 @@ function initPage() {
     addEventListeners();
 
     DROPDOWN = new RALLY.Mashup.Dropdown(BATCH_TOOLKIT, MASHUP_TYPE, 'timeboxList', 'timeboxLabel',
-            'mu_super_customizable_' + MASHUP_TYPE.toLowerCase());
+            'mu_super_customizable_' + MASHUP_TYPE.toLowerCase(), {projectScopeUp: false, projectScopeDown: false});
     DROPDOWN.invoke(createChart);
 }
 </script>
