@@ -54,7 +54,7 @@ describe 'Rally.apps.charts.cfd.project.ProjectCFDApp', ->
       config = @app._buildChartAppConfig()
       expect(config).not.toBeNull()
       expect(config.storeConfig).not.toBeNull() # tested elsewhere
-      expect(config.calculatorType).toBe 'ProjectCFDCalculator'
+      expect(config.calculatorType).toBe 'Rally.apps.charts.cfd.project.ProjectCFDCalculator'
       expect(config.calculatorConfig).not.toBeNull() # tested elsewhere
       expect(config.listeners.chartRendered).toBe @app._publishComponentReady
       expect(config.chartConfig.title.text).toBe @project.Name + ' Cumulative Flow Diagram'

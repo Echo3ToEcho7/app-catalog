@@ -16,6 +16,7 @@
         config: {
             startDateField: 'start',
             endDateField: 'end',
+            dateEditEnabled: false, // Note: Editing dates is disabled for alpha, to prevent problems with invalid date ranges
             timeframeRecord: undefined,
             planRecord: undefined,
             dateFormat: 'M j',
@@ -51,7 +52,7 @@
         },
 
         getStoreFilter: function (model) {
-            return _.reduce(this.planRecord.data.features, function(result, feature) {
+            var result = _.reduce(this.planRecord.data.features, function(result, feature) {
                 var filter = Ext.create('Rally.data.QueryFilter', {
                     property: 'ObjectID',
                     operator: '=',
@@ -63,6 +64,7 @@
                     return result.or(filter);
                 }
             }, null);
+            return result || [];
         },
 
         onProgressBarClick: function (event) {
@@ -106,6 +108,11 @@
 
         onTimeframeDatesClick: function (event) {
             var _this = this;
+
+            // TODO: Remove this check or enable the flag after alpha, once we can handle changing timeframe date ranges
+            if (!this.dateEditEnabled) {
+                return;
+            }
 
             return Ext.create('Rally.apps.roadmapplanningboard.TimeframeDatesPopoverView', {
                 target: Ext.get(event.target),

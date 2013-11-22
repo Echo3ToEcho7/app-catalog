@@ -112,7 +112,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       expect(headerTplData['formattedPercent']).toEqual("0%")
       expect(headerTplData['progressBarHtml']).toBeTruthy()
 
-  describe 'store filter', ->
+  describe '#getStoreFilter', ->
 
     beforeEach ->
       @createTimeframeRecord()
@@ -124,7 +124,7 @@ describe 'Rally.apps.roadmapplanningboard.TimeframePlanningColumn', ->
       @createPlanRecord()
       @createColumn()
 
-      debugger
+      expect(this.column.getStoreFilter()).toEqual []
 
   describe 'when rendered', ->
     beforeEach ->

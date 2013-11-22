@@ -9,13 +9,13 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
 
   helpers
     createApp: (config)->
-      now = new Date()
+      now = new Date(1384305300 * 1000);
       tomorrow = Rally.util.DateTime.add(now, 'day', 1)
       nextDay = Rally.util.DateTime.add(tomorrow, 'day', 1)
       dayAfter = Rally.util.DateTime.add(nextDay, 'day', 1)
       @iterationData = [
-        {Name:'Iteration 1', _ref:'/iteration/0', StartDate:Rally.util.DateTime.toIsoString(now), EndDate:Rally.util.DateTime.toIsoString(tomorrow)}
-        {Name:'Iteration 2', _ref:'/iteration/2', StartDate:Rally.util.DateTime.toIsoString(nextDay), EndDate:Rally.util.DateTime.toIsoString(dayAfter)}
+        {Name:'Iteration 1', _ref:'/iteration/0', StartDate: now, EndDate: tomorrow}
+        {Name:'Iteration 2', _ref:'/iteration/2', StartDate: nextDay, EndDate: dayAfter}
       ]
 
       @IterationModel = Rally.test.mock.data.WsapiModelFactory.getIterationModel()
@@ -37,9 +37,9 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       iteration = @iterationData[0]
 
       [
-        { property: 'Iteration.Name', operator: '=', value: iteration.Name },
-        { property: "Iteration.StartDate", operator: '=', value: iteration.StartDate }
-        { property: "Iteration.EndDate", operator: '=', value: iteration.EndDate }
+        { property: 'Iteration.Name', operator: '=', value: iteration.Name }
+        { property: "Iteration.StartDate", operator: '=', value: Rally.util.DateTime.toIsoString(iteration.StartDate) }
+        { property: "Iteration.EndDate", operator: '=', value: Rally.util.DateTime.toIsoString(iteration.EndDate) }
       ]
 
     stubRequests: ->
@@ -128,6 +128,12 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       expect(@app.getSetting('cardFields')).toBe 'Parent,Tasks,Defects,Discussion,PlanEstimate'
 
   it 'should filter the grid to the currently selected iteration', ->
+    @stubFeatureToggle ['EXT4_GRID_BULK_EDIT', 'ITERATION_TRACKING_BOARD_GRID_TOGGLE']
+    @createApp().then =>
+      @toggleToGrid()
+      expect(@app.down('#gridBoard').getGridOrBoard().enableBulkEdit).toBe true
+
+  it 'should filter the grid to the currently selected iteration', ->
     @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
     requestStub = @stubRequests()
 
@@ -144,6 +150,44 @@ describe 'Rally.apps.iterationtrackingboard.IterationTrackingBoardApp', ->
       @toggleToBoard()
 
       expect(request).toBeWsapiRequestWith(filters: @getIterationFilter()) for request in requests
+
+  it 'should show the filter control button in the board mode', ->
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F4359_FILTER']
+
+    @createApp().then =>
+      @toggleToBoard()
+      expect(@app.down('rallyfiltercontrol').isVisible()).toBeTruthy()
+
+  it 'should not show the filter control button in the board mode when feature not enabled', ->
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
+
+    @createApp().then =>
+      @toggleToBoard()
+      expect(@app.down('rallyfiltercontrol')).toBeNull()
+
+
+  it 'should not show the filter control button in the grid mode', ->
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F4359_FILTER']
+
+    @createApp().then =>
+      @toggleToGrid()
+      expect(@app.down('rallyfiltercontrol').isVisible()).toBeFalsy()
+
+  it 'should show a treegrid when treegrid toggled on', ->
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE', 'F2903_USE_ITERATION_TREE_GRID']
+
+    @createApp().then =>
+      @toggleToGrid()
+      expect(@app.down('rallytreegrid')).not.toBeNull()
+      expect(@app.down('rallygrid')).toBeNull()
+
+  it 'should show a regular grid when treegrid toggled off', ->
+    @stubFeatureToggle ['ITERATION_TRACKING_BOARD_GRID_TOGGLE']
+
+    @createApp().then =>
+      @toggleToGrid()
+      expect(@app.down('rallygrid')).not.toBeNull()
+      expect(@app.down('rallytreegrid')).toBeNull()
 
   describe '#getSettingsFields', ->
 

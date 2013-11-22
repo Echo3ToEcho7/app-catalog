@@ -123,7 +123,7 @@
         },
 
         _findTimeboxes: function(model) {
-            Ext.create('Rally.data.WsapiDataStore', {
+            Ext.create('Rally.data.wsapi.Store', {
                 model: model,
                 fetch: ['Name', 'StartDate', 'EndDate', 'Project', 'PlannedVelocity'],
                 autoLoad: true,

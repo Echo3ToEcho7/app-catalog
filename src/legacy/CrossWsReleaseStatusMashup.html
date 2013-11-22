@@ -13,9 +13,9 @@
 <script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
 <script type="text/javascript" src="/slm/js/help.js"></script>
 <script type="text/javascript" src="/slm/js/slm.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.13/js/batch-toolkit.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.13/js/utilities.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.13/js/dropdown.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/utilities.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/dropdown.js"></script>
 <script type="text/javascript" description="CrossWsReleaseStatus.js">
 /*
  Copyright (c) 2002-2008  Rally Software Development Corp. All rights reserved.
@@ -225,7 +225,7 @@ function initPage() {
             '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
 
     releaseDropdown = new RALLY.Mashup.Dropdown(batchToolkit,
-            RALLY.Mashup.RELEASE, 'releaseList', 'releaseLabel', 'mu_cross_workspace');
+            RALLY.Mashup.RELEASE, 'releaseList', 'releaseLabel', 'mu_cross_workspace', {projectScopeUp: false, projectScopeDown: false});
     releaseDropdown.invoke(gotReleases);
 }
 </script>

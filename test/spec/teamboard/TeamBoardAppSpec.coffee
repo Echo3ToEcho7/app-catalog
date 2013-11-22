@@ -15,6 +15,11 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
       for fieldName in fieldNames
         expect(cardEl.down('.field-content.' + fieldName)).not.toBeNull()
 
+    assertFilter: (filter, property, operator, value) ->
+      expect(filter.property).toBe property
+      expect(filter.operator).toBe operator
+      expect(filter.value).toBe value
+
     cardboard: ->
       @app.down('.rallycardboard')
 
@@ -24,7 +29,6 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
 
       @app = Ext.create 'Rally.apps.teamboard.TeamBoardApp', Ext.apply(
         context: Ext.create 'Rally.app.Context'
-        # renderTo: 'testDiv'
       , options.appConfig)
 
       if options.appConfig?.renderTo then @waitForComponentReady(@app) else webdriver.promise.fulfilled(@app)
@@ -54,10 +58,18 @@ describe 'Rally.apps.teamboard.TeamBoardApp', ->
       expect(@app.getEl().down('.no-data')).not.toBe null
 
   it 'should show a board with one column per team', ->
-    @createApp(
-      projectRecords: @projectRecords
-    ).then =>
+    @createApp().then =>
       expect(@cardboard().columns.length).toBe @projectRecords.length
+
+  it 'should show non-disabled team members in each column', ->
+    @createApp(
+      appConfig:
+        renderTo: 'testDiv'
+    ).then =>
+      filters = @cardboard().getColumns()[0].store.filters
+      expect(filters.getCount()).toBe 2
+      @assertFilter filters.getAt(0), 'TeamMemberships', 'contains', @projectRecords[0].get('_ref')
+      @assertFilter filters.getAt(1), 'Disabled', '=', 'false'
 
   it 'should create a readOnly board when current user is not an admin', ->
     @createApp(

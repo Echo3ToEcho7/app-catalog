@@ -76,7 +76,6 @@
             tips.push('In order for releases and iterations to roll-up properly across projects, the name and the dates need to match exactly.');
             tips.push('Did you accidentally delete a user story or defect? You can recover them in the Recycle Bin, located at the bottom-right of the screen.');
             tips.push('Administrators can edit, delete, and archive tags.');
-            tips.push('Having a tough day and could use some comic relief? Add the "More Cowbell" app to your dashboard for a laugh.');
             tips.push('Are a few strong personalities dominating your meetings? Consider a round-robin approach or silent sticky writing activity to solicit opinions from less vocal team members.');
             tips.push('Is your product owner also your scrummaster? Make sure you don\'t have a conflict of interest.');
             tips.push('If you are on a page that you want someone else to see, copy the link from the address bar and email it to them.');
