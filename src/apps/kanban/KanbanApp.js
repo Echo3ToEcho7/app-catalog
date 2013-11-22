@@ -51,6 +51,12 @@
         launch: function() {
             this.setLoading();
 
+            this.getContext().isFeatureEnabled = function (feature) {
+                return !!window.parent.FEATURE_TOGGLES[feature];
+            };
+
+            this.timeboxContext = this.getContext().getTimeboxScope();
+
             Rally.data.ModelFactory.getModel({
                 type: 'UserStory',
                 success: this._onStoryModelRetrieved,
@@ -59,7 +65,9 @@
         },
 
         onTimeboxScopeChange: function (timeboxScope) {
-            
+            this.timeboxContext = timeboxScope;
+            this.down('#bodyContainer').removeAll(true);
+            this._addCardboardContent();
         },
 
         getOptions: function() {
@@ -204,8 +212,10 @@
 
         _getCardboardFilter: function () {
             var filters = null;
-            var timeboxContext = this.getContext().getTimeboxScope();
+            var timeboxContext = this.timeboxContext;
             var timeboxFilter = null;
+
+            console.log('Timebox', timeboxContext);
 
             if (timeboxContext) {
               timeboxFilter = timeboxContext.getQueryFilter();
@@ -383,12 +393,27 @@
                 rankScope: 'BACKLOG'
             });
             record.set(this.getSetting('groupByField'), this.cardboard.getColumns()[0].getValue());
+
+            if (this.timeboxContext) {
+              type = this.timeboxContext.getRecord().get("_type");
+              if (type.toLowerCase() === "release") {
+                record.set("Release", this.timeboxContext.getRecord().get("_ref"));
+              } else if (type.toLowerCase() === "iteration") {
+                record.set("Iteration", this.timeboxContext.getRecord().get("_ref"));
+              }
+            }
         },
 
         _onBeforeEditorShow: function(addNew, params) {
             params.rankTo = 'BOTTOM';
             params.rankScope = 'BACKLOG';
             params.iteration = 'u';
+            params.release = 'u';
+
+            if (this.timeboxContext) {
+              type = this.timeboxContext.getRecord().get("_type");
+              params[type] = Rally.util.Ref.getOidFromRef(this.timeboxContext.getRecord().get('_ref')) || 'u';
+            }
 
             var groupByFieldName = this.groupByField.name;
 

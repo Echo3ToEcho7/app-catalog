@@ -24,3 +24,7 @@
   float: right;
   padding-right: 4px;
 }
+
+html {
+  overflow-y: show;
+}
