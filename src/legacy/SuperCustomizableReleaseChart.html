@@ -1532,7 +1532,7 @@ function createChart() {
     document.getElementById('table_div').style.visibility = "hidden";
     RALLY.Mashup.Utilities.showWait('chart_div');
 
-    BURNDOWN_CHART = new RALLY.Mashup.SuperCustomizableChart(BATCH_TOOLKIT, DROPDOWN.getSelectedOids(),
+    BURNDOWN_CHART = new RALLY.Mashup.SuperCustomizableChart(BATCH_TOOLKIT, null,
             DROPDOWN.getSelectedName(), DROPDOWN.getSelectedStart(), DROPDOWN.getSelectedEnd(),
             MASHUP_TYPE, buildConfig(), 'chart_div', 'table_div', null);
 

@@ -374,7 +374,7 @@ function initPage() {
             "__PROJECT_SCOPING_UP__", "__PROJECT_SCOPING_DOWN__");
 
     iterationDropdown = new RALLY.Mashup.Dropdown(batchToolkit, RALLY.Mashup.ITERATION,
-            "timeboxList", "timeboxLabel", "mu_personal_burndown");
+            "timeboxList", "timeboxLabel", "mu_personal_burndown", {projectScopeUp: false, projectScopeDown: false});
     iterationDropdown.invoke(runMainQuery);
 
     if (widgetMode) {

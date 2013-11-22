@@ -1380,12 +1380,8 @@ function initPage() {
     if (typeof(WORKSPACE_OID) !== "undefined") {
         config.workspace = "/workspace/" + WORKSPACE_OID;
     }
-    if (typeof(SCOPE_DOWN) !== "undefined") {
-        config.projectScopeDown = SCOPE_DOWN;
-    }
-    if (typeof(SCOPE_UP) !== "undefined") {
-        config.projectScopeUp = SCOPE_UP;
-    }
+    config.projectScopeDown = false;
+    config.projectScopeUp = false;
 
     if (WIDGET_MODE) {
         document.getElementById('warning').style.display = 'none';
