@@ -244,7 +244,8 @@
     }
 
     function initPage() {
-        timeboxDropdown = new RALLY.Mashup.Dropdown(batchToolkit, RALLY.Mashup.ITERATION, 'timeboxList', 'timeboxLabel', 'mu_iteration_trace');
+        timeboxDropdown = new RALLY.Mashup.Dropdown(batchToolkit, RALLY.Mashup.ITERATION, 
+            'timeboxList', 'timeboxLabel', 'mu_iteration_trace', {projectScopeUp: false, projectScopeDown: false});
         timeboxDropdown.invoke(runMainQuery);
     }
 

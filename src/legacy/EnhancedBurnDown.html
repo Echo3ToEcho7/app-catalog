@@ -12,9 +12,9 @@
 <script type="text/javascript" src="/slm/js-lib/dojo/1.3.1/dojo/dojo.js"></script>
 <script type="text/javascript" src="/slm/js/help.js"></script>
 <script type="text/javascript" src="/slm/js/slm.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.13/js/batch-toolkit.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.13/js/utilities.js"></script>
-<script type="text/javascript" src="/slm/mashup/1.13/js/dropdown.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/utilities.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/dropdown.js"></script>
 <script type="text/javascript" src="/apps/1.33/lib/ejsc/EJSChart.js"></script>
 <script type="text/javascript" description="EnhancedBurnDown_calc.js">
 /*
@@ -771,7 +771,7 @@ function processWorkProductPrefixes(results) {
     }
 
     releaseDropdown = new RALLY.Mashup.Dropdown(batchToolkit, RALLY.Mashup.RELEASE, 'releaseList', 'releaseLabel',
-            'mu_enhanced_burndown');
+            'mu_enhanced_burndown', {projectScopeUp: false, projectScopeDown: false});
 
     releaseDropdown.invoke(buildChart);
 }
