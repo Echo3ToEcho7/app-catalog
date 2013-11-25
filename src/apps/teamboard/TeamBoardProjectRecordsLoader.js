@@ -4,7 +4,7 @@
     Ext.define('Rally.apps.teamboard.TeamBoardProjectRecordsLoader', {
         requires: [
             'Rally.data.QueryFilter',
-            'Rally.data.WsapiDataStore'
+            'Rally.data.wsapi.Store'
         ],
         singleton: true,
 
@@ -26,7 +26,7 @@
                 config.pageSize = 25;
             }
 
-            var store = Ext.create('Rally.data.WsapiDataStore', config);
+            var store = Ext.create('Rally.data.wsapi.Store', config);
             store.load({
                 callback: callback,
                 scope: scope

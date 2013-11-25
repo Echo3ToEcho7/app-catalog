@@ -13,7 +13,7 @@
             'Rally.util.DateTime',
             'Rally.data.ModelFactory',
             'Rally.nav.Manager',
-            'Rally.data.WsapiDataStore',
+            'Rally.data.wsapi.Store',
             'Rally.util.Timebox',
             'Deft.Deferred'
         ],
@@ -231,7 +231,7 @@
                     Ext.Object.each(queryObjects, function(key, value) {
                         if (models[key]) {
                             var loadDeferred = Ext.create('Deft.Deferred');
-                            Ext.create('Rally.data.WsapiDataStore', {
+                            Ext.create('Rally.data.wsapi.Store', {
                                 model: models[key],
                                 fetch: value,
                                 context: this.getContext().getDataContext(),

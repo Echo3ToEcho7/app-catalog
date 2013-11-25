@@ -5,7 +5,7 @@
         extend: 'Rally.ui.cardboard.CardBoard',
         alias: 'widget.roadmapplanningboard',
 
-        inject: ['timeframeStore', 'planStore', 'roadmapStore'],
+        inject: ['timelineStore', 'timeframeStore', 'planStore', 'roadmapStore'],
         
         requires: [
             'Rally.data.util.PortfolioItemHelper',
@@ -65,22 +65,39 @@
                         context: this.context,
                         success: function(models) {
                             this.models = _.values(models);
-                            this.planStore.load({
-                                callback: function(records, operation, success) {
-                                    if (success) {
-                                        this.timeframeStore.load({
-                                            callback: function(records, operation, success) {
-                                                if (success) {
-                                                    this.buildColumnsFromStore(this.timeframeStore);
-                                                    callback.call(this);
-                                                }
-                                            },
-                                            requester: this,
-                                            scope: this
-                                        });
-                                    }
+                            this.timelineStore.load({
+                                callback: function (records, operation, success) {
+                                    this.timeline = this.timelineStore.first();
+                                    this.planStore.load({
+                                        callback: function(records, operation, success) {
+                                            if (success) {
+                                                this.timeframeStore.load({
+                                                    callback: function(records, operation, success) {
+                                                        if (success) {
+                                                            this.buildColumnsFromStore(this.timeframeStore);
+                                                            callback.call(this);
+                                                        }
+                                                    },
+                                                    params: {
+                                                        timeline: {
+                                                            id: this.timeline.getId()
+                                                        }
+                                                    },
+                                                    requester: this,
+                                                    scope: this
+                                                });
+                                            }
+                                        },
+                                        params: {
+                                            roadmap: {
+                                                id: this.roadmapId
+                                            }
+                                        },
+                                        reqester: this,
+                                        scope: this
+                                    });
                                 },
-                                reqester: this,
+                                requester: this,
                                 scope: this
                             });
                         },
@@ -260,7 +277,6 @@
 
         _getClickAction: function () {
             var themesVisible = this.showTheme;
-            console.log(themesVisible);
             var message = "Themes toggled from [" + !themesVisible + "] to [" + themesVisible + "]";
             return message;
         }

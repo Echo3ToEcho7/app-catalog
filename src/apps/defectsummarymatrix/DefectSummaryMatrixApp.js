@@ -113,7 +113,7 @@
 
         _initializeAllDefectStore: function() {
             if (this.releaseFilter && this.defectModel) {
-                this.allDefectStore = Ext.create('Rally.data.WsapiDataStore', {
+                this.allDefectStore = Ext.create('Rally.data.wsapi.Store', {
                     model: this.defectModel,
                     fetch: ['State','Priority'],
                     autoLoad: true,

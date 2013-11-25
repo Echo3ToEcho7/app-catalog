@@ -22,7 +22,7 @@
             // Don't need to do anything to the User record
         },
 
-        getStoreFilter: function(type) {
+        getStoreFilter: function(model) {
             return {
                 property: this.attribute,
                 operator: 'contains',

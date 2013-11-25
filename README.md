@@ -1,143 +1,98 @@
 # App Catalog
 
+A collection of extensible apps from Rally's [App Catalog](https://help.rallydev.com/app-catalog).
+
+2.0rc2 release - [Download](https://github.com/RallyApps/app-catalog/releases/download/2.0rc2/2.0rc2.zip)
+
 ## License
 
 Copyright (c) Rally Software Development Corp. 2013 Distributed under the MIT License.
 
-## Tasks
-The App Catalog builds with Node and Grunt. To install them and the App Catalog NPM modules, enter:
+## Contents
 
-```
-brew update && brew install node
-npm install -g grunt-cli
-npm install
-```
+### SDK 2 Apps
+These apps are built using [App SDK 2.0rc2](https://help.rallydev.com/apps/2.0rc1/doc/).
 
-For a list of tasks enter:
-```
-grunt --help
-```
+* [Blocked Work](https://help.rallydev.com/blocked-work) - [[src](src/apps/blockedwork)]
+* Custom Board - [[src](src/apps/board)]
+* [Custom Grid](https://help.rallydev.com/custom-grid) - [[src](src/apps/grid)]
+* [Defect Summary Matrix](https://help.rallydev.com/defect-summary-matrix) - [[src](src/apps/defectsummarymatrix)]
+* Item Detail - [[src](src/apps/itemdetail)]
+* Iteration Burndown - [[src](src/apps/charts/iterationburndownminimal)]
+* [Iteration Planning Board](https://help.rallydev.com/iteration-planning-board) - [[src](src/apps/iterationplanningboard)]
+* [Iteration Summary](https://help.rallydev.com/iteration-summary) - [[src](src/apps/iterationsummary)]
+* [Iteration Tracking Board](https://help.rallydev.com/iteration-tracking-board) - [[src](src/apps/iterationtrackingboard)]
+* [Kanban Board](https://help.rallydev.com/kanban-board) - [[src](src/apps/kanban)]
+* Portfolio Burndown - [[src](src/apps/charts/rpm/burn)]
+* Portfolio CFD - [[src](src/apps/charts/rpm/cfd)]
+* [Portfolio Hierarchy](https://help.rallydev.com/portfolio-hierarchy) - [[src](src/apps/portfoliohierarchy)]
+* [Portfolio Kanban Board](https://help.rallydev.com/portfolio-kanban-board) - [[src](src/apps/portfoliokanban)]
+* Project CFD - [[src](src/apps/charts/cfd/project)]
+* [Recent Activity](https://help.rallydev.com/recent-activity) - [[src](src/apps/recentactivity)]
+* Release Burndown - [[src](src/apps/charts/burndown)]
+* [Story Hierarchy](https://help.rallydev.com/story-hierarchy) - [[src](src/apps/storyhierarchy)]
+* Team Board - [[src](src/apps/charts/teamboard)]
+* [Tip of the Day](https://help.rallydev.com/tip-day) - [[src](src/apps/tipoftheday)]
 
-If you get the error "zsh: command not found: grunt", you may need to add the following line to your .zshrc:
-```
-PATH=/usr/local/share/npm/bin:$PATH
-```
+### Legacy Apps
+These apps are built using [App SDK 1](https://help.rallydev.com/app-sdk) and earlier technologies and are considered deprecated.  
 
-Make sure `NODE_PATH` is set up correctly. You can find the base path by doing `npm list -g`. It should be something like `/usr/local/share/npm/lib`. The `NODE_PATH` will be this base path + `/node_modules`. Add this line to your `~/.zshrc` file:
-```
-export NODE_PATH=`npm config get prefix`/lib/node_modules
-```
+* [Active Defect Charts](https://help.rallydev.com/active-defect-charts) - [[src](src/legacy/ActiveDefectCharts.html)]
+* [Agile EVM](https://help.rallydev.com/agile-evm) - [[src](src/legacy/AgileEVM.html)] 
+* [Blocking History](https://help.rallydev.com/blocking-history) - [[src](src/legacy/BlockingHistoryApp.html)]
+* [Build Dashboard](https://help.rallydev.com/build-dashboard) - [[src](src/legacy/BuildDashboardApp.html)]
+* [Build Traceability](https://help.rallydev.com/build-traceability) - [[src](src/legacy/BuildTraceabilityApp.html)]
+* [Completed Stories and Defects per Iteration](https://help.rallydev.com/completed-stories-and-defects-iteration) - [[src](src/legacy/CompletedStoriesAndDefectsApp.html)]
+* [Cross Workspace Release Status](https://help.rallydev.com/cross-workspace-release-status) - [[src](src/legacy/CrossWsReleaseStatusMashup.html)]
+* [Defects by Closer](https://help.rallydev.com/defects-closer) - [[src](src/legacy/DefectsByCloserApp.html)]
+* [Defects by Package](https://help.rallydev.com/defects-package) - [[src](src/legacy/DefectsByPackage.html)]
+* [Dependency Status Dashboard #2](https://help.rallydev.com/dependency-status-dashboard-2) - [[src](src/legacy/DependencyStatus2App.html)]
+* [Dependency Status Dashboard](https://help.rallydev.com/dependency-status-dashboard) - [[src](src/legacy/DependencyStatusApp.html)]
+* [Enhanced Burndown Chart](https://help.rallydev.com/enhanced-burndown-chart) - [[src](src/legacy/EnhancedBurnDown.html)]
+* [Enhanced Velocity Chart](https://help.rallydev.com/enhanced-velocity-chart) - [[src](src/legacy/EnhancedVelocityChartMashup.html)]
+* [Epic Progress](https://help.rallydev.com/epic-progress) - [[src](src/legacy/EpicProgressApp.html)]
+* [Estimation Board](https://help.rallydev.com/estimation-board) - [[src](src/legacy/EstimationBoardApp.html)]
+* [Iteration Dashboard](https://help.rallydev.com/iteration-dashboard) - [[src](src/legacy/IterationDashboardMashup.html)]
+* [Iteration Scope Change](https://help.rallydev.com/iteration-scope-change) - [[src](src/legacy/IterationScopeChangeApp.html)]
+* [Iteration Traceability](https://help.rallydev.com/iteration-traceability) - [[src](src/legacy/IterationTraceability.html)]
+* [Last Result by Test Set](https://help.rallydev.com/last-result-test-set) - [[src](src/legacy/LastResultByTestSetApp.html)]
+* [Open Defect Age](https://help.rallydev.com/open-defect-age) - [[src](src/legacy/OpenDefectAge.html)]
+* [Open Stories, Defects, and Tasks](https://help.rallydev.com/open-stories-defects-tasks) - [[src](src/legacy/OpenStoriesTasksDefectsApp.html)]
+* [Personal Burndown](https://help.rallydev.com/personal-burndown-chart) - [[src](src/legacy/PersonalBurndownChart.html)]
+* [Planned vs. Actual Burndown](https://help.rallydev.com/planned-vs-actual-burndown-chart) - [[src](src/legacy/PlannedVsActualBurndownApp.html)]
+* [Print Story Cards](https://help.rallydev.com/print-story-cards) - [[src](src/legacy/PrintStoryCardsApp.html)]
+* [Print Task Cards](https://help.rallydev.com/print-task-cards) - [[src](src/legacy/PrintTaskCardsApp.html)]
+* [Productivity Chart](https://help.rallydev.com/productivity-chart) - [[src](src/legacy/ProductivityChart.html)]
+* [Program Dashboard](https://help.rallydev.com/program-dashboard) - [[src](src/legacy/ProgramDashboard.html)]
+* [Project Status](https://help.rallydev.com/project-status) - [[src](src/legacy/ProjectStatusApp.html)]
+* [Recently Changed](https://help.rallydev.com/recently-changed) - [[src](src/legacy/RecentlyChangedApp.html)]
+* [Release Dashboard](https://help.rallydev.com/release-dashboard) - [[src](src/legacy/ReleaseDashboardMashup.html)]
+* [Release Dependencies](https://help.rallydev.com/release-dependencies) - [[src](src/legacy/ReleaseDependenciesApp.html)]
+* [Release Scope Change](https://help.rallydev.com/release-scope-change) - [[src](src/legacy/ReleaseScopeChangeApp.html)]
+* [Release Summary](https://help.rallydev.com/release-summary) - [[src](src/legacy/ReleaseSummaryApp.html)]
+* [Release Traceability](https://help.rallydev.com/release-traceability) - [[src](src/legacy/ReleaseTraceability.html)]
+* [Source Code Checkin](https://help.rallydev.com/source-code-check) - [[src](src/legacy/SourceCodeCheckinApp.html)]
+* [Stories by Creator](https://help.rallydev.com/stories-creator) - [[src](src/legacy/StoriesByCreatorApp.html)]
+* [Story Board](https://help.rallydev.com/story-board) - [[src](src/legacy/StoryBoardApp.html)]
+* [Story Deep Copy](https://help.rallydev.com/story-deep-copy) - [[src](src/legacy/StoryDeepCopyApp.html)]
+* [Story Map](https://help.rallydev.com/story-map) - [[src](src/legacy/StoryMapApp.html)]
+* [Super Customizable Iteration Chart](https://help.rallydev.com/super-customizable-iteration-chart) - [[src](src/legacy/SuperCustomizableIterationChart.html)]
+* [Super Customizable Program Chart](https://help.rallydev.com/super-customizable-program-chart) - [[src](src/legacy/SuperCustomizableProgramChart.html)]
+* [Super Customizable Release Chart](https://help.rallydev.com/super-customizable-release-chart) - [[src](src/legacy/SuperCustomizableReleaseChart.html)]
+* [System Requirements Validation Document](https://help.rallydev.com/system-requirement-validation-document-0) - [[src](src/legacy/SystemRequirementValidationDocumentApp.html)]
+* [Task Board](https://help.rallydev.com/task-board) - [[src](src/legacy/TaskBoard.html)]
+* [Test Case Estimation](https://help.rallydev.com/test-case-estimation) - [[src](src/legacy/TestCaseEstimation.html)]
+* [Test Case Pass/Fail History](https://help.rallydev.com/test-case-passfail-history) - [[src](src/legacy/TestCasePassFailHistoryApp.html)]
+* [Traceability Matrix](https://help.rallydev.com/traceability-matrix-0) - [[src](src/legacy/TraceabilityMatrixApp.html)]
+* [User Lookup](https://help.rallydev.com/user-lookup) - [[src](src/legacy/UserLookup.html)]
+* [Utilization Chart](https://help.rallydev.com/utilization-chart) - [[src](src/legacy/UtilizationChartApp.html)]
+* [Weekly Actuals](https://help.rallydev.com/weekly-actuals-report) - [[src](src/legacy/WeeklyActualsApp.html)]
 
-## Common Tasks
-```
-grunt jshint
-```
-This task will check all app source files for js errors.
+## Development
 
-```
-grunt check
-```
-This task will run the convention tests for all app source files.
+The following links will be helpful when developing apps:
 
-```
-grunt watch
-```
-This task will watch for any css and/or spec file changes and automatically recompile them.
+* [Getting Started](https://help.rallydev.com/apps/2.0rc1/doc/#!/guide/getting_started)
+* [Rally App Builder](https://help.rallydev.com/apps/2.0rc1/doc/#!/guide/app_builder)
+* [App SDK 2.0rc2 API Docs](https://help.rallydev.com/apps/2.0rc1/doc/)
 
-```
-grunt build
-```
-This task will generate a build of the app catalog.
-
-## Running Tests
-
-### Start up Selenium
-To run App Catalog tests, the Selenium server environment must be started up:
-```
-sel
-```
-
-This will also make sure webdriver is running.
-
-### Running Tests
-App Catalog JavaScript tests can be run by the following command:
-```
-grunt test
-```
-This task will run all the Tests/Specs it can find in the `test` directory. If you only want to run a specific test you can enter:
-```
-grunt test --spec={FileNameSpec}
-```
-If you would like to run tests or a single test in a dedicated browser with the debug console you'll have to make sure selenium is running and jasmine is running.
-
-### Installing ChromeDriver
-If you do not have ChromeDriver installed, your test runs will fail with the error:
-```
-The path to the driver executable must be set by the webdriver.chrome.driver system property; for more information, see http://code.google.com/p/selenium/wiki/ChromeDriver
-```
-If this happens, you will need to run:
-```
-brew install chromedriver
-```
-
-### Running Tests Faster
-By starting up a Jasmine file server once, tests can run without as much overhead for setting up the tests.
-
-To start Jasmine server:
-```
-grunt test:server
-```
-Jasmine defaults to port 8890.
-
-To pick tests to run enter:
-```
-grunt test:conf --spec={FileNameSpec}
-```
-
-### Running Tests Against Local App SDK Changes
-Generate the jasmine test config pointing at local files:
-```
-APPSDK_PATH=~/projects/appsdk grunt test:conf [--spec={FileNameSpec}]
-```
-Start the server:
-```
-APPSDK_PATH=~/projects/appsdk grunt test:server
-```
-
-Now that you have all these services running you can go to [http://localhost:5445/wd/hub/](http://localhost:5445/wd/hub/). You will be presented with a list of browser sessions. You can create a new session - once loaded click on the `Load Script` button and type in `localhost:8890/`. This should point the browser instance to the Jasmine test suite you previously set up. You can now debug and refresh.
-
-## Developing for ALM
-The App Catalog is now a dependency in ALM and is defined in `build/js_dependencies.rb` as a nexus artifact. The artifact is named `app-catalog`. This is how the build servers pull in the App Catalog. If you need real-time updates of App Catalog files in ALM, you'll have to start Jetty using the environment variable `APP_CATALOG_PATH`. The default location for this path is `~/projects/app-catalog`. For example:
-```
-APP_CATALOG_PATH=~/projects/app-catalog buildr jetty:run
-```
-This will start up Jetty and tell it to use the files directly from the App Catalog for development, including CSS generation.
-
-If you have made modifications to the ALM Java files, you may need to run
-```
-APP_CATALOG_PATH=~/projects/app-catalog buildr clean jetty:run
-```
-
-### Running on-demand-guitests without a push to either repository
-Before the App Catalog was in a separate repository, you could change ALM and the App Catalog, do a local commit and push to ondemand. Now that the App Catalog is in a separate repository the process changes slightly, but doesn't need to require a push.
-
-The App Catalog is pulled in from nexus and requires you to run the following command to push a locally-built App Catalog to nexus:
-```
-grunt nexus:deploy
-```
-**NOTE: This task requires gnutar since Darwin tar command is broken**
-
-**NOTE: This task pushes a version based on your commit hash. If you don't commit a local version, you could get collisions in nexus. Also, setting the BUILD_NUMBER ENV variable sets a prefix which can help avoid collisions and later identify deploys made from your machine.**
-
-This task allows you to push a dev version of the `app-catalog` artifact to nexus to reference later. The task will give you the nexus artifact ID string. The last part is the nexus version. You will use this later.
-
-Make your changes to ALM and when you're ready to do a push to the on-demand-guitest job, do a local ALM commit. When you go into the Jenkins job and click `Build Now`, paste the version into the `APP_CATALOG_SRC_VERSION` environment variable. This will tell the job to run with your version of the App SDK source.
-
-When everything is good, follow the steps to push to master like normal.
-
-### Getting changes into master
-Once all tests pass and you want to push to get your code into master, make sure you run `grunt test` in the App Catalog and submit a pull request. Once the pull request is accepted, the Jenkins job `master-app-catalog-continuous` will pick up the commit, run tests and deploy the `app-catalog` artifact to nexus. You can find the list of artifact versions [in nexus](http://alm-build.f4tech.com:8080/nexus/content/repositories/thirdparty/com/rallydev/js/app-catalog/). The version style is `{continuous-master-build-number}-{short-git-hash}` - you can use these to find out which artifact version is yours.
-
-Once the `master-app-catalog-continuous` job is done and you know the artifact version that was built, update `build/js_dependencies.rb` and change the version number of the `app-catalog` artifact. When you commit and push your change in ALM, the build server will pick up your version of the App Catalog and do its thing. Also, everyone pulling from ALM in normal mode (not doing real-time App Catalog development) will pull your version the next time they run.
-
-Most ALM tasks depend of the `buildr js:thirdparty:dependencies` and should not need to be used directly, but if you run into an issue and your version of a dependency isn't correct, you can safely run this task. You can find the version of a dependency in the `.version` file in the base path of each dependency in `js-lib`

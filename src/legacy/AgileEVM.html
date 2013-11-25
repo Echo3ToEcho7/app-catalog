@@ -67,11 +67,11 @@
 
 <script type="text/javascript" src="/slm/js/help.js"></script>
 
-<script type="text/javascript" src="/slm/mashup/1.11/js/batch-toolkit.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/batch-toolkit.js"></script>
 
-<script type="text/javascript" src="/slm/mashup/1.11/js/utilities.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/utilities.js"></script>
 
-<script type="text/javascript" src="/slm/mashup/1.11/js/dropdown.js"></script>
+<script type="text/javascript" src="/slm/mashup/1.21/js/dropdown.js"></script>
 
 <script type="text/javascript" src="/apps/1.33/lib/ejsc/EJSChart.js"></script>
 
@@ -484,7 +484,7 @@ function initPage() {
             '__PROJECT_SCOPING_UP__', '__PROJECT_SCOPING_DOWN__');
 
     releaseDropdown = new RALLY.Mashup.Dropdown(batchToolkit, RALLY.Mashup.RELEASE, 'releaseList',
-            'releaseLabel', 'mu_test_releasedropdown123');
+            'releaseLabel', 'mu_test_releasedropdown123', {projectScopeUp: false, projectScopeDown: false});
 
     releaseDropdown.invoke(queryData);
 }

@@ -13,7 +13,7 @@
             'Rally.util.Test',
             'Rally.ui.EmptyTextFactory',
             'Rally.ui.dialog.ChooserDialog',
-            'Rally.data.WsapiDataStore'
+            'Rally.data.wsapi.Store'
         ],
 
         mixins: [
@@ -115,7 +115,7 @@
         },
 
         _createPortfolioItemStore: function () {
-            Ext.create("Rally.data.WsapiDataStore", {
+            Ext.create("Rally.data.wsapi.Store", {
                 model: "Portfolio Item",
                 filters: [
                     {

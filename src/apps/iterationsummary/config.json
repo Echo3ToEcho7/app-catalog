@@ -2,7 +2,7 @@
    "name": "Iteration Summary",
    "className": "Rally.apps.iterationsummary.IterationSummaryApp",
    "server": "https://rally1.rallydev.com",
-   "sdk": "x",
+   "sdk": "2.0rc2",
    "javascript": [
       "IterationSummaryApp.js"
    ],

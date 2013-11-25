@@ -1,26 +1,6 @@
 (function () {
     var Ext = window.Ext4 || window.Ext;
 
-    Ext.define("ProjectCFDCalculator", {
-        extend: "Rally.data.lookback.calculator.TimeSeriesCalculator",
-
-        getMetrics: function() {
-            var stateFieldName = this.stateFieldName;
-            var stateFieldValues = this.stateFieldValues.split(',');
-
-            var metrics = [
-            ];
-
-            for (var i = 0; i < stateFieldValues.length; ++i) {
-                metrics.push(
-                    {as: stateFieldValues[i], groupByField: stateFieldName, allowedValues: [stateFieldValues[i]], f: 'groupByCount', display: 'area'}
-                );
-            }
-            return metrics;
-        }
-
-    });
-
     Ext.define("Rally.apps.charts.cfd.project.ProjectCFDApp", {
         name: 'chartapp',
         extend: "Rally.app.App",
@@ -31,6 +11,7 @@
         requires: [
             'Rally.ui.chart.Chart',
             'Rally.apps.charts.cfd.project.ProjectCFDSettings',
+            'Rally.apps.charts.cfd.project.ProjectCFDCalculator',
             'Rally.util.Help',
             'Rally.util.Test'
         ],
@@ -127,7 +108,7 @@
             return {
                 xtype: 'rallychart',
                 storeConfig: this._buildChartStoreConfig(),
-                calculatorType: 'ProjectCFDCalculator',
+                calculatorType: 'Rally.apps.charts.cfd.project.ProjectCFDCalculator',
                 calculatorConfig: this._buildChartCalculatorConfig(),
 
                 chartColors: [  // RGB values obtained from here: http://ux-blog.rallydev.com/?cat=23

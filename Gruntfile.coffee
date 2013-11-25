@@ -1,6 +1,6 @@
 module.exports = (grunt) ->
-  serverPort = grunt.option('port') || 8890
-  inlinePort = grunt.option('port') || 8891
+  serverPort = grunt.option('port') || 8892
+  inlinePort = grunt.option('port') || 8893
 
   path = require 'path'
 
