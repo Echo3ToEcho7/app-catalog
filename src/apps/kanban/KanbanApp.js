@@ -51,9 +51,12 @@
         launch: function() {
             this.setLoading();
 
-            this.getContext().isFeatureEnabled = function (feature) {
-                return !!window.parent.FEATURE_TOGGLES[feature];
-            };
+            // Check to see if this is a custom app and change how the current context checks for Feature Toggles
+            if (window.parent && window.parent.FEATURE_TOGGLES) {
+              this.getContext().isFeatureEnabled = function (feature) {
+                  return !!window.parent.FEATURE_TOGGLES[feature];
+              };
+            }
 
             this.timeboxContext = this.getContext().getTimeboxScope();
 
@@ -65,6 +68,8 @@
         },
 
         onTimeboxScopeChange: function (timeboxScope) {
+            this.callParent(arguments);
+
             this.timeboxContext = timeboxScope;
             this.down('#bodyContainer').removeAll(true);
             this._addCardboardContent();
